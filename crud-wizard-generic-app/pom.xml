@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>pl.jalokim.crudwizard</groupId>
+        <artifactId>crud-wizard-parent</artifactId>
+        <version>${main.version}.${minor.version}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>crud-wizard-generic-app</artifactId>
+
+    <properties>
+        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>pl.jalokim.crudwizard</groupId>
+            <artifactId>crud-wizard-core</artifactId>
+        </dependency>
+
+
+        <!-- test -->
+        <dependency>
+            <groupId>pl.jalokim.crudwizard</groupId>
+            <artifactId>crud-wizard-test-utils</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
