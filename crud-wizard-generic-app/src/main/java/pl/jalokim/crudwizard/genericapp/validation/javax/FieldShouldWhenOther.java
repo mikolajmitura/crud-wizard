@@ -13,24 +13,24 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(FieldShouldWhenOther.List.class)
 @Documented
-@Constraint(
-    validatedBy = {}
-)
+@Constraint(validatedBy = FieldShouldWhenOtherValidator.class)
 public @interface FieldShouldWhenOther {
+
+    String DEFAULT_MESSAGE = "{pl.jalokim.validation.javax.FieldShouldWhenOther.message}";
 
     String field();
 
-    OtherFieldMatch shouldBe = OtherFieldMatch.NULL;
+    OtherFieldMatch should();
 
-    String[] shouldHaveValue() default {};
+    String[] fieldValues() default {};
 
     String whenField();
 
-    OtherFieldMatch is = OtherFieldMatch.NOT_NULL;
+    OtherFieldMatch is();
 
     String[] otherFieldValues() default {};
 
-    String message() default "";
+    String message() default DEFAULT_MESSAGE;
 
     Class<?>[] groups() default {};
 
@@ -40,6 +40,7 @@ public @interface FieldShouldWhenOther {
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
     @interface List {
+
         FieldShouldWhenOther[] value();
     }
 

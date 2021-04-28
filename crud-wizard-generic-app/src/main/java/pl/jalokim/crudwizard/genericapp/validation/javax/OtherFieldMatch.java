@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.validation.javax;
 
+import java.util.List;
+
 public enum OtherFieldMatch {
 
     /**
@@ -8,12 +10,12 @@ public enum OtherFieldMatch {
     EQUAL_TO_ANY,
 
     /**
-     * when other field is collection
+     * when is collection
      */
     CONTAINS_ALL,
 
     /**
-     * when other field is collection
+     * when field is collection
      */
     CONTAINS_ANY,
 
@@ -24,5 +26,28 @@ public enum OtherFieldMatch {
 
     NULL,
 
-    NOT_NULL
+    NOT_NULL,
+
+    /**
+     * For collections
+     */
+    EMPTY_COLLECTION,
+
+    /**
+     * For collections
+     */
+    EMPTY_COLLECTION_OR_NULL,
+
+    /**
+     * For String
+     */
+    NOT_BLANK,
+
+    /**
+     * For String
+     */
+    BLANK;
+
+    public static final List<OtherFieldMatch> FOR_COLLECTIONS = List.of(CONTAINS_ALL, CONTAINS_ANY, EMPTY_COLLECTION, EMPTY_COLLECTION_OR_NULL);
+    public static final List<OtherFieldMatch> FOR_STRING = List.of(NOT_BLANK, BLANK);
 }

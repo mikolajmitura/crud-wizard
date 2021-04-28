@@ -15,6 +15,9 @@ import pl.jalokim.crudwizard.core.translations.TestAppMessageSourceHolder;
  */
 public class AppMessageSourceTestImpl extends SpringAppMessageSource {
 
+    public static final String EXPECTED_TEST_TRANSLATIONS = "expected-test-translations";
+    public static AppMessageSourceTestImpl EXPECTED_MESSAGES = new AppMessageSourceTestImpl(EXPECTED_TEST_TRANSLATIONS, false);
+
     private final Properties properties = new Properties();
 
     public static void initStaticAppMessageSource() {
@@ -22,9 +25,16 @@ public class AppMessageSourceTestImpl extends SpringAppMessageSource {
     }
 
     @SneakyThrows
-    public AppMessageSourceTestImpl(String resourcePath) {
+    public AppMessageSourceTestImpl(String resourcePath, boolean setupInStaticHolder) {
         super(MessageSourceFactory.createMessageSource(resourcePath));
-        TestAppMessageSourceHolder.setAppMessageSource(this);
+        if (setupInStaticHolder) {
+            TestAppMessageSourceHolder.setAppMessageSource(this);
+        }
+    }
+
+    @SneakyThrows
+    public AppMessageSourceTestImpl(String resourcePath) {
+        this(resourcePath, true);
     }
 
     public AppMessageSourceTestImpl() {
