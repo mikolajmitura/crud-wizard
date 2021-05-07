@@ -1,15 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.validation.javax;
 
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.CONTAINS_ALL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.CONTAINS_ANY;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.EMPTY_COLLECTION;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.EMPTY_COLLECTION_OR_NULL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.EQUAL_TO_ANY;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.NOT_EQUAL_TO_ALL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.NOT_NULL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.OtherFieldMatch.NULL;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.CONTAINS_ALL;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.CONTAINS_ANY;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EMPTY;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EMPTY_OR_NULL;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EQUAL_TO_ANY;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_BLANK;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_EMPTY;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_NULL;
+import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NULL;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.Builder;
 import lombok.Value;
@@ -51,17 +54,29 @@ import lombok.Value;
     is = NOT_EQUAL_TO_ALL,
     otherFieldValues = {"text11", "text22"})
 @FieldShouldWhenOther(field = "someSet",
-    should = EMPTY_COLLECTION,
+    should = EMPTY,
     whenField = "someEnums",
-    is = EMPTY_COLLECTION)
+    is = EMPTY)
 @FieldShouldWhenOther(field = "emptyOrNull",
-    should = EMPTY_COLLECTION_OR_NULL,
+    should = EMPTY_OR_NULL,
     whenField = "emptyOrNullOther",
-    is = EMPTY_COLLECTION_OR_NULL)
+    is = EMPTY_OR_NULL)
 @FieldShouldWhenOther(field = "shouldBeNotNull",
     should = NOT_NULL,
     whenField = "isEmptyList",
-    is = EMPTY_COLLECTION)
+    is = EMPTY)
+@FieldShouldWhenOther(field = "blankTestFiled",
+    should = NOT_BLANK,
+    whenField = "whenBlankTestFiled",
+    is = NOT_BLANK)
+@FieldShouldWhenOther(field = "someStringNotEmpty",
+    should = NOT_EMPTY,
+    whenField = "someMapNotEmpty",
+    is = NOT_EMPTY)
+@FieldShouldWhenOther(field = "someStringNotEmpty",
+    should = NOT_EMPTY,
+    whenField = "someCollectionNotEmpty",
+    is = NOT_EMPTY)
 @Builder
 @Value
 public class FieldShouldWhenOtherDto {
@@ -87,6 +102,13 @@ public class FieldShouldWhenOtherDto {
 
     String shouldBeNotNull;
     List<String> isEmptyList;
+
+    String blankTestFiled;
+    String whenBlankTestFiled;
+
+    Map<String, String> someMapNotEmpty;
+    String someStringNotEmpty;
+    List<String> someCollectionNotEmpty;
 
     public enum SomeEnum {
         ENTRY_1, ENTRY_2, ENTRY_3

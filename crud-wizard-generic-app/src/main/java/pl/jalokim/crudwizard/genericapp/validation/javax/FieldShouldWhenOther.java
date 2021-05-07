@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-@Target({ElementType.METHOD, ElementType.FIELD, ElementType.TYPE})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(FieldShouldWhenOther.List.class)
 @Documented
@@ -20,13 +20,13 @@ public @interface FieldShouldWhenOther {
 
     String field();
 
-    OtherFieldMatch should();
+    ExpectedFieldState should();
 
     String[] fieldValues() default {};
 
     String whenField();
 
-    OtherFieldMatch is();
+    ExpectedFieldState is();
 
     String[] otherFieldValues() default {};
 
@@ -36,7 +36,7 @@ public @interface FieldShouldWhenOther {
 
     Class<? extends Payload>[] payload() default {};
 
-    @Target({ElementType.METHOD, ElementType.FIELD, ElementType.TYPE})
+    @Target({ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
     @interface List {
