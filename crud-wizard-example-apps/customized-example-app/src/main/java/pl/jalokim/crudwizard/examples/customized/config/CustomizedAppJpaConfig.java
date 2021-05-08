@@ -17,13 +17,14 @@ import org.springframework.transaction.PlatformTransactionManager;
     basePackages = "pl.jalokim.crudwizard.examples.customized",
     entityManagerFactoryRef = "localContainerEntityManagerFactory"
 )
-public class JpaConfig {
+public class CustomizedAppJpaConfig {
 
     @Bean
     @Primary
     public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactory(EntityManagerFactoryBuilder builder,
         DataSource appDataSource) {
         return builder.dataSource(appDataSource)
+            // TODO remove in future this properties
             .properties(
                 Map.of("hibernate.hbm2ddl.auto", "update")
             )

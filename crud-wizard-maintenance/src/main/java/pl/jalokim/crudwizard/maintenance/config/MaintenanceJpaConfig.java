@@ -27,6 +27,8 @@ public class MaintenanceJpaConfig {
         @Qualifier("maintenanceDataSource") DataSource maintenanceDataSource) {
         return builder.dataSource(maintenanceDataSource)
             .packages("pl.jalokim.crudwizard.maintenance")
+            // TODO to remove in future hibernate.hbm2ddl.auto=update
+            // TODO use liqubase instead
             .properties(
                 Map.of("hibernate.hbm2ddl.auto", "update")
             )

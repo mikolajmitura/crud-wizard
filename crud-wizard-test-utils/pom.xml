@@ -16,7 +16,6 @@
         <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>
@@ -115,12 +114,7 @@
                     </testSources>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
-
 
 </project>

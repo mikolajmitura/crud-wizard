@@ -42,13 +42,11 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
         then:
         response.andExpect(status().isBadRequest())
         def jsonResponse = extractResponseAsJson(response)
-        jsonResponse['errors'].size() == 6
+        jsonResponse['errors'].size() == 4
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('surName', 'must not be null'))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('pesel', 'must not be null'))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('someBean.surName', 'must not be null'))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('someBean.pesel', 'must not be null'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('', 'Exactly one of following is mandatory: [first, second]'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('someBean', 'Exactly one of following is mandatory: [first, second]'))
     }
 
     def "should pass validation update"() {
@@ -80,9 +78,8 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
         then:
         response.andExpect(status().isBadRequest())
         def jsonResponse = extractResponseAsJson(response)
-        jsonResponse['errors'].size() == 3
+        jsonResponse['errors'].size() == 2
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('id', 'must not be null'))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('name', 'must not be null'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('', 'Exactly one of following is mandatory: [first, second]'))
     }
 }

@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.test.utils
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils
@@ -9,6 +11,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig
 import pl.jalokim.crudwizard.test.utils.rest.EndpointActions
 
@@ -38,6 +41,30 @@ class BaseIntegrationControllerSpec extends BaseIntegrationSpecification impleme
 
     String performAndReturnAsString(MockHttpServletRequestBuilder requestBuilder) {
         perform(requestBuilder).andReturn().response.contentAsString
+    }
+
+    long postAndReturnLong(String url, Object payload) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.post(url), payload)
+        httpResponse.andExpect(status().isCreated())
+        extractResponseAsLong(httpResponse)
+    }
+
+    List<Map> getAndReturnJson(String url, Map parameters = null) {
+        def httpResponse = performQuery(url, parameters)
+        httpResponse.andExpect(status().isOk())
+        extractResponseAsJsonArray(httpResponse)
+    }
+
+    Object getAndReturnArrayJson(String url, Map parameters = null) {
+        def httpResponse = performQuery(url, parameters)
+        httpResponse.andExpect(status().isOk())
+        extractResponseAsJson(httpResponse)
+    }
+
+    public <T> T getAndReturnObject(String url, Class<T> returnClass) {
+        def httpResponse = performQuery(url)
+        httpResponse.andExpect(status().isOk())
+        extractResponseAsClass(httpResponse, returnClass)
     }
 
     static def toJson(String text) {

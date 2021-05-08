@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.datastorage.jdbc;
 
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -16,27 +16,33 @@ import org.springframework.transaction.PlatformTransactionManager;
 @ComponentScan("pl.jalokim.crudwizard.datastorage.jdbc")
 public class JdbcDataStorageConfig {
 
-    @Bean
-    public PlatformTransactionManager applicationTransactionManager(@Qualifier("applicationDataSource") DataSource applicationDataSource) {
-        return new DataSourceTransactionManager(applicationDataSource);
-    }
+    private static final String JDBC_DATA_STORAGE_PREFIX = "crud.wizard.jdbc-data-storage";
+    private static final String DEFAULTS_PREFIX = JDBC_DATA_STORAGE_PREFIX + ".defaults";
 
-    @ConfigurationProperties(prefix = "crud.wizard.application.datasource")
     @Bean
     @Primary
-    public DataSourceProperties applicationDataSourceProperties() {
+    @ConditionalOnProperty(value = DEFAULTS_PREFIX + ".transaction-manager.enabled", havingValue = "true", matchIfMissing = true)
+    public PlatformTransactionManager jdbcDataStorageTransactionManager(DataSource jdbcDataStorageDataSource) {
+        return new DataSourceTransactionManager(jdbcDataStorageDataSource);
+    }
+
+    @ConfigurationProperties(prefix = JDBC_DATA_STORAGE_PREFIX + ".datasource")
+    @Bean
+    @Primary
+    @ConditionalOnProperty(value = DEFAULTS_PREFIX + ".datasource-properties.enabled", havingValue = "true", matchIfMissing = true)
+    public DataSourceProperties jdbcDataStorageDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
     @Primary
-    public DataSource applicationDataSource(@Qualifier("applicationDataSourceProperties")
-        DataSourceProperties applicationDataSourceProperties) {
+    @ConditionalOnProperty(value = DEFAULTS_PREFIX + ".datasource.enabled", havingValue = "true", matchIfMissing = true)
+    public DataSource jdbcDataStorageDataSource(DataSourceProperties jdbcDataStorageDataSourceProperties) {
         return DataSourceBuilder.create()
-            .driverClassName(applicationDataSourceProperties.getDriverClassName())
-            .url(applicationDataSourceProperties.getUrl())
-            .username(applicationDataSourceProperties.getUsername())
-            .password(applicationDataSourceProperties.getPassword())
+            .driverClassName(jdbcDataStorageDataSourceProperties.getDriverClassName())
+            .url(jdbcDataStorageDataSourceProperties.getUrl())
+            .username(jdbcDataStorageDataSourceProperties.getUsername())
+            .password(jdbcDataStorageDataSourceProperties.getPassword())
             .build();
     }
 }

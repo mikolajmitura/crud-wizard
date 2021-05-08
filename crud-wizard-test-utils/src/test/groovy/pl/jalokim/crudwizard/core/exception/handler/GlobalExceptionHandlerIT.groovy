@@ -92,8 +92,6 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
         response.andExpect(status().isBadRequest())
         def jsonResponse = extractResponseAsJson(response)
         jsonResponse['message'].contains 'Business logic exception'
-        jsonResponse['errors'].size() == 1
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('', 'Business logic exception'))
     }
 
     def "should handle TechnicalException and rewrite exception message as error"() {
@@ -104,8 +102,6 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
         response.andExpect(status().isNotImplemented())
         def jsonResponse = extractResponseAsJson(response)
         jsonResponse['message'].contains 'Technical exception'
-        jsonResponse['errors'].size() == 1
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('', 'Technical exception'))
     }
 
     def "should handle DataValidationException and rewrite exception message as error"() {

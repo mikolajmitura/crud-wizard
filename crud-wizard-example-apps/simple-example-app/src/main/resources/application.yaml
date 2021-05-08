@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+crud.wizard:
+  maintenance:
+      datasource:
+        url: jdbc:postgresql://localhost:5432/simple-maintenance
+        driverClassName: org.postgresql.Driver
+        username: postgres
+        password: postgres
+
+  jdbc-data-storage:
+    datasource:
+      url: jdbc:postgresql://localhost:5432/simple-application
+      driverClassName: org.postgresql.Driver
+      username: postgres
+      password: postgres
+
+
+

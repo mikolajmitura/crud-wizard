@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.test.utils
+package pl.jalokim.crudwizard
 
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication

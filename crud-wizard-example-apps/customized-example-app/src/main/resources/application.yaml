@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+crud.wizard:
+  maintenance:
+      datasource:
+        url: jdbc:postgresql://localhost:5432/customized-maintenance
+        driverClassName: org.postgresql.Driver
+        username: postgres
+        password: postgres
+
+  jdbc-data-storage:
+    datasource:
+      url: jdbc:postgresql://localhost:5432/customized-application
+      driverClassName: org.postgresql.Driver
+      username: postgres
+      password: postgres
+    defaults:
+      transaction-manager.enabled: false
+
+

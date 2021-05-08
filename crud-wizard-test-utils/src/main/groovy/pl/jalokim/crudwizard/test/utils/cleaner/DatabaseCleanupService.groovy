@@ -1,53 +1,57 @@
 package pl.jalokim.crudwizard.test.utils.cleaner
 
 import javax.annotation.PostConstruct
-import javax.persistence.EntityManager
-import javax.persistence.Table
-import org.hibernate.Session
+import javax.sql.DataSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
 class DatabaseCleanupService {
 
     def tables = []
     List<String> skipTables = []
 
-    @Autowired
-    EntityManagerForCleanupProvider entityManagerProvider
-
     @Autowired(required = false)
     List<SkipTablesForClean> skipTablesForClean
 
-    EntityManager entityManager
+    @Autowired
+    List<DataSource> dataSources
+
+    List<DataBaseContext> dataBaseContexts
 
     @PostConstruct
     void postConstruct() {
-        entityManager = entityManagerProvider.entityManager
-        skipTablesForClean?.forEach({skipTables.addAll(it.getSkipTables())})
+        dataBaseContexts = dataSources.collect {
+            new DataBaseContext(it)
+        }
+        skipTablesForClean?.forEach {
+            skipTables.addAll(it.getSkipTables()*.toLowerCase())
+        }
     }
 
     @EventListener(ContextRefreshedEvent)
     def fetchTablesNames() {
-        def session = entityManager.unwrap(Session)
-        def metamodel = session.getSessionFactory().getMetamodel()
-        metamodel.entities.each {
-            def table = it.getJavaType().getAnnotation(Table)
-            if (table && !skipTables.contains(table.name())) {
-                tables.add(table.name())
+        dataBaseContexts.each { DataBaseContext dataBaseContext ->
+            List<Map<String, Object>> rows = dataBaseContext.getJdbcTemplate().queryForList("SHOW TABLES")
+            rows.each {
+                String tableName = (String) it.get("TABLE_NAME")
+                if (!skipTables.contains(tableName)) {
+                    dataBaseContext.addTable(tableName)
+                }
             }
         }
     }
 
     def cleanupDatabase() {
-        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate()
-        tables.each {
-            entityManager.createNativeQuery("DELETE FROM " + it).executeUpdate()
+        dataBaseContexts.each { DataBaseContext dataBaseContext ->
+            def jdbcTemplate = dataBaseContext.getJdbcTemplate()
+            jdbcTemplate.update("SET REFERENTIAL_INTEGRITY FALSE")
+            dataBaseContext.getNamesOfTables().each {
+                jdbcTemplate.update("DELETE FROM " + it)
+            }
+            jdbcTemplate.update("SET REFERENTIAL_INTEGRITY TRUE")
         }
-        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate()
     }
 }

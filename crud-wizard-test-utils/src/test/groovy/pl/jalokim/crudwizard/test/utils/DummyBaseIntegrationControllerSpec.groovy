@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.test.utils
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestExecutionListeners
+import pl.jalokim.crudwizard.TestsApplicationConfig
 import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 
 @ActiveProfiles("integration")

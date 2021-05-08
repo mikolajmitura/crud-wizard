@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/simple/users")
-@Transactional("applicationTransactionManager")
+@Transactional
 @RequiredArgsConstructor
 public class SimpleRestController {
 
     @GetMapping
     public List<String> getAll() {
-        return List.of();
+        return List.of("user1", "user2");
     }
 }
