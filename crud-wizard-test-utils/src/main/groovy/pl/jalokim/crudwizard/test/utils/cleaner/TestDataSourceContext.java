@@ -1,19 +1,19 @@
 package pl.jalokim.crudwizard.test.utils.cleaner;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.DataSource;
 import lombok.Getter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @Getter
-public class DataBaseContext {
+public class TestDataSourceContext {
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
-    private final List<String> namesOfTables = new ArrayList<>();
+    private final List<String> namesOfTables = new CopyOnWriteArrayList<>();
 
-    public DataBaseContext(DataSource dataSource) {
+    public TestDataSourceContext(DataSource dataSource) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }

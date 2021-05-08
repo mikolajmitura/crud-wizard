@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.test.utils.cleaner
 
+import com.zaxxer.hikari.HikariDataSource
 import javax.annotation.PostConstruct
 import javax.sql.DataSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service
 @Service
 class DatabaseCleanupService {
 
-    def tables = []
     List<String> skipTables = []
 
     @Autowired(required = false)
@@ -19,12 +19,17 @@ class DatabaseCleanupService {
     @Autowired
     List<DataSource> dataSources
 
-    List<DataBaseContext> dataBaseContexts
+    List<TestDataSourceContext> dataBaseContexts
 
     @PostConstruct
     void postConstruct() {
         dataBaseContexts = dataSources.collect {
-            new DataBaseContext(it)
+            def jdbcURl = ((HikariDataSource) it).jdbcUrl
+            if (jdbcURl.startsWith("jdbc:h2:mem:")) {
+                new TestDataSourceContext(it)
+            } else {
+                throw new IllegalStateException("For test cleanup only H2 in memory is allowed but was used URL: $jdbcURl")
+            }
         }
         skipTablesForClean?.forEach {
             skipTables.addAll(it.getSkipTables()*.toLowerCase())
@@ -33,7 +38,7 @@ class DatabaseCleanupService {
 
     @EventListener(ContextRefreshedEvent)
     def fetchTablesNames() {
-        dataBaseContexts.each { DataBaseContext dataBaseContext ->
+        dataBaseContexts.each { TestDataSourceContext dataBaseContext ->
             List<Map<String, Object>> rows = dataBaseContext.getJdbcTemplate().queryForList("SHOW TABLES")
             rows.each {
                 String tableName = (String) it.get("TABLE_NAME")
@@ -45,7 +50,7 @@ class DatabaseCleanupService {
     }
 
     def cleanupDatabase() {
-        dataBaseContexts.each { DataBaseContext dataBaseContext ->
+        dataBaseContexts.each { TestDataSourceContext dataBaseContext ->
             def jdbcTemplate = dataBaseContext.getJdbcTemplate()
             jdbcTemplate.update("SET REFERENTIAL_INTEGRITY FALSE")
             dataBaseContext.getNamesOfTables().each {

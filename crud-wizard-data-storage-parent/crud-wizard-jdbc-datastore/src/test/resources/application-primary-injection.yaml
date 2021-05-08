@@ -1,0 +1,5 @@
+crud.wizard:
+  jdbc-data-storage:
+    defaults:
+      transaction-manager.enabled: true
+      datasource.enabled: false

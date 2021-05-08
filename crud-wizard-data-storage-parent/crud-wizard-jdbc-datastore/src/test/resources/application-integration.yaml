@@ -1,0 +1,13 @@
+crud.wizard:
+  jdbc-data-storage:
+    datasource:
+      url: jdbc:h2:mem:datastorage:MODE=PostgreSQL
+      driverClassName: org.h2.Driver
+      username: sa
+      password:
+
+
+
+
+
+
