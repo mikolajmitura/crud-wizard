@@ -22,13 +22,13 @@ public class GenericRestController {
 
     @RequestMapping
     public ResponseEntity<Object> invokeHttpMethod(@RequestBody(required = false) Map<String, Object> requestBody,
-        @RequestParam Map<String, Object> params, @RequestHeader Map<String, String> headers,
+        @RequestParam Map<String, Object> httpQueryParams, @RequestHeader Map<String, String> headers,
         HttpServletRequest request, HttpServletResponse response) {
 
         return genericService.findAndInvokeHttpMethod(
             GenericServiceArgument.builder()
                 .requestBody(requestBody)
-                .params(params)
+                .httpQueryParams(httpQueryParams)
                 .headers(headers)
                 .request(request)
                 .response(response)

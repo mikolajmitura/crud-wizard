@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.maintenance.endpoints;
+package pl.jalokim.crudwizard.maintenance.metamodel.endpoint;
 
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;

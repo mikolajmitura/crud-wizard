@@ -10,7 +10,7 @@ import lombok.Value;
 @Builder
 public class GenericServiceArgument {
 
-    Map<String, Object> params;
+    Map<String, Object> httpQueryParams;
     Map<String, Object> requestBody;
     Map<String, String> headers;
     HttpServletRequest request;

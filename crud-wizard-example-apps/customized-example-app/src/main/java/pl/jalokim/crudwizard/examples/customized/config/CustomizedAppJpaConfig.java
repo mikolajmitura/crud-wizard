@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.examples.customized.config;
 
-import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -24,10 +23,6 @@ public class CustomizedAppJpaConfig {
     public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactory(EntityManagerFactoryBuilder builder,
         DataSource appDataSource) {
         return builder.dataSource(appDataSource)
-            // TODO remove in future this properties
-            .properties(
-                Map.of("hibernate.hbm2ddl.auto", "update")
-            )
             .packages("pl.jalokim.crudwizard.examples.customized")
             .build();
     }

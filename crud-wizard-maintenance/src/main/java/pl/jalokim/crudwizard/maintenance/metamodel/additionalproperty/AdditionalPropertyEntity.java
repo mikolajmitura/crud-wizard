@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.examples.customized.repo;
+package pl.jalokim.crudwizard.maintenance.metamodel.additionalproperty;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,18 +12,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
-@Table(name = "users")
 @Builder
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserEntity {
+@Data
+@Table(name = "additional_properties")
+public class AdditionalPropertyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String name;
-    private String surName;
+    private String ownerClass;
+    private Long ownerId;
 
+    private String name;
+    private String valueRealClassName;
+    private String jsonValue;
 }

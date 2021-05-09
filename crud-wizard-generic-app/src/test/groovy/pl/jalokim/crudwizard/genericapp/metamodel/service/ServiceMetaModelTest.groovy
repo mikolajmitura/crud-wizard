@@ -15,8 +15,8 @@ class ServiceMetaModelTest extends Specification {
         serviceMetaModel                   || expected
         ServiceMetaModel.builder().build() || true
         ServiceMetaModel.builder()
-            .serviceRealClassId(12)
-            .serviceMethodId(12)
+            .id(12)
+            .realMethodName("name")
             .build()                       || false
     }
 }

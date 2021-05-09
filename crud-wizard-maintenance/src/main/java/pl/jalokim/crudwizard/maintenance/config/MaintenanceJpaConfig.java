@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.maintenance.config;
 
-import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,16 +21,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 )
 public class MaintenanceJpaConfig {
 
+    public static final String MAINTENANCE_ENTITY_MANAGER = "maintenanceEntityManager";
+
     @Bean
     LocalContainerEntityManagerFactoryBean maintenanceEntityManagerFactory(EntityManagerFactoryBuilder builder,
         @Qualifier("maintenanceDataSource") DataSource maintenanceDataSource) {
         return builder.dataSource(maintenanceDataSource)
+            .persistenceUnit(MAINTENANCE_ENTITY_MANAGER)
             .packages("pl.jalokim.crudwizard.maintenance")
-            // TODO to remove in future hibernate.hbm2ddl.auto=update
-            // TODO use liqubase instead
-            .properties(
-                Map.of("hibernate.hbm2ddl.auto", "update")
-            )
             .build();
     }
 

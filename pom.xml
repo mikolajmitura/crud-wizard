@@ -56,11 +56,14 @@
         <plugin.spotbugs.version>4.0.0</plugin.spotbugs.version>
         <findbugs.version>3.0.0</findbugs.version>
 
+        <mapstruct.version>1.4.1.Final</mapstruct.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <lombok.version>1.18.20</lombok.version>
+
         <checkstyle.root.path>${project.basedir}</checkstyle.root.path>
         <checkstyle.location>${checkstyle.root.path}/src/main/resources/checkstyle/checkstyle.xml</checkstyle.location>
         <checkstyle.suppressions.location>${checkstyle.root.path}/src/main/resources/checkstyle/suppressions.xml</checkstyle.suppressions.location>
     </properties>
-
 
     <dependencies>
         <dependency>
@@ -85,7 +88,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>${lombok.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -106,6 +109,16 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>${commons-csv.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
         </dependency>
 
         <dependency>

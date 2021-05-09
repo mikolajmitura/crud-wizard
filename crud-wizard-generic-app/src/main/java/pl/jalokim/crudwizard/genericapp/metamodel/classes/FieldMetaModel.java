@@ -8,22 +8,13 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
-public class ClassMetaModel extends ParentMetaModel {
+public class FieldMetaModel extends ParentMetaModel {
 
     Long id;
 
-    String name;
+    String fieldName;
 
-    String realClassName;
+    ClassMetaModel fieldType;
 
-    List<ClassMetaModel> genericTypes;
-    List<FieldMetaModel> fields;
     List<ValidatorMetaModel> validators;
-
-    /**
-     * when this model is part of another 'comesFrom' is relation which contains 'fields'
-     */
-    ClassMetaModel comesFrom;
-
-    List<ClassMetaModel> extendsFromModels;
 }

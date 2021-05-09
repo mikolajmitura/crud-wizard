@@ -49,13 +49,13 @@ class BaseIntegrationControllerSpec extends BaseIntegrationSpecification impleme
         extractResponseAsLong(httpResponse)
     }
 
-    List<Map> getAndReturnJson(String url, Map parameters = null) {
+    List<Map> getAndReturnArrayJson(String url, Map parameters = null) {
         def httpResponse = performQuery(url, parameters)
         httpResponse.andExpect(status().isOk())
         extractResponseAsJsonArray(httpResponse)
     }
 
-    Object getAndReturnArrayJson(String url, Map parameters = null) {
+    Object getAndReturnJson(String url, Map parameters = null) {
         def httpResponse = performQuery(url, parameters)
         httpResponse.andExpect(status().isOk())
         extractResponseAsJson(httpResponse)
