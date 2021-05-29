@@ -10,8 +10,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>crud-wizard-jdbc-datastore</artifactId>
-    <name>crud-wizard-data-storage-parent/crud-wizard-jdbc-datastore</name>
+    <artifactId>jdbc-data-storage</artifactId>
+    <name>jdbc-data-storage</name>
 
     <properties>
         <checkstyle.root.path>${project.parent.parent.basedir}</checkstyle.root.path>

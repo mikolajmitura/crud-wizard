@@ -15,7 +15,7 @@
     <artifactId>crud-wizard-data-storage-parent</artifactId>
 
     <modules>
-        <module>crud-wizard-jdbc-datastore</module>
+        <module>jdbc-data-storage</module>
     </modules>
 
     <properties>

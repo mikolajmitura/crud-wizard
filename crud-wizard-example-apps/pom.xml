@@ -31,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>pl.jalokim.crudwizard.datastorage</groupId>
-            <artifactId>crud-wizard-jdbc-datastore</artifactId>
+            <artifactId>jdbc-data-storage</artifactId>
             <version>${project.version}</version>
         </dependency>
 
