@@ -31,11 +31,11 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
         ), "invalid")
 
         when:
-        def response = performWithJsonContent(post("/test"), request)
+        def response = operationsOnRestController.performWithJsonContent(post("/test"), request)
 
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'Invalid request'
         jsonResponse['errors'].size() == 11
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('mandatoryField', 'must not be null'))
@@ -55,62 +55,62 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
 
     def "should handle entity not found exceptions and return response exception messages"() {
         when:
-        def response = perform(get("/test/modelnotfound"))
+        def response = operationsOnRestController.perform(get("/test/modelnotfound"))
 
         then:
         response.andExpect(status().isNotFound())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'My entity was not found with id: id'
     }
 
     def "should handle BindException and return response containing binding errors"() {
         when:
-        def response = perform(get("/test/bindexception"))
+        def response = operationsOnRestController.perform(get("/test/bindexception"))
 
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'Invalid request'
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('objectA', 'An error has occurred'))
     }
 
     def "should handle OptimisticLockingException and return response containing exception message"() {
         when:
-        def response = perform(get("/test/optimisticLocking"))
+        def response = operationsOnRestController.perform(get("/test/optimisticLocking"))
 
         then:
         response.andExpect(status().isConflict())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'Resource has been modified by another user.'
     }
 
     def "should handle BusinessLogicException and rewrite exception message as error"() {
         when:
-        def response = perform(get("/test/businessLogicException"))
+        def response = operationsOnRestController.perform(get("/test/businessLogicException"))
 
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'Business logic exception'
     }
 
     def "should handle TechnicalException and rewrite exception message as error"() {
         when:
-        def response = perform(get("/test/technicalException"))
+        def response = operationsOnRestController.perform(get("/test/technicalException"))
 
         then:
         response.andExpect(status().isNotImplemented())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'Technical exception'
     }
 
     def "should handle DataValidationException and rewrite exception message as error"() {
         when:
-        def response = perform(get("/test/data-validation-exception"))
+        def response = operationsOnRestController.perform(get("/test/data-validation-exception"))
 
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'] == "some error"
         jsonResponse['errors'].size() == 3
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('property1', 'message 1'))
@@ -121,66 +121,66 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
 
     def "should handle raw Exception and rewrite exception message as error"() {
         when:
-        def response = perform(get("/test/raw-exception"))
+        def response = operationsOnRestController.perform(get("/test/raw-exception"))
 
         then:
         response.andExpect(status().isInternalServerError())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'] == "raw exception message"
         jsonResponse['errors'] == null
     }
 
     def "should handle instance of ApplicationException and not translate exception"() {
         when:
-        def response = perform(get("/test/throw-exception-without-text-placeholder"))
+        def response = operationsOnRestController.perform(get("/test/throw-exception-without-text-placeholder"))
 
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'] == "not translated message"
         jsonResponse['errorCode'] == null
     }
 
     def "should handle instance of ApplicationException and translate exception message"() {
         when:
-        def response = perform(get("/test/throw-exception-with-text-placeholder"))
+        def response = operationsOnRestController.perform(get("/test/throw-exception-with-text-placeholder"))
 
         then:
         response.andExpect(status().isNotFound())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'] == "Some global exception"
         jsonResponse['errorCode'] == "some.global.exception.message"
     }
 
     def "should handle instance of ApplicationException with MessagePlaceholder instance"() {
         when:
-        def response = perform(get("/test/throw-exception-with-message-placeholder-object"))
+        def response = operationsOnRestController.perform(get("/test/throw-exception-with-message-placeholder-object"))
 
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'] == "placeholders some property 1 12"
         jsonResponse['errorCode'] == "fixed.error.code"
     }
 
     def "should return passed offset via header"() {
         when:
-        def response = perform(get("/test/required-time-zone-header")
+        def response = operationsOnRestController.perform(get("/test/required-time-zone-header")
             .header(TimeZoneRequestHolder.X_TIMEZONE_NAME_HEADER, "Europe/Warsaw"))
 
         then:
         response.andExpect(status().isOk())
-        def jsonResponse = extractResponseAsJsonObject(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJsonObject(response)
         jsonResponse[0] == "Europe/Warsaw"
     }
 
     def "should return that not passed offset via header"() {
         when:
-        def response = perform(get("/test/required-time-zone-header"))
+        def response = operationsOnRestController.perform(get("/test/required-time-zone-header"))
 
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJsonObject(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJsonObject(response)
         jsonResponse['message'] == "required ${TimeZoneRequestHolder.X_TIMEZONE_NAME_HEADER} header"
     }
 }

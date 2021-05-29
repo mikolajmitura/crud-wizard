@@ -2,9 +2,9 @@ server:
   port: 8081
 
 crud.wizard:
-  maintenance:
+  metamodel:
       datasource:
-        url: jdbc:postgresql://localhost:5432/customized-maintenance
+        url: jdbc:postgresql://localhost:5432/customized-metamodel
         driverClassName: org.postgresql.Driver
         username: postgres
         password: postgres
@@ -15,8 +15,8 @@ crud.wizard:
       driverClassName: org.postgresql.Driver
       username: postgres
       password: postgres
-    defaults:
-      transaction-manager.enabled: false
+      defaults:
+        transaction-manager-enabled: false
 
 spring:
   jpa:

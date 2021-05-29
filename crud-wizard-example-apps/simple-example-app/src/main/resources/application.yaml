@@ -2,9 +2,9 @@ server:
   port: 8081
 
 crud.wizard:
-  maintenance:
+  metamodel:
       datasource:
-        url: jdbc:postgresql://localhost:5432/simple-maintenance
+        url: jdbc:postgresql://localhost:5432/simple-metamodel
         driverClassName: org.postgresql.Driver
         username: postgres
         password: postgres

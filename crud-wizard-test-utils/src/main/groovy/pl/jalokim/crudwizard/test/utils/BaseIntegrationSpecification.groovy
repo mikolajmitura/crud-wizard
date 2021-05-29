@@ -8,6 +8,8 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import javax.validation.ClockProvider
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -20,6 +22,7 @@ import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
 import spock.lang.Shared
 import spock.lang.Specification
 
+@AutoConfigureMockMvc
 class BaseIntegrationSpecification extends Specification implements UsesTimeProvider {
 
     @Autowired
@@ -30,6 +33,10 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
 
     @Autowired
     protected AppMessageSource appMessageSource
+
+    @Autowired
+    @Qualifier("rawOperationsOnRestController")
+    protected RawOperationsOnRestController operationsOnRestController
 
     @Shared Map<Integer, Boolean> executedClosuresByLineNumber = [:]
 

@@ -1,0 +1,8 @@
+some-example:
+  properties:
+    someText: someText-default
+
+  invalid-field-value:
+    someLong: test-default
+  invalid-field-name:
+    notExist: someValue

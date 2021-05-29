@@ -9,6 +9,6 @@ import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 @ActiveProfiles("integration")
 @SpringBootTest(classes = [TestsApplicationConfig], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestExecutionListeners(value = [DatabaseCleanupListener], mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
-class DummyBaseIntegrationControllerSpec extends BaseIntegrationControllerSpec {
+class DummyBaseIntegrationControllerSpec extends BaseIntegrationSpecification {
 
 }

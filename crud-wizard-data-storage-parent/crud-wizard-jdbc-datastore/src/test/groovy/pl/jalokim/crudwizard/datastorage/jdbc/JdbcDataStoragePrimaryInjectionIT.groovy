@@ -12,16 +12,20 @@ import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestExecutionListeners
 import pl.jalokim.crudwizard.JdbcDStoreTestsApplicationConfig
+import pl.jalokim.crudwizard.test.utils.BaseIntegrationSpecification
 import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 import spock.lang.Specification
 
 @ActiveProfiles(["integration", "primary-injection"])
 @SpringBootTest(classes = [JdbcDStoreTestsApplicationConfig], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestExecutionListeners(value = [DatabaseCleanupListener], mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
-class JdbcDataStoragePrimaryInjectionIT extends Specification {
+class JdbcDataStoragePrimaryInjectionIT extends BaseIntegrationSpecification {
 
     @Autowired
     private JdbcDataStorage jdbcDataStorage
+
+    @Autowired
+    private JdbcDataStorageProperties jdbcDataStorageProperties
 
     def "should inject other primary datasource"() {
         when:
@@ -37,13 +41,19 @@ class JdbcDataStoragePrimaryInjectionIT extends Specification {
 
         @Bean
         @Primary
-        DataSource customDataStorageDataSource() {
-            return DataSourceBuilder.create()
+        DataSource primaryJdbcDataStorageDataSource() {
+            DataSourceBuilder.create()
                 .driverClassName("org.h2.Driver")
                 .url("jdbc:h2:mem:custom-jdbc-url:MODE=PostgreSQL")
                 .username("sa")
                 .password("")
                 .build()
+        }
+
+        @Bean
+        @Primary
+        JdbcDataStorageDataSourceProperties jdbcDataStorageDataSourceProperties() {
+            new JdbcDataStorageDataSourceProperties()
         }
     }
 }

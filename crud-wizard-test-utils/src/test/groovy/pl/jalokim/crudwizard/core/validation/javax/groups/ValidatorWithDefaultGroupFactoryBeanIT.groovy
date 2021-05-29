@@ -25,7 +25,7 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
             .build()
 
         when:
-        def response = performWithJsonContent(post("/test/create"), input)
+        def response = operationsOnRestController.performWithJsonContent(post("/test/create"), input)
         then:
         response.andExpect(status().isOk())
     }
@@ -38,10 +38,10 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
             .build()
 
         when:
-        def response = performWithJsonContent(post("/test/create"), input)
+        def response = operationsOnRestController.performWithJsonContent(post("/test/create"), input)
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['errors'].size() == 4
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('surName', 'must not be null'))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('pesel', 'must not be null'))
@@ -60,7 +60,7 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
             .build()
 
         when:
-        def response = performWithJsonContent(post("/test/update"), input)
+        def response = operationsOnRestController.performWithJsonContent(post("/test/update"), input)
         then:
         response.andExpect(status().isOk())
     }
@@ -74,10 +74,10 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
             .build()
 
         when:
-        def response = performWithJsonContent(post("/test/update"), input)
+        def response = operationsOnRestController.performWithJsonContent(post("/test/update"), input)
         then:
         response.andExpect(status().isBadRequest())
-        def jsonResponse = extractResponseAsJson(response)
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['errors'].size() == 2
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('id', 'must not be null'))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('name', 'must not be null'))

@@ -6,4 +6,14 @@ public interface DataStorage {
         return null;
     }
 
+    String getName();
+
+    default String infoDataStorage() {
+        return String.format("%s %s", getName(), getClassName());
+    }
+
+    default String getClassName() {
+        return getClass().getCanonicalName();
+    }
+
 }

@@ -1,7 +1,7 @@
 crud.wizard:
-  maintenance:
+  metamodel:
     datasource:
-      url: jdbc:h2:mem:customizedmaintenance:MODE=PostgreSQL
+      url: jdbc:h2:mem:customizedmetamodel:MODE=PostgreSQL
       driverClassName: org.h2.Driver
       username: sa
       password:

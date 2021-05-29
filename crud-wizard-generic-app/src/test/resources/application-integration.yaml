@@ -1,0 +1,41 @@
+spring:
+  jpa:
+    database-platform: #empty (detected at runtime) do not remove this line
+    open-in-view: false
+    properties:
+      hibernate:
+        hbm2ddl.auto: update # validate
+        jdbc.lob.non_contextual_creation: true
+        physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+
+crud.wizard:
+  metamodel:
+    datasource:
+      url: jdbc:h2:mem:metamodelDB:MODE=PostgreSQL
+      driverClassName: org.h2.Driver
+      username: sa
+      password:
+
+some-example:
+  properties:
+    someText: someText
+    someRawLong: 1
+    someLong: 2
+    rawBoolean: true
+    objectBoolean: true
+    simpleList:
+      - one
+      - two
+    listWithObjects:
+      - someDouble: 12.0
+        rawDouble: 13.0
+        rawShort: 12
+        objectShort: 13
+      - someDouble: 15.0
+        rawDouble: 16.0
+        rawShort: 15
+        objectShort: 16
+
+  invalid-field-value:
+    someLong: test

@@ -1,7 +1,7 @@
-package pl.jalokim.crudwizard;
+package pl.jalokim.crudwizard
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 import pl.jalokim.crudwizard.core.AppWizardCoreConfig;

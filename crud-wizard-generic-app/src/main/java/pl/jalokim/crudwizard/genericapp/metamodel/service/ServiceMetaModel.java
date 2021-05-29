@@ -5,13 +5,13 @@ import java.util.Objects;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.metamodel.ParentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
 import pl.jalokim.utils.collection.Elements;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
 @Builder
-public class ServiceMetaModel extends ParentMetaModel {
+public class ServiceMetaModel extends AdditionalPropertyMetaModel {
 
     Long id;
     String realClassName;

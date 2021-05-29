@@ -1,0 +1,19 @@
+crud.wizard:
+  jdbc-data-storage:
+    datasource:
+      defaults:
+        transaction-manager-enabled: true
+        datasourcePropertiesEnabled: true
+    datasourceByName:
+      source1:
+        url: jdbc:h2:mem:source1:MODE=PostgreSQL
+        driverClassName: org.h2.Driver
+        username: sa1
+        password:
+      source2:
+        url: jdbc:h2:mem:source2:MODE=PostgreSQL
+        driverClassName: org.h2.Driver
+        username: sa2
+        password: pass
+        defaults:
+          datasource-enabled: true

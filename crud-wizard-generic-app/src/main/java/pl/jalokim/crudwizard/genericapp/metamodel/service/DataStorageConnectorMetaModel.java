@@ -1,14 +1,16 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.service;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.metamodel.ParentMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classes.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.mapping.MapperMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
-public class DataStorageConnectorMetaModel extends ParentMetaModel {
+@Builder
+public class DataStorageConnectorMetaModel extends AdditionalPropertyMetaModel {
 
     Long id;
     DataStorageMetaModel dataStorageMetaModel;

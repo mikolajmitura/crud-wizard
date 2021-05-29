@@ -1,12 +1,14 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.validator;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.metamodel.ParentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
-@Value
-public class ValidatorMetaModel extends ParentMetaModel {
+@Data
+@Builder
+public class ValidatorMetaModel extends AdditionalPropertyMetaModel {
 
     Long id;
 
