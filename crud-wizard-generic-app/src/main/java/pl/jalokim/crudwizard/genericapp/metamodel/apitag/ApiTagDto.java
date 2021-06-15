@@ -5,6 +5,7 @@ import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldSta
 
 import lombok.Builder;
 import lombok.Value;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseModelDto;
 import pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOther;
 
 @Value
@@ -21,7 +22,7 @@ import pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOther;
     is = NULL
 )
 @Builder
-public class ApiTagDto {
+public class ApiTagDto extends BaseModelDto {
 
     Long id;
 

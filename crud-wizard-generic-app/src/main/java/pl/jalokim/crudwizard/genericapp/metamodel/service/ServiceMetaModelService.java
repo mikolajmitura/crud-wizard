@@ -1,23 +1,27 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.service;
 
+import static pl.jalokim.utils.collection.Elements.elements;
+
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntityRepository;
-import pl.jalokim.utils.collection.Elements;
 
 @RequiredArgsConstructor
 @MetamodelService
 public class ServiceMetaModelService {
 
     private final ServiceMetaModelRepository serviceMetaModelRepository;
+    private final ServiceMetaModelMapper serviceMetaModelMapper;
     private final MapperMetaModelEntityRepository mapperMetaModelEntityRepository;
     private final ClassMetaModelService classMetaModelService;
 
     public ServiceMetaModelEntity saveServiceMetaModel(ServiceMetaModelEntity serviceMetaModel) {
-        Elements.elements(serviceMetaModel.getDataStorageConnectors())
+        elements(serviceMetaModel.getDataStorageConnectors())
             .forEach(connectorEntry -> {
                 MapperMetaModelEntity mapperMetaModel = connectorEntry.getMapperMetaModel();
                 if (mapperMetaModel != null && mapperMetaModel.getId() == null) {
@@ -29,5 +33,11 @@ public class ServiceMetaModelService {
                 }
             });
         return serviceMetaModelRepository.persist(serviceMetaModel);
+    }
+
+    public List<ServiceMetaModel> findAll(MetaModelContext metaModelContext) {
+        return elements(serviceMetaModelRepository.findAll())
+            .map(serviceEntity -> serviceMetaModelMapper.toDto(metaModelContext, serviceEntity))
+            .asList();
     }
 }

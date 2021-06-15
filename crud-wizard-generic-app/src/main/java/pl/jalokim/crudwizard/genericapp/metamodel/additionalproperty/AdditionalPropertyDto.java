@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.properties;
+package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
 import lombok.Builder;
 import lombok.Value;

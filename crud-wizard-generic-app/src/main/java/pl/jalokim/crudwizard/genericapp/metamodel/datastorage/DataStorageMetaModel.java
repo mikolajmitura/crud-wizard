@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.service;
+package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -8,19 +8,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.CreateEndpointMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointService;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
 
 @RestController
 @RequestMapping("/maintenance/endpoints")
 @RequiredArgsConstructor
 public class EndpointRestController {
 
-    private final EndpointService endpointService;
+    private final EndpointMetaModelService endpointService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Long createNewEndpoint(@RequestBody @Validated CreateEndpointMetaModelDto createEndpointMetaModelDto) {
+    public Long createNewEndpoint(@RequestBody @Validated EndpointMetaModelDto createEndpointMetaModelDto) {
         // TODO validation that there is not endpoint with that url and http method already
         // TODO should be validation that in normal spring mappings that endpoint (url and http method) haven't existed already
         return endpointService.createNewEndpoint(createEndpointMetaModelDto);

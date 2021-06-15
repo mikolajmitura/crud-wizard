@@ -22,7 +22,6 @@ import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelEntity;
 
 @Entity
@@ -55,7 +54,7 @@ public class EndpointMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     @OneToMany(cascade = {CascadeType.ALL})
     @JoinColumn(name = "endpoint_meta_model_id")
-    private List<FieldMetaModelEntity> queryArguments;
+    private List<ClassMetaModelEntity> queryArguments;
 
     @ManyToOne
     @JoinColumn(name = "service_meta_model_id")

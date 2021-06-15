@@ -7,7 +7,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.stereotype.Component;
 
 /**
- * It removes default  DataSourceProperties bean configured by "spring.datasource"
+ * It removes default DataSourceProperties bean configured by "spring.datasource"
  */
 @Component
 public class MetaModelSpringBootCustomizer implements BeanDefinitionRegistryPostProcessor {

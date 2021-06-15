@@ -1,15 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
-@Value
-@Builder
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder(toBuilder = true)
 public class ClassMetaModel extends AdditionalPropertyMetaModel {
 
     Long id;
@@ -21,11 +24,6 @@ public class ClassMetaModel extends AdditionalPropertyMetaModel {
     List<ClassMetaModel> genericTypes;
     List<FieldMetaModel> fields;
     List<ValidatorMetaModel> validators;
-
-    /**
-     * when this model is part of another 'comesFrom' is relation which contains 'fields'
-     */
-    ClassMetaModel comesFrom;
 
     List<ClassMetaModel> extendsFromModels;
 }

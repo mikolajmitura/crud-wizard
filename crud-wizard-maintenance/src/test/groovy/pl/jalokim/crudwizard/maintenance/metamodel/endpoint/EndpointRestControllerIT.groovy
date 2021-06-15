@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.maintenance.metamodel.endpoint
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.CreateEndpointMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelRepository
 import pl.jalokim.crudwizard.maintenance.MaintenanceBaseIntegrationController
 
@@ -19,7 +19,7 @@ class EndpointRestControllerIT extends MaintenanceBaseIntegrationController {
 
     def "should save new endpoint to db"() {
         given:
-        CreateEndpointMetaModelDto createEndpointMetaModelDto = createCreateEndpointMetaModelDto()
+        EndpointMetaModelDto createEndpointMetaModelDto = createCreateEndpointMetaModelDto()
 
         when:
         long createdId = endpointRestController.create(createEndpointMetaModelDto)
@@ -31,8 +31,8 @@ class EndpointRestControllerIT extends MaintenanceBaseIntegrationController {
         }
     }
 
-    CreateEndpointMetaModelDto createCreateEndpointMetaModelDto() {
-        CreateEndpointMetaModelDto.builder()
+    EndpointMetaModelDto createCreateEndpointMetaModelDto() {
+        EndpointMetaModelDto.builder()
             .baseUrl("users")
             .apiTag(ApiTagDto.builder()
                 .name("users")

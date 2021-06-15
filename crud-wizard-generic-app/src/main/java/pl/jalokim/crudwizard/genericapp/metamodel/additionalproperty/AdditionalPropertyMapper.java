@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.mapper.BaseMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.properties.AdditionalPropertyDto;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @SuppressWarnings("ClassTypeParameterName")

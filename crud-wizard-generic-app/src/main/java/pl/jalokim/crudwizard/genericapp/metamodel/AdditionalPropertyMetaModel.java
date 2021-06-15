@@ -2,11 +2,13 @@ package pl.jalokim.crudwizard.genericapp.metamodel;
 
 import java.util.List;
 import lombok.Data;
-import pl.jalokim.crudwizard.genericapp.metamodel.properties.AdditionalPropertyDto;
+import lombok.EqualsAndHashCode;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
 import pl.jalokim.utils.collection.Elements;
 
 @Data
-public class AdditionalPropertyMetaModel {
+@EqualsAndHashCode(callSuper = true)
+public abstract class AdditionalPropertyMetaModel extends BaseModelDto {
 
     protected List<AdditionalPropertyDto> additionalProperties;
 
