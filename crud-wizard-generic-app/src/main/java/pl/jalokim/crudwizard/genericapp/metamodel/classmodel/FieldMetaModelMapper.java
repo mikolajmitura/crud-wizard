@@ -5,6 +5,8 @@ import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;

@@ -1,27 +1,25 @@
-package pl.jalokim.crudwizard.datastorage.jdbc;
+package pl.jalokim.crudwizard.datastorage.inmemory;
 
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.utils.collection.Elements;
-import pl.jalokim.utils.string.StringUtils;
 
-@AllArgsConstructor
-public class JdbcDataStorage implements DataStorage {
+@RequiredArgsConstructor
+public class InMemoryDataStorage implements DataStorage {
 
-    public static final String JDBC_DATA_STORAGE_NAME = "jdbcDataStorage";
-    private final JdbcDataStorageDataSourceProperties dataSourceProperties;
-    private final DataSource dataSource;
+    private final String name;
+
+    public InMemoryDataStorage() {
+        this("in_memory_data_storage");
+    }
 
     @Override
     public String getName() {
-        return StringUtils.concatElementsSkipNulls(Elements.elements(
-            dataSourceProperties.getPrefixName(), "-", JDBC_DATA_STORAGE_NAME));
+        return name;
     }
 
     @Override
@@ -48,5 +46,4 @@ public class JdbcDataStorage implements DataStorage {
     public List<Map<String, Object>> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
         return null;
     }
-
 }

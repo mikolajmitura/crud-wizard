@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel;
+package pl.jalokim.crudwizard.core.metamodels;
 
 import lombok.Data;
 

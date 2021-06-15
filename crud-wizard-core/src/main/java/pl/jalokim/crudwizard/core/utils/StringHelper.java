@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.util;
+package pl.jalokim.crudwizard.core.utils;
 
 public class StringHelper {
 

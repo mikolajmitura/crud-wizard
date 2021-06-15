@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelRepository;

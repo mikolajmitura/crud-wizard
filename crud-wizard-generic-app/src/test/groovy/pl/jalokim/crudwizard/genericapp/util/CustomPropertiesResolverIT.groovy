@@ -6,6 +6,7 @@ import org.springframework.core.env.Environment
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestExecutionListeners
 import pl.jalokim.crudwizard.TestsApplicationConfig
+import pl.jalokim.crudwizard.core.utils.CustomPropertiesResolver
 import pl.jalokim.crudwizard.test.utils.BaseIntegrationSpecification
 import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 

@@ -1,9 +1,8 @@
-package pl.jalokim.crudwizard.genericapp.metamodel;
+package pl.jalokim.crudwizard.core.metamodels;
 
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
 import pl.jalokim.utils.collection.Elements;
 
 @Data

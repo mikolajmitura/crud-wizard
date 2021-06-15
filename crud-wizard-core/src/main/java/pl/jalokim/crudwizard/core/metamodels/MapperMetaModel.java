@@ -1,9 +1,8 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
+package pl.jalokim.crudwizard.core.metamodels;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
 @Value

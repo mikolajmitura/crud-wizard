@@ -1,13 +1,13 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
+package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector;
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContextByEntity;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
 public abstract class DataStorageConnectorMetaModelMapper extends AdditionalPropertyMapper<DataStorageConnectorMetaModel, DataStorageConnectorMetaModelEntity> {

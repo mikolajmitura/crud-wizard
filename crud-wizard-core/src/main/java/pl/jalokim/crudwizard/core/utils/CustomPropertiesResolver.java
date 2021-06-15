@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.util;
+package pl.jalokim.crudwizard.core.utils;
 
 import static org.apache.commons.lang3.tuple.ImmutablePair.of;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isCollectionType;

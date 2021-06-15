@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.validation.javax;
 
 import lombok.Builder;
 import lombok.Getter;
+import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 
 @Builder
 @Getter

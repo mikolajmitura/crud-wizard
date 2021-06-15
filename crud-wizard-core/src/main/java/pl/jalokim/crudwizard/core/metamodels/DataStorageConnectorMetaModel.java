@@ -1,13 +1,10 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
+package pl.jalokim.crudwizard.core.metamodels;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

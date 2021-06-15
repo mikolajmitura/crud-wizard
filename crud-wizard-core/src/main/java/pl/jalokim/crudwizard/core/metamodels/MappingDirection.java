@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
+package pl.jalokim.crudwizard.core.metamodels;
 
 public enum MappingDirection {
     TO_DATA_STORAGE,

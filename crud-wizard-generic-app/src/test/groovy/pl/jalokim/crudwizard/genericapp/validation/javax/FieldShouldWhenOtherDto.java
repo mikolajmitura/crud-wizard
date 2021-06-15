@@ -1,21 +1,22 @@
 package pl.jalokim.crudwizard.genericapp.validation.javax;
 
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.CONTAINS_ALL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.CONTAINS_ANY;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EMPTY;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EMPTY_OR_NULL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EQUAL_TO_ANY;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_BLANK;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_EMPTY;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_NULL;
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NULL;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ALL;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ANY;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY_OR_NULL;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_BLANK;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EMPTY;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Builder;
 import lombok.Value;
+import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
 @FieldShouldWhenOther(field = "personalNumber",
     should = NULL,

@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.url;
 
-import static pl.jalokim.crudwizard.genericapp.util.StringHelper.replaceAllWithEmpty;
+import static pl.jalokim.crudwizard.core.utils.StringHelper.replaceAllWithEmpty;
 
 import java.util.List;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart.UrlPartBuilder;

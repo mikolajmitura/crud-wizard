@@ -7,14 +7,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Data;
+import pl.jalokim.crudwizard.core.metamodels.ApiTagDto;
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModel;
 
 @Data
 public class MetaModelContext {

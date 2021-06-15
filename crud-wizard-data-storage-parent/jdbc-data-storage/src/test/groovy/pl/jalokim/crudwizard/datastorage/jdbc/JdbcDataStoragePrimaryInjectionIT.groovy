@@ -14,7 +14,6 @@ import org.springframework.test.context.TestExecutionListeners
 import pl.jalokim.crudwizard.JdbcDStoreTestsApplicationConfig
 import pl.jalokim.crudwizard.test.utils.BaseIntegrationSpecification
 import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
-import spock.lang.Specification
 
 @ActiveProfiles(["integration", "primary-injection"])
 @SpringBootTest(classes = [JdbcDStoreTestsApplicationConfig], webEnvironment = SpringBootTest.WebEnvironment.MOCK)

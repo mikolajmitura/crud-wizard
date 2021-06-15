@@ -5,19 +5,19 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
+import pl.jalokim.crudwizard.core.metamodels.ApiTagDto;
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.provider.DataStorageMetaModelService;
 

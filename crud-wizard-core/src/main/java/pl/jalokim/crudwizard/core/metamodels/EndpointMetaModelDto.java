@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
+package pl.jalokim.crudwizard.core.metamodels;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -8,10 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpMethod;
-import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
+import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -19,7 +16,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 @Builder(toBuilder = true)
 public class EndpointMetaModelDto extends AdditionalPropertyMetaModel {
 
-    @NotNull(groups = UpdateEndpointContext.class)
+    @NotNull(groups = UpdateContext.class)
     Long id;
 
     @NotNull

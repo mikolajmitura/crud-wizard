@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
+import pl.jalokim.crudwizard.core.datastorage.DataStorage;
+import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 

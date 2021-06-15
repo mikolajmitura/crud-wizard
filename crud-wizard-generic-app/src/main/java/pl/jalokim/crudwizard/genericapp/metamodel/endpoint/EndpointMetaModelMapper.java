@@ -6,6 +6,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;

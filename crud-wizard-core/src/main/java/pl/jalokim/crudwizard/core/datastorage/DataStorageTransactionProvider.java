@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.datastorage;
+package pl.jalokim.crudwizard.core.datastorage;
 
 public interface DataStorageTransactionProvider {
 

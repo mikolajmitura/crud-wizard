@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import pl.jalokim.crudwizard.genericapp.util.CustomPropertiesResolver;
+import pl.jalokim.crudwizard.core.utils.CustomPropertiesResolver;
 
 @Configuration
 public class JdbcDataStorageFactory implements BeanDefinitionRegistryPostProcessor, BeanFactoryAware {

@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.util
 
+import pl.jalokim.crudwizard.core.utils.StringHelper
 import spock.lang.Specification
 
 class StringHelperTest extends Specification {

@@ -2,8 +2,8 @@ package pl.jalokim.crudwizard.maintenance.metamodel.endpoint
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
-import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
+import pl.jalokim.crudwizard.core.metamodels.ApiTagDto
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelRepository
 import pl.jalokim.crudwizard.maintenance.MaintenanceBaseIntegrationController
 

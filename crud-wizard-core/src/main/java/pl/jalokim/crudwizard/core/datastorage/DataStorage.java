@@ -1,10 +1,10 @@
-package pl.jalokim.crudwizard.genericapp.datastorage;
+package pl.jalokim.crudwizard.core.datastorage;
 
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 
 public interface DataStorage {
 

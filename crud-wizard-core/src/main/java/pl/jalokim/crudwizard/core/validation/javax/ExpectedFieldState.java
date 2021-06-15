@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.validation.javax;
+package pl.jalokim.crudwizard.core.validation.javax;
 
 import java.util.List;
 

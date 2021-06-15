@@ -1,15 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.validation.javax
 
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EMPTY
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EMPTY_OR_NULL
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_NULL
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_EMPTY
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NULL
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_BLANK
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.EQUAL_TO_ANY
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.CONTAINS_ALL
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.CONTAINS_ANY
-import static pl.jalokim.crudwizard.genericapp.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ALL
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ANY
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY_OR_NULL
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_BLANK
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EMPTY
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_1
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_2
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_3
@@ -21,6 +21,8 @@ import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 
 import java.util.concurrent.atomic.AtomicReference
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
+import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther
+import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOtherValidator
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -34,17 +36,23 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
     def setup() {
         fieldShouldWhenOtherStub.set(FieldShouldWhenOtherStub.builder().build())
         validatorWithConverter = createValidatorWithConverter()
-        mockFieldShouldWhenOther.field() >> {args -> fieldShouldWhenOtherStub.get().getField()
+        mockFieldShouldWhenOther.field() >> {
+            args -> fieldShouldWhenOtherStub.get().getField()
         }
-        mockFieldShouldWhenOther.should() >> {args -> fieldShouldWhenOtherStub.get().getShould()
+        mockFieldShouldWhenOther.should() >> {
+            args -> fieldShouldWhenOtherStub.get().getShould()
         }
-        mockFieldShouldWhenOther.fieldValues() >> {args -> fieldShouldWhenOtherStub.get().getFieldValues()
+        mockFieldShouldWhenOther.fieldValues() >> {
+            args -> fieldShouldWhenOtherStub.get().getFieldValues()
         }
-        mockFieldShouldWhenOther.whenField() >> {args -> fieldShouldWhenOtherStub.get().getWhenField()
+        mockFieldShouldWhenOther.whenField() >> {
+            args -> fieldShouldWhenOtherStub.get().getWhenField()
         }
-        mockFieldShouldWhenOther.is() >> {args -> fieldShouldWhenOtherStub.get().getIs()
+        mockFieldShouldWhenOther.is() >> {
+            args -> fieldShouldWhenOtherStub.get().getIs()
         }
-        mockFieldShouldWhenOther.otherFieldValues() >> {args -> fieldShouldWhenOtherStub.get().getOtherFieldValues()
+        mockFieldShouldWhenOther.otherFieldValues() >> {
+            args -> fieldShouldWhenOtherStub.get().getOtherFieldValues()
         }
     }
 
@@ -57,17 +65,17 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
         assertValidationResults(foundErrors, expectedErrors)
 
         where:
-        someObject                         || expectedErrors
-        someObject0() || []
-        someObject1() || expectedResult1()
-        someObject2() || []
-        someObject3() || []
-        someObject4() || []
-        someObject5() || expectedResult5()
-        someObject6() || expectedResult6()
-        someObject7() || []
-        someObject8() || []
-        someObject9() || []
+        someObject     || expectedErrors
+        someObject0()  || []
+        someObject1()  || expectedResult1()
+        someObject2()  || []
+        someObject3()  || []
+        someObject4()  || []
+        someObject5()  || expectedResult5()
+        someObject6()  || expectedResult6()
+        someObject7()  || []
+        someObject8()  || []
+        someObject9()  || []
         someObject10() || []
         someObject11() || []
     }

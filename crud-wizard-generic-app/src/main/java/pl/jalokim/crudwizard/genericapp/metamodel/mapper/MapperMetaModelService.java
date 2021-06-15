@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 
 @RequiredArgsConstructor

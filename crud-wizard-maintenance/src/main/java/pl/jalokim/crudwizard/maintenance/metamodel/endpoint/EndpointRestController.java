@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
 
 @RestController

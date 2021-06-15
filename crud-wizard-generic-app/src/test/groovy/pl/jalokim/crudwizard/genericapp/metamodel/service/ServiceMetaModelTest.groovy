@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.service
 
+import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel
 import spock.lang.Specification
 
 class ServiceMetaModelTest extends Specification {

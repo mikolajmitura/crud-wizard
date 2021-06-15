@@ -4,6 +4,7 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;

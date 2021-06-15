@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.validation.javax;
+package pl.jalokim.crudwizard.core.validation.javax;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -16,7 +16,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = FieldShouldWhenOtherValidator.class)
 public @interface FieldShouldWhenOther {
 
-    String DEFAULT_MESSAGE = "{pl.jalokim.validation.javax.FieldShouldWhenOther.message}";
+    String DEFAULT_MESSAGE = "{pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther.message}";
 
     String field();
 

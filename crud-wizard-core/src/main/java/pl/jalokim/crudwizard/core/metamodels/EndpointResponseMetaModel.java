@@ -1,19 +1,18 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.validator;
+package pl.jalokim.crudwizard.core.metamodels;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.genericapp.metamodel.AdditionalPropertyMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
-public class ValidatorMetaModel extends AdditionalPropertyMetaModel {
+@Builder(toBuilder = true)
+public class EndpointResponseMetaModel extends AdditionalPropertyMetaModel {
 
     Long id;
-
-    String realClassName;
+    ClassMetaModel classMetaModel;
+    Long successHttpCode;
 }

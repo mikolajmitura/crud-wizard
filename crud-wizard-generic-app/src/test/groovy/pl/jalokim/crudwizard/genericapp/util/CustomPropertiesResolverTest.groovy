@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.util
 
+import pl.jalokim.crudwizard.core.utils.CustomPropertiesResolver
 import spock.lang.Specification
 
 class CustomPropertiesResolverTest extends Specification {

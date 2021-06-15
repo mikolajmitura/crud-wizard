@@ -16,6 +16,7 @@
 
     <modules>
         <module>jdbc-data-storage</module>
+        <module>in-memory-data-storage</module>
     </modules>
 
     <properties>
