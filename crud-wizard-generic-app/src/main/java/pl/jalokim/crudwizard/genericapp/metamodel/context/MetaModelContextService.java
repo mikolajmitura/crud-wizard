@@ -76,6 +76,7 @@ public class MetaModelContextService {
     private void loadClassMetaModels(MetaModelContext metaModelContext) {
         var classMetaModels = new ModelsCache<ClassMetaModel>();
         for (var classMetaModel : classMetaModelService.findAllSwallow(metaModelContext)) {
+            classMetaModel.loadRealClass();
             classMetaModels.put(classMetaModel.getId(), classMetaModel);
         }
         metaModelContext.setClassMetaModels(classMetaModels);

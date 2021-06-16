@@ -39,5 +39,4 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModel {
     EndpointResponseMetaModel responseMetaModel;
 
     // TODO maybe here which headers distinct to this endpoint
-    // TODO all models and DataStorage move to core module???
 }

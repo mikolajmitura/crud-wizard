@@ -6,5 +6,5 @@ public interface DataStorageTransactionProvider {
 
     void commitTransaction();
 
-    void rollbackTransaction(Exception cause);
+    void rollbackTransaction(Throwable cause);
 }

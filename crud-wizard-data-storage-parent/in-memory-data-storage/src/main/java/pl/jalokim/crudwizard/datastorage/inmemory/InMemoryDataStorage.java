@@ -10,20 +10,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
+import pl.jalokim.crudwizard.core.datastorage.RawEntity;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
+import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
 
 @RequiredArgsConstructor
 public class InMemoryDataStorage implements DataStorage {
 
-    // TODO #Next test for it
-
     private final String name;
-    private final Map<String, EntityBag> entitiesByName = new ConcurrentHashMap<>();
+    private final Map<String, EntityStorage> entitiesByName = new ConcurrentHashMap<>();
+    private final IdGenerators idGenerators;
 
-    public InMemoryDataStorage() {
-        this("in_memory_data_storage");
+    public InMemoryDataStorage(IdGenerators idGenerators) {
+        this("in_memory_data_storage", idGenerators);
     }
 
     @Override
@@ -32,10 +33,10 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public void saveEntity(ClassMetaModel classMetaModel, Map<String, Object> entity) {
-        EntityBag entityBag = entitiesByName.get(classMetaModel.getName());
+    public Object saveEntity(ClassMetaModel classMetaModel, RawEntity entity) {
+        EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
-            entityBag = new EntityBag(classMetaModel);
+            entityBag = new EntityStorage(classMetaModel, idGenerators);
             entitiesByName.put(classMetaModel.getName(), entityBag);
         }
 
@@ -45,12 +46,12 @@ public class InMemoryDataStorage implements DataStorage {
             .getFirst();
 
         Object idObject = entity.get(fieldWithId.getFieldName());
-        entityBag.saveEntity(idObject, entity);
+        return entityBag.saveEntity(idObject, fieldWithId, entity);
     }
 
     @Override
     public void deleteEntity(ClassMetaModel classMetaModel, Object idObject) {
-        EntityBag entityBag = entitiesByName.get(classMetaModel.getName());
+        EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
             throw new EntityNotFoundException(String.format("Cannot find storage for entities: %s", classMetaModel.getName()));
         }
@@ -58,21 +59,25 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Map<String, Object> getEntityById(ClassMetaModel classMetaModel, Object idObject) {
-        EntityBag entityBag = entitiesByName.get(classMetaModel.getName());
+    public RawEntity getEntityById(ClassMetaModel classMetaModel, Object idObject) {
+        EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         return Optional.ofNullable(entityBag.getById(idObject))
-            .orElseThrow(()-> new EntityNotFoundException(String.format("not exists with id: %s entity name: %s", idObject, classMetaModel.getName())));
+            .orElseThrow(() -> new EntityNotFoundException(String.format("not exists with id: %s entity name: %s", idObject, classMetaModel.getName())));
     }
 
     @Override
-    public Page<Map<String, Object>> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
+    public Page<RawEntity> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
         // TODO how to do queries? eq, not eq, contains, in how?
         return null;
     }
 
     @Override
-    public List<Map<String, Object>> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
+    public List<RawEntity> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
         // TODO how to do queries? eq, not eq, contains, in how?
         return null;
+    }
+
+    public void clear() {
+        entitiesByName.clear();
     }
 }
