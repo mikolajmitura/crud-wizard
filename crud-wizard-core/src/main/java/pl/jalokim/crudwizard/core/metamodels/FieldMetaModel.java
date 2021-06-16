@@ -13,6 +13,8 @@ import lombok.experimental.FieldDefaults;
 @Builder(toBuilder = true)
 public class FieldMetaModel extends AdditionalPropertyMetaModel {
 
+    public static final String IS_ID_FIELD = "is_id_field";
+
     Long id;
 
     String fieldName;

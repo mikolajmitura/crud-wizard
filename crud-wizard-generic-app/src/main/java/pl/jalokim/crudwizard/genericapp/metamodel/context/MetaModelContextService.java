@@ -35,6 +35,7 @@ public class MetaModelContextService {
     private final ServiceMetaModelService serviceMetaModelService;
     private final EndpointMetaModelService endpointMetaModelService;
 
+    // TODO #Next test it after tested in memory data storage
     public synchronized void reloadAll() {
         MetaModelContext metaModelContext = new MetaModelContext();
         loadDataStorages(metaModelContext);
