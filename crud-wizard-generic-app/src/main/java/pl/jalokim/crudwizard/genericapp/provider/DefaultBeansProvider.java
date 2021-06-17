@@ -10,6 +10,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
+import pl.jalokim.crudwizard.genericapp.config.DefaultBeansConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 
@@ -19,7 +21,7 @@ public class DefaultBeansProvider implements ApplicationRunner {
 
     public final DefaultBeansConfiguration defaultBeansConfiguration;
     public final List<DataStorage> dataStorages;
-    public final DataStorageMetaModelService dataStorageMetaModelProvider;
+    public final DataStorageMetaModelService dataStorageMetaModelService;
 
     private final Map<String, Map<String, DataStorageMetaModel>> dataStorageMetaModelByInfo = new ConcurrentHashMap<>();
 
@@ -31,12 +33,12 @@ public class DefaultBeansProvider implements ApplicationRunner {
                 .name(dataStorage.getName())
                 .className(dataStorage.getClassName())
                 .build();
-            if (!dataStorageMetaModelProvider.exists(dataStorageMetaModelFromDataStorage)) {
-                dataStorageMetaModelProvider.createNewAndGetId(dataStorageMetaModelFromDataStorage);
+            if (!dataStorageMetaModelService.exists(dataStorageMetaModelFromDataStorage)) {
+                dataStorageMetaModelService.createNewAndGetId(dataStorageMetaModelFromDataStorage);
             }
         }
 
-        for (DataStorageMetaModel dataStorageMetaModel : dataStorageMetaModelProvider.findAll()) {
+        for (DataStorageMetaModel dataStorageMetaModel : dataStorageMetaModelService.findAll()) {
             Objects.requireNonNull(dataStorageMetaModel.getName(), "DataStorageMetaModel name should be not null for: " + dataStorageMetaModel);
             Map<String, DataStorageMetaModel> stringDataStorageMetaModelsByClassName = dataStorageMetaModelByInfo
                 .computeIfAbsent(dataStorageMetaModel.getName(), (key) -> new ConcurrentHashMap<>());
@@ -54,6 +56,9 @@ public class DefaultBeansProvider implements ApplicationRunner {
         if (dataStorages.size() == 1) {
             return dataStorages.get(0);
         }
+
+        // TODO #Next 1 test for that by name
+        // TODO #Next 1 test for that by name and type
         if (defaultBeansConfiguration.getNameOfDataSource() != null) {
             List<DataStorage> foundByName = Elements.elements(dataStorages)
                 .filter(dataStorage -> dataStorage.getName().equals(defaultBeansConfiguration.getNameOfDataSource()))
@@ -70,6 +75,8 @@ public class DefaultBeansProvider implements ApplicationRunner {
                 }
             }
         }
+        // TODO when cannot find by name and type then check that is some is registered as primary DataStorage in spring context
+        // TODO #NEXT 2 and test for it
         String dataStoragesInfo = StringUtils.concatElementsAsLines(dataStorages, DataStorage::infoDataStorage);
         throw new IllegalArgumentException(String.format(
             "Found instances of DataStorage: %s %n"

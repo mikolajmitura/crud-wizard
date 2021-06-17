@@ -19,12 +19,13 @@ import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
 @RequiredArgsConstructor
 public class InMemoryDataStorage implements DataStorage {
 
+    public static final String DEFAULT_DS_NAME = "in_memory_data_storage";
     private final String name;
     private final Map<String, EntityStorage> entitiesByName = new ConcurrentHashMap<>();
     private final IdGenerators idGenerators;
 
     public InMemoryDataStorage(IdGenerators idGenerators) {
-        this("in_memory_data_storage", idGenerators);
+        this(DEFAULT_DS_NAME, idGenerators);
     }
 
     @Override

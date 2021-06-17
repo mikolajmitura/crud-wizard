@@ -19,7 +19,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelServ
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
-import pl.jalokim.crudwizard.genericapp.provider.DataStorageMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
 
 @MetamodelService
 @RequiredArgsConstructor
@@ -35,7 +35,7 @@ public class MetaModelContextService {
     private final ServiceMetaModelService serviceMetaModelService;
     private final EndpointMetaModelService endpointMetaModelService;
 
-    // TODO #Next test it after tested in memory data storage
+    // TODO #Next 0 test it after tested in memory data storage - THIS AS FIRST TO TEST
     public synchronized void reloadAll() {
         MetaModelContext metaModelContext = new MetaModelContext();
         loadDataStorages(metaModelContext);

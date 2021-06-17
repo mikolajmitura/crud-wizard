@@ -18,7 +18,7 @@ import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 @ActiveProfiles(["integration", "primary-injection"])
 @SpringBootTest(classes = [JdbcDStoreTestsApplicationConfig], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestExecutionListeners(value = [DatabaseCleanupListener], mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
-class JdbcDataStoragePrimaryInjectionIT extends BaseIntegrationSpecification {
+class JdbcDataStorageWithPrimaryDataSourceIT extends BaseIntegrationSpecification {
 
     @Autowired
     private JdbcDataStorage jdbcDataStorage

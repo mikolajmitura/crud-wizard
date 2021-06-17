@@ -1,11 +1,9 @@
-package pl.jalokim.crudwizard.genericapp.provider;
+package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelRepository;
 import pl.jalokim.utils.collection.Elements;
 
 @MetamodelService

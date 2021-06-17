@@ -1,19 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.util
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.env.Environment
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestExecutionListeners
-import pl.jalokim.crudwizard.TestsApplicationConfig
+import pl.jalokim.crudwizard.GenericAppBaseIntegrationSpecification
 import pl.jalokim.crudwizard.core.utils.CustomPropertiesResolver
-import pl.jalokim.crudwizard.test.utils.BaseIntegrationSpecification
-import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 
-@ActiveProfiles(["integration"])
-@SpringBootTest(classes = [TestsApplicationConfig], webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@TestExecutionListeners(value = [DatabaseCleanupListener], mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
-class CustomPropertiesResolverIT extends BaseIntegrationSpecification {
+class CustomPropertiesResolverIT extends GenericAppBaseIntegrationSpecification {
 
     @Autowired
     private Environment environment

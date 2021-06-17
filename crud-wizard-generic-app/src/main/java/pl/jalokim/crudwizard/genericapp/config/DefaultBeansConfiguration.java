@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.provider;
+package pl.jalokim.crudwizard.genericapp.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
