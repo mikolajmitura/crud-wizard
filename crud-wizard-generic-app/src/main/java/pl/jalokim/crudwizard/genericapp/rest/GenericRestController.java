@@ -10,25 +10,26 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pl.jalokim.crudwizard.genericapp.service.GenericService;
+import pl.jalokim.crudwizard.core.datastorage.RawEntity;
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
+import pl.jalokim.crudwizard.genericapp.service.GenericServiceDelegator;
 
 @RestController
 @RequestMapping("/**/*")
 @RequiredArgsConstructor
 public class GenericRestController {
 
-    private final GenericService genericService;
+    private final GenericServiceDelegator genericServiceDelegator;
 
     @RequestMapping
     public ResponseEntity<Object> invokeHttpMethod(@RequestBody(required = false) Map<String, Object> requestBody,
         @RequestParam Map<String, Object> httpQueryParams, @RequestHeader Map<String, String> headers,
         HttpServletRequest request, HttpServletResponse response) {
 
-        return genericService.findAndInvokeHttpMethod(
+        return genericServiceDelegator.findAndInvokeHttpMethod(
             GenericServiceArgument.builder()
-                .requestBody(requestBody)
-                .httpQueryParams(httpQueryParams)
+                .requestBody(RawEntity.fromMap(requestBody))
+                .httpQueryParams(RawEntity.fromMap(httpQueryParams))
                 .headers(headers)
                 .request(request)
                 .response(response)

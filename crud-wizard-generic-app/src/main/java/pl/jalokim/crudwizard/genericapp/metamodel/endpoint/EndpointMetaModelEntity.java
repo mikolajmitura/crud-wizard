@@ -22,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelEntity;
 
 @Entity
@@ -63,4 +64,8 @@ public class EndpointMetaModelEntity extends WithAdditionalPropertiesEntity {
     @ManyToOne
     @JoinColumn(name = "response_meta_model_id")
     private EndpointResponseMetaModelEntity responseMetaModel;
+
+    @OneToMany
+    @JoinColumn(name = "service_meta_model_id")
+    private List<DataStorageConnectorMetaModelEntity> dataStorageConnectors;
 }

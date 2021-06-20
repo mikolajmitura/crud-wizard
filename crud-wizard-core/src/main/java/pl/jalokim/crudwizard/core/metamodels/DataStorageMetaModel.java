@@ -5,17 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel;
+import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class DataStorageMetaModel extends AdditionalPropertyMetaModel {
+public class DataStorageMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;
 
     String name;
 
-    String className;
+    DataStorage dataStorage;
 }

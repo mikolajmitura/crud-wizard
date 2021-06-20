@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
-public class EndpointResponseMetaModel extends AdditionalPropertyMetaModel {
+public class EndpointResponseMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;
     ClassMetaModel classMetaModel;

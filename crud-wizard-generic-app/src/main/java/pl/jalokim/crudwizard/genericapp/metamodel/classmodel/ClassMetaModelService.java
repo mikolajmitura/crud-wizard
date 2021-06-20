@@ -41,7 +41,7 @@ public class ClassMetaModelService {
         return classMetaModelRepository.persist(classMetaModelEntity);
     }
 
-    public List<ClassMetaModel> findAllSwallow(MetaModelContext metaModelContext) {
+    public List<ClassMetaModel> findAllSwallowModels(MetaModelContext metaModelContext) {
         return Elements.elements(classMetaModelRepository.findAll())
             .map(entity -> classMetaModelMapper.toSwallowDto(metaModelContext, entity))
             .asList();

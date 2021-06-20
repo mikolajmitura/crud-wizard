@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
-public class DataStorageConnectorMetaModel extends AdditionalPropertyMetaModel {
+public class DataStorageConnectorMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;
     DataStorageMetaModel dataStorageMetaModel;

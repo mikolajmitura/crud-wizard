@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
+import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import org.mapstruct.Mapper;
@@ -11,7 +12,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalP
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<ClassMetaModel, ClassMetaModelEntity> {
+public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
     @Autowired
     private FieldMetaModelMapper fieldMetaModelMapper;
@@ -21,16 +22,16 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
-    public abstract ClassMetaModel toDto(ClassMetaModelEntity classMetaModelEntity);
+    public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
     public ClassMetaModel toSwallowDto(MetaModelContext metaModelContext, ClassMetaModelEntity classMetaModelEntity) {
-        ClassMetaModel classMetaModel = toDto(classMetaModelEntity);
+        ClassMetaModel classMetaModel = toMetaModel(classMetaModelEntity);
         classMetaModel.setGenericTypes(mapToList(
             classMetaModelEntity.getGenericTypes(),
             genericType -> newClassMetaModel(genericType.getId())));
 
         classMetaModel.setFields(mapToList(classMetaModelEntity.getFields(),
-            field -> fieldMetaModelMapper.toDto(metaModelContext, classMetaModel, field)));
+            field -> fieldMetaModelMapper.toMetaModel(metaModelContext, classMetaModel, field)));
 
         classMetaModel.setValidators(mapToList(
             classMetaModelEntity.getValidators(),
@@ -42,6 +43,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
             classMetaModelEntity.getExtendsFromModels(),
             extendsFromModel -> newClassMetaModel(extendsFromModel.getId())
         ));
+        classMetaModel.setRealClass(loadRealClass(classMetaModelEntity.getClassName()));
 
         return classMetaModel;
     }

@@ -5,11 +5,12 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class EndpointMetaModelService {
     private final ClassMetaModelService classMetaModelService;
     private final ServiceMetaModelService serviceMetaModelService;
     private final EndpointResponseMetaModelRepository endpointResponseMetaModelRepository;
+    private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
 
     public Long createNewEndpoint(EndpointMetaModelDto createEndpointMetaModelDto) {
         var endpointMetaModelEntity = endpointMetaModelMapper.toEntity(createEndpointMetaModelDto);
@@ -49,14 +51,19 @@ public class EndpointMetaModelService {
             endpointMetaModelEntity.setResponseMetaModel(endpointResponseMetaModelRepository.persist(responseMetaModel));
         }
 
+        if (endpointMetaModelEntity.getDataStorageConnectors() != null) {
+            elements(endpointMetaModelEntity.getDataStorageConnectors())
+                .forEach(dataStorageConnectorMetaModelService::saveNewDataStorageConnector);
+        }
+
         endpointMetaModelEntity = endpointMetaModelRepository.persist(endpointMetaModelEntity);
 
         return endpointMetaModelEntity.getId();
     }
 
-    public List<EndpointMetaModelDto> findAll(MetaModelContext metaModelContext) {
+    public List<EndpointMetaModel> findAllMetaModels(MetaModelContext metaModelContext) {
         return elements(endpointMetaModelRepository.findAll())
-            .map(endpointMetaModelEntity -> endpointMetaModelMapper.toDto(metaModelContext, endpointMetaModelEntity))
+            .map(endpointMetaModelEntity -> endpointMetaModelMapper.toFullMetaModel(metaModelContext, endpointMetaModelEntity))
             .asList();
     }
 }

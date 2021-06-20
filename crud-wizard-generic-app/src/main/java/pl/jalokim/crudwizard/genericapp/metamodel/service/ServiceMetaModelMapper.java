@@ -3,30 +3,36 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.jalokim.crudwizard.core.metamodels.BeanMethodMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
+import pl.jalokim.crudwizard.genericapp.provider.BeanInstanceMetaModel;
+import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class ServiceMetaModelMapper extends AdditionalPropertyMapper<ServiceMetaModel, ServiceMetaModelEntity> {
+public abstract class ServiceMetaModelMapper extends AdditionalPropertyMapper<ServiceMetaModelDto, ServiceMetaModelEntity, ServiceMetaModel> {
 
     @Autowired
-    private DataStorageConnectorMetaModelMapper dataStorageConnectorMetaModelMapper;
+    private GenericBeansProvider genericBeansProvider;
 
     @Override
-    @Mapping(target = "dataStorageConnectors", ignore = true)
-    public abstract ServiceMetaModel toDto(ServiceMetaModelEntity serviceMetaModelEntity);
+    public abstract ServiceMetaModel toMetaModel(ServiceMetaModelEntity serviceMetaModelEntity);
 
-    public ServiceMetaModel toDto(MetaModelContext metaModelContext, ServiceMetaModelEntity serviceMetaModelEntity) {
-        return toDto(serviceMetaModelEntity).toBuilder()
-            .dataStorageConnectors(elements(serviceMetaModelEntity.getDataStorageConnectors())
-                .map(dataStorageConnectorEntity ->
-                    dataStorageConnectorMetaModelMapper.toDto(metaModelContext, dataStorageConnectorEntity))
-                .asList())
+    public ServiceMetaModel toFullMetaModel(ServiceMetaModelEntity serviceMetaModelEntity) {
+        BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeansProvider.getAllGenericServiceBeans())
+            .filter(serviceBean -> serviceBean.getBeanName().equals(serviceMetaModelEntity.getBeanName())
+                && serviceBean.getClassName().equals(serviceMetaModelEntity.getClassName()))
+            .getFirst();
+
+        BeanMethodMetaModel beanMethodMetaModel = elements(beanInstanceMetaModel.getGenericMethodMetaModels())
+            .filter(methodMetaModel -> methodMetaModel.getName().equals(serviceMetaModelEntity.getMethodName()))
+            .getFirst();
+
+        return toMetaModel(serviceMetaModelEntity).toBuilder()
+            .serviceInstance(beanInstanceMetaModel.getBeanInstance())
+            .methodMetaModel(beanMethodMetaModel)
             .build();
     }
 }

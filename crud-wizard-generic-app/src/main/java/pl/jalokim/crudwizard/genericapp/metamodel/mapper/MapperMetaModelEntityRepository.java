@@ -8,4 +8,5 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditio
 public interface MapperMetaModelEntityRepository extends JpaRepository<MapperMetaModelEntity, Long>,
     WithAdditionalPropertiesCustomRepository<MapperMetaModelEntity> {
 
+    boolean existsByBeanNameAndClassNameAndMethodName(String beanName, String className, String methodName);
 }

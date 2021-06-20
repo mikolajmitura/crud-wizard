@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
-public class FieldMetaModel extends AdditionalPropertyMetaModel {
+public class FieldMetaModel extends AdditionalPropertyMetaModelDto {
 
     public static final String IS_ID_FIELD = "is_id_field";
 

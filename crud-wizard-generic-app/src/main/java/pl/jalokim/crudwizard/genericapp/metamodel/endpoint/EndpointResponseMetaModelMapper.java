@@ -10,16 +10,17 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalP
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class EndpointResponseMetaModelMapper extends AdditionalPropertyMapper<EndpointResponseMetaModel, EndpointResponseMetaModelEntity> {
+public abstract class EndpointResponseMetaModelMapper
+    extends AdditionalPropertyMapper<EndpointResponseMetaModelDto, EndpointResponseMetaModelEntity, EndpointResponseMetaModel> {
 
     public EndpointResponseMetaModel toEndpointResponseMetaModel(MetaModelContext metaModelContext,
         EndpointResponseMetaModelEntity endpointResponseMetaModelEntity) {
 
-        return toDto(endpointResponseMetaModelEntity).toBuilder()
+        return toModel(endpointResponseMetaModelEntity).toBuilder()
             .classMetaModel(getFromContext(metaModelContext::getClassMetaModels, () -> endpointResponseMetaModelEntity.getClassMetaModel().getId()))
             .build();
     }
 
     @Mapping(target = "classMetaModel", ignore = true)
-    public abstract EndpointResponseMetaModel toDto(EndpointResponseMetaModelEntity endpointResponseMetaModelEntity);
+    public abstract EndpointResponseMetaModel toModel(EndpointResponseMetaModelEntity endpointResponseMetaModelEntity);
 }

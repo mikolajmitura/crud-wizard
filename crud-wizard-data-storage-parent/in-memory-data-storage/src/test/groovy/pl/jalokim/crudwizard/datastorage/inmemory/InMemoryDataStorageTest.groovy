@@ -103,7 +103,7 @@ class InMemoryDataStorageTest extends Specification {
         def fieldMetaModel = FieldMetaModel.builder()
             .fieldName(idFieldName)
             .fieldType(ClassMetaModel.builder()
-                .realClassName(typeOfId.canonicalName)
+                .className(typeOfId.canonicalName)
                 .realClass(typeOfId)
                 .build())
             .build()

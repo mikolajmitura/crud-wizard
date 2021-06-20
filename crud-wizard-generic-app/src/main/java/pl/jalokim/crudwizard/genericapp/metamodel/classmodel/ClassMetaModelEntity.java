@@ -35,7 +35,7 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     private String name;
 
-    private String realClassName;
+    private String className;
 
     @ManyToMany
     @JoinTable(

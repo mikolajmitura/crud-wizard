@@ -7,7 +7,7 @@ import pl.jalokim.utils.collection.Elements;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public abstract class AdditionalPropertyMetaModel extends BaseModelDto {
+public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
 
     protected List<AdditionalPropertyDto> additionalProperties;
 
@@ -15,6 +15,15 @@ public abstract class AdditionalPropertyMetaModel extends BaseModelDto {
         return Elements.elements(additionalProperties)
             .filter(property -> property.getName().equals(propertyName))
             .map(AdditionalPropertyDto::getValue)
+            .findFirst()
+            .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getPropertyRealValue(String propertyName) {
+        return Elements.elements(additionalProperties)
+            .filter(property -> property.getName().equals(propertyName))
+            .map(property -> (T) property.getRealValue())
             .findFirst()
             .orElse(null);
     }

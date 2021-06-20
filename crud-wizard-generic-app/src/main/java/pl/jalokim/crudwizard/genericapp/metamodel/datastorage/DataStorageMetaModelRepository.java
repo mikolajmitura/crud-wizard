@@ -8,4 +8,5 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditio
 public interface DataStorageMetaModelRepository extends JpaRepository<DataStorageMetaModelEntity, Long>,
     WithAdditionalPropertiesCustomRepository<DataStorageMetaModelEntity> {
 
+    boolean existsByNameAndClassName(String name, String className);
 }

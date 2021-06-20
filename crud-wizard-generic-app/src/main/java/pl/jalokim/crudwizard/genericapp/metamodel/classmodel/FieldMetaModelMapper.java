@@ -10,18 +10,19 @@ import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<FieldMetaModel, FieldMetaModelEntity>  {
+public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<FieldMetaModelDto, FieldMetaModelEntity, FieldMetaModel>  {
 
     @Override
     @Mapping(target = "fieldType", ignore = true)
     @Mapping(target = "ownerOfField", ignore = true)
     @Mapping(target = "validators", ignore = true)
-    public abstract FieldMetaModel toDto(FieldMetaModelEntity fieldMetaModelEntity);
+    public abstract FieldMetaModel toMetaModel(FieldMetaModelEntity fieldMetaModelEntity);
 
-    public FieldMetaModel toDto(MetaModelContext metaModelContext, ClassMetaModel classMetaModel, FieldMetaModelEntity field) {
-        return toDto(field).toBuilder()
+    public FieldMetaModel toMetaModel(MetaModelContext metaModelContext, ClassMetaModel classMetaModel, FieldMetaModelEntity field) {
+        return toMetaModel(field).toBuilder()
             .fieldType(newClassMetaModel(field.getFieldType().getId()))
             .ownerOfField(classMetaModel)
             .validators(mapToList(

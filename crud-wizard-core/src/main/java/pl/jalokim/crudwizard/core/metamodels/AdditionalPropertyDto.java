@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Value;
 
@@ -11,4 +12,10 @@ public class AdditionalPropertyDto {
     String name;
     String valueRealClassName;
     Object value;
+
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public <T> T getRealValue() {
+        return (T) value;
+    }
 }

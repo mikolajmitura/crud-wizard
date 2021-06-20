@@ -7,10 +7,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Data;
-import pl.jalokim.crudwizard.core.metamodels.ApiTagDto;
+import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
@@ -20,12 +21,17 @@ import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
 public class MetaModelContext {
 
     private ModelsCache<DataStorageMetaModel> dataStorages;
-    private ModelsCache<ApiTagDto> apiTags;
+    private ModelsCache<ApiTagMetamodel> apiTags;
     private ModelsCache<ValidatorMetaModel> validatorMetaModels;
     private ModelsCache<ClassMetaModel> classMetaModels;
     private ModelsCache<MapperMetaModel> mapperMetaModels;
     private ModelsCache<ServiceMetaModel> serviceMetaModels;
-    private ModelsCache<EndpointMetaModelDto> endpointMetaModels;
+    private ModelsCache<EndpointMetaModel> endpointMetaModels;
+
+    private ServiceMetaModel defaultServiceMetaModel;
+    private MapperMetaModel defaultMapperMetaModel;
+    private DataStorageMetaModel defaultDataStorageMetaModel;
+    private List<DataStorageConnectorMetaModel> defaultDataStorageConnectorMetaModels;
 
     public static <I, R> List<R> getListFromContext(List<I> inputList,
         Supplier<ModelsCache<R>> gettingModelById, Function<I, Long> gettingId) {

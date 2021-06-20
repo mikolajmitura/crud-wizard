@@ -1,29 +1,29 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
-import java.util.List;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.utils.collection.Elements;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
-public class ServiceMetaModel extends AdditionalPropertyMetaModel {
+public class ServiceMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;
-    String realClassName;
-    String realMethodName;
+
+    /**
+     * real instance of service
+     */
+    Object serviceInstance;
+    String className;
+    String beanName;
+    String methodName;
+    BeanMethodMetaModel methodMetaModel;
+
+    // TODO script will be loaded to serviceInstance in lazy way and cached then
     String serviceScript;
 
-    List<DataStorageConnectorMetaModel> dataStorageConnectors;
-
-    public boolean isGenericServiceMetaModel() {
-        return Elements.elements(realClassName, realMethodName, serviceScript)
-            .allMatch(Objects::isNull);
-    }
 }

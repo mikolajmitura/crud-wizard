@@ -26,5 +26,5 @@ public class ValidatorMetaModelEntity extends WithAdditionalPropertiesEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String realClassName;
+    private String className;
 }

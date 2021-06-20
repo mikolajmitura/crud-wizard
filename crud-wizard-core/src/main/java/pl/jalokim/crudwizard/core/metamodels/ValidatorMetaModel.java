@@ -5,15 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
-public class ValidatorMetaModel extends AdditionalPropertyMetaModel {
+@Builder(toBuilder = true)
+public class ValidatorMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;
 
-    String realClassName;
+    Class<?> realClass;
+
+    // TODO or just normal validator instance...
 }

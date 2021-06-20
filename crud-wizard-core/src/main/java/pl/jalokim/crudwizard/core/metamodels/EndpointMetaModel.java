@@ -1,34 +1,27 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
 import java.util.List;
-import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpMethod;
-import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
-public class EndpointMetaModelDto extends AdditionalPropertyMetaModel {
+public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
 
-    @NotNull(groups = UpdateContext.class)
     Long id;
 
-    @NotNull
-    ApiTagDto apiTag;
+    ApiTagMetamodel apiTag;
 
-    @NotNull
     String baseUrl;
 
-    @NotNull
     HttpMethod httpMethod;
 
-    @NotNull
     String operationName;
 
     ClassMetaModel payloadMetamodel;
@@ -38,5 +31,8 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModel {
 
     EndpointResponseMetaModel responseMetaModel;
 
+    List<DataStorageConnectorMetaModel> dataStorageConnectors;
+
     // TODO maybe here which headers distinct to this endpoint
+    // TODO below should be translated whole url
 }

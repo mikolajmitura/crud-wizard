@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.core.metamodels;
 import lombok.Data;
 
 @Data
-public class BaseModelDto {
+public class ObjectWithVersion {
 
     private Long version;
 }

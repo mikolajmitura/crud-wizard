@@ -5,13 +5,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Builder;
 import lombok.Value;
+import pl.jalokim.crudwizard.core.datastorage.RawEntity;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class GenericServiceArgument {
 
-    Map<String, Object> httpQueryParams;
-    Map<String, Object> requestBody;
+    RawEntity httpQueryParams;
+    RawEntity requestBody;
+
+    /**
+     * Translated to read classes based on class meta model.
+     */
+    RawEntity requestBodyTranslated;
     Map<String, String> headers;
     HttpServletRequest request;
     HttpServletResponse response;

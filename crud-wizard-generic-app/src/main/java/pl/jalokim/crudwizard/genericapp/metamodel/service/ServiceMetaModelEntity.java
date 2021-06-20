@@ -1,12 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.service;
 
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,7 +12,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity;
 
 @Entity
 @Builder
@@ -30,13 +26,11 @@ public class ServiceMetaModelEntity extends WithAdditionalPropertiesEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String realClassName;
+    private String className;
 
-    private String realMethodName;
+    private String beanName;
+
+    private String methodName;
 
     private String serviceScript;
-
-    @OneToMany
-    @JoinColumn(name = "service_meta_model_id")
-    private List<DataStorageConnectorMetaModelEntity> dataStorageConnectors;
 }

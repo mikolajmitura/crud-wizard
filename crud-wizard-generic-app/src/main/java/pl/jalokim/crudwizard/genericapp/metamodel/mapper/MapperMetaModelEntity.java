@@ -29,9 +29,11 @@ public class MapperMetaModelEntity  extends WithAdditionalPropertiesEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String realClassName;
+    private String className;
 
-    private String realMethodName;
+    private String beanName;
+
+    private String methodName;
 
     private String mapperScript;
 
