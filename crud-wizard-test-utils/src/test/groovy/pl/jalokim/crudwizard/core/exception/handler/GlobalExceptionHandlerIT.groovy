@@ -6,6 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder
 import static pl.jalokim.crudwizard.test.utils.rest.ErrorResponseMatcher.findErrorsDtoByProperty
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidPatternMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.resourceAlreadyUpdatedMessage
 
 import pl.jalokim.crudwizard.core.datetime.TimeZoneRequestHolder
 import pl.jalokim.crudwizard.test.utils.DummyBaseIntegrationControllerSpec
@@ -38,8 +41,8 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
         def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'Invalid request'
         jsonResponse['errors'].size() == 11
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('mandatoryField', 'must not be null'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('alphanumericString', 'must match "^[A-Za-z0-9]*$"'))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('mandatoryField', notNullMessage()))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('alphanumericString', invalidPatternMessage('^[A-Za-z0-9]*\$')))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('firstLong', "custom validation message ENUM2"))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('secondLong', "custom validation message enum2 TEST"))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('thirdLong', "some custom validation message"))
@@ -74,14 +77,14 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('objectA', 'An error has occurred'))
     }
 
-    def "should handle OptimisticLockingException and return response containing exception message"() {
+    def "should handle ResourceChangedException and return response containing exception message"() {
         when:
         def response = operationsOnRestController.perform(get("/test/optimisticLocking"))
 
         then:
         response.andExpect(status().isConflict())
         def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
-        jsonResponse['message'].contains 'Resource has been modified by another user.'
+        jsonResponse['message'].contains resourceAlreadyUpdatedMessage()
     }
 
     def "should handle BusinessLogicException and rewrite exception message as error"() {

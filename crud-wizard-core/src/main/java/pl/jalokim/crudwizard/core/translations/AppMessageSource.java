@@ -1,13 +1,19 @@
 package pl.jalokim.crudwizard.core.translations;
 
 import static java.util.Objects.isNull;
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.validation.MessageInterpolator;
 import org.springframework.context.NoSuchMessageException;
+import pl.jalokim.crudwizard.core.validation.javax.groups.ContextFromPlaceholderArgs;
+import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorFactoryHolder;
 
 public interface AppMessageSource {
 
@@ -22,7 +28,18 @@ public interface AppMessageSource {
     }
 
     default String getMessage(String propertyKey, Object... placeholderArgs) {
-        return MessageFormat.format(getMessage(propertyKey), placeholderArgs);
+        Map<String, Object> placeholderArgsByIndexes = new HashMap<>();
+        for (int i = 0; i < placeholderArgs.length; i++) {
+            placeholderArgsByIndexes.put(Integer.toString(i), placeholderArgs[i]);
+        }
+        return getMessage(propertyKey, placeholderArgsByIndexes);
+    }
+
+    default String getMessage(String propertyKey, Map<String, Object> placeholderArgs) {
+        getMessage(propertyKey);
+        MessageInterpolator messageInterpolator = ValidatorFactoryHolder.getValidatorFactory().getMessageInterpolator();
+        return messageInterpolator.interpolate(wrapAsPlaceholder(propertyKey), new ContextFromPlaceholderArgs(placeholderArgs),
+            Locale.getDefault());
     }
 
     default String getMessageByEnum(Enum<?> enumValue, Object... placeholderArgs) {

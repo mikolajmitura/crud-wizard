@@ -1,6 +1,11 @@
 package pl.jalokim.crudwizard.core;
 
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSource;
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMainMessageSource;
+
 import java.time.Clock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,9 +25,20 @@ public class AppWizardCoreConfig {
     }
 
     @Bean
-    @Primary
     MessageSource appMessageSource() {
         return MessageSourceFactory.createMessageSource();
+    }
+
+    @Bean
+    MessageSource commonMessageSource() {
+        return createCommonMessageSource();
+    }
+
+    @Bean
+    @Primary
+    MessageSource mainMessageSource(@Qualifier("appMessageSource") @Autowired(required = false) MessageSource appMessageSource,
+        @Qualifier("commonMessageSource") MessageSource commonMessageSource) {
+        return createMainMessageSource(appMessageSource, commonMessageSource);
     }
 
     @Bean

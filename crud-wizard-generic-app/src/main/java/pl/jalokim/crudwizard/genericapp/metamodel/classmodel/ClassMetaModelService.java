@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
+import static pl.jalokim.crudwizard.core.utils.ElementsUtils.nullableElements;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
@@ -17,21 +19,21 @@ public class ClassMetaModelService {
     private final ClassMetaModelMapper classMetaModelMapper;
 
     public ClassMetaModelEntity saveClassModel(ClassMetaModelEntity classMetaModelEntity) {
-        Elements.elements(classMetaModelEntity.getGenericTypes())
+        nullableElements(classMetaModelEntity.getGenericTypes())
             .forEach(genericTypeEntry -> {
                 if (genericTypeEntry.getId() == null) {
                     genericTypeEntry.setId(saveClassModel(genericTypeEntry).getId());
                 }
             });
 
-        Elements.elements(classMetaModelEntity.getValidators())
+        nullableElements(classMetaModelEntity.getValidators())
             .forEach(validatorEntry -> {
                 if (validatorEntry.getId() == null) {
                     validatorEntry.setId(validatorMetaModelRepository.persist(validatorEntry).getId());
                 }
             });
 
-        Elements.elements(classMetaModelEntity.getExtendsFromModels())
+        nullableElements(classMetaModelEntity.getExtendsFromModels())
             .forEach(extendsFromEntry -> {
                 if (extendsFromEntry.getId() == null) {
                     extendsFromEntry.setId(saveClassModel(extendsFromEntry).getId());

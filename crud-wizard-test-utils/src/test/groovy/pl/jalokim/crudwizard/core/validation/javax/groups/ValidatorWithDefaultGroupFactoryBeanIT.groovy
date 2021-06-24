@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.core.validation.javax.groups
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 
 import pl.jalokim.crudwizard.core.exception.handler.SomeBean
 import pl.jalokim.crudwizard.test.utils.DummyBaseIntegrationControllerSpec
@@ -43,10 +44,10 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
         response.andExpect(status().isBadRequest())
         def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['errors'].size() == 4
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('surName', 'must not be null'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('pesel', 'must not be null'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('someBean.surName', 'must not be null'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('someBean.pesel', 'must not be null'))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('surName', notNullMessage()))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('pesel', notNullMessage()))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('someBean.surName', notNullMessage()))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('someBean.pesel', notNullMessage()))
     }
 
     def "should pass validation update"() {
@@ -79,7 +80,7 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
         response.andExpect(status().isBadRequest())
         def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['errors'].size() == 2
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('id', 'must not be null'))
-        assertThat(jsonResponse, ErrorResponseMatcher.hasError('name', 'must not be null'))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('id', notNullMessage()))
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('name', notNullMessage()))
     }
 }

@@ -16,8 +16,6 @@ import javax.validation.Payload;
 @Constraint(validatedBy = FieldShouldWhenOtherValidator.class)
 public @interface FieldShouldWhenOther {
 
-    String DEFAULT_MESSAGE = "{pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther.message}";
-
     String field();
 
     ExpectedFieldState should();
@@ -30,7 +28,7 @@ public @interface FieldShouldWhenOther {
 
     String[] otherFieldValues() default {};
 
-    String message() default DEFAULT_MESSAGE;
+    String message() default "";
 
     Class<?>[] groups() default {};
 

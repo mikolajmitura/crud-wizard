@@ -1,8 +1,12 @@
 package pl.jalokim.crudwizard.core.exception;
 
-public class ResourceChangedException extends RuntimeException {
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
+
+public class ResourceChangedException extends ApplicationException {
+
+    public static final String RESOURCE_CHANGED_EXCEPTION_DEFAULT_MESSAGE = "ResourceChangedException.default.message";
 
     public ResourceChangedException() {
-        super("Resource has been modified by another user.");
+        super(wrapAsPlaceholder(RESOURCE_CHANGED_EXCEPTION_DEFAULT_MESSAGE));
     }
 }

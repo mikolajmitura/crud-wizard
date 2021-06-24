@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.core.validation.javax;
 
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ALL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ANY;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY;
@@ -16,7 +17,6 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.WITHOUT_OTHER_FIELD_VALUES;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.WITH_OTHER_FIELD_VALUES;
-import static pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther.DEFAULT_MESSAGE;
 import static pl.jalokim.utils.collection.CollectionUtils.intersection;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.constants.Constants.SPACE;
@@ -34,7 +34,7 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 import javax.validation.ConstraintValidatorContext;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
+import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.constants.Constants;
@@ -42,7 +42,7 @@ import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.string.StringUtils;
 import pl.jalokim.utils.template.TemplateAsText;
 
-public class FieldShouldWhenOtherValidator implements BaseConstraintValidator<FieldShouldWhenOther, Object> {
+public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWithDynamicMessage<FieldShouldWhenOther, Object> {
 
     private static final String FIELD_SHOULD_BE_EXPECTED_TYPE =
         "field '${field}' in class ${class} should be one of class: [${expectedClasses}] when used one of ${otherFieldMatchEnums}";
@@ -92,6 +92,12 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidator<Fi
         this.otherFieldValues = Arrays.asList(fieldShouldWhenOther.otherFieldValues());
     }
 
+    public void setupCustomMessage(Object value, ConstraintValidatorContext context) {
+        customMessage(context, createMessagePlaceholder(
+            messagePlaceholder(context), messagePlaceholderArgs(value, context)
+        ).translateMessage(), field);
+    }
+
     @Override
     public boolean isValidValue(Object value, ConstraintValidatorContext context) {
         boolean mainFieldResult = VALIDATION_BY_PREDICATE.get(should)
@@ -100,14 +106,19 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidator<Fi
             .test(buildFieldMeta(value, whenField), otherFieldValues);
 
         if (otherFieldResult) {
-            addMessageParameter(context, "should", getAppMessageSource().getMessageByEnumWithPrefix("shouldBe", should));
-            addMessageParameter(context, "fieldValues", getValuesWhenCan(should, fieldValues));
-            addMessageParameter(context, "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is));
-            addMessageParameter(context, "otherFieldValues", getValuesWhenCan(is, otherFieldValues));
-            customMessage(context, DEFAULT_MESSAGE, field);
             return mainFieldResult;
         }
         return true;
+    }
+
+    @Override
+    public Map<String, Object> messagePlaceholderArgs(Object value, ConstraintValidatorContext context) {
+        return Map.of(
+            "should", getAppMessageSource().getMessageByEnumWithPrefix("shouldBe", should),
+            "fieldValues", getValuesWhenCan(should, fieldValues),
+            "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
+            "otherFieldValues", getValuesWhenCan(is, otherFieldValues)
+        );
     }
 
     private static boolean isNull(FieldMeta fieldMeta) {

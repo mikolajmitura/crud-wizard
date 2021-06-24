@@ -12,6 +12,7 @@
         <module>crud-wizard-core</module>
         <module>crud-wizard-test-utils</module>
         <module>crud-wizard-generic-app</module>
+        <module>crud-wizard-generic-app-test-utils</module>
         <module>crud-wizard-maintenance</module>
         <module>crud-wizard-data-storage-parent</module>
         <module>crud-wizard-example-apps</module>
@@ -136,11 +137,23 @@
                 <artifactId>crud-wizard-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>pl.jalokim.crudwizard</groupId>
+                <artifactId>crud-wizard-generic-app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
 
             <dependency>
                 <groupId>pl.jalokim.crudwizard</groupId>
                 <artifactId>crud-wizard-test-utils</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>pl.jalokim.crudwizard</groupId>
+                <artifactId>crud-wizard-generic-app-test-utils</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>

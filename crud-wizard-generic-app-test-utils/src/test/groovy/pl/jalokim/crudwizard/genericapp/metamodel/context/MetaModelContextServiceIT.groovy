@@ -9,7 +9,8 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
     @Autowired
     private ApiTagRepository apiTagRepository
 
-    // TODO to implement test
+    // TODO #3 to implement load context
+    // TODO #4 to implement load context with urls hierarchy etc
 //    def "should load all meta models as expected"() {
 //        given:
 //        def firstApiTag = apiTagRepository.save(sampleApiTagEntity())

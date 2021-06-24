@@ -6,6 +6,7 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsP
 import pl.jalokim.crudwizard.core.exception.handler.DummyRestController
 import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
+import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImplTest
 import spock.lang.Specification
 
 class MessagePlaceholderTest extends Specification {
@@ -70,27 +71,58 @@ class MessagePlaceholderTest extends Specification {
     def "should return expected translatedMessage via shortcut method createMessagePlaceholder"() {
         when:
         def messagePlaceholder = createMessagePlaceholder(getClass(), "code.suffix",
-        ExampleEnum.ENUM2, "raw value", "some.property1", "{some.property3}",
-        MessagePlaceholder.builder()
-            .mainPlaceholder(DummyRestController, "some.code")
-            .argumentsAsPlaceholders("some.property1", "some.property2")
-            .build()
+            ExampleEnum.ENUM2, "raw value", "some.property1", "{some.property3}",
+            MessagePlaceholder.builder()
+                .mainPlaceholder(DummyRestController, "some.code")
+                .argumentsAsPlaceholders("some.property1", "some.property2")
+                .build()
         )
         then:
-        messagePlaceholder.translateMessage() == "some message enum2 TEST raw value some property 1 some property 3 placeholders some property 1 some property 2"
+        messagePlaceholder.translateMessage() == "some message enum2 TEST raw value some.property1 some property 3 placeholders some property 1 some property 2"
         messagePlaceholder.getRawArguments() == [
-            "{pl.jalokim.crudwizard.core.translations.ExampleEnum.ENUM2}", "raw value", "{some.property1}",
+            "{pl.jalokim.crudwizard.core.translations.ExampleEnum.ENUM2}", "raw value", "some.property1",
             "{some.property3}", "placeholders some property 1 some property 2"
         ]
     }
 
-    def "should wrap as external placeholder"() {
+    def "should find property and change placeholders"() {
+        when:
+        def messagePlaceholder = createMessagePlaceholder("pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImplTest.placeholders",
+            [anotherProperty: "{example.property}",
+             rawValue       : "raw value",
+             someEnum       : ExampleEnum.TEST
+            ]
+        )
+        then:
+        messagePlaceholder.translateMessage() == "example value example value raw value test:example value enum: TEST some"
+    }
+
+    def "should find property by class name and change placeholders"() {
+        when:
+        def messagePlaceholder = createMessagePlaceholder(AppMessageSourceTestImplTest.class, "placeholders",
+            [anotherProperty: "{example.property}",
+             rawValue       : "raw value",
+             someEnum       : ExampleEnum.TEST
+            ]
+        )
+        then:
+        messagePlaceholder.translateMessage() == "example value example value raw value test:example value enum: TEST some"
+    }
+
+    def "should wrap text as external placeholder for fronted"() {
         given:
         def textToWrap = "some.property"
         when:
         def result = MessagePlaceholder.wrapAsExternalPlaceholder(textToWrap)
         then:
         result == "F#[${textToWrap}]#"
+    }
+
+    def "should wrap enum as external placeholder for fronted"() {
+        when:
+        def result = MessagePlaceholder.wrapAsExternalPlaceholder(ExampleEnum.ENUM2)
+        then:
+        result == "F_Enum#[example_enum.enum2]#"
     }
 
     static MessagePlaceholder buildMessagePlaceholder(String mainPlaceHolderText, String errorCodeText) {

@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.validation.javax
 
+import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ALL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ANY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY
@@ -174,31 +175,31 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
 
     private ArrayList<ErrorDto> expectedResult1() {
         [
-            ErrorDto.errorEntry("realId", message("given.validation.should.pass[1]realId[0]")),
-            ErrorDto.errorEntry("personalNumber", message("given.validation.should.pass[1]personalNumber[0]")),
-            ErrorDto.errorEntry("someList", message("given.validation.should.pass[1]someList[0]")),
-            ErrorDto.errorEntry("someList", message("given.validation.should.pass[1]someList[1]")),
-            ErrorDto.errorEntry("notEqualToAll", message("given.validation.should.pass[1]notEqualToAll[0]")),
-            ErrorDto.errorEntry("emptyOrNull", message("given.validation.should.pass[1]emptyOrNull[0]")),
-            ErrorDto.errorEntry("blankTestFiled", message("given.validation.should.pass[1]blankTestFiled[0]"))
+            errorEntry("realId", message("given.validation.should.pass[1]realId[0]")),
+            errorEntry("personalNumber", message("given.validation.should.pass[1]personalNumber[0]")),
+            errorEntry("someList", message("given.validation.should.pass[1]someList[0]")),
+            errorEntry("someList", message("given.validation.should.pass[1]someList[1]")),
+            errorEntry("notEqualToAll", message("given.validation.should.pass[1]notEqualToAll[0]")),
+            errorEntry("emptyOrNull", message("given.validation.should.pass[1]emptyOrNull[0]")),
+            errorEntry("blankTestFiled", message("given.validation.should.pass[1]blankTestFiled[0]"))
         ]
     }
 
     private ArrayList<ErrorDto> expectedResult5() {
         [
-            ErrorDto.errorEntry("someEnum", message("given.validation.should.pass[5]someEnum[0]")),
-            ErrorDto.errorEntry("someList", message("given.validation.should.pass[5]someList[0]")),
-            ErrorDto.errorEntry("someSet", message("given.validation.should.pass[5]someSet[0]")),
-            ErrorDto.errorEntry("someStringNotEmpty", message("given.validation.should.pass[5]someStringNotEmpty[0]")),
-            ErrorDto.errorEntry("someStringNotEmpty", message("given.validation.should.pass[5]someStringNotEmpty[1]")),
+            errorEntry("someEnum", message("given.validation.should.pass[5]someEnum[0]")),
+            errorEntry("someList", message("given.validation.should.pass[5]someList[0]")),
+            errorEntry("someSet", message("given.validation.should.pass[5]someSet[0]")),
+            errorEntry("someStringNotEmpty", message("given.validation.should.pass[5]someStringNotEmpty[0]")),
+            errorEntry("someStringNotEmpty", message("given.validation.should.pass[5]someStringNotEmpty[1]")),
         ]
     }
 
     private ArrayList<ErrorDto> expectedResult6() {
         [
-            ErrorDto.errorEntry("someEnum", message("given.validation.should.pass[5]someEnum[0]")),
-            ErrorDto.errorEntry("someSet", message("given.validation.should.pass[5]someSet[0]")),
-            ErrorDto.errorEntry("shouldBeNotNull", message("given.validation.should.pass[6]shouldBeNotNull[0]")),
+            errorEntry("someEnum", message("given.validation.should.pass[5]someEnum[0]")),
+            errorEntry("someSet", message("given.validation.should.pass[5]someSet[0]")),
+            errorEntry("shouldBeNotNull", message("given.validation.should.pass[6]shouldBeNotNull[0]")),
         ]
     }
 
