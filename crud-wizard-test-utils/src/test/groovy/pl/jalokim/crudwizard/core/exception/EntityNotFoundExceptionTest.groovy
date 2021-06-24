@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.core.exception
 
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 
+import pl.jalokim.crudwizard.core.exception.handler.DummyDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
 
@@ -61,7 +62,7 @@ class EntityNotFoundExceptionTest extends UnitTestSpec {
         Long id = DataFakerHelper.randomLong()
 
         when:
-        throwEntityNotFoundException(id, SomeBean)
+        throwEntityNotFoundException(id, DummyDto)
 
         then:
         EntityNotFoundException ex = thrown()
