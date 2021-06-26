@@ -21,18 +21,16 @@ public class DataStorageConnectorMetaModelService {
     private final MapperMetaModelEntityRepository mapperMetaModelEntityRepository;
     private final ClassMetaModelService classMetaModelService;
 
-    public Long saveNewDataStorageConnector(DataStorageConnectorMetaModelEntity dataStorageConnectorMetaModelEntity) {
+    public DataStorageConnectorMetaModelEntity saveNewDataStorageConnector(DataStorageConnectorMetaModelEntity dataStorageConnectorMetaModelEntity) {
         MapperMetaModelEntity mapperMetaModel = dataStorageConnectorMetaModelEntity.getMapperMetaModel();
         if (mapperMetaModel != null && mapperMetaModel.getId() == null) {
-            mapperMetaModel.setId(mapperMetaModelEntityRepository.persist(mapperMetaModel).getId());
+            dataStorageConnectorMetaModelEntity.setMapperMetaModel(mapperMetaModelEntityRepository.persist(mapperMetaModel));
         }
         ClassMetaModelEntity classMetaModelInDataStorage = dataStorageConnectorMetaModelEntity.getClassMetaModelInDataStorage();
         if (classMetaModelInDataStorage != null && classMetaModelInDataStorage.getId() == null) {
-            classMetaModelInDataStorage.setId(classMetaModelService.saveClassModel(classMetaModelInDataStorage).getId());
+            dataStorageConnectorMetaModelEntity.setClassMetaModelInDataStorage(classMetaModelService.saveClassModel(classMetaModelInDataStorage));
         }
-        Long dataStorageConnectorId = dataStorageConnectorMetaModelRepository.persist(dataStorageConnectorMetaModelEntity).getId();
-        dataStorageConnectorMetaModelEntity.setId(dataStorageConnectorId);
-        return dataStorageConnectorId;
+        return dataStorageConnectorMetaModelRepository.persist(dataStorageConnectorMetaModelEntity);
     }
 
     public List<DataStorageConnectorMetaModel> getAllMetaModels(MetaModelContext metaModelContext, List<Long> dataStorageConnectorsId) {

@@ -12,7 +12,6 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
 
     private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter()
 
-    // TODO #0 build whole app at beginning.
     // TODO #1 as first to implements
     @Unroll
     def "should return expected messages for default context of EndpointMetaModelDto"() {

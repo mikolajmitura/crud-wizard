@@ -26,7 +26,7 @@ public class EndpointMetaModelService {
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
 
     public Long createNewEndpoint(EndpointMetaModelDto createEndpointMetaModelDto) {
-        var endpointMetaModelEntity = endpointMetaModelMapper.toEntity(createEndpointMetaModelDto);
+        final var endpointMetaModelEntity = endpointMetaModelMapper.toEntity(createEndpointMetaModelDto);
 
         if (isNull(endpointMetaModelEntity.getApiTag().getId())) {
             endpointMetaModelEntity.setApiTag(apiTagRepository.save(endpointMetaModelEntity.getApiTag()));
@@ -46,19 +46,22 @@ public class EndpointMetaModelService {
         if (responseMetaModel != null && responseMetaModel.getId() == null) {
             var responseClassMetaModel = responseMetaModel.getClassMetaModel();
             if (responseClassMetaModel != null && responseClassMetaModel.getId() == null) {
-                responseClassMetaModel.setId(classMetaModelService.saveClassModel(responseClassMetaModel).getId());
+                responseMetaModel.setClassMetaModel(classMetaModelService.saveClassModel(responseClassMetaModel));
             }
             endpointMetaModelEntity.setResponseMetaModel(endpointResponseMetaModelRepository.persist(responseMetaModel));
         }
 
         if (endpointMetaModelEntity.getDataStorageConnectors() != null) {
             elements(endpointMetaModelEntity.getDataStorageConnectors())
-                .forEach(dataStorageConnectorMetaModelService::saveNewDataStorageConnector);
+                .forEachWithIndexed(indexedValue ->
+                    endpointMetaModelEntity.getDataStorageConnectors().set(
+                        indexedValue.getIndex(),
+                        dataStorageConnectorMetaModelService.saveNewDataStorageConnector(
+                            indexedValue.getValue()))
+                );
         }
 
-        endpointMetaModelEntity = endpointMetaModelRepository.persist(endpointMetaModelEntity);
-
-        return endpointMetaModelEntity.getId();
+        return endpointMetaModelRepository.persist(endpointMetaModelEntity).getId();
     }
 
     public List<EndpointMetaModel> findAllMetaModels(MetaModelContext metaModelContext) {

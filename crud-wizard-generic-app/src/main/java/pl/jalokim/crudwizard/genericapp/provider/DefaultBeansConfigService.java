@@ -103,6 +103,7 @@ public class DefaultBeansConfigService {
                     .dataStorageMetaModel(dataStorageMetaModelRepository.getOne(getDefaultDataStorageId()))
                     .mapperMetaModel(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))
                     .build())
+                    .getId()
             };
             saveNewConfiguration(DEFAULT_DATA_STORAGE_CONNECTORS_ID, newDefaultDataStorageConnectorsId, Long[].class);
         }
