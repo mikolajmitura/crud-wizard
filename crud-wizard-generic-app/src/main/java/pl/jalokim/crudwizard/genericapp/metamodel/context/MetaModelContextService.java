@@ -166,4 +166,8 @@ public class MetaModelContextService implements ApplicationRunner {
         }
         metaModelContext.setEndpointMetaModels(endpointMetaModels);
     }
+
+    public MetaModelContext getMetaModelContext() {
+        return metaModelContextReference.get();
+    }
 }
