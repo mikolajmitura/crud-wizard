@@ -5,6 +5,8 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CON
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY_OR_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.MAX;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.MIN;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_BLANK;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EMPTY;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL;
@@ -78,6 +80,24 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
     should = NOT_EMPTY,
     whenField = "someCollectionNotEmpty",
     is = NOT_EMPTY)
+@FieldShouldWhenOther(field = "someTextField",
+    should = MAX,
+    fieldValues = "2",
+    whenField = "someListString",
+    is = MIN,
+    otherFieldValues = "3")
+@FieldShouldWhenOther(field = "someMap",
+    should = MAX,
+    fieldValues = "1",
+    whenField = "someLong",
+    is = MIN,
+    otherFieldValues = "10")
+@FieldShouldWhenOther(field = "someMap",
+    should = MIN,
+    fieldValues = "2",
+    whenField = "someDouble",
+    is = MAX,
+    otherFieldValues = "10.50")
 @Builder
 @Value
 public class FieldShouldWhenOtherDto {
@@ -110,6 +130,13 @@ public class FieldShouldWhenOtherDto {
     Map<String, String> someMapNotEmpty;
     String someStringNotEmpty;
     List<String> someCollectionNotEmpty;
+
+    // used for test validation of MIN, MAX
+    String someTextField;
+    List<String> someListString;
+    Map<?, ?> someMap;
+    Long someLong;
+    Double someDouble;
 
     public enum SomeEnum {
         ENTRY_1, ENTRY_2, ENTRY_3

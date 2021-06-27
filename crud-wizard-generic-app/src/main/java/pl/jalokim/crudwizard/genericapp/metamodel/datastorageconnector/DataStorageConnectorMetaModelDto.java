@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector;
 
+import javax.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,10 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 public class DataStorageConnectorMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     Long id;
+    @Valid
     DataStorageMetaModelDto dataStorageMetaModel;
+    @Valid
     MapperMetaModelDto mapperMetaModel;
+    @Valid
     ClassMetaModelDto classMetaModelInDataStorage;
 }

@@ -45,7 +45,7 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     )
     private List<ClassMetaModelEntity> genericTypes;
 
-    @OneToMany(cascade = { CascadeType.ALL })
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "class_meta_model_id")
     private List<FieldMetaModelEntity> fields;
 

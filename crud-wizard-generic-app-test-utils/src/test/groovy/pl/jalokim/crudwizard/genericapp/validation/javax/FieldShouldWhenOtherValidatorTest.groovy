@@ -6,6 +6,8 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CON
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY_OR_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.MAX
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.MIN
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_BLANK
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EMPTY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL
@@ -15,11 +17,13 @@ import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenO
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_2
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_3
 import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomInteger
+import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomLong
 import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.EXPECTED_MESSAGES
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
+import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicReference
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther
@@ -79,6 +83,13 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
         someObject9()  || []
         someObject10() || []
         someObject11() || []
+        someObject12() || []
+        someObject13() || expectedResult13()
+        someObject14() || []
+        someObject15() || expectedResult15()
+        someObject16() || []
+        someObject17() || expectedResult17()
+        someObject18() || []
     }
 
     @Unroll
@@ -116,6 +127,24 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
     }
 
     @Unroll
+    def "should inform about expected number, string, map or collection for field type"() {
+        when:
+        validatorWithConverter.validateAndReturnErrors(inputObject)
+
+        then:
+        Exception ex = thrown()
+        def wholeClass = inputObject.getClass().canonicalName
+        ex.getCause().message ==
+            "field 'notSupported' in class $wholeClass should be one of class:" +
+            " [java.util.Collection, java.util.Map, java.lang.String, java.lang.Number] when used one of MIN, MAX"
+
+        where:
+        inputObject                                                                   || _
+        new MinMaxTestNotSupportedClasses(someString1: randomText(), notSupported: LocalDate.now()) || _
+        new MinMaxTestNotSupportedClasses(someString2: randomText(), notSupported: LocalDate.now()) || _
+    }
+
+    @Unroll
     def "for some field status enums other fields values should be empty"() {
         given:
         fieldShouldWhenOtherStub.set(FieldShouldWhenOtherStub.builder()
@@ -144,7 +173,6 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
         NOT_EMPTY          | _
     }
 
-
     @Unroll
     def "for some field status enums other fields values should be not empty"() {
         given:
@@ -171,6 +199,44 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
         CONTAINS_ALL       | _
         CONTAINS_ANY       | _
         NOT_EQUAL_TO_ALL   | _
+        MAX                | _
+        MIN                | _
+    }
+
+    @Unroll
+    def "for some field status enums other fields values should be list with one number"() {
+        given:
+        fieldShouldWhenOtherStub.set(FieldShouldWhenOtherStub.builder()
+            .field("firstField")
+            .should(expectedFieldState)
+            .fieldValues(fieldValues as String[])
+            .build()
+        )
+
+        def validator = new FieldShouldWhenOtherValidator()
+
+        when:
+        validator.initialize(mockFieldShouldWhenOther)
+
+        then:
+        Exception ex = thrown()
+        ex.message == "invalid @FieldShouldWhenOther for field=firstField for: " +
+            "should=$expectedFieldState, field: fieldValues should have only one element with number value"
+
+        where:
+        expectedFieldState | fieldValues
+        MAX                | ["not number"]
+        MIN                | ["1", "12"]
+    }
+
+    def "should inform about expected integer type when when field is string type"() {
+        when:
+        validatorWithConverter.validateAndReturnErrors(new MinMaxTestExpectingIntegerValueInConfig(forTestInvalidStringSize: randomText(), someString1: randomText()))
+
+        then:
+        Exception ex = thrown()
+        ex.getCause().message == "invalid @FieldShouldWhenOther for field=someString1 for: fieldValues=[12.11], " +
+            "value of field: fieldValues should be not floating point number"
     }
 
     private ArrayList<ErrorDto> expectedResult1() {
@@ -200,6 +266,24 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
             errorEntry("someEnum", message("given.validation.should.pass[5]someEnum[0]")),
             errorEntry("someSet", message("given.validation.should.pass[5]someSet[0]")),
             errorEntry("shouldBeNotNull", message("given.validation.should.pass[6]shouldBeNotNull[0]")),
+        ]
+    }
+
+    private ArrayList<ErrorDto> expectedResult13() {
+        [
+            errorEntry("someTextField", message("given.validation.should.pass[13]shouldBeMax[0]"))
+        ]
+    }
+
+    private ArrayList<ErrorDto> expectedResult15() {
+        [
+            errorEntry("someMap", message("given.validation.should.pass[15]shouldBeMax[0]"))
+        ]
+    }
+
+    private ArrayList<ErrorDto> expectedResult17() {
+        [
+            errorEntry("someMap", message("given.validation.should.pass[17]shouldBeMin[0]"))
         ]
     }
 
@@ -316,6 +400,60 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
             .build()
     }
 
+    private FieldShouldWhenOtherDto someObject12() {
+        FieldShouldWhenOtherDto.builder()
+            .someTextField(randomText(2))
+            .someListString(List.of(randomText(), randomText(), randomText(), randomText()))
+            .build()
+    }
+
+    private FieldShouldWhenOtherDto someObject13() {
+        FieldShouldWhenOtherDto.builder()
+            .someTextField(randomText(4))
+            .someListString(List.of(randomText(), randomText(), randomText(), randomText()))
+            .build()
+    }
+
+    private FieldShouldWhenOtherDto someObject14() {
+        FieldShouldWhenOtherDto.builder()
+            .someLong(10)
+            .someMap(Map.of(randomText(), randomLong()))
+            .build()
+    }
+
+
+    private FieldShouldWhenOtherDto someObject15() {
+        FieldShouldWhenOtherDto.builder()
+            .someLong(10)
+            .someMap(Map.of(randomText(), randomLong(),
+                randomText(), randomLong(),
+                randomText(), randomLong()))
+            .build()
+    }
+
+    private FieldShouldWhenOtherDto someObject16() {
+        FieldShouldWhenOtherDto.builder()
+            .someDouble(10.30)
+            .someMap(Map.of(randomText(), randomLong(),
+                    randomText(), randomLong())
+            )
+            .build()
+    }
+
+    private FieldShouldWhenOtherDto someObject17() {
+        FieldShouldWhenOtherDto.builder()
+            .someDouble(10.30)
+            .someMap(Map.of(randomText(), randomLong()))
+            .build()
+    }
+
+    private FieldShouldWhenOtherDto someObject18() {
+        FieldShouldWhenOtherDto.builder()
+            .someDouble(10.51)
+            .someMap(Map.of())
+            .build()
+    }
+
     private static String message(String suffixCode) {
         EXPECTED_MESSAGES.getMessage(FieldShouldWhenOtherValidatorTest, suffixCode)
     }
@@ -335,5 +473,19 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
     private static class ShouldDoesNotHaveOtherFieldsValue {
         private String object1
         private String object2
+    }
+
+    @FieldShouldWhenOther(field = "notSupported", should = MAX, fieldValues = "12",  whenField = "someString1", is = NOT_NULL)
+    @FieldShouldWhenOther(field = "notSupported", should = MIN, fieldValues = "12",  whenField = "someString2", is = NOT_NULL)
+    private static class MinMaxTestNotSupportedClasses {
+        private LocalDate notSupported
+        private String someString1
+        private String someString2
+    }
+
+    @FieldShouldWhenOther(field = "someString1", should = MIN, fieldValues = "12.11",  whenField = "forTestInvalidStringSize", is = NOT_NULL)
+    private static class MinMaxTestExpectingIntegerValueInConfig {
+        private String someString1
+        private String forTestInvalidStringSize
     }
 }

@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,8 +21,10 @@ public class FieldMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     Long id;
 
+    @NotNull
     String fieldName;
 
+    @NotNull
     ClassMetaModelDto fieldType;
 
     List<ValidatorMetaModelDto> validators;

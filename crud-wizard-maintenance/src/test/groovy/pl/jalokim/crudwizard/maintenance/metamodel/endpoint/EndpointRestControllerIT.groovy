@@ -24,14 +24,9 @@ class EndpointRestControllerIT extends MaintenanceBaseIntegrationController {
         then:
         inTransaction {
             def endpointEntity = endpointMetaModelRepository.findExactlyOneById(createdId)
-            verifyAll(endpointEntity) {
-                baseUrl == createEndpointMetaModelDto.baseUrl
-                httpMethod == createEndpointMetaModelDto.httpMethod
-                operationName == createEndpointMetaModelDto.operationName
-                apiTag.name == createEndpointMetaModelDto.apiTag.name
-            }
+            assert endpointEntity != null
         }
     }
 
-    // TODO only just check that endpoints were invoked
+    // TODO only just check that endpoints were invoked create, delete update etc real test should be in EndpointMetaModelServiceIT
 }

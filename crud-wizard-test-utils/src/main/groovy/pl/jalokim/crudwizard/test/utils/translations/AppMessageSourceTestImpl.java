@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.test.utils.translations;
 
 import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY;
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.APPLICATION_TRANSLATIONS_PATH;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMainMessageSource;
@@ -17,21 +18,25 @@ import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageCon
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.PATTERN_MESSAGE_PROPERTY;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.RANGE_MESSAGE_PROPERTY;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.SIZE_MESSAGE_PROPERTY;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import lombok.SneakyThrows;
 import org.springframework.context.NoSuchMessageException;
-import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
 import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource;
 import pl.jalokim.crudwizard.core.translations.TestAppMessageSourceHolder;
+import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
+import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.test.utils.validation.TestingConstraintValidatorFactory;
+import pl.jalokim.utils.constants.Constants;
 
 /**
  * Useful for testing without spring context.
@@ -101,27 +106,27 @@ public class AppMessageSourceTestImpl extends SpringAppMessageSource {
     }
 
     public static String invalidPatternMessage(String regexp) {
-        return getAppMessageSource().getMessage(PATTERN_MESSAGE_PROPERTY, Map.of("regexp" , regexp));
+        return getAppMessageSource().getMessage(PATTERN_MESSAGE_PROPERTY, Map.of("regexp", regexp));
     }
 
     public static String invalidSizeMessage(int min, int max) {
-        return getAppMessageSource().getMessage(SIZE_MESSAGE_PROPERTY, Map.of("min" , min, "max", max));
+        return getAppMessageSource().getMessage(SIZE_MESSAGE_PROPERTY, Map.of("min", min, "max", max));
     }
 
     public static String invalidLengthMessage(int min, int max) {
-        return getAppMessageSource().getMessage(LENGTH_MESSAGE_PROPERTY, Map.of("min" , min, "max", max));
+        return getAppMessageSource().getMessage(LENGTH_MESSAGE_PROPERTY, Map.of("min", min, "max", max));
     }
 
     public static String invalidRangeMessage(Number min, Number max) {
-        return getAppMessageSource().getMessage(RANGE_MESSAGE_PROPERTY, Map.of("min" , min, "max", max));
+        return getAppMessageSource().getMessage(RANGE_MESSAGE_PROPERTY, Map.of("min", min, "max", max));
     }
 
     public static String invalidMinMessage(Number min) {
-        return getAppMessageSource().getMessage(MIN_MESSAGE_PROPERTY, Map.of("value" , min));
+        return getAppMessageSource().getMessage(MIN_MESSAGE_PROPERTY, Map.of("value", min));
     }
 
     public static String invalidMaxMessage(Number max) {
-        return getAppMessageSource().getMessage(MAX_MESSAGE_PROPERTY, Map.of("value" , max));
+        return getAppMessageSource().getMessage(MAX_MESSAGE_PROPERTY, Map.of("value", max));
     }
 
     public static String messageForValidator(Class<? extends Annotation> validatorAnnotation) {
@@ -142,5 +147,23 @@ public class AppMessageSourceTestImpl extends SpringAppMessageSource {
 
     public static String resourceAlreadyUpdatedMessage() {
         return getAppMessageSource().getMessage("ResourceChangedException.default.message");
+    }
+
+    public static String fieldShouldWhenOtherMessage(ExpectedFieldState should, List<String> fieldValues, String whenField,
+        ExpectedFieldState is, List<String> otherFieldValues) {
+        return getAppMessageSource().getMessage(
+            buildMessageForValidator(FieldShouldWhenOther.class),
+            Map.of(
+                "should", getAppMessageSource().getMessageByEnumWithPrefix("shouldBe", should),
+                "fieldValues", fieldValues.isEmpty() ? Constants.EMPTY : joinValues(fieldValues),
+                "whenField", wrapAsExternalPlaceholder(whenField),
+                "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
+                "otherFieldValues", otherFieldValues.isEmpty() ? Constants.EMPTY : joinValues(otherFieldValues)
+            )
+        );
+    }
+
+    private static String joinValues(List<String> list) {
+        return  " " + elements(list).asConcatText(", ");
     }
 }
