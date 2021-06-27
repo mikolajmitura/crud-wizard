@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithClassName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomText
 
 import org.springframework.http.HttpMethod
@@ -17,7 +17,7 @@ class EndpointMetaModelDtoSamples {
                 .build())
             .httpMethod(HttpMethod.POST)
             .operationName(randomText())
-            .payloadMetamodel(createValidClassMetaModelDtoWithClassName())
+            .payloadMetamodel(createValidClassMetaModelDtoWithName())
             .responseMetaModel(createValidEndpointResponseMetaModelDto())
             .build()
     }

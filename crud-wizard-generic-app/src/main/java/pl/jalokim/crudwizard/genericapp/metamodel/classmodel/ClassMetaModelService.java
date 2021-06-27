@@ -19,24 +19,30 @@ public class ClassMetaModelService {
     private final ClassMetaModelMapper classMetaModelMapper;
 
     public ClassMetaModelEntity saveClassModel(ClassMetaModelEntity classMetaModelEntity) {
+        nullableElements(classMetaModelEntity.getFields())
+            .forEach(field -> field.setFieldType(saveClassModel(field.getFieldType())));
+
         nullableElements(classMetaModelEntity.getGenericTypes())
-            .forEach(genericTypeEntry -> {
+            .forEachWithIndexed(indexed -> {
+                var genericTypeEntry = indexed.getValue();
                 if (genericTypeEntry.getId() == null) {
-                    genericTypeEntry.setId(saveClassModel(genericTypeEntry).getId());
+                    classMetaModelEntity.getGenericTypes().set(indexed.getIndex(), saveClassModel(genericTypeEntry));
                 }
             });
 
         nullableElements(classMetaModelEntity.getValidators())
-            .forEach(validatorEntry -> {
+            .forEachWithIndexed(indexed -> {
+                var validatorEntry = indexed.getValue();
                 if (validatorEntry.getId() == null) {
-                    validatorEntry.setId(validatorMetaModelRepository.persist(validatorEntry).getId());
+                    classMetaModelEntity.getValidators().set(indexed.getIndex(), validatorMetaModelRepository.persist(validatorEntry));
                 }
             });
 
         nullableElements(classMetaModelEntity.getExtendsFromModels())
-            .forEach(extendsFromEntry -> {
+            .forEachWithIndexed(indexed -> {
+                var extendsFromEntry = indexed.getValue();
                 if (extendsFromEntry.getId() == null) {
-                    extendsFromEntry.setId(saveClassModel(extendsFromEntry).getId());
+                    classMetaModelEntity.getExtendsFromModels().set(indexed.getIndex(), saveClassModel(extendsFromEntry));
                 }
             });
 
