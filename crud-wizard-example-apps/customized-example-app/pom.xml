@@ -5,7 +5,7 @@
     <parent>
         <artifactId>crud-wizard-example-apps</artifactId>
         <groupId>pl.jalokim.crudwizard.example</groupId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

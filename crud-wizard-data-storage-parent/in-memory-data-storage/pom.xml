@@ -5,7 +5,7 @@
     <parent>
         <artifactId>crud-wizard-data-storage-parent</artifactId>
         <groupId>pl.jalokim.crudwizard.datastorage</groupId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

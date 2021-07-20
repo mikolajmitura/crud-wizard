@@ -6,7 +6,7 @@
     <parent>
         <groupId>pl.jalokim.crudwizard</groupId>
         <artifactId>crud-wizard-parent</artifactId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
