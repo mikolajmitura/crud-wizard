@@ -17,4 +17,6 @@ public class ValidatorMetaModel extends AdditionalPropertyMetaModelDto {
     Class<?> realClass;
 
     // TODO or just normal validator instance...
+
+    // TODO maybe validator script in future as well?
 }

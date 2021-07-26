@@ -5,8 +5,10 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import org.springframework.http.HttpMethod
+import org.springframework.stereotype.Component
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
 
+@Component
 class EndpointMetaModelDtoSamples {
 
     static EndpointMetaModelDto createValidPostEndpointMetaModelDto() {

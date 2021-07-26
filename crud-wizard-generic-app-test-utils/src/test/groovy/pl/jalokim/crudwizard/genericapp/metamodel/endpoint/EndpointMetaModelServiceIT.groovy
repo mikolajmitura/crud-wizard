@@ -54,6 +54,7 @@ class EndpointMetaModelServiceIT extends GenericAppBaseIntegrationSpecification 
     }
     // TODO save all fields during create endpoint metamodels, queryArguments, responseMetaModel with not raw java class but with class metadata,
     //  classMetaModelInDataStorage other than payload
+
     // TODO new endpoint with already existed metamodels
     // TODO save with new service
     // TODO save with new mapper

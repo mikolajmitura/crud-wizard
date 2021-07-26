@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 @EqualsAndHashCode(callSuper = true)
@@ -19,8 +20,10 @@ public class FieldMetaModel extends AdditionalPropertyMetaModelDto {
 
     String fieldName;
 
+    @ToString.Exclude
     ClassMetaModel fieldType;
 
+    @ToString.Exclude
     ClassMetaModel ownerOfField;
 
     List<ValidatorMetaModel> validators;

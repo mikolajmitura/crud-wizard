@@ -22,6 +22,7 @@ public abstract class DataStorageConnectorMetaModelMapper
 
     public DataStorageConnectorMetaModel toFullMetaModel(MetaModelContext metaModelContext, DataStorageConnectorMetaModelEntity dataStorageConnectorEntity) {
         return DataStorageConnectorMetaModel.builder()
+            .id(dataStorageConnectorEntity.getId())
             .dataStorageMetaModel(ofNullable(getFromContextByEntity(
                 metaModelContext::getDataStorages,
                 dataStorageConnectorEntity::getDataStorageMetaModel))

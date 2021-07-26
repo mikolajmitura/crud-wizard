@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public class ModelsCache<M> {
 
-    private Map<Long, M> modelsById = new ConcurrentHashMap<>();
+    private final Map<Long, M> modelsById = new ConcurrentHashMap<>();
 
     public M getById(Long nullableId) {
         return Optional.ofNullable(nullableId)

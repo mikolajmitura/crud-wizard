@@ -42,7 +42,6 @@ public class MetaModelContextService implements ApplicationRunner {
     private final EndpointMetaModelService endpointMetaModelService;
 
     // TODO test it with few scenarios
-    // simple case with all defaults things, default mapper, default service, default data storage
     // some endpoint with another data storage.
     // some endpoint with another generic service
     // some endpoint with another generic service with another mapper
