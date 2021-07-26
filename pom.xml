@@ -4,10 +4,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>pl.jalokim.parentpom</groupId>
+        <artifactId>java-parent-pom</artifactId>
+        <version>1.0.1</version>
+    </parent>
+
     <groupId>pl.jalokim.crudwizard</groupId>
     <artifactId>crud-wizard-parent</artifactId>
     <packaging>pom</packaging>
-    <version>${main.version}.${minor.version}</version>
+    <version>${main-version}.${minor-version}</version>
     <modules>
         <module>crud-wizard-core</module>
         <module>crud-wizard-test-utils</module>
@@ -19,51 +25,18 @@
         <module>crud-wizard-code-coverage</module>
     </modules>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.6.RELEASE</version>
-    </parent>
-
     <properties>
-        <main.version>1.0</main.version>
-        <minor.version>0-SNAPSHOT</minor.version>
+        <main-version>1.0</main-version>
+        <minor-version>0-SNAPSHOT</minor-version>
 
-        <java.version>11</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-
-        <commons-lang.version>3.10</commons-lang.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-io.version>2.6</commons-io.version>
         <commons-csv.version>1.8</commons-csv.version>
-        <commons-lang.version>3.10</commons-lang.version>
-
-        <!-- tests -->
-        <spock.version>1.3-groovy-2.5</spock.version>
-        <groovy.version>2.5.8</groovy.version>
-        <javafaker.version>1.0.2</javafaker.version>
-
-        <!-- plugins -->
-        <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-
-        <!-- code checks -->
-        <plugin.gmaven.version>1.8.1</plugin.gmaven.version>
-        <jacoco-plugin.version>0.8.5</jacoco-plugin.version>
-        <plugin.surefire.version>2.22.2</plugin.surefire.version>
-        <plugin.checkstyle.version>3.1.1</plugin.checkstyle.version>
-        <plugin.spotbugs.version>4.0.0</plugin.spotbugs.version>
-        <findbugs.version>3.0.0</findbugs.version>
 
         <mapstruct.version>1.4.1.Final</mapstruct.version>
-        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
-        <lombok.version>1.18.20</lombok.version>
+        <java-utils.version>3.0.2</java-utils.version>
+        <swagger.version>2.9.2</swagger.version>
 
-        <checkstyle.root.path>${project.basedir}</checkstyle.root.path>
-        <checkstyle.location>${checkstyle.root.path}/src/main/resources/checkstyle/checkstyle.xml</checkstyle.location>
-        <checkstyle.suppressions.location>${checkstyle.root.path}/src/main/resources/checkstyle/suppressions.xml</checkstyle.suppressions.location>
+        <!-- spring-boot-starter-test does not support new version of junit so is set to 4.13-->
+        <junit.version>4.13</junit.version>
     </properties>
 
     <dependencies>
@@ -84,27 +57,7 @@
         <dependency>
             <groupId>pl.jalokim.utils</groupId>
             <artifactId>java-utils</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>${commons-collections4.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang.version}</version>
+            <version>${java-utils.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -121,17 +74,22 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>${findbugs.version}</version>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${swagger.version}</version>
         </dependency>
-
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-parent</artifactId>
+                <version>2.2.6.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>pl.jalokim.crudwizard</groupId>
                 <artifactId>crud-wizard-core</artifactId>
@@ -164,188 +122,12 @@
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>pl.jalokim.utils</groupId>
+                <artifactId>test-utils</artifactId>
+                <version>${java-utils.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${plugin.checkstyle.version}</version>
-                <configuration>
-                    <configLocation>${checkstyle.location}</configLocation>
-                    <suppressionsLocation>${checkstyle.suppressions.location}</suppressionsLocation>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <consoleOutput>true</consoleOutput>
-                    <sourceDirectories>
-                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                    </sourceDirectories>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${plugin.spotbugs.version}</version>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>${plugin.gmaven.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compileTests</goal>
-                            <goal>addTestSources</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <sourceEncoding>UTF-8</sourceEncoding>
-                    <testSources>
-                        <testSource>
-                            <directory>${project.basedir}/src/test/groovy</directory>
-                            <includes>
-                                <include>**/*.groovy</include>
-                            </includes>
-                        </testSource>
-                        <testSource>
-                            <directory>${project.basedir}/target/generated-test-sources/</directory>
-                            <includes>
-                                <include>**/*.groovy</include>
-                            </includes>
-                        </testSource>
-                    </testSources>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
-                        <version>${groovy.version}</version>
-                        <scope>runtime</scope>
-                        <type>pom</type>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${plugin.surefire.version}</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Spec.java</include>
-                        <include>**/*IT.java</include>
-                    </includes>
-                    <failIfNoTests>false</failIfNoTests>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <release>${java.version}</release>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <compilerArgs>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-    <profiles>
-        <profile>
-            <!-- Test Coverage -->
-            <id>coverage</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>${jacoco-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>jacoco-prepare-agent</id>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>check</id>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                                <phase>verify</phase>
-                                <configuration>
-                                    <excludes>
-                                        <exclude>**/*Main.class</exclude>
-                                    </excludes>
-                                    <rules>
-                                        <rule>
-                                            <element>BUNDLE</element>
-                                            <limits>
-                                                <limit>
-                                                    <counter>INSTRUCTION</counter>
-                                                    <value>COVEREDRATIO</value>
-<!--                                                    <minimum>0.1</minimum>-->
-                                                </limit>
-                                                <limit>
-                                                    <counter>BRANCH</counter>
-                                                    <value>COVEREDRATIO</value>
-<!--                                                    <minimum>0.1</minimum>-->
-                                                </limit>
-                                            </limits>
-                                        </rule>
-                                    </rules>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>skip-code-review</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <version>${plugin.checkstyle.version}</version>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.github.spotbugs</groupId>
-                        <artifactId>spotbugs-maven-plugin</artifactId>
-                        <version>${plugin.spotbugs.version}</version>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

@@ -21,6 +21,7 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
 
     // TODO #3 to implement load context
     // TODO #4 to implement load context with urls hierarchy etc
+    @SuppressWarnings(["UnusedVariable"])
     def "should load all meta models as expected for simple case, default mapper, default service, default data storage"() {
         given:
         def firstApiTag = apiTagRepository.save(sampleApiTagEntity())
@@ -32,11 +33,6 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
         def reloadedContext = metaModelContextService.getMetaModelContext()
 
         then:
-        verifyAll(reloadedContext) {
-
-        }
-
+        verifyAll(reloadedContext) {}
     }
-
-
 }

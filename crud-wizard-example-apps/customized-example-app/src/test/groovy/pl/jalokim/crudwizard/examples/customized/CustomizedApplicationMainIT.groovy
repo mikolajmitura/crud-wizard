@@ -7,7 +7,7 @@ import pl.jalokim.crudwizard.CustomizedApplicationTestConfig
 import pl.jalokim.crudwizard.examples.customized.repo.UserEntity
 import pl.jalokim.crudwizard.test.utils.BaseIntegrationSpecification
 import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
-import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
+import pl.jalokim.utils.test.DataFakerHelper
 
 @ActiveProfiles("integration")
 @SpringBootTest(classes = [CustomizedApplicationTestConfig], webEnvironment = SpringBootTest.WebEnvironment.MOCK)

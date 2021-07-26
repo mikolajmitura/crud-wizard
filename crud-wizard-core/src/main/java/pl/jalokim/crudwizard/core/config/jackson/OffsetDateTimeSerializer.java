@@ -9,6 +9,8 @@ import java.time.format.DateTimeFormatter;
 
 public class OffsetDateTimeSerializer extends StdSerializer<OffsetDateTime> {
 
+    private static final long serialVersionUID = 1L;
+
     OffsetDateTimeSerializer() {
         super(OffsetDateTime.class);
     }

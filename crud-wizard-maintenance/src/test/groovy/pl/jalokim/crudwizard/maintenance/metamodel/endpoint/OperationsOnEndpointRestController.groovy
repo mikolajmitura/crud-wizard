@@ -1,10 +1,11 @@
 package pl.jalokim.crudwizard.maintenance.metamodel.endpoint
 
 import org.springframework.stereotype.Component
-import pl.jalokim.crudwizard.test.utils.BaseOperationsOnRestController
+import pl.jalokim.crudwizard.test.utils.BaseOperationsOnEndpoints
 
 @Component
-class OperationsOnEndpointRestController extends BaseOperationsOnRestController {
+@SuppressWarnings("GetterMethodCouldBeProperty")
+class OperationsOnEndpointRestController extends BaseOperationsOnEndpoints {
 
     @Override
     String getEndpointUrl() {

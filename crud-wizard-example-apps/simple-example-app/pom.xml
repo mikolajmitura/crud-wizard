@@ -5,16 +5,12 @@
     <parent>
         <artifactId>crud-wizard-example-apps</artifactId>
         <groupId>pl.jalokim.crudwizard.example</groupId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>simple-example-app</artifactId>
     <name>crud-wizard-example-apps/simple-example-app</name>
-
-    <properties>
-        <checkstyle.root.path>${project.parent.parent.basedir}</checkstyle.root.path>
-    </properties>
 
 </project>

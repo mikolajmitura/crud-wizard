@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 
 class StringBlankToNullModule extends SimpleModule {
 
+    private static final long serialVersionUID = 1L;
+
     StringBlankToNullModule() {
         addDeserializer(String.class, new StdScalarDeserializer<String>(String.class) {
             @Override

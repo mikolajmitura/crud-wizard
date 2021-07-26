@@ -5,7 +5,7 @@ import static pl.jalokim.crudwizard.core.exception.handler.ErrorWithMessagePlace
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder
 import pl.jalokim.crudwizard.core.exception.ErrorWithMessagePlaceholder
-import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
+import pl.jalokim.utils.test.DataFakerHelper
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import spock.lang.Specification
 

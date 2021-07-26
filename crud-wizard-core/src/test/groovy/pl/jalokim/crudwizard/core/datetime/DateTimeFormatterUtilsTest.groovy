@@ -6,6 +6,7 @@ import java.time.ZoneOffset
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings("UnnecessarySetter")
 class DateTimeFormatterUtilsTest extends Specification {
 
     private static TimeZone defaultTimeZoneId

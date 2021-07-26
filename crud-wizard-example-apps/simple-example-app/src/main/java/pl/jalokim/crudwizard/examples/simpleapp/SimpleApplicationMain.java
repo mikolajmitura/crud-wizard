@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Example of usage default jdbc data storage without custom entities and jpa configurations
  */
 @SpringBootApplication
+@SuppressWarnings("PMD.UseUtilityClass")
 public class SimpleApplicationMain {
 
     public static void main(String[] args) {

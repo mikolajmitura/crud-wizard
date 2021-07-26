@@ -49,6 +49,7 @@ import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.string.StringUtils;
 import pl.jalokim.utils.template.TemplateAsText;
 
+@SuppressWarnings({"PMD.GodClass", "PMD.NPathComplexity"})
 public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWithDynamicMessage<FieldShouldWhenOther, Object> {
 
     private static final String FIELD_SHOULD_BE_EXPECTED_TYPE =
@@ -101,6 +102,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         this.otherFieldValues = Arrays.asList(fieldShouldWhenOther.otherFieldValues());
     }
 
+    @Override
     public void setupCustomMessage(Object value, ConstraintValidatorContext context) {
         customMessage(context, createMessagePlaceholder(
             messagePlaceholder(context), messagePlaceholderArgs(value, context)
@@ -366,7 +368,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
             return new BigInteger(dependValuesMeta.getValues().get(0));
         } catch (NumberFormatException ex) {
             throw invalidFieldShouldWhenOtherConfig(fieldMeta, dependValuesMeta,
-                String.format("value of field: %s should be not floating point number", dependValuesMeta.getOtherFieldValuesName()));
+                String.format("value of field: %s should be not floating point number", dependValuesMeta.getOtherFieldValuesName()), ex);
         }
     }
 
@@ -380,13 +382,14 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
     }
 
     private static IllegalArgumentException invalidFieldShouldWhenOtherConfig(FieldMeta fieldMeta,
-        DependValuesMeta dependValuesMeta, String restOfMessage) {
+        DependValuesMeta dependValuesMeta, String restOfMessage, Exception causeException) {
 
         return new IllegalArgumentException(
             String.format("invalid @FieldShouldWhenOther for %s=%s for: %s=%s, %s",
                 dependValuesMeta.getFieldByPositionName(), fieldMeta.getFieldName(),
                 dependValuesMeta.getOtherFieldValuesName(), dependValuesMeta.getValues(),
-                restOfMessage)
+                restOfMessage),
+            causeException
         );
     }
 }

@@ -9,8 +9,8 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createEmptyValidatorMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
-import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomLong
-import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomText
+import static pl.jalokim.utils.test.DataFakerHelper.randomLong
+import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults

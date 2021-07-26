@@ -5,16 +5,12 @@
     <parent>
         <groupId>pl.jalokim.crudwizard</groupId>
         <artifactId>crud-wizard-parent</artifactId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>crud-wizard-generic-app-test-utils</artifactId>
-
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -41,7 +37,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>${plugin.gmaven.version}</version>
+                <version>${gmavenplus-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>

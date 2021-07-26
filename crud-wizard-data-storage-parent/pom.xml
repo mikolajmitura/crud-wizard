@@ -5,7 +5,7 @@
     <parent>
         <artifactId>crud-wizard-parent</artifactId>
         <groupId>pl.jalokim.crudwizard</groupId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -18,9 +18,5 @@
         <module>jdbc-data-storage</module>
         <module>in-memory-data-storage</module>
     </modules>
-
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
 
 </project>

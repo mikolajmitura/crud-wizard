@@ -3,10 +3,12 @@ package pl.jalokim.crudwizard.genericapp.metamodel.url;
 import static pl.jalokim.crudwizard.core.utils.StringHelper.replaceAllWithEmpty;
 
 import java.util.List;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart.UrlPartBuilder;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 
+@UtilityClass
 public class BaseUrlArgumentResolver {
 
     private static final String PATH_VARIABLE_REGEX = "\\{([a-zA-Z0-9])+}";

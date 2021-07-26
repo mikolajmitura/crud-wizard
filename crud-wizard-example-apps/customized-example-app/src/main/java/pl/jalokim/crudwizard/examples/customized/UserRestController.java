@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.examples.customized;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,17 +19,20 @@ import pl.jalokim.crudwizard.examples.customized.repo.UserRepository;
 @RequestMapping("/custom/users")
 @Transactional
 @RequiredArgsConstructor
+@Api(tags = "users")
 public class UserRestController {
 
     private final UserRepository userRepository;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation("add user")
     public Long addUser(@RequestBody UserEntity user) {
         return userRepository.save(user).getId();
     }
 
     @GetMapping
+    @ApiOperation("get all users")
     public List<UserEntity> getAll() {
         return userRepository.findAllByOrderById();
     }

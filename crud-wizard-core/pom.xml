@@ -5,31 +5,14 @@
     <parent>
         <artifactId>crud-wizard-parent</artifactId>
         <groupId>pl.jalokim.crudwizard</groupId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
-
     <artifactId>crud-wizard-core</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.spockframework</groupId>
-            <artifactId>spock-core</artifactId>
-            <version>${spock.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-datetime</artifactId>
-            <version>${groovy.version}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
@@ -43,5 +26,11 @@
             <artifactId>spring-data-jpa</artifactId>
         </dependency>
 
+        <!-- tests -->
+        <dependency>
+            <groupId>pl.jalokim.utils</groupId>
+            <artifactId>test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

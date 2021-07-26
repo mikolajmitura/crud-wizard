@@ -23,9 +23,6 @@ class JdbcDataStorageWithPrimaryDataSourceIT extends BaseIntegrationSpecificatio
     @Autowired
     private JdbcDataStorage jdbcDataStorage
 
-    @Autowired
-    private JdbcDataStorageProperties jdbcDataStorageProperties
-
     def "should inject other primary datasource"() {
         when:
         def dataSource = (HikariDataSource) jdbcDataStorage.dataSource

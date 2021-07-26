@@ -6,4 +6,5 @@ import org.springframework.boot.test.context.TestConfiguration
 @TestConfiguration
 @SpringBootApplication
 class CustomizedApplicationTestConfig {
+
 }

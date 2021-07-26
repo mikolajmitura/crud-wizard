@@ -21,15 +21,15 @@ public interface DataStorage {
      * @param entity value of entity
      * @return id of saved object
      */
-    Object saveEntity(ClassMetaModel classMetaModel, RawEntity entity);
+    Object saveEntity(ClassMetaModel classMetaModel, RawEntityObject entity);
 
     void deleteEntity(ClassMetaModel classMetaModel, Object idObject);
 
-    RawEntity getEntityById(ClassMetaModel classMetaModel, Object idObject);
+    RawEntityObject getEntityById(ClassMetaModel classMetaModel, Object idObject);
 
-    Page<RawEntity> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject);
+    Page<RawEntityObject> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject);
 
-    List<RawEntity> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject);
+    List<RawEntityObject> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject);
 
     default String infoDataStorage() {
         return String.format("%s %s", getName(), getClassName());

@@ -12,7 +12,7 @@ class DatabaseCleanupListenerOnClassTest extends DummyBaseIntegrationControllerS
 
     def setup() {
         executeOnlyOnce {
-            (1..5).forEach() {
+            (1..5).forEach {
                 DummyEntity entity1 = new DummyEntity()
                 entity1.setName("name:${it}")
                 dummyRepository1.save(entity1)

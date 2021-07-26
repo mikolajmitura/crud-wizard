@@ -13,6 +13,7 @@ public interface BaseConstraintValidator<A extends Annotation, T> extends Constr
 
     boolean isValidValue(T value, ConstraintValidatorContext context);
 
+    @Override
     default boolean isValid(T value, ConstraintValidatorContext context) {
         return Objects.isNull(value) || isValidValue(value, context);
     }

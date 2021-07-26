@@ -8,7 +8,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Objects;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class TestDateUtils {
 
     public static String toJsonFormat(OffsetDateTime offsetDateTime) {

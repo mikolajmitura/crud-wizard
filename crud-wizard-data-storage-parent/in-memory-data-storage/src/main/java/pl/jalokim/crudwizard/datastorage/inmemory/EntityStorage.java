@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.datastorage.inmemory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.datastorage.RawEntity;
+import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
@@ -14,24 +14,25 @@ public class EntityStorage {
 
     ClassMetaModel forModel;
     IdGenerators idGenerators;
-    Map<Object, RawEntity> entitiesById = new ConcurrentHashMap<>();
+    Map<Object, RawEntityObject> entitiesById = new ConcurrentHashMap<>();
 
-    public synchronized RawEntity getById(Object idObject) {
+    public synchronized RawEntityObject getById(Object idObject) {
         return entitiesById.get(idObject);
     }
 
-    public synchronized Object saveEntity(Object idObject, FieldMetaModel fieldWithId, RawEntity entity) {
-        if (idObject != null) {
-            if (entitiesById.containsKey(idObject)) {
-                delete(idObject);
-            }
+    public synchronized Object saveEntity(Object idObject, FieldMetaModel fieldWithId, RawEntityObject entity) {
+        Object idObjectToReturn = idObject;
+        if (idObjectToReturn == null) {
+            idObjectToReturn = idGenerators.getNextFor(fieldWithId.getFieldType().getRealClass());
+            entity.field(fieldWithId.getFieldName(), idObjectToReturn);
         } else {
-            idObject = idGenerators.getNextFor(fieldWithId.getFieldType().getRealClass());
-            entity.field(fieldWithId.getFieldName(), idObject);
+            if (entitiesById.containsKey(idObjectToReturn)) {
+                delete(idObjectToReturn);
+            }
         }
-        entitiesById.put(idObject, entity);
+        entitiesById.put(idObjectToReturn, entity);
 
-        return idObject;
+        return idObjectToReturn;
     }
 
     public synchronized void delete(Object idObject) {

@@ -5,16 +5,12 @@
     <parent>
         <artifactId>crud-wizard-data-storage-parent</artifactId>
         <groupId>pl.jalokim.crudwizard.datastorage</groupId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>in-memory-data-storage</artifactId>
-
-    <properties>
-        <checkstyle.root.path>${project.parent.parent.basedir}</checkstyle.root.path>
-    </properties>
 
     <dependencies>
         <dependency>

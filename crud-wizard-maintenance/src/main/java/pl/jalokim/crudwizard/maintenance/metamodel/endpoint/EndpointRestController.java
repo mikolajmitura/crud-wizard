@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.maintenance.metamodel.endpoint;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -14,12 +16,14 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelServ
 @RestController
 @RequestMapping("/maintenance/endpoints")
 @RequiredArgsConstructor
+@Api(tags = "endpoint-management")
 public class EndpointRestController {
 
     private final EndpointMetaModelService endpointService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation("Creation of new endpoint with metamodels")
     public Long createNewEndpoint(@RequestBody @Validated EndpointMetaModelDto createEndpointMetaModelDto) {
         // TODO validation that there is not endpoint with that url and http method already
         // TODO should be validation that in normal spring mappings that endpoint (url and http method) haven't existed already

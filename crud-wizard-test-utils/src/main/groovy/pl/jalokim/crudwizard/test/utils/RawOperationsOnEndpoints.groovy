@@ -16,7 +16,7 @@ import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig
 import pl.jalokim.crudwizard.test.utils.rest.EndpointActions
 
 @Component("rawOperationsOnRestController")
-class RawOperationsOnRestController implements EndpointActions {
+class RawOperationsOnEndpoints implements EndpointActions {
 
     @Autowired
     protected MockMvc client

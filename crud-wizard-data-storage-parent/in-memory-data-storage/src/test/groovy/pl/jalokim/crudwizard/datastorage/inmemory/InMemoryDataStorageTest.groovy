@@ -1,11 +1,11 @@
 package pl.jalokim.crudwizard.datastorage.inmemory
 
-import pl.jalokim.crudwizard.core.datastorage.RawEntity
+import pl.jalokim.crudwizard.core.datastorage.RawEntityObject
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators
-import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
+import pl.jalokim.utils.test.DataFakerHelper
 import spock.lang.Specification
 
 class InMemoryDataStorageTest extends Specification {
@@ -20,26 +20,26 @@ class InMemoryDataStorageTest extends Specification {
     def "should save, update, delete few entities in in memory data storage"() {
         given:
         def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE)
-        def firstPerson = RawEntity.fromMap([
+        def firstPerson = RawEntityObject.fromMap([
             name     : DataFakerHelper.randomText(),
             firstName: DataFakerHelper.randomText()
         ])
 
-        def secondPerson = RawEntity.fromMap([
+        def secondPerson = RawEntityObject.fromMap([
             name     : DataFakerHelper.randomText(),
             firstName: DataFakerHelper.randomText()
         ])
 
-        def address = RawEntity.fromMap([
+        def address = RawEntityObject.fromMap([
             city  : DataFakerHelper.randomText(),
             street: DataFakerHelper.randomText()
         ])
 
-        def firstJob = RawEntity.fromMap([
+        def firstJob = RawEntityObject.fromMap([
             jobName: DataFakerHelper.randomText()
         ])
 
-        def secondJob = RawEntity.fromMap([
+        def secondJob = RawEntityObject.fromMap([
             jobName: DataFakerHelper.randomText()
         ])
 
@@ -73,7 +73,7 @@ class InMemoryDataStorageTest extends Specification {
 
         and: "update to new entity for certain id"
         when:
-        def updatedFirstPerson = RawEntity.fromMap(firstPerson)
+        def updatedFirstPerson = RawEntityObject.fromMap(firstPerson)
         updatedFirstPerson.name = firstPerson.name + DataFakerHelper.randomText()
 
         Long updatedFirstPersonId = inMemoryStorage.saveEntity(personMetaModel, updatedFirstPerson)
@@ -99,7 +99,6 @@ class InMemoryDataStorageTest extends Specification {
     }
 
     private ClassMetaModel newClassMetaModel(String name, String idFieldName, Class<?> typeOfId) {
-
         def fieldMetaModel = FieldMetaModel.builder()
             .fieldName(idFieldName)
             .fieldType(ClassMetaModel.builder()

@@ -12,8 +12,10 @@ class DatabaseCleanupListenerOnMethodsTest extends DummyBaseIntegrationControlle
 
     @Shared
     List<Long> created1Ids = []
+
     @Shared
     List<Long> created2Ids = []
+
     @Shared
     List<Long> created3Ids = []
 
@@ -22,7 +24,7 @@ class DatabaseCleanupListenerOnMethodsTest extends DummyBaseIntegrationControlle
     def "should always return the 5 number of of dummy1 entities for: #invocationIndex"() {
         given:
         executeOnlyOnce {
-            (1..5).forEach() {
+            (1..5).forEach {
                 DummyEntity entity1 = new DummyEntity()
                 entity1.setName("name:${it}")
                 created1Ids << dummyRepository1.save(entity1).getId()
@@ -33,9 +35,7 @@ class DatabaseCleanupListenerOnMethodsTest extends DummyBaseIntegrationControlle
 
         then:
         created1Ids.size() == 5
-        created1Ids as Set == dummyRepository1.findAll().collect {
-            it.id
-        } as Set
+        created1Ids as Set == dummyRepository1.findAll()*.id as Set
         numberOrEntities == 5
 
         where:
@@ -51,7 +51,7 @@ class DatabaseCleanupListenerOnMethodsTest extends DummyBaseIntegrationControlle
     def "should always return the 4 number of of dummy1 entities for: #invocationIndex"() {
         given:
         executeOnlyOnce {
-            (1..4).forEach() {
+            (1..4).forEach {
                 DummyEntity entity1 = new DummyEntity()
                 entity1.setName("name:${it}")
                 created2Ids << dummyRepository1.save(entity1).getId()
@@ -62,9 +62,7 @@ class DatabaseCleanupListenerOnMethodsTest extends DummyBaseIntegrationControlle
 
         then:
         created2Ids.size() == 4
-        created2Ids as Set == dummyRepository1.findAll().collect {
-            it.id
-        } as Set
+        created2Ids as Set == dummyRepository1.findAll()*.id as Set
         numberOrEntities == 4
 
         where:
@@ -78,7 +76,7 @@ class DatabaseCleanupListenerOnMethodsTest extends DummyBaseIntegrationControlle
     def "should return the #expectedSize number of of dummy1 entities for: #invocationIndex"() {
         given:
         executeOnlyOnce {
-            (1..4).forEach() {
+            (1..4).forEach {
                 DummyEntity entity1 = new DummyEntity()
                 entity1.setName("name:${it}")
                 created3Ids << dummyRepository1.save(entity1).getId()

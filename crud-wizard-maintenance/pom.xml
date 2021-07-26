@@ -5,16 +5,12 @@
     <parent>
         <artifactId>crud-wizard-parent</artifactId>
         <groupId>pl.jalokim.crudwizard</groupId>
-        <version>${main.version}.${minor.version}</version>
+        <version>${main-version}.${minor-version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>crud-wizard-maintenance</artifactId>
-
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
 
     <dependencies>
         <dependency>

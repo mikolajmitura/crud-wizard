@@ -4,7 +4,7 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createM
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder
 
 import pl.jalokim.crudwizard.core.exception.handler.DummyRestController
-import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
+import pl.jalokim.utils.test.DataFakerHelper
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImplTest
 import spock.lang.Specification

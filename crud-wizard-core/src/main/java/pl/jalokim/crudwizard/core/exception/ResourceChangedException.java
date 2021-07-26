@@ -4,6 +4,8 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsP
 
 public class ResourceChangedException extends ApplicationException {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String RESOURCE_CHANGED_EXCEPTION_DEFAULT_MESSAGE = "ResourceChangedException.default.message";
 
     public ResourceChangedException() {

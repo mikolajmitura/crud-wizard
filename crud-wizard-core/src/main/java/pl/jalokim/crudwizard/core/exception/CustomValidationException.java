@@ -10,6 +10,8 @@ import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 @Getter
 public class CustomValidationException extends ApplicationException {
 
+    private static final long serialVersionUID = 1L;
+
     private final Set<ErrorWithMessagePlaceholder> errors;
     private final HttpStatus statusCode;
 
