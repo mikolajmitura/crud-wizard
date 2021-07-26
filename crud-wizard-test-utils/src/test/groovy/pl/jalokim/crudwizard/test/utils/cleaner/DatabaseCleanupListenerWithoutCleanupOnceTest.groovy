@@ -11,7 +11,7 @@ class DatabaseCleanupListenerWithoutCleanupOnceTest extends DummyBaseIntegration
 
     def setup() {
         executeOnlyOnce {
-            (1..5).forEach() {
+            (1..5).forEach {
                 DummyEntity entity1 = new DummyEntity()
                 entity1.setName("name:${it}")
                 dummyRepository1.save(entity1)
@@ -36,7 +36,7 @@ class DatabaseCleanupListenerWithoutCleanupOnceTest extends DummyBaseIntegration
     def "should find #expectedSize entries from created before all test (test 2) for: #invocationIndex index"() {
         given:
         executeOnlyOnce {
-            (1..4).forEach() {
+            (1..4).forEach {
                 DummyEntity entity1 = new DummyEntity()
                 entity1.setName("name:${it}")
                 dummyRepository1.save(entity1)

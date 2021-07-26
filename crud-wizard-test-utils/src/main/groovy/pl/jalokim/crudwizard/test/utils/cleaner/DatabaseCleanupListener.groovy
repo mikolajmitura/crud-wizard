@@ -15,7 +15,7 @@ class DatabaseCleanupListener extends AbstractTestExecutionListener {
         }
 
         if (cleanupOnceOnMethodLevel(testContext)) {
-            if (invokedCleanupByMethod.computeIfAbsent(testContext.testMethod, {key-> 0}) == 0) {
+            if (invokedCleanupByMethod.computeIfAbsent(testContext.testMethod, {key -> 0}) == 0) {
                 cleanUpWithIncrementInvocation(testContext)
             }
         } else if (!cleanupOnceOnClassLevel(testContext)) {

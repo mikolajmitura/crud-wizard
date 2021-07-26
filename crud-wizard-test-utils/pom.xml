@@ -12,36 +12,21 @@
 
     <artifactId>crud-wizard-test-utils</artifactId>
 
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>pl.jalokim.utils</groupId>
+            <artifactId>test-utils</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>
             <artifactId>crud-wizard-core</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.github.javafaker</groupId>
-            <artifactId>javafaker</artifactId>
-            <version>${javafaker.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.spockframework</groupId>
-            <artifactId>spock-core</artifactId>
-            <version>${spock.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-spring</artifactId>
             <version>${spock.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-datetime</artifactId>
-            <version>${groovy.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -53,10 +38,6 @@
             <artifactId>h2</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
@@ -73,7 +54,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>${plugin.gmaven.version}</version>
+                <version>${gmavenplus-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>

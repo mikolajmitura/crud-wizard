@@ -7,21 +7,14 @@ import javax.validation.metadata.ConstraintDescriptor;
 
 class SimpleConstraintViolation implements ConstraintViolation {
 
+    Path propertyPath;
+    String message;
+
     @NamedVariant
     SimpleConstraintViolation(Path propertyPath, String message) {
         this.propertyPath = propertyPath;
         this.message = message;
     }
-
-    Path propertyPath;
-    String message;
-    final String messageTemplate = null;
-    final Object rootBean = null;
-    final Class rootBeanClass = null;
-    final Object leafBean = null;
-    final Object executableReturnValue = null;
-    final Object invalidValue = null;
-    final ConstraintDescriptor<?> constraintDescriptor = null;
 
     @Override
     public String getMessage() {

@@ -11,6 +11,8 @@ import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 @Getter
 public abstract class ApplicationException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     private final String originalTextOrPlaceholder;
     private MessagePlaceholder messagePlaceHolder;
 

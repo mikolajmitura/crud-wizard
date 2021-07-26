@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
-import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomText
+import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 

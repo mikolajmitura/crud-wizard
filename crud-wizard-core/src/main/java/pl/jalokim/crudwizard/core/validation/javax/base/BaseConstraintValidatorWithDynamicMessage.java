@@ -37,7 +37,7 @@ public interface BaseConstraintValidatorWithDynamicMessage<A extends Annotation,
         return String.format("%s.message", validatorAnnotation.getCanonicalName());
     }
 
-    static String joinWithComma(String[] fieldNames) {
+    static String joinWithComma(String... fieldNames) {
         return joinWithComma(Arrays.asList(fieldNames));
     }
 

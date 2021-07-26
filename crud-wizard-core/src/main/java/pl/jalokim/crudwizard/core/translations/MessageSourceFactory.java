@@ -3,9 +3,11 @@ package pl.jalokim.crudwizard.core.translations;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.experimental.UtilityClass;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
+@UtilityClass
 public class MessageSourceFactory {
 
     public static final String APPLICATION_TRANSLATIONS_PATH = "application-translations";

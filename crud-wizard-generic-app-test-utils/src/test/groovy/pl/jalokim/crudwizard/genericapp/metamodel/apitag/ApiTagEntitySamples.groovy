@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.apitag
 
-import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
+import pl.jalokim.utils.test.DataFakerHelper
 
 class ApiTagEntitySamples {
 

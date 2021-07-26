@@ -13,10 +13,6 @@
 
     <artifactId>crud-wizard-generic-app</artifactId>
 
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>

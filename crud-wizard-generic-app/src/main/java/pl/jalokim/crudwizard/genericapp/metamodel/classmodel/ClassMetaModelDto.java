@@ -24,14 +24,18 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-@FieldShouldWhenOther(field = "name", should = NOT_NULL, whenField = "className", is = NULL)
-@FieldShouldWhenOther(field = "name", should = NULL, whenField = "className", is = NOT_NULL)
-@FieldShouldWhenOther(field = "className", should = NULL, whenField = "name", is = NOT_NULL)
-@FieldShouldWhenOther(field = "fields", should = NULL, whenField = "className", is = NOT_NULL)
-@FieldShouldWhenOther(field = "fields", should = NOT_EMPTY, whenField = "name", is = NOT_NULL)
-@FieldShouldWhenOther(field = "genericTypes", should = NULL, whenField = "name", is = NOT_NULL)
-@FieldShouldWhenOther(field = "extendsFromModels", should = NULL, whenField = "className", is = NOT_NULL)
+@FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NOT_NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NULL)
+@FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = ClassMetaModelDto.CLASS_NAME, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = ClassMetaModelDto.FIELDS, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = "fields", should = NOT_EMPTY, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = "genericTypes", should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = "extendsFromModels", should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL)
 public class ClassMetaModelDto extends AdditionalPropertyMetaModelDto {
+
+    public static final String NAME = "name";
+    public static final String CLASS_NAME = "className";
+    public static final String FIELDS = "fields";
 
     @NotNull(groups = UpdateContext.class)
     Long id;

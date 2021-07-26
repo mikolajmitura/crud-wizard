@@ -12,10 +12,6 @@
 
     <artifactId>crud-wizard-generic-app-test-utils</artifactId>
 
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>
@@ -41,7 +37,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>${plugin.gmaven.version}</version>
+                <version>${gmavenplus-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>

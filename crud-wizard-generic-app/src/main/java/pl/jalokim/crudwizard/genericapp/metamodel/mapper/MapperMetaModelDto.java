@@ -17,13 +17,18 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 @Value
 @Builder
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-@FieldShouldWhenOther(field = "className", should = NULL, whenField = "mapperScript", is = NOT_NULL)
-@FieldShouldWhenOther(field = "beanName", should = NULL, whenField = "mapperScript", is = NOT_NULL)
-@FieldShouldWhenOther(field = "methodName", should = NULL, whenField = "mapperScript", is = NOT_NULL)
-@FieldShouldWhenOther(field = "mapperScript", should = NULL, whenField = "className", is = NOT_NULL)
-@FieldShouldWhenOther(field = "mapperScript", should = NULL, whenField = "methodName", is = NOT_NULL)
-@FieldShouldWhenOther(field = "mapperScript", should = NULL, whenField = "beanName", is = NOT_NULL)
+@FieldShouldWhenOther(field = MapperMetaModelDto.CLASS_NAME, should = NULL, whenField = MapperMetaModelDto.MAPPER_SCRIPT, is = NOT_NULL)
+@FieldShouldWhenOther(field = MapperMetaModelDto.BEAN_NAME, should = NULL, whenField = MapperMetaModelDto.MAPPER_SCRIPT, is = NOT_NULL)
+@FieldShouldWhenOther(field = MapperMetaModelDto.METHOD_NAME, should = NULL, whenField = MapperMetaModelDto.MAPPER_SCRIPT, is = NOT_NULL)
+@FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MapperMetaModelDto.CLASS_NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MapperMetaModelDto.METHOD_NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MapperMetaModelDto.BEAN_NAME, is = NOT_NULL)
 public class MapperMetaModelDto extends AdditionalPropertyMetaModelDto {
+
+    public static final String MAPPER_SCRIPT = "mapperScript";
+    public static final String CLASS_NAME = "className";
+    public static final String METHOD_NAME = "methodName";
+    public static final String BEAN_NAME = "beanName";
 
     Long id;
     String className;

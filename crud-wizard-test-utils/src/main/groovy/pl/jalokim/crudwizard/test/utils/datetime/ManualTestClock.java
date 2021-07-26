@@ -5,20 +5,22 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 
-public class ManualTestClock extends Clock implements Serializable {
+public final class ManualTestClock extends Clock implements Serializable {
 
-    private static final Clock defaultClock = Clock.systemDefaultZone();
+    private static final long serialVersionUID = 1L;
 
-    private Instant instant;
-    private ZoneId zone;
+    private static final Clock DEFAULT_CLOCK = Clock.systemDefaultZone();
+
+    private final ZoneId zone;
+    private Instant fixedInstant;
 
     private ManualTestClock() {
-        instant = null;
+        fixedInstant = null;
         this.zone = ZoneId.systemDefault();
     }
 
     private ManualTestClock(Instant fixedInstant, ZoneId zone) {
-        this.instant = fixedInstant;
+        this.fixedInstant = fixedInstant;
         this.zone = zone;
     }
 
@@ -37,9 +39,9 @@ public class ManualTestClock extends Clock implements Serializable {
             return this;
         }
         if (fixedClockSet()) {
-            return new ManualTestClock(this.instant, zone);
+            return new ManualTestClock(this.fixedInstant, zone);
         }
-        return defaultClock.withZone(zone);
+        return DEFAULT_CLOCK.withZone(zone);
     }
 
     @Override
@@ -71,29 +73,29 @@ public class ManualTestClock extends Clock implements Serializable {
         return "ManualClock(" + (fixedClockSet() ? "FixedClock" : "DefaultSystemClock") + ")[" + getInstantInternal() + "," + getZoneInternal() + "]";
     }
 
-    public void setInstant(Instant instant) {
-        this.instant = instant;
+    public void setFixedInstant(Instant fixedInstant) {
+        this.fixedInstant = fixedInstant;
     }
 
     public void reset() {
-        instant = null;
+        fixedInstant = null;
     }
 
     private ZoneId getZoneInternal() {
         if (fixedClockSet()) {
             return zone;
         }
-        return defaultClock.getZone();
+        return DEFAULT_CLOCK.getZone();
     }
 
     private boolean fixedClockSet() {
-        return instant != null;
+        return fixedInstant != null;
     }
 
     private Instant getInstantInternal() {
         if (fixedClockSet()) {
-            return instant;
+            return fixedInstant;
         }
-        return defaultClock.instant();
+        return DEFAULT_CLOCK.instant();
     }
 }

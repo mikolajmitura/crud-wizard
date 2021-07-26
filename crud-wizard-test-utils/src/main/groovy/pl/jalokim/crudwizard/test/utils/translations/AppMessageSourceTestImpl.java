@@ -22,9 +22,9 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +44,7 @@ import pl.jalokim.utils.constants.Constants;
 public class AppMessageSourceTestImpl extends SpringAppMessageSource {
 
     public static final String EXPECTED_TEST_TRANSLATIONS = "expected-test-translations";
-    public static AppMessageSourceTestImpl EXPECTED_MESSAGES = new AppMessageSourceTestImpl(EXPECTED_TEST_TRANSLATIONS, false);
+    public static final AppMessageSourceTestImpl EXPECTED_MESSAGES = new AppMessageSourceTestImpl(EXPECTED_TEST_TRANSLATIONS, false);
 
     private final Properties properties = new Properties();
 
@@ -71,7 +71,7 @@ public class AppMessageSourceTestImpl extends SpringAppMessageSource {
     @Deprecated
     public AppMessageSourceTestImpl(File pathToPropertiesFile) {
         super(null);
-        try (InputStream inputStream = new FileInputStream(pathToPropertiesFile)) {
+        try (InputStream inputStream = Files.newInputStream(pathToPropertiesFile.toPath())) {
             properties.load(inputStream);
         }
         TestAppMessageSourceHolder.setAppMessageSource(this);

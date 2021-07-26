@@ -29,6 +29,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEn
 @Table(name = "class_meta_models")
 public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
+    public static final String CLASS_META_MODEL_ID = "class_meta_model_id";
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -40,19 +42,19 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     @ManyToMany
     @JoinTable(
         name = "class_meta_models_generic_types",
-        joinColumns = { @JoinColumn(name = "class_meta_model_id") },
+        joinColumns = { @JoinColumn(name = CLASS_META_MODEL_ID) },
         inverseJoinColumns = { @JoinColumn(name = "generic_model_id") }
     )
     private List<ClassMetaModelEntity> genericTypes;
 
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
-    @JoinColumn(name = "class_meta_model_id")
+    @JoinColumn(name = CLASS_META_MODEL_ID)
     private List<FieldMetaModelEntity> fields;
 
     @ManyToMany
     @JoinTable(
         name = "meta_models_validators",
-        joinColumns = { @JoinColumn(name = "class_meta_model_id") },
+        joinColumns = { @JoinColumn(name = CLASS_META_MODEL_ID) },
         inverseJoinColumns = { @JoinColumn(name = "validator_meta_model_id") }
     )
     private List<ValidatorMetaModelEntity> validators;
@@ -60,7 +62,7 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     @ManyToMany
     @JoinTable(
         name = "class_meta_extends_from_models",
-        joinColumns = { @JoinColumn(name = "class_meta_model_id") },
+        joinColumns = { @JoinColumn(name = CLASS_META_MODEL_ID) },
         inverseJoinColumns = { @JoinColumn(name = "extends_from_model_id") }
     )
     private List<ClassMetaModelEntity> extendsFromModels;

@@ -16,9 +16,9 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_1
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_2
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_3
-import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomInteger
-import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomLong
-import static pl.jalokim.crudwizard.test.utils.random.DataFakerHelper.randomText
+import static pl.jalokim.utils.test.DataFakerHelper.randomInteger
+import static pl.jalokim.utils.test.DataFakerHelper.randomLong
+import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.EXPECTED_MESSAGES
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
@@ -32,6 +32,7 @@ import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings("UnusedPrivateField")
 class FieldShouldWhenOtherValidatorTest extends Specification {
 
     private ValidatorWithConverter validatorWithConverter
@@ -421,7 +422,6 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
             .build()
     }
 
-
     private FieldShouldWhenOtherDto someObject15() {
         FieldShouldWhenOtherDto.builder()
             .someLong(10)
@@ -471,6 +471,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
 
     @FieldShouldWhenOther(field = "object1", should = EMPTY, fieldValues = "12", whenField = "object2", is = NOT_EMPTY, otherFieldValues = "12")
     private static class ShouldDoesNotHaveOtherFieldsValue {
+
         private String object1
         private String object2
     }
@@ -478,6 +479,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
     @FieldShouldWhenOther(field = "notSupported", should = MAX, fieldValues = "12",  whenField = "someString1", is = NOT_NULL)
     @FieldShouldWhenOther(field = "notSupported", should = MIN, fieldValues = "12",  whenField = "someString2", is = NOT_NULL)
     private static class MinMaxTestNotSupportedClasses {
+
         private LocalDate notSupported
         private String someString1
         private String someString2
@@ -485,6 +487,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
 
     @FieldShouldWhenOther(field = "someString1", should = MIN, fieldValues = "12.11",  whenField = "forTestInvalidStringSize", is = NOT_NULL)
     private static class MinMaxTestExpectingIntegerValueInConfig {
+
         private String someString1
         private String forTestInvalidStringSize
     }

@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ValidatorFactoryHolder {
 
+    private static final AtomicReference<ValidatorFactory> VALIDATOR_FACTORY_REFERENCE = new AtomicReference<>();
+
     @Autowired
     private ValidatorFactory validatorFactory;
 
@@ -18,8 +20,6 @@ public class ValidatorFactoryHolder {
     public void init() {
         setValidatorFactory(validatorFactory);
     }
-
-    private static final AtomicReference<ValidatorFactory> VALIDATOR_FACTORY_REFERENCE = new AtomicReference<>();
 
     public static ValidatorFactory getValidatorFactory() {
         return Optional.ofNullable(VALIDATOR_FACTORY_REFERENCE.get())

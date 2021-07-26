@@ -57,6 +57,7 @@ public interface AppMessageSource {
         return getMessageWithPrefix(prefix, buildPropertyKey(enumValue), placeholderArgs);
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     default String getMessageWithOptionalSuffixes(String rootPropertyKey, Object... optionalSuffixes) {
         if (isNull(rootPropertyKey)) {
             return null;

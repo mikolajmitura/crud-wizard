@@ -23,8 +23,6 @@ class BaseUrlArgumentResolverTest extends Specification {
         "/users/{userId}/orders/{orderId}" || [normalUrlPart("users"), variableUrlPart("userId"),
                                                normalUrlPart("orders"), variableUrlPart("orderId")]
         "/users/data"                      || [normalUrlPart("users"), normalUrlPart("data")]
-        "/users//data"                      || [normalUrlPart("users"), normalUrlPart("data")]
+        "/users//data"                     || [normalUrlPart("users"), normalUrlPart("data")]
     }
-
-
 }

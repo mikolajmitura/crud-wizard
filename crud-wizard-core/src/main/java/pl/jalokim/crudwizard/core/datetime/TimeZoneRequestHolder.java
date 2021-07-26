@@ -2,8 +2,10 @@ package pl.jalokim.crudwizard.core.datetime;
 
 import java.time.ZoneId;
 import java.util.Optional;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.exception.BusinessLogicException;
 
+@UtilityClass
 public class TimeZoneRequestHolder {
 
     public static final String X_TIMEZONE_NAME_HEADER = "X-Timezone-Name";

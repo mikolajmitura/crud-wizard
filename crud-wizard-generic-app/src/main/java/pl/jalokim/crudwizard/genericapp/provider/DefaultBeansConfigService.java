@@ -98,7 +98,7 @@ public class DefaultBeansConfigService {
     private void saveDefaultDataStorageConnectors() {
         var defaultDataStorageConnectorsId = getDefaultDataStorageConnectorsId();
         if (isEmpty(defaultDataStorageConnectorsId)) {
-            Long[] newDefaultDataStorageConnectorsId = new Long[]{
+            Long[] newDefaultDataStorageConnectorsId = {
                 dataStorageConnectorMetaModelService.saveNewDataStorageConnector(DataStorageConnectorMetaModelEntity.builder()
                     .dataStorageMetaModel(dataStorageMetaModelRepository.getOne(getDefaultDataStorageId()))
                     .mapperMetaModel(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))

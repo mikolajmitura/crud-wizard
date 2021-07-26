@@ -5,7 +5,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class DateTimeFormatterUtils {
 
     private static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";

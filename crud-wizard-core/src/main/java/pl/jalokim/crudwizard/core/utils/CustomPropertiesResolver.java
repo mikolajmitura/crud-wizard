@@ -6,8 +6,8 @@ import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isCollectionTy
 import com.google.common.base.CaseFormat;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,11 +17,12 @@ import java.util.function.Function;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Value;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.PropertySource;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
@@ -29,6 +30,9 @@ import pl.jalokim.utils.reflection.ReflectionOperationException;
 import pl.jalokim.utils.reflection.TypeMetadata;
 import pl.jalokim.utils.string.StringUtils;
 
+@UtilityClass
+@SuppressWarnings("PMD.CognitiveComplexity")
+@Slf4j
 public class CustomPropertiesResolver {
 
     private static final Map<Class<?>, Function<String, Object>> OBJECT_FACTORY_BY_CLASS_TYPE = Map.ofEntries(
@@ -66,36 +70,41 @@ public class CustomPropertiesResolver {
 
     private static Map<String, PropertySourceOriginValue> getValueOfProperties(String propertyPrefix, List<MapPropertySource> propertySources) {
         Map<String, PropertySourceOriginValue> properties = new HashMap<>();
-        for (MapPropertySource propertySource : propertySources) {
+        propertySources.forEach(propertySource -> {
             Map<String, Object> mapFromPropertySource = propertySource.getSource();
-            for (String keyProperty : mapFromPropertySource.keySet()) {
-                if (keyProperty.startsWith(propertyPrefix)) {
-                    Elements<String> keyPropertyParts = Elements.elements(keyProperty.replace(propertyPrefix + ".", "")
-                        .split("\\."));
-                    AtomicReference<Map<String, PropertySourceOriginValue>> currentNode = new AtomicReference<>(properties);
-                    keyPropertyParts.forEachWithIndexed(element -> {
-                        String propertyPart = element.getValue();
-                        PropertySourceOriginValue node = currentNode.get().get(propertyPart);
-                        if (node == null) {
-                            if (element.isLast()) {
-                                currentNode.get().put(propertyPart, getOriginValue(propertySource, mapFromPropertySource, keyProperty));
-                            } else {
-                                HashMap<String, PropertySourceOriginValue> newNode = new HashMap<>();
-                                currentNode.get().put(propertyPart, new PropertySourceOriginValue(propertySource.getName(), keyProperty, newNode));
-                                currentNode.set(newNode);
-                            }
-                        } else {
-                            if (node.getPropertyValue() instanceof Map) {
-                                currentNode.set(getAsMap(node.getPropertyValue()));
-                            } else {
-                                currentNode.get().put(propertyPart, getOriginValue(propertySource, mapFromPropertySource, keyProperty));
-                            }
-                        }
-                    });
-                }
-            }
-        }
+            mapFromPropertySource.keySet()
+                .forEach(keyProperty -> populateValuesOfProperties(propertyPrefix, properties, propertySource, mapFromPropertySource, keyProperty));
+        });
         return properties;
+    }
+
+    @SuppressWarnings({"PMD.CognitiveComplexity", "PMD.CloseResource"})
+    private static void populateValuesOfProperties(String propertyPrefix, Map<String, PropertySourceOriginValue> properties, MapPropertySource propertySource,
+        Map<String, Object> mapFromPropertySource, String keyProperty) {
+        if (keyProperty.startsWith(propertyPrefix)) {
+            Elements<String> keyPropertyParts = Elements.elements(keyProperty.replace(propertyPrefix + ".", "")
+                .split("\\."));
+            AtomicReference<Map<String, PropertySourceOriginValue>> currentNode = new AtomicReference<>(properties);
+            keyPropertyParts.forEachWithIndexed(element -> {
+                String propertyPart = element.getValue();
+                PropertySourceOriginValue node = currentNode.get().get(propertyPart);
+                if (node == null) {
+                    if (element.isLast()) {
+                        currentNode.get().put(propertyPart, getOriginValue(propertySource, mapFromPropertySource, keyProperty));
+                    } else {
+                        HashMap<String, PropertySourceOriginValue> newNode = new HashMap<>();
+                        currentNode.get().put(propertyPart, new PropertySourceOriginValue(propertySource.getName(), keyProperty, newNode));
+                        currentNode.set(newNode);
+                    }
+                } else {
+                    if (node.getPropertyValue() instanceof Map) {
+                        currentNode.set(getAsMap(node.getPropertyValue()));
+                    } else {
+                        currentNode.get().put(propertyPart, getOriginValue(propertySource, mapFromPropertySource, keyProperty));
+                    }
+                }
+            });
+        }
     }
 
     private static PropertySourceOriginValue getOriginValue(MapPropertySource propertySource, Map<String,
@@ -106,12 +115,14 @@ public class CustomPropertiesResolver {
 
     private static List<MapPropertySource> getMapPropertySources(AbstractEnvironment environment) {
         List<MapPropertySource> propertySources = new ArrayList<>();
-        for (Iterator<PropertySource<?>> it = environment.getPropertySources().iterator(); it.hasNext(); ) {
-            PropertySource<?> propertySource = it.next();
-            if (propertySource instanceof MapPropertySource) {
-                propertySources.add(0, (MapPropertySource) propertySource);
+
+        environment.getPropertySources().forEach(propertySource -> {
+                if (propertySource instanceof MapPropertySource) {
+                    propertySources.add(0, (MapPropertySource) propertySource);
+                }
             }
-        }
+        );
+
         return propertySources;
     }
 
@@ -129,22 +140,34 @@ public class CustomPropertiesResolver {
 
             String setterName = buildSetterMethodName(fieldName);
             TypeMetadata metaForField = getMetaForField(objectMetadata, fieldName, propertyEntry.getValue());
-            Method[] methods = objectMetadata.getRawType().getMethods();
-            for (Method method : methods) {
-                if (method.getName().equals(setterName)) {
-                    List<Class<?>> methodArgsTypes = Elements.elements(method.getParameterTypes()).asList();
-                    if (methodArgsTypes.size() == 1) {
-                        Class<?> setterArgument = methodArgsTypes.get(0);
-                        if (metaForField.getRawType().isAssignableFrom(setterArgument)) {
-                            Object newObject = getNodeValue(propertyEntry, realObject, TypeMetadataForField.create(fieldName, metaForField));
-                            if (newObject != null) {
-                                try {
-                                    method.invoke(realObject, newObject);
-                                } catch (ReflectiveOperationException e) {
-                                    // nop
-                                }
-                            }
-                        }
+            populateFieldInObjects(objectMetadata, realObject, propertyEntry, fieldName, setterName, metaForField);
+        }
+    }
+
+    private static void populateFieldInObjects(TypeMetadata objectMetadata, Object realObject, Entry<String, PropertySourceOriginValue> propertyEntry,
+        String fieldName, String setterName, TypeMetadata metaForField) {
+
+        Method[] methods = objectMetadata.getRawType().getMethods();
+
+        Arrays.stream(methods)
+            .filter(method -> method.getName().equals(setterName))
+            .forEach(method -> {
+                List<Class<?>> methodArgsTypes = Elements.elements(method.getParameterTypes()).asList();
+                setValueViaSetterWhenCan(realObject, propertyEntry, fieldName, metaForField, method, methodArgsTypes);
+            });
+    }
+
+    private static void setValueViaSetterWhenCan(Object realObject, Entry<String, PropertySourceOriginValue> propertyEntry, String fieldName,
+        TypeMetadata metaForField, Method method, List<Class<?>> methodArgsTypes) {
+        if (methodArgsTypes.size() == 1) {
+            Class<?> setterArgument = methodArgsTypes.get(0);
+            if (metaForField.getRawType().isAssignableFrom(setterArgument)) {
+                Object newObject = getNodeValue(propertyEntry, realObject, TypeMetadataForField.create(fieldName, metaForField));
+                if (newObject != null) {
+                    try {
+                        method.invoke(realObject, newObject);
+                    } catch (ReflectiveOperationException e) {
+                        log.debug("problem during invoke method " + method, e);
                     }
                 }
             }
@@ -170,18 +193,18 @@ public class CustomPropertiesResolver {
         if (metaForField.isSimpleType()) {
             String rawValueAsText = (String) propertyValue;
             Function<String, Object> stringObjectFunction = OBJECT_FACTORY_BY_CLASS_TYPE.get(rawFieldType);
-            if (stringObjectFunction != null) {
-                try {
-                    newObject = stringObjectFunction.apply(rawValueAsText);
-                } catch (Exception ex) {
-                  // nop
-                }
-            } else {
+            if (stringObjectFunction == null) {
                 for (Class<?> typeFromMapConversion : OBJECT_FACTORY_BY_CLASS_TYPE.keySet()) {
                     if (rawFieldType.isAssignableFrom(typeFromMapConversion)) {
                         newObject = rawValueAsText;
                         break;
                     }
+                }
+            } else {
+                try {
+                    newObject = stringObjectFunction.apply(rawValueAsText);
+                } catch (Exception ex) {
+                    log.debug("error during conversion from " + rawValueAsText, ex);
                 }
             }
         } else if (metaForField.isMapType()) {
@@ -196,8 +219,6 @@ public class CustomPropertiesResolver {
 
             newObject = newMap;
         } else if (isCollectionType(metaForField.getRawType())) {
-            int atIndexToAdd = Integer.parseInt(propertyEntry.getKey().split("\\[")[1].replaceAll("]", ""));
-            TypeMetadata typeInCollection = metaForField.getGenericType(0);
             newObject = InvokableReflectionUtils.getValueOfField(parentNode, typeMetadataForField.getFieldName());
             if (newObject == null) {
                 if (rawFieldType.isAssignableFrom(List.class)) {
@@ -208,6 +229,8 @@ public class CustomPropertiesResolver {
                     throw new IllegalStateException("Not supported type: " + metaForField.getRawType().getCanonicalName());
                 }
             }
+            int atIndexToAdd = Integer.parseInt(propertyEntry.getKey().split("\\[")[1].replaceAll("]", ""));
+            TypeMetadata typeInCollection = metaForField.getGenericType(0);
             addToCollectionAtIndex(newObject, atIndexToAdd, getNodeValue(propertyEntry, parentNode, TypeMetadataForField.create(typeInCollection)));
         } else {
             newObject = InvokableReflectionUtils.newInstance(rawFieldType);
@@ -269,6 +292,7 @@ public class CustomPropertiesResolver {
 
     @Value
     private static class PropertySourceOriginValue {
+
         String propertyKeySource;
         String propertyKey;
         Object propertyValue;
@@ -285,7 +309,7 @@ public class CustomPropertiesResolver {
                 }
                 list.add(objectToAdd);
             }
-        } else if (collectionObject instanceof Set)  {
+        } else if (collectionObject instanceof Set) {
             ((Set<Object>) collectionObject).add(objectToAdd);
         } else {
             throw new IllegalStateException("Not supported type: " + collectionObject.getClass().getCanonicalName());

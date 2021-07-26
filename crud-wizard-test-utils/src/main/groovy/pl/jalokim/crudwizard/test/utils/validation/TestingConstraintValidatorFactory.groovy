@@ -20,7 +20,7 @@ import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
  */
 class TestingConstraintValidatorFactory implements ConstraintValidatorFactory {
 
-    private def constraintValidatorFactory = new ConstraintValidatorFactoryImpl()
+    private constraintValidatorFactory = new ConstraintValidatorFactoryImpl()
     List<?> validatorsDependencies
 
     TestingConstraintValidatorFactory(Object... validatorsDependencies) {

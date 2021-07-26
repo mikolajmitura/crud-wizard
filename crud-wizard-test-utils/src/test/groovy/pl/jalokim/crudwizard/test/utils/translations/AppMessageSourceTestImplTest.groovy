@@ -14,7 +14,7 @@ import javax.validation.constraints.DecimalMax
 import org.springframework.context.MessageSource
 import org.springframework.context.NoSuchMessageException
 import pl.jalokim.crudwizard.core.translations.ExampleEnum
-import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
+import pl.jalokim.utils.test.DataFakerHelper
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Specification
 
@@ -169,7 +169,7 @@ class AppMessageSourceTestImplTest extends Specification {
     def "should return expected message for DecimalMax"() {
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(new SomeBean(
-            someDecimalNumber: new BigDecimal("1000.00"),
+            someDecimalNumber: 1000.00G,
         ))
 
         then:

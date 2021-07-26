@@ -12,10 +12,6 @@
 
     <artifactId>crud-wizard-maintenance</artifactId>
 
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>

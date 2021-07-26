@@ -3,9 +3,9 @@ package pl.jalokim.crudwizard.test.utils
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
-abstract class BaseOperationsOnRestController<INPUT> extends RawOperationsOnRestController {
+abstract class BaseOperationsOnEndpoints<INPUT> extends RawOperationsOnEndpoints {
 
     long create(INPUT payload) {
         postAndReturnLong(getEndpointUrl(), payload)

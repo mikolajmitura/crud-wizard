@@ -19,8 +19,4 @@
         <module>in-memory-data-storage</module>
     </modules>
 
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
-
 </project>

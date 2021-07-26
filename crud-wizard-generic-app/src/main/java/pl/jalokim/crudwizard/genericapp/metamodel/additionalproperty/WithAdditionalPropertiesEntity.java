@@ -25,5 +25,6 @@ public abstract class WithAdditionalPropertiesEntity extends BaseEntity {
         return additionalProperties;
     }
 
+    @Override
     public abstract Long getId();
 }

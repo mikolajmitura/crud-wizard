@@ -19,6 +19,7 @@ public class MetaModelSpringBootCustomizer implements BeanDefinitionRegistryPost
         registry.removeBeanDefinition(DEFAULT_DATA_SOURCE_PROPERTIES_BEAN_NAME);
     }
 
+    @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 

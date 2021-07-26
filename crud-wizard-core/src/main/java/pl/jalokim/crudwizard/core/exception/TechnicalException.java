@@ -4,6 +4,8 @@ import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 
 public class TechnicalException extends ApplicationException {
 
+    private static final long serialVersionUID = 1L;
+
     public TechnicalException(String message) {
         super(message);
     }

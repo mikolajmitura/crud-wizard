@@ -20,7 +20,8 @@ public class EndpointResponseMetaModelDto extends AdditionalPropertyMetaModelDto
     Long id;
     @Valid
     ClassMetaModelDto classMetaModel;
-    @Min(value = 100)
-    @Max(value = 599)
+
+    @Min(100)
+    @Max(599)
     Long successHttpCode;
 }

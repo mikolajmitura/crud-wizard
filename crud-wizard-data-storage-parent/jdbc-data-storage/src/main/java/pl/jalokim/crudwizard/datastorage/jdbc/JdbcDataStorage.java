@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.datastorage.RawEntity;
+import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
@@ -26,27 +26,28 @@ public class JdbcDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, RawEntity entity) {
+    public Object saveEntity(ClassMetaModel classMetaModel, RawEntityObject entity) {
         return null;
     }
 
     @Override
+    @SuppressWarnings("PMD.UncommentedEmptyMethodBody") // TODO to remove this after impl
     public void deleteEntity(ClassMetaModel classMetaModel, Object idObject) {
 
     }
 
     @Override
-    public RawEntity getEntityById(ClassMetaModel classMetaModel, Object idObject) {
+    public RawEntityObject getEntityById(ClassMetaModel classMetaModel, Object idObject) {
         return null;
     }
 
     @Override
-    public Page<RawEntity> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
+    public Page<RawEntityObject> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
         return null;
     }
 
     @Override
-    public List<RawEntity> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
+    public List<RawEntityObject> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
         return null;
     }
 

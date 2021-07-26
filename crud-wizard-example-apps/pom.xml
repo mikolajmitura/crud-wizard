@@ -19,10 +19,6 @@
         <module>customized-example-app</module>
     </modules>
 
-    <properties>
-        <checkstyle.root.path>${project.parent.basedir}</checkstyle.root.path>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>

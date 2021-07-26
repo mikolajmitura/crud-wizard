@@ -12,7 +12,7 @@ public class UnitTestTimeProvider extends CurrentTimeProvider {
     }
 
     public void fixedDate(LocalDate date) {
-        TEST_CLOCK.setInstant(date.atStartOfDay().atZone(TEST_CLOCK.getZone()).toInstant());
+        TEST_CLOCK.setFixedInstant(date.atStartOfDay().atZone(TEST_CLOCK.getZone()).toInstant());
     }
 
     public void resetFixedDate() {

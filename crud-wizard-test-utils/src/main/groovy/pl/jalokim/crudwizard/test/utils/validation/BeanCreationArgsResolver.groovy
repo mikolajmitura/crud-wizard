@@ -26,7 +26,7 @@ class BeanCreationArgsResolver {
             }
             if (foundArgument == null) {
                 throw new IllegalArgumentException("Cannot find constructor argument with type: ${constrParameterType.getName()} " +
-                    "for class: ${typeInstance.getName()} in provided dependencies: ${argumentsForInject}" )
+                    "for class: ${typeInstance.getName()} in provided dependencies: ${argumentsForInject}")
             }
             foundArguments.add(foundArgument)
         }

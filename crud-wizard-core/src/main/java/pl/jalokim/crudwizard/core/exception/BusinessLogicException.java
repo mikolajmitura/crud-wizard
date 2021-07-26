@@ -4,6 +4,8 @@ import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 
 public class BusinessLogicException extends ApplicationException {
 
+    private static final long serialVersionUID = 1L;
+
     public BusinessLogicException(String message) {
         super(message);
     }

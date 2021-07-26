@@ -36,7 +36,7 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
 
     @Autowired
     @Qualifier("rawOperationsOnRestController")
-    protected RawOperationsOnRestController operationsOnRestController
+    protected RawOperationsOnEndpoints operationsOnRestController
 
     @Shared Map<Integer, Boolean> executedClosuresByLineNumber = [:]
 
@@ -71,15 +71,15 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     }
 
     protected static void fixedDate(LocalDate date) {
-        TEST_CLOCK.instant = date.atStartOfDay().atZone(TEST_CLOCK.zone).toInstant()
+        TEST_CLOCK.fixedInstant = date.atStartOfDay().atZone(TEST_CLOCK.zone).toInstant()
     }
 
     protected static void fixedOffsetDateTime(OffsetDateTime dateTime) {
-        TEST_CLOCK.instant = dateTime.toInstant()
+        TEST_CLOCK.fixedInstant = dateTime.toInstant()
     }
 
     protected static void fixedInstant(Instant instant) {
-        TEST_CLOCK.instant = instant
+        TEST_CLOCK.fixedInstant = instant
     }
 
     private static void resetFixedDate() {

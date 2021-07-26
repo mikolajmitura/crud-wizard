@@ -7,6 +7,8 @@ import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 
 public class EntityNotFoundException extends ApplicationException {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY = "EntityNotFoundException.default.message";
     public static final String EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY = "EntityNotFoundException.default.concrete.message";
 

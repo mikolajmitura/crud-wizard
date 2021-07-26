@@ -3,9 +3,9 @@ package pl.jalokim.crudwizard.core.datetime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import org.springframework.context.annotation.Configuration;
+import lombok.experimental.UtilityClass;
 
-@Configuration
+@UtilityClass
 public class TimeProviderHolder {
 
     private static final AtomicReference<TimeProvider> TIME_PROVIDER_INSTANCE = new AtomicReference<>();

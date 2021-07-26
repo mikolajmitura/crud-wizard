@@ -48,10 +48,8 @@ public class JdbcDataStorageProperties {
             throw new IllegalArgumentException("Cannot be more then primary datasource under properties: " + JDBC_DATA_STORAGE_PREFIX);
         }
 
-        if (foundPrimaryDataSources.size() == 0) {
-            if (datasource != null) {
-                datasource.setPrimary(true);
-            }
+        if (foundPrimaryDataSources.size() == 0 && datasource != null) {
+            datasource.setPrimary(true);
         }
         return allDatasourceProperties;
     }

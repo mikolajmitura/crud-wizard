@@ -4,7 +4,7 @@ import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.get
 
 import pl.jalokim.crudwizard.core.exception.handler.DummyDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
-import pl.jalokim.crudwizard.test.utils.random.DataFakerHelper
+import pl.jalokim.utils.test.DataFakerHelper
 
 class EntityNotFoundExceptionTest extends UnitTestSpec {
 

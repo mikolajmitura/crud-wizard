@@ -17,14 +17,18 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-@FieldShouldWhenOther(field = "className", should = NULL, whenField = "serviceScript", is = NOT_NULL)
-@FieldShouldWhenOther(field = "beanName", should = NULL, whenField = "serviceScript", is = NOT_NULL)
-@FieldShouldWhenOther(field = "methodName", should = NULL, whenField = "serviceScript", is = NOT_NULL)
-@FieldShouldWhenOther(field = "serviceScript", should = NULL, whenField = "className", is = NOT_NULL)
-@FieldShouldWhenOther(field = "serviceScript", should = NULL, whenField = "methodName", is = NOT_NULL)
-@FieldShouldWhenOther(field = "serviceScript", should = NULL, whenField = "beanName", is = NOT_NULL)
+@FieldShouldWhenOther(field = ServiceMetaModelDto.CLASS_NAME, should = NULL, whenField = ServiceMetaModelDto.SERVICE_SCRIPT, is = NOT_NULL)
+@FieldShouldWhenOther(field = ServiceMetaModelDto.BEAN_NAME, should = NULL, whenField = ServiceMetaModelDto.SERVICE_SCRIPT, is = NOT_NULL)
+@FieldShouldWhenOther(field = ServiceMetaModelDto.METHOD_NAME, should = NULL, whenField = ServiceMetaModelDto.SERVICE_SCRIPT, is = NOT_NULL)
+@FieldShouldWhenOther(field = ServiceMetaModelDto.SERVICE_SCRIPT, should = NULL, whenField = ServiceMetaModelDto.CLASS_NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = ServiceMetaModelDto.SERVICE_SCRIPT, should = NULL, whenField = ServiceMetaModelDto.METHOD_NAME, is = NOT_NULL)
+@FieldShouldWhenOther(field = ServiceMetaModelDto.SERVICE_SCRIPT, should = NULL, whenField = ServiceMetaModelDto.BEAN_NAME, is = NOT_NULL)
 public class ServiceMetaModelDto extends AdditionalPropertyMetaModelDto {
 
+    public static final String CLASS_NAME = "className";
+    public static final String SERVICE_SCRIPT = "serviceScript";
+    public static final String METHOD_NAME = "methodName";
+    public static final String BEAN_NAME = "beanName";
     Long id;
     String className;
     String beanName;

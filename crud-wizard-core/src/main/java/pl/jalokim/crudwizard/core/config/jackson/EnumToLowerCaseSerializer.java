@@ -7,6 +7,8 @@ import java.io.IOException;
 
 public class EnumToLowerCaseSerializer extends StdSerializer<Enum> {
 
+    private static final long serialVersionUID = 1L;
+
     EnumToLowerCaseSerializer() {
         super(Enum.class);
     }

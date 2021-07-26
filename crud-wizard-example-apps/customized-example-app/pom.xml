@@ -12,8 +12,4 @@
 
     <artifactId>customized-example-app</artifactId>
     <name>crud-wizard-example-apps/customized-example-app</name>
-
-    <properties>
-        <checkstyle.root.path>${project.parent.parent.basedir}</checkstyle.root.path>
-    </properties>
 </project>
