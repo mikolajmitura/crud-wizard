@@ -162,6 +162,5 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
         }
     }
 
-    // TODO #1 to implement load context with urls hierarchy etc
     // TODO #2 to implement load context with custom service, mapper, data storage connectors, should verify only them not all modelsById fields.ApiTagSamples
 }

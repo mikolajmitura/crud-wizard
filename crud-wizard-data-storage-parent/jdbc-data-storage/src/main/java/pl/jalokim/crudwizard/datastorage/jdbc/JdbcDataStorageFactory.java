@@ -56,7 +56,7 @@ public class JdbcDataStorageFactory implements BeanDefinitionRegistryPostProcess
     }
 
     @Override
-    @SuppressWarnings("PMD.UncommentedEmptyMethodBody") // TODO to remove this after impl
+    @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
     public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
 
     }

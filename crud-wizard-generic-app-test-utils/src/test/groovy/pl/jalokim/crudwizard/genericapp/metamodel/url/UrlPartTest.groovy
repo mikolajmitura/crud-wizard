@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.url
 
-import pl.jalokim.crudwizard.core.metamodels.url.UrlPart
+import static pl.jalokim.crudwizard.core.metamodels.url.UrlPart.normalUrlPart
+import static pl.jalokim.crudwizard.core.metamodels.url.UrlPart.variableUrlPart
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -18,13 +20,5 @@ class UrlPartTest extends Specification {
         expectedValue || urlPart
         true          || variableUrlPart("text")
         false         || normalUrlPart("text")
-    }
-
-    static UrlPart variableUrlPart(String variableName) {
-        new UrlPart("{${variableName}}", variableName)
-    }
-
-    static UrlPart normalUrlPart(String normalPathPart) {
-        new UrlPart(normalPathPart, null)
     }
 }
