@@ -1,9 +1,9 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.apitag;
+package pl.jalokim.crudwizard.genericapp.metamodel.apitag
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelTransactional
-import pl.jalokim.utils.test.DataFakerHelper;
+import pl.jalokim.utils.test.DataFakerHelper
 
 @Component
 @MetamodelTransactional

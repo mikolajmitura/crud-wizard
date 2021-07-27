@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppBaseIntegrationSpecification
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperBean
-import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService
@@ -17,9 +16,6 @@ import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceBean
 
 class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
-
-    @Autowired
-    private ApiTagRepository apiTagRepository
 
     @Autowired
     private ApiTagSamples apiTagSamples
@@ -71,7 +67,6 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
 
         then:
         verifyAll(reloadedContext) {
-
             dataStorages.modelsById == dataStorageMetaModelService.findAllMetaModels()
                 .collectEntries {
                     [it.id, it]
@@ -86,11 +81,7 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
                 .collectEntries {
                     [it.id, it]
                 }
-            apiTags.modelsById.values().collect {
-                it.name
-            } as Set == [firstApiTag, secondApiTag, endpointMetaModelDto.apiTag].collect {
-                it.name
-            } as Set
+            apiTags.modelsById.values()*.name as Set == [firstApiTag, secondApiTag, endpointMetaModelDto.apiTag]*.name as Set
 
             validatorMetaModels.modelsById.isEmpty()
 
@@ -172,5 +163,5 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
     }
 
     // TODO #1 to implement load context with urls hierarchy etc
-    // TODO #2 to implement load context with custom service, mapper, data storage connectors, should verify only them not all modelsById fields.
+    // TODO #2 to implement load context with custom service, mapper, data storage connectors, should verify only them not all modelsById fields.ApiTagSamples
 }
