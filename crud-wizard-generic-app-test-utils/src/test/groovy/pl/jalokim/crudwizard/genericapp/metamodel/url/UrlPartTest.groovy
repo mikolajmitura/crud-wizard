@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.url
 
+import pl.jalokim.crudwizard.core.metamodels.url.UrlPart
 import spock.lang.Specification
 import spock.lang.Unroll
 

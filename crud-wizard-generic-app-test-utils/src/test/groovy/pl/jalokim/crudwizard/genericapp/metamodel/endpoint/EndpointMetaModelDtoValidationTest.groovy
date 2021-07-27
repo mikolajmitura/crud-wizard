@@ -1,22 +1,28 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEmptyClassMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithClassName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPutEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
-import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidMinMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
+import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import org.springframework.http.HttpMethod
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
@@ -67,9 +73,13 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .httpMethod(HttpMethod.PUT)
             .responseMetaModel(null)
             .payloadMetamodel(null)
+            .pathParams(null)
             .build()                          | [
             errorEntry("payloadMetamodel", fieldShouldWhenOtherMessage(
                 NOT_NULL, [], "httpMethod", EQUAL_TO_ANY, ["POST", "PUT", "PATCH"]
+            )),
+            errorEntry("pathParams", fieldShouldWhenOtherMessage(
+                NOT_NULL, [], "httpMethod", EQUAL_TO_ANY, ["PUT", "PATCH"]
             ))
         ]
 
@@ -77,16 +87,20 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .httpMethod(HttpMethod.PATCH)
             .responseMetaModel(null)
             .payloadMetamodel(null)
+            .pathParams(null)
             .build()                          | [
             errorEntry("payloadMetamodel", fieldShouldWhenOtherMessage(
                 NOT_NULL, [], "httpMethod", EQUAL_TO_ANY, ["POST", "PUT", "PATCH"]
+            )),
+            errorEntry("pathParams", fieldShouldWhenOtherMessage(
+                NOT_NULL, [], "httpMethod", EQUAL_TO_ANY, ["PUT", "PATCH"]
             ))
         ]
 
         createValidPostEndpointMetaModelDto().toBuilder()
             .httpMethod(HttpMethod.GET)
             .payloadMetamodel(createEmptyClassMetaModelDto())
-            .queryArguments([createEmptyClassMetaModelDto()])
+            .queryArguments(createEmptyClassMetaModelDto())
             .responseMetaModel(null)
             .build()                          | [
             errorEntry("payloadMetamodel", fieldShouldWhenOtherMessage(
@@ -98,7 +112,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("payloadMetamodel.name", fieldShouldWhenOtherMessage(
                 NOT_NULL, [], "className", NULL, []
             )),
-            errorEntry("queryArguments[0].name", fieldShouldWhenOtherMessage(
+            errorEntry("queryArguments.name", fieldShouldWhenOtherMessage(
                 NOT_NULL, [], "className", NULL, []
             ))
         ]
@@ -169,6 +183,33 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("dataStorageConnectors[0].mapperMetaModel.mappingDirection", notNullMessage()),
             errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])),
         ]
+
+        createValidPutEndpointMetaModelDto()  | []
+
+        createValidPutEndpointMetaModelDto().toBuilder()
+            .baseUrl("base-path/{basePath}/next-url")
+            .build()                          | [
+            errorEntry("", messageForValidator(PathParamsAndUrl, [
+                baseUrl: "base-path/{basePath}/next-url",
+                fieldNames: "basePath, nextId"
+            ]))
+        ]
+
+        createValidPutEndpointMetaModelDto().toBuilder()
+            .pathParams(ClassMetaModelDto.builder()
+                .name(randomText())
+                .fields([
+                    createValidFieldMetaModelDto("basePath", Double),
+                    FieldMetaModelDto.builder()
+                        .fieldName("nextId")
+                        .fieldType(createValidClassMetaModelDtoWithName())
+                        .build()
+
+                ])
+                .build())
+            .build()                          | [
+            errorEntry("", getMessage(PathParamsAndUrl, "allFieldsShouldHasClassName"))
+        ]
     }
 
     @Unroll
@@ -183,6 +224,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         endpointMetaModelDto           | expectedErrors
         createValidPostEndpointMetaModelDto()
             .toBuilder().id(1).build() | []
+
         emptyEndpointMetaModelDto()    | [
             errorEntry("id", notNullMessage()),
             errorEntry("apiTag", notNullMessage()),

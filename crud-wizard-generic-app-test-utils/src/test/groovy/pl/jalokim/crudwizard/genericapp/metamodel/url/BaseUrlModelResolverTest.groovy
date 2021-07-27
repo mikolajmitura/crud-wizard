@@ -6,12 +6,12 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPartTest.variabl
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class BaseUrlArgumentResolverTest extends Specification {
+class BaseUrlModelResolverTest extends Specification {
 
     @Unroll
     def "build expected UrlMetamodel instance: #expectedUrlMetamodel from url: #baseUrl"() {
         when:
-        def urlMetaModel = BaseUrlArgumentResolver.resolveUrl(baseUrl)
+        def urlMetaModel = BaseUrlModelResolver.resolveUrl(baseUrl)
 
         then:
         urlMetaModel.rawUrl == baseUrl

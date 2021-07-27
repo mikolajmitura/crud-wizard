@@ -53,9 +53,13 @@ public class EndpointMetaModelEntity extends WithAdditionalPropertiesEntity {
     @JoinColumn(name = "payload_metamodel_id")
     private ClassMetaModelEntity payloadMetamodel;
 
-    @OneToMany(cascade = {CascadeType.ALL})
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "endpoint_meta_model_id")
-    private List<ClassMetaModelEntity> queryArguments;
+    private ClassMetaModelEntity queryArguments;
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "path_params_metamodel_id")
+    private ClassMetaModelEntity pathParams;
 
     @ManyToOne
     @JoinColumn(name = "service_meta_model_id")

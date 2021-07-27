@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContext;
-import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getListFromContext;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContextByEntity;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
@@ -13,9 +13,9 @@ import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 // TODO try use uses to inject others mapper, now is problem with ambiguity from AdditionalPropertyMapper
@@ -40,9 +40,10 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
         EndpointMetaModel endpointMetaModel = toMetaModel(endpointMetaModelEntity);
         return endpointMetaModel.toBuilder()
             .apiTag(getFromContext(metaModelContext::getApiTags, () -> endpointMetaModelEntity.getApiTag().getId()))
-            .payloadMetamodel(getFromContext(metaModelContext::getClassMetaModels, () -> endpointMetaModelEntity.getPayloadMetamodel().getId()))
-            .queryArguments(getListFromContext(
-                endpointMetaModelEntity.getQueryArguments(), metaModelContext::getClassMetaModels, ClassMetaModelEntity::getId))
+            .urlMetamodel(BaseUrlModelResolver.resolveUrl(endpointMetaModelEntity.getBaseUrl()))
+            .payloadMetamodel(getFromContextByEntity(metaModelContext::getClassMetaModels, endpointMetaModelEntity::getPayloadMetamodel))
+            .queryArguments(getFromContextByEntity(metaModelContext::getClassMetaModels, endpointMetaModelEntity::getQueryArguments))
+            .pathParams(getFromContextByEntity(metaModelContext::getClassMetaModels, endpointMetaModelEntity::getPathParams))
             .serviceMetaModel(Optional.ofNullable(endpointMetaModelEntity.getServiceMetaModel())
                 .map(serviceMetaModel -> getFromContext(metaModelContext::getServiceMetaModels, serviceMetaModel::getId))
                 .orElse(metaModelContext.getDefaultServiceMetaModel()))

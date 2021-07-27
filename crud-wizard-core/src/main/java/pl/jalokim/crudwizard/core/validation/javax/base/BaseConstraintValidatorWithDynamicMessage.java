@@ -14,16 +14,20 @@ public interface BaseConstraintValidatorWithDynamicMessage<A extends Annotation,
     @Override
     default boolean isValid(T value, ConstraintValidatorContext context) {
         setupCustomMessage(value, context);
+        return isValidWithoutCustomMessage(value, context);
+    }
+
+    default boolean isValidWithoutCustomMessage(T value, ConstraintValidatorContext context) {
         return BaseConstraintValidator.super.isValid(value, context);
     }
 
-    default void setupCustomMessage(Object value, ConstraintValidatorContext context) {
+    default void setupCustomMessage(T value, ConstraintValidatorContext context) {
         customMessage(context, MessagePlaceholder.createMessagePlaceholder(
             messagePlaceholder(context), messagePlaceholderArgs(value, context)
         ));
     }
 
-    default Map<String, Object> messagePlaceholderArgs(Object value, ConstraintValidatorContext context) {
+    default Map<String, Object> messagePlaceholderArgs(T value, ConstraintValidatorContext context) {
         return Map.of();
     }
 

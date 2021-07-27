@@ -4,12 +4,14 @@ import static pl.jalokim.crudwizard.core.utils.StringHelper.replaceAllWithEmpty;
 
 import java.util.List;
 import lombok.experimental.UtilityClass;
-import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart.UrlPartBuilder;
+import pl.jalokim.crudwizard.core.metamodels.url.UrlMetamodel;
+import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
+import pl.jalokim.crudwizard.core.metamodels.url.UrlPart.UrlPartBuilder;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 
 @UtilityClass
-public class BaseUrlArgumentResolver {
+public class BaseUrlModelResolver {
 
     private static final String PATH_VARIABLE_REGEX = "\\{([a-zA-Z0-9])+}";
 

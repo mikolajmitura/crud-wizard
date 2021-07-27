@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.url;
+package pl.jalokim.crudwizard.core.metamodels.url;
 
 import lombok.Builder;
 import lombok.Value;

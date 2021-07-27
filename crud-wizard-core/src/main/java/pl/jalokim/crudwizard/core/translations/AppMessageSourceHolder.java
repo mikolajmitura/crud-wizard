@@ -28,6 +28,10 @@ public class AppMessageSourceHolder {
         return getAppMessageSource().getMessage(propertyKey, placeholderArgs);
     }
 
+    public static String getMessage(Class<?> propertyKeyPrefix, String propertySuffix, Object... placeholderArgs) {
+        return getAppMessageSource().getMessage(propertyKeyPrefix, propertySuffix, placeholderArgs);
+    }
+
     public static String getMessage(String propertyKey, Map<String, Object> placeholderArgsByName) {
         return getAppMessageSource().getMessage(propertyKey, placeholderArgsByName);
     }

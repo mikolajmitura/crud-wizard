@@ -147,7 +147,7 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
                 id == endpointId
                 apiTag.id != null
                 apiTag.name == endpointMetaModelDto.apiTag.name
-                baseUrl == endpointMetaModelDto.baseUrl
+                urlMetamodel.rawUrl == endpointMetaModelDto.baseUrl
                 httpMethod == endpointMetaModelDto.httpMethod
                 operationName == endpointMetaModelDto.operationName
                 payloadMetamodel == payloadMetaModelInstance

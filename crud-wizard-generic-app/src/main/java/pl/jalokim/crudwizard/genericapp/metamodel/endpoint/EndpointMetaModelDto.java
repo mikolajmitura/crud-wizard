@@ -26,14 +26,18 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-@FieldShouldWhenOther(field = "payloadMetamodel", should = NOT_NULL, whenField = "httpMethod",
+@FieldShouldWhenOther(field = "payloadMetamodel", should = NOT_NULL, whenField = EndpointMetaModelDto.HTTP_METHOD,
     is = EQUAL_TO_ANY, otherFieldValues = {"POST", "PUT", "PATCH"})
-@FieldShouldWhenOther(field = "responseMetaModel", should = NOT_NULL, whenField = "httpMethod",
+@FieldShouldWhenOther(field = "responseMetaModel", should = NOT_NULL, whenField = EndpointMetaModelDto.HTTP_METHOD,
     is = EQUAL_TO_ANY, otherFieldValues = {"GET", "POST"})
-@FieldShouldWhenOther(field = "payloadMetamodel", should = NULL, whenField = "httpMethod",
+@FieldShouldWhenOther(field = "payloadMetamodel", should = NULL, whenField = EndpointMetaModelDto.HTTP_METHOD,
     is = EQUAL_TO_ANY, otherFieldValues = {"GET", "DELETE"})
+@FieldShouldWhenOther(field = "pathParams", should = NOT_NULL, whenField = EndpointMetaModelDto.HTTP_METHOD,
+    is = EQUAL_TO_ANY, otherFieldValues = {"PUT", "PATCH"})
+@PathParamsAndUrl
 public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
 
+    public static final String HTTP_METHOD = "httpMethod";
     @NotNull(groups = EndpointUpdateContext.class)
     Long id;
 
@@ -52,7 +56,11 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
     @Valid
     ClassMetaModelDto payloadMetamodel;
 
-    List<@Valid ClassMetaModelDto> queryArguments;
+    @Valid
+    ClassMetaModelDto queryArguments;
+
+    @Valid
+    ClassMetaModelDto pathParams;
 
     @Valid
     ServiceMetaModelDto serviceMetaModel;

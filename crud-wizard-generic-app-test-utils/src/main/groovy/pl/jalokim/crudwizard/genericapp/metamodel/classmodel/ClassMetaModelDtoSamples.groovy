@@ -36,4 +36,11 @@ class ClassMetaModelDtoSamples {
             .fieldType(createValidClassMetaModelDtoWithClassName())
             .build()
     }
+
+    static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, Class<?> fieldType) {
+        FieldMetaModelDto.builder()
+            .fieldName(fieldName)
+            .fieldType(createClassMetaModelDtoFromClass(fieldType))
+            .build()
+    }
 }
