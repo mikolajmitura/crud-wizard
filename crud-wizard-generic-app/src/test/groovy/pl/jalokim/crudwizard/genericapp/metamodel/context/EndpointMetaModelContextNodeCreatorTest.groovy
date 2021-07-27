@@ -91,6 +91,28 @@ class EndpointMetaModelContextNodeCreatorTest extends Specification {
         invoiceSendNode.nextNodesByPath.isEmpty()
     }
 
+    def "should return exception when is duplicate of endpoints"() {
+        given:
+        MetaModelContext metaModelContext = new MetaModelContext()
+        def endpointMetaModels = new ModelsCache<EndpointMetaModel>()
+
+        [
+            newEndpointMetaModel(1, "users/{userId}", HttpMethod.PUT),
+            newEndpointMetaModel(2, "users/{otherId}", HttpMethod.PUT)
+        ].each {endpointMetaModel ->
+            endpointMetaModels.put(endpointMetaModel.getId(), endpointMetaModel)
+        }
+
+        metaModelContext.setEndpointMetaModels(endpointMetaModels)
+
+        when:
+        EndpointMetaModelContextNodeCreator.loadEndpointNodes(metaModelContext)
+
+        then:
+        IllegalStateException ex = thrown()
+        ex.message == "Already exists endpoint with method: ${HttpMethod.PUT} and URL: /users/{$VARIABLE_URL_PART}, problematic URL: users/{otherId}"
+    }
+
     private static EndpointMetaModel newEndpointMetaModel(Long id, String rawUrl, HttpMethod httpMethod) {
         EndpointMetaModel.builder()
             .id(id)

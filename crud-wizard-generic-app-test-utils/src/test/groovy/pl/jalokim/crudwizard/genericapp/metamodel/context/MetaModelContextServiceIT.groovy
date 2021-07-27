@@ -159,6 +159,11 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
                     dataStorageConnectors == defaultDataStorageConnectorMetaModels
                 }
             }
+
+            verifyAll(endpointMetaModelContextNode.nextNodesByPath[endpointMetaModelDto.baseUrl]) {
+                urlPart.originalValue == endpointMetaModelDto.baseUrl
+                endpointsByHttpMethod[endpointMetaModelDto.httpMethod] == endpointMetaModels.modelsById.get(endpointId)
+            }
         }
     }
 

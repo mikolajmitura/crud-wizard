@@ -61,6 +61,7 @@ public class EndpointMetaModelService {
                 );
         }
 
+        // TODO reload metamodel context
         return endpointMetaModelRepository.persist(endpointMetaModelEntity).getId();
     }
 

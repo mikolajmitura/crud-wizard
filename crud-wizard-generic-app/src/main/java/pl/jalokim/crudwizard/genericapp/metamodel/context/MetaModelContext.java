@@ -29,7 +29,7 @@ public class MetaModelContext {
     private ModelsCache<ServiceMetaModel> serviceMetaModels;
     private ModelsCache<EndpointMetaModel> endpointMetaModels;
 
-    private EndpointMetaModelContextNode endpointMetaModelContextNode = new EndpointMetaModelContextNode(normalUrlPart("/"));
+    private EndpointMetaModelContextNode endpointMetaModelContextNode = new EndpointMetaModelContextNode(normalUrlPart("/"), null);
 
     private ServiceMetaModel defaultServiceMetaModel;
     private MapperMetaModel defaultMapperMetaModel;
