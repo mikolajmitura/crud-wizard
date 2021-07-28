@@ -10,6 +10,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
@@ -17,6 +18,7 @@ import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorWithDefaultGr
 
 @Configuration
 @ComponentScan("pl.jalokim.crudwizard.core")
+@EnableAspectJAutoProxy
 public class AppWizardCoreConfig {
 
     @Bean

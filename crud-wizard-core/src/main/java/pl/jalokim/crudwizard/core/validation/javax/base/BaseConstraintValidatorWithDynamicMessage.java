@@ -13,8 +13,9 @@ public interface BaseConstraintValidatorWithDynamicMessage<A extends Annotation,
 
     @Override
     default boolean isValid(T value, ConstraintValidatorContext context) {
+        var result = isValidWithoutCustomMessage(value, context);
         setupCustomMessage(value, context);
-        return isValidWithoutCustomMessage(value, context);
+        return result;
     }
 
     default boolean isValidWithoutCustomMessage(T value, ConstraintValidatorContext context) {

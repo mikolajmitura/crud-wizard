@@ -1,7 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
+import static org.springframework.http.HttpMethod.POST
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
@@ -11,6 +14,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPutEndpointMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
@@ -21,21 +25,53 @@ import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssert
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
+import pl.jalokim.crudwizard.core.metamodels.url.UrlPart
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
 
 class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
 
-    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter()
+    private MetaModelContextService metaModelContextService = Mock()
+    private ApplicationContext applicationContext = Mock()
+    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(metaModelContextService, applicationContext)
+
+    def setup() {
+        RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
+        applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class) >> abstractHandlerMethodMapping
+        abstractHandlerMethodMapping.getHandlerMethods() >> [:]
+    }
 
     @Unroll
     def "should return expected messages for default context of EndpointMetaModelDto"() {
+        given:
+        MetaModelContext metaModelContext = new MetaModelContext()
+        metaModelContext.getEndpointMetaModelContextNode()
+            .putNextNodeOrGet(UrlPart.normalUrlPart("users"))
+            .putNextNodeOrGet(UrlPart.variableUrlPart("userId"))
+            .putNextNodeOrGet(UrlPart.normalUrlPart("orders"))
+            .putNextNodeOrGet(UrlPart.variableUrlPart("orderId"))
+            .putEndpointByMethod(EndpointMetaModel.builder()
+                .urlMetamodel(BaseUrlModelResolver.resolveUrl("users/{usersIdVar}/orders/{ordersIdVar}"))
+                .httpMethod(POST)
+                .operationName("existOperationName")
+                .build())
+
+        metaModelContextService.getMetaModelContext() >> metaModelContext
+
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(endpointMetaModelDto)
 
@@ -189,8 +225,9 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         createValidPutEndpointMetaModelDto().toBuilder()
             .baseUrl("base-path/{basePath}/next-url")
             .build()                          | [
-            errorEntry("", messageForValidator(PathParamsAndUrl, [
+            errorEntry("", messageForValidator(PathParamsAndUrlVariablesTheSame, [
                 baseUrl: "base-path/{basePath}/next-url",
+                fieldName: wrapAsExternalPlaceholder("pathParams"),
                 fieldNames: "basePath, nextId"
             ]))
         ]
@@ -208,12 +245,32 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 ])
                 .build())
             .build()                          | [
-            errorEntry("", getMessage(PathParamsAndUrl, "allFieldsShouldHasClassName"))
+            errorEntry("", getMessage(PathParamsAndUrlVariablesTheSame, "allFieldsShouldHasClassName"))
+        ]
+
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .baseUrl("users/{userId}/orders/{orderId}")
+            .build() | [
+            errorEntry("", createMessagePlaceholder(EndpointNotExistsAlready, "crudWizardController", [
+                url: "users/{userId}/orders/{orderId}",
+                httpMethod: "POST",
+                foundUrl: "users/{usersIdVar}/orders/{ordersIdVar}",
+                foundOperationName: "existOperationName",
+            ]).translateMessage()),
+            errorEntry("", messageForValidator(PathParamsAndUrlVariablesTheSame, [
+                baseUrl   : "users/{userId}/orders/{orderId}",
+                fieldName: wrapAsExternalPlaceholder("pathParams"),
+                fieldNames: ""
+            ]))
         ]
     }
 
     @Unroll
     def "should return expected messages for update context of EndpointMetaModelDto"() {
+        given:
+        MetaModelContext metaModelContext = new MetaModelContext()
+        metaModelContextService.getMetaModelContext() >> metaModelContext
+
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(endpointMetaModelDto, EndpointUpdateContext)
 
@@ -233,9 +290,4 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("operationName", notNullMessage())
         ]
     }
-
-    private static EndpointMetaModelDto emptyEndpointMetaModelDto() {
-        EndpointMetaModelDto.builder().build()
-    }
-
 }

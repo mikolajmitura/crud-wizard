@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
+package pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -8,14 +8,20 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsP
 import static pl.jalokim.crudwizard.core.utils.ElementsUtils.nullableElements;
 import static pl.jalokim.crudwizard.core.utils.NullableHelper.helpWithNulls;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import javax.validation.ConstraintValidatorContext;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlMetamodel;
+import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver;
 
-public class PathParamsAndUrlValidator implements BaseConstraintValidatorWithDynamicMessage<PathParamsAndUrl, EndpointMetaModelDto> {
+public class PathParamsAndUrlVariablesTheSameValidator
+    implements BaseConstraintValidatorWithDynamicMessage<PathParamsAndUrlVariablesTheSame, EndpointMetaModelDto> {
 
     @Override
     public boolean isValid(EndpointMetaModelDto value, ConstraintValidatorContext context) {
@@ -32,12 +38,19 @@ public class PathParamsAndUrlValidator implements BaseConstraintValidatorWithDyn
         return true;
     }
 
-    private boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context, String baseUrl, ClassMetaModelDto pathParams) {
+    private boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context,
+        String baseUrl, ClassMetaModelDto pathParams) {
         UrlMetamodel urlMetamodel = BaseUrlModelResolver.resolveUrl(baseUrl);
-        var pathVariablesNames = nullableElements(urlMetamodel.getPathVariablesNames()).asSet();
+        var pathVariablesNames = nullableElements(urlMetamodel.getPathVariablesNames()).asList();
 
-        if (isNotEmpty(pathVariablesNames) && nonNull(pathParams.getFields())) {
-            boolean allHaveClassName = nullableElements(pathParams.getFields())
+        var pathParamsFields = nullableElements(
+            ofNullable(pathParams)
+                .map(ClassMetaModelDto::getFields)
+                .orElse(List.of()))
+            .asSet();
+
+        if (isNotEmpty(pathVariablesNames) || isNotEmpty(pathParamsFields)) {
+            boolean allHaveClassName = nullableElements(pathParamsFields)
                 .map(FieldMetaModelDto::getFieldType)
                 .map(ClassMetaModelDto::getClassName)
                 .allMatch(className -> nonNull(className) && (
@@ -46,15 +59,15 @@ public class PathParamsAndUrlValidator implements BaseConstraintValidatorWithDyn
                 );
 
             if (!allHaveClassName) {
-                customMessage(context, wrapAsPlaceholder(PathParamsAndUrl.class, "allFieldsShouldHasClassName"));
+                customMessage(context, wrapAsPlaceholder(PathParamsAndUrlVariablesTheSame.class, "allFieldsShouldHasClassName"));
                 return false;
             }
             setupCustomMessage(endpointMetaModelDto, context);
-            var fieldsNames = nullableElements(pathParams.getFields())
+            var fieldsNames = nullableElements(pathParamsFields)
                 .map(FieldMetaModelDto::getFieldName)
                 .asSet();
 
-            return pathVariablesNames.equals(fieldsNames);
+            return new HashSet<>(pathVariablesNames).equals(fieldsNames);
         }
         return true;
     }
@@ -63,7 +76,8 @@ public class PathParamsAndUrlValidator implements BaseConstraintValidatorWithDyn
     public Map<String, Object> messagePlaceholderArgs(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context) {
         return Map.of(
             "baseUrl", ofNullable(endpointMetaModelDto.getBaseUrl())
-            .orElse(EMPTY),
+                .orElse(EMPTY),
+            "fieldName", MessagePlaceholder.wrapAsExternalPlaceholder("pathParams"),
             "fieldNames", nullableElements(helpWithNulls(() -> endpointMetaModelDto.getPathParams().getFields()))
                 .map(FieldMetaModelDto::getFieldName)
                 .asConcatText(", ")

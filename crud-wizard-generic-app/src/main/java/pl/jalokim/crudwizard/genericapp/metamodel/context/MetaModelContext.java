@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
-import static pl.jalokim.crudwizard.core.metamodels.url.UrlPart.normalUrlPart;
 import static pl.jalokim.crudwizard.core.utils.NullableHelper.helpWithNulls;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNode.createRootMetaModelNode;
 
 import java.util.List;
 import java.util.function.Function;
@@ -29,7 +29,7 @@ public class MetaModelContext {
     private ModelsCache<ServiceMetaModel> serviceMetaModels;
     private ModelsCache<EndpointMetaModel> endpointMetaModels;
 
-    private EndpointMetaModelContextNode endpointMetaModelContextNode = new EndpointMetaModelContextNode(normalUrlPart("/"), null);
+    private EndpointMetaModelContextNode endpointMetaModelContextNode = createRootMetaModelNode();
 
     private ServiceMetaModel defaultServiceMetaModel;
     private MapperMetaModel defaultMapperMetaModel;

@@ -13,27 +13,29 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ElementKind;
 import javax.validation.Path;
 import javax.validation.Path.Node;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto;
 
+@UtilityClass
 public class ConstraintViolationToErrorConverter {
 
     private static final Set<ElementKind> IGNORED_ELEMENT_KINDS = Set.of(BEAN, METHOD, PARAMETER, CONTAINER_ELEMENT);
 
-    public ErrorDto toErrorDto(ConstraintViolation<?> constraintViolation) {
+    public static ErrorDto toErrorDto(ConstraintViolation<?> constraintViolation) {
         return ErrorDto.builder()
             .property(extractPropertyPath(constraintViolation.getPropertyPath()))
             .message(constraintViolation.getMessage())
             .build();
     }
 
-    private String extractPropertyPath(Path propertyPath) {
+    private static String extractPropertyPath(Path propertyPath) {
         return StreamSupport.stream(propertyPath.spliterator(), false)
-            .filter(Predicate.not(this::shouldBeIgnored))
+            .filter(Predicate.not(ConstraintViolationToErrorConverter::shouldBeIgnored))
             .map(Node::toString)
             .collect(Collectors.joining("."));
     }
 
-    private boolean shouldBeIgnored(Node node) {
+    private static boolean shouldBeIgnored(Node node) {
         return IGNORED_ELEMENT_KINDS.contains(node.getKind());
     }
 }

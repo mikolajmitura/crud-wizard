@@ -35,7 +35,7 @@ class EndpointMetaModelContextNodeCreatorTest extends Specification {
 
         then:
         def endpointMetaModelContextNode = metaModelContext.endpointMetaModelContextNode
-        endpointMetaModelContextNode.urlPart.originalValue == "/"
+        endpointMetaModelContextNode.urlPartMetaModel.pathOrVariable == "/"
         endpointMetaModelContextNode.nextNodesByPath.size() == 2
 
         // users
@@ -43,7 +43,7 @@ class EndpointMetaModelContextNodeCreatorTest extends Specification {
         usersNode.endpointsByHttpMethod.size() == 1
         usersNode.endpointsByHttpMethod[HttpMethod.POST].id == 2
         usersNode.nextNodesByPath.size() == 2
-        usersNode.urlPart.originalValue == "users"
+        usersNode.urlPartMetaModel.pathOrVariable == "users"
 
         def usersVariableNode = usersNode.nextNodesByPath[VARIABLE_URL_PART]
         usersVariableNode.nextNodesByPath.size() == 1
@@ -77,15 +77,15 @@ class EndpointMetaModelContextNodeCreatorTest extends Specification {
 
         // invoices
         def invoicesNode = endpointMetaModelContextNode.nextNodesByPath["invoices"]
-        invoicesNode.urlPart.originalValue == "invoices"
+        invoicesNode.urlPartMetaModel.pathOrVariable == "invoices"
         invoicesNode.endpointsByHttpMethod.isEmpty()
 
         def invoiceVariableNode = invoicesNode.nextNodesByPath[VARIABLE_URL_PART]
-        invoiceVariableNode.urlPart.variableName == VARIABLE_URL_PART
+        invoiceVariableNode.urlPartMetaModel.pathOrVariable == VARIABLE_URL_PART
         invoiceVariableNode.endpointsByHttpMethod.isEmpty()
 
         def invoiceSendNode = invoiceVariableNode.nextNodesByPath["send"]
-        invoiceSendNode.urlPart.originalValue == "send"
+        invoiceSendNode.urlPartMetaModel.pathOrVariable == "send"
         invoiceSendNode.endpointsByHttpMethod.size() == 1
         invoiceSendNode.endpointsByHttpMethod[HttpMethod.POST].id == 9
         invoiceSendNode.nextNodesByPath.isEmpty()

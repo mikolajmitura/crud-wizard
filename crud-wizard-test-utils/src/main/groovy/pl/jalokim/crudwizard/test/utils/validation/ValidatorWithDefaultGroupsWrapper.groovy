@@ -4,6 +4,7 @@ import javax.validation.ConstraintViolation
 import javax.validation.Validator
 import javax.validation.executable.ExecutableValidator
 import javax.validation.metadata.BeanDescriptor
+import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorFactoryHolder
 
 class ValidatorWithDefaultGroupsWrapper implements Validator {
 
@@ -15,12 +16,7 @@ class ValidatorWithDefaultGroupsWrapper implements Validator {
 
     @Override
     def <T> Set<ConstraintViolation<T>> validate(T t, Class<?>... classes) {
-        def results = [] as Set
-        if (classes.length > 0) {
-            results.addAll(delegated.validate(t, classes))
-        }
-        results.addAll(delegated.validate(t))
-        return results
+        ValidatorFactoryHolder.getValidationErrors(delegated, t, classes)
     }
 
     @Override

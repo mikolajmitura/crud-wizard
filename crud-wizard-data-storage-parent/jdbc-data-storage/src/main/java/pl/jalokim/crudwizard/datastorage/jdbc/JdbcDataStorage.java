@@ -31,7 +31,6 @@ public class JdbcDataStorage implements DataStorage {
     }
 
     @Override
-    @SuppressWarnings("PMD.UncommentedEmptyMethodBody") // TODO to remove this after impl
     public void deleteEntity(ClassMetaModel classMetaModel, Object idObject) {
 
     }

@@ -7,6 +7,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import javax.validation.ClockProvider
+import javax.validation.ValidatorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -19,6 +20,7 @@ import pl.jalokim.crudwizard.core.datetime.TimeProvider
 import pl.jalokim.crudwizard.core.datetime.TimeProviderHolder
 import pl.jalokim.crudwizard.core.translations.AppMessageSource
 import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
+import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorFactoryHolder
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -38,6 +40,9 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     @Qualifier("rawOperationsOnRestController")
     protected RawOperationsOnEndpoints operationsOnRestController
 
+    @Autowired
+    protected ValidatorFactory validatorFactory
+
     @Shared Map<Integer, Boolean> executedClosuresByLineNumber = [:]
 
     @Override
@@ -48,6 +53,7 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     def setup() {
         AppMessageSourceHolder.setAppMessageSource(appMessageSource)
         TimeProviderHolder.setTimeProvider(timeProvider)
+        ValidatorFactoryHolder.setValidatorFactory(validatorFactory)
     }
 
     def cleanup() {

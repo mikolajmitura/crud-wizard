@@ -52,4 +52,8 @@ class EndpointMetaModelDtoSamples {
             .successHttpCode(201)
             .build()
     }
+
+    static EndpointMetaModelDto emptyEndpointMetaModelDto() {
+        EndpointMetaModelDto.builder().build()
+    }
 }

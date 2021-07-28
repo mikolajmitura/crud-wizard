@@ -15,6 +15,18 @@ abstract class BaseOperationsOnEndpoints<INPUT> extends RawOperationsOnEndpoints
         putPayload(getEndpointUrl(), payload)
     }
 
+    Map notSuccessCreate(INPUT payload) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.post(getEndpointUrl()), payload)
+        httpResponse.andExpect(status().isBadRequest())
+        extractResponseAsJson(httpResponse)
+    }
+
+    Map notSuccessUpdate(INPUT payload) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.put(getEndpointUrl()), payload)
+        httpResponse.andExpect(status().isBadRequest())
+        extractResponseAsJson(httpResponse)
+    }
+
     public <T> T getById(Long id, Class<T> returnClass) {
         getAndReturnObject("${getEndpointUrl()}/$id", returnClass)
     }

@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.core.exception.handler;
 
 import java.util.Set;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.stereotype.Service;
@@ -16,11 +17,12 @@ import pl.jalokim.crudwizard.core.exception.ErrorWithMessagePlaceholder;
 import pl.jalokim.crudwizard.core.exception.ResourceChangedException;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
+import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 
 @Validated
 @Service
 @AllArgsConstructor
-class DummyService {
+public class DummyService {
 
     void dummyMethod(@Valid DummyDto dto) {
 
@@ -73,5 +75,13 @@ class DummyService {
 
     public void dummyMethodThrowingRawException() throws Exception {
         throw new Exception("raw exception message");
+    }
+
+    public void create(@Validated SimpleDummyDto dto) {
+
+    }
+
+    public void update(@NotNull Long someId, @NotNull @Validated(UpdateContext.class) SimpleDummyDto dto) {
+
     }
 }

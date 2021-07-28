@@ -42,8 +42,6 @@ public class GlobalExceptionHandler {
     public static final String EXCEPTION_HANDLED_MESSAGE = "Exception handled.";
     public static final String VALIDATION_ERROR_MESSAGE = "Invalid request";
 
-    private final ConstraintViolationToErrorConverter constraintViolationToErrorConverter = new ConstraintViolationToErrorConverter();
-
     @ExceptionHandler(BusinessLogicException.class)
     @ResponseStatus(BAD_REQUEST)
     @ResponseBody
@@ -123,7 +121,7 @@ public class GlobalExceptionHandler {
         return ErrorResponseDto.builder()
             .message(VALIDATION_ERROR_MESSAGE)
             .errors(ex.getConstraintViolations().stream()
-                .map(constraintViolationToErrorConverter::toErrorDto)
+                .map(ConstraintViolationToErrorConverter::toErrorDto)
                 .collect(Collectors.toSet()))
             .build();
     }
@@ -134,7 +132,7 @@ public class GlobalExceptionHandler {
                 .message(VALIDATION_ERROR_MESSAGE)
                 .errors(bindingResult.getAllErrors().stream()
                     .map(error -> error.unwrap(ConstraintViolation.class))
-                    .map(constraintViolationToErrorConverter::toErrorDto)
+                    .map(ConstraintViolationToErrorConverter::toErrorDto)
                     .collect(Collectors.toSet()))
                 .build();
         } catch (IllegalArgumentException illegalArgumentException) {

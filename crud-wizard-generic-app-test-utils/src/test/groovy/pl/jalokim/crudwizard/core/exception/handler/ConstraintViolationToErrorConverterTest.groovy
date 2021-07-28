@@ -1,24 +1,22 @@
 package pl.jalokim.crudwizard.core.exception.handler
 
 import static org.hibernate.validator.internal.engine.path.PathImpl.createRootPath
+import static pl.jalokim.crudwizard.core.rest.response.converter.ConstraintViolationToErrorConverter.toErrorDto
 
 import javax.validation.Path
 import org.hibernate.validator.internal.engine.path.PathImpl
 import org.hibernate.validator.internal.metadata.aggregated.ExecutableMetaData
-import pl.jalokim.crudwizard.core.rest.response.converter.ConstraintViolationToErrorConverter
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class ConstraintViolationToErrorConverterTest extends Specification {
-
-    private ConstraintViolationToErrorConverter converter = new ConstraintViolationToErrorConverter()
 
     def "should copy error message from violation"() {
         given:
         def input = new SimpleConstraintViolation(createRootPath(), "must not be blank")
 
         when:
-        def actual = converter.toErrorDto(input)
+        def actual = toErrorDto(input)
 
         then:
         actual.message == "must not be blank"
@@ -27,7 +25,7 @@ class ConstraintViolationToErrorConverterTest extends Specification {
     @Unroll
     def "should stringify path #propertyPath ignoring irrelevant nodes"() {
         expect:
-        converter.toErrorDto(new SimpleConstraintViolation(propertyPath, "must not be blank")).property == property
+        toErrorDto(new SimpleConstraintViolation(propertyPath, "must not be blank")).property == property
 
         where:
         propertyPath                                                                     || property

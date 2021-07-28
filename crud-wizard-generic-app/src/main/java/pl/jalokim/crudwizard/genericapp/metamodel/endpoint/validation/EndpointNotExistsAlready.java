@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
+package pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -8,11 +8,12 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = PathParamsAndUrlValidator.class)
-public @interface PathParamsAndUrl {
+@Constraint(validatedBy = EndpointNotExistsAlreadyValidator.class)
+public @interface EndpointNotExistsAlready {
 
     String message() default "";
 

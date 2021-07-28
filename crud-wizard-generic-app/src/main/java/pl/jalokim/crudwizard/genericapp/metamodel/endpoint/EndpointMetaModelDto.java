@@ -19,6 +19,8 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
 
 @EqualsAndHashCode(callSuper = true)
@@ -34,7 +36,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
     is = EQUAL_TO_ANY, otherFieldValues = {"GET", "DELETE"})
 @FieldShouldWhenOther(field = "pathParams", should = NOT_NULL, whenField = EndpointMetaModelDto.HTTP_METHOD,
     is = EQUAL_TO_ANY, otherFieldValues = {"PUT", "PATCH"})
-@PathParamsAndUrl
+@PathParamsAndUrlVariablesTheSame
+@EndpointNotExistsAlready
 public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     public static final String HTTP_METHOD = "httpMethod";

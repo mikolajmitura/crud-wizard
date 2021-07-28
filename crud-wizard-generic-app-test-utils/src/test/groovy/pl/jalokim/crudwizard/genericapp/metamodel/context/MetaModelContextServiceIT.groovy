@@ -161,11 +161,11 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
             }
 
             verifyAll(endpointMetaModelContextNode.nextNodesByPath[endpointMetaModelDto.baseUrl]) {
-                urlPart.originalValue == endpointMetaModelDto.baseUrl
+                urlPartMetaModel.urlPart.originalValue == endpointMetaModelDto.baseUrl
                 endpointsByHttpMethod[endpointMetaModelDto.httpMethod] == endpointMetaModels.modelsById.get(endpointId)
             }
         }
     }
 
-    // TODO #2 to implement load context with custom service, mapper, data storage connectors, should verify only them not all modelsById fields.ApiTagSamples
+    // TODO #3 to implement load context with custom service, mapper, data storage connectors, should verify only them not all modelsById fields.ApiTagSamples
 }

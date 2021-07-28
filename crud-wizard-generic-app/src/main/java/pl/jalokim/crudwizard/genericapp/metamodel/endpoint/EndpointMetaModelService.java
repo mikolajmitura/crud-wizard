@@ -5,6 +5,7 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagRepository;
@@ -25,7 +26,7 @@ public class EndpointMetaModelService {
     private final EndpointResponseMetaModelRepository endpointResponseMetaModelRepository;
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
 
-    public Long createNewEndpoint(EndpointMetaModelDto createEndpointMetaModelDto) {
+    public Long createNewEndpoint(@Validated EndpointMetaModelDto createEndpointMetaModelDto) {
         final var endpointMetaModelEntity = endpointMetaModelMapper.toEntity(createEndpointMetaModelDto);
 
         if (isNull(endpointMetaModelEntity.getApiTag().getId())) {
