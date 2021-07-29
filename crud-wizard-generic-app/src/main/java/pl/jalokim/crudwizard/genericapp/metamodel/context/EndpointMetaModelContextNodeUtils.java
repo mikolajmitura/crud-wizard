@@ -22,8 +22,10 @@ import pl.jalokim.utils.collection.CollectionUtils;
 public class EndpointMetaModelContextNodeUtils {
 
     private final ObjectMapper objectMapper;
+    private final MetaModelContextService metaModelContextService;
 
-    public FoundEndpointMetaModel getEndpointByUrl(MetaModelContext metaModelContext, String url, HttpMethod httpMethod) {
+    public FoundEndpointMetaModel findEndpointByUrl(String url, HttpMethod httpMethod) {
+        MetaModelContext metaModelContext = metaModelContextService.getMetaModelContext();
         var foundEndpointRef = new AtomicReference<EndpointMetaModel>();
         var urlMetamodel = UrlModelResolver.resolveUrl(url);
         var endpointNodeRef = new AtomicReference<>(metaModelContext.getEndpointMetaModelContextNode());
@@ -60,11 +62,13 @@ public class EndpointMetaModelContextNodeUtils {
             .map(endpointMeta -> endpointMeta.getPathParams().getFields())
             .orElse(List.of());
 
-        for (int pathParamIndex = 0; pathParamIndex < urlPathParamsValue.size(); pathParamIndex++) {
-            String rawParamValue = urlPathParamsValue.get(pathParamIndex);
-            FieldMetaModel fieldMetaModel = pathParamFields.get(pathParamIndex);
-            Object convertedValue = objectMapper.convertValue(rawParamValue, fieldMetaModel.getFieldType().getRealClass());
-            pathParamsMap.put(fieldMetaModel.getFieldName(), convertedValue);
+        if (CollectionUtils.isNotEmpty(pathParamFields)) {
+            for (int pathParamIndex = 0; pathParamIndex < urlPathParamsValue.size(); pathParamIndex++) {
+                String rawParamValue = urlPathParamsValue.get(pathParamIndex);
+                FieldMetaModel fieldMetaModel = pathParamFields.get(pathParamIndex);
+                Object convertedValue = objectMapper.convertValue(rawParamValue, fieldMetaModel.getFieldType().getRealClass());
+                pathParamsMap.put(fieldMetaModel.getFieldName(), convertedValue);
+            }
         }
 
         return FoundEndpointMetaModel.builder()

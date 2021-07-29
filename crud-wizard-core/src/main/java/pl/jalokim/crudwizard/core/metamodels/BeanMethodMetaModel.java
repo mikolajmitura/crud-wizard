@@ -17,10 +17,10 @@ public class BeanMethodMetaModel {
     List<MethodArgumentMetaModel> methodArguments;
 
     TypeMetadata returnType;
-    // TODO #0 'returnType' some returnType class meta info
+    // TODO #04 'returnType' some returnType class meta info
     // maybe instead of TypeMetadata from java-utils use from generics-resolver
 
-    // TODO #1 add method arguments with annotations meta model.
+    // TODO #05 add method arguments with annotations meta model.
     // arguments which can be resolved:
     // by type EndpointMetaModel
     // by type GenericServiceArgument

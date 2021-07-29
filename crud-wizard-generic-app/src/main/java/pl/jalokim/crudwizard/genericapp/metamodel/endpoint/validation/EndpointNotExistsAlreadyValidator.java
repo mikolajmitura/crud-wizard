@@ -4,9 +4,7 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -17,14 +15,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlMetamodel;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
 import pl.jalokim.crudwizard.core.translations.AppMessageSource;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
-import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNode;
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.FoundEndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.utils.collection.CollectionUtils;
@@ -33,8 +30,8 @@ import pl.jalokim.utils.collection.CollectionUtils;
 @RequiredArgsConstructor
 public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidatorWithDynamicMessage<EndpointNotExistsAlready, EndpointMetaModelDto> {
 
-    private final MetaModelContextService metaModelContextService;
     private final ApplicationContext applicationContext;
+    private final EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils;
 
     @Override
     public boolean isValid(EndpointMetaModelDto value, ConstraintValidatorContext context) {
@@ -50,34 +47,28 @@ public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidato
     }
 
     private boolean endpointNotDuplicated(EndpointValidationContext validationContext) {
-        var metaModelContext = metaModelContextService.getMetaModelContext();
-        var endpointMetaModelContextNodeRef = new AtomicReference<>(metaModelContext.getEndpointMetaModelContextNode());
-
-        verifyInEndpointMetaModelContext(validationContext, endpointMetaModelContextNodeRef);
+        verifyInEndpointMetaModelContext(validationContext);
         verifyInSpringRestControllers(validationContext);
-
         return validationContext.notFound.get();
     }
 
-    private void verifyInEndpointMetaModelContext(EndpointValidationContext validationContext,
-        AtomicReference<EndpointMetaModelContextNode> endpointMetaModelContextNodeRef) {
-        var urlParts = validationContext.getNewUrlParts();
-        for (int i = 0; i < urlParts.size(); i++) {
-            var urlPart = urlParts.get(i);
+    private void verifyInEndpointMetaModelContext(EndpointValidationContext validationContext) {
+        var newUrl = validationContext.getNewUrlMetamodel().getRawUrl();
+        var newHttpMethod = validationContext.getNewHttpMethod();
+        FoundEndpointMetaModel foundEndpointMetaModel = endpointMetaModelContextNodeUtils.findEndpointByUrl(newUrl, newHttpMethod);
 
-            var nextNode = endpointMetaModelContextNodeRef.get().getNodeByUrlPart(urlPart);
-            if (nextNode == null) {
-                break;
-            }
-
-            endpointMetaModelContextNodeRef.set(nextNode);
-            if (CollectionUtils.isLastIndex(urlParts, i)) {
-                var foundEndpoint = endpointMetaModelContextNodeRef.get()
-                    .getEndpointByHttpMethod(validationContext.getNewHttpMethod());
-
-                verifyEndpointWasFound(validationContext, foundEndpoint);
-            }
+        if (foundEndpointMetaModel.isFound()) {
+            var foundEndpoint = foundEndpointMetaModel.getEndpointMetaModel();
+            customMessage(validationContext.getContext(), MessagePlaceholder.createMessagePlaceholder(
+                AppMessageSource.buildPropertyKey(EndpointNotExistsAlready.class, "crudWizardController"), Map.of(
+                    "url", validationContext.getEndpointMetaModelDto().getBaseUrl(),
+                    "httpMethod", validationContext.getNewHttpMethod().toString(),
+                    "foundUrl", foundEndpoint.getUrlMetamodel().getRawUrl(),
+                    "foundOperationName", foundEndpoint.getOperationName()
+                )
+            ));
         }
+        validationContext.getNotFound().set(foundEndpointMetaModel.isNotFound());
     }
 
     private void verifyInSpringRestControllers(EndpointValidationContext validationContext) {
@@ -134,23 +125,6 @@ public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidato
                 validationContext.getNotFound().set(false);
             }
         }
-    }
-
-    private void verifyEndpointWasFound(EndpointValidationContext validationContext, EndpointMetaModel foundEndpoint) {
-        boolean wasNotFound = Objects.isNull(foundEndpoint);
-
-        if (!wasNotFound) {
-            customMessage(validationContext.getContext(), MessagePlaceholder.createMessagePlaceholder(
-                AppMessageSource.buildPropertyKey(EndpointNotExistsAlready.class, "crudWizardController"), Map.of(
-                    "url", validationContext.getEndpointMetaModelDto().getBaseUrl(),
-                    "httpMethod", validationContext.getNewHttpMethod().toString(),
-                    "foundUrl", foundEndpoint.getUrlMetamodel().getRawUrl(),
-                    "foundOperationName", foundEndpoint.getOperationName()
-                )
-            ));
-        }
-
-        validationContext.getNotFound().set(wasNotFound);
     }
 
     @Value

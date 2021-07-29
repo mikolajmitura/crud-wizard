@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
@@ -29,6 +30,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
@@ -43,8 +45,10 @@ import spock.lang.Unroll
 class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
 
     private MetaModelContextService metaModelContextService = Mock()
+    private EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(createObjectMapper(),
+        metaModelContextService)
     private ApplicationContext applicationContext = Mock()
-    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(metaModelContextService, applicationContext)
+    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext)
 
     def setup() {
         RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()

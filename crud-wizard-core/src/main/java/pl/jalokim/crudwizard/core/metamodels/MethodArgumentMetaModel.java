@@ -11,6 +11,6 @@ public class MethodArgumentMetaModel {
     Set<Annotation> annotations;
 
     TypeMetadata argumentType;
-    // TODO #0 'argumentType' some class meta info
+    // TODO #07 'argumentType' some class meta info
     // maybe instead of TypeMetadata from java-utils use from generics-resolver
 }

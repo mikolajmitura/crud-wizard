@@ -13,7 +13,11 @@ public class FoundEndpointMetaModel {
     EndpointMetaModel endpointMetaModel;
     RawEntityObject urlPathParams;
 
-    public boolean wasFound() {
+    public boolean isFound() {
         return Objects.nonNull(endpointMetaModel) && Objects.nonNull(urlPathParams);
+    }
+
+    public boolean isNotFound() {
+        return !isFound();
     }
 }
