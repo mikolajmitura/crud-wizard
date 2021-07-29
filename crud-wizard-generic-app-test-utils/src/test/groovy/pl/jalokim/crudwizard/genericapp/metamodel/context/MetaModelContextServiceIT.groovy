@@ -13,7 +13,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelServ
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService
-import pl.jalokim.crudwizard.genericapp.service.GenericServiceBean
+import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 
 class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
 
@@ -48,7 +48,7 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
     private GenericMapperBean genericMapperBean
 
     @Autowired
-    private GenericServiceBean genericServiceBean
+    private DefaultGenericService genericServiceBean
 
     /*
     test for create new endpoint which doesn't use currently created meta model. It creates all of them.
@@ -129,8 +129,8 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
             verifyAll(defaultServiceMetaModel) {
                 id == defaultBeansService.getDefaultGenericServiceId()
                 serviceInstance == genericServiceBean
-                className == GenericServiceBean.canonicalName
-                beanName == "genericServiceBean"
+                className == DefaultGenericService.canonicalName
+                beanName == "defaultGenericService"
                 methodName == "saveOrReadFromDataStorages"
                 methodMetaModel.name == "saveOrReadFromDataStorages"
                 serviceScript == null

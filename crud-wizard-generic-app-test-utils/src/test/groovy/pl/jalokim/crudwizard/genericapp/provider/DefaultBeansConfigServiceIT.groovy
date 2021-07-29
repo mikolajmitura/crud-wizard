@@ -8,7 +8,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaMod
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntityRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelRepository
-import pl.jalokim.crudwizard.genericapp.service.GenericServiceBean
+import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 
 class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification {
 
@@ -52,8 +52,8 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
             }
 
             verifyAll(serviceMetaModelRepository.getOne(genericServiceMetaModelId)) {
-                className == GenericServiceBean.canonicalName
-                beanName == "genericServiceBean"
+                className == DefaultGenericService.canonicalName
+                beanName == "defaultGenericService"
                 methodName == "saveOrReadFromDataStorages"
                 serviceScript == null
             }

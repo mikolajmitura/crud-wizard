@@ -15,7 +15,7 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 // TODO try use uses to inject others mapper, now is problem with ambiguity from AdditionalPropertyMapper
@@ -40,7 +40,7 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
         EndpointMetaModel endpointMetaModel = toMetaModel(endpointMetaModelEntity);
         return endpointMetaModel.toBuilder()
             .apiTag(getFromContext(metaModelContext::getApiTags, () -> endpointMetaModelEntity.getApiTag().getId()))
-            .urlMetamodel(BaseUrlModelResolver.resolveUrl(endpointMetaModelEntity.getBaseUrl()))
+            .urlMetamodel(UrlModelResolver.resolveUrl(endpointMetaModelEntity.getBaseUrl()))
             .payloadMetamodel(getFromContextByEntity(metaModelContext::getClassMetaModels, endpointMetaModelEntity::getPayloadMetamodel))
             .queryArguments(getFromContextByEntity(metaModelContext::getClassMetaModels, endpointMetaModelEntity::getQueryArguments))
             .pathParams(getFromContextByEntity(metaModelContext::getClassMetaModels, endpointMetaModelEntity::getPathParams))

@@ -1,34 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNode.VARIABLE_URL_PART
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples.createMetaModelContextWithEndpoints
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples.newEndpointMetaModel
 
 import org.springframework.http.HttpMethod
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
-import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver
 import spock.lang.Specification
 
 class EndpointMetaModelContextNodeCreatorTest extends Specification {
 
     def "should return expected url nodes"() {
         given:
-        MetaModelContext metaModelContext = new MetaModelContext()
-        def endpointMetaModels = new ModelsCache<EndpointMetaModel>()
-
-        [
-            newEndpointMetaModel(1, "users/{userId}", HttpMethod.GET),
-            newEndpointMetaModel(2, "users", HttpMethod.POST),
-            newEndpointMetaModel(3, "users/{userId}", HttpMethod.PUT),
-            newEndpointMetaModel(4, "users/{userId}/orders", HttpMethod.POST),
-            newEndpointMetaModel(5, "users/{userIdent}/orders/{orderId}", HttpMethod.PUT),
-            newEndpointMetaModel(6, "users/{userIdent}/orders/{orderId}", HttpMethod.GET),
-            newEndpointMetaModel(7, "users/{userIdent}/orders/{order}/reject", HttpMethod.POST),
-            newEndpointMetaModel(8, "users/report/orders/{order}/reject", HttpMethod.POST),
-            newEndpointMetaModel(9, "invoices/{invoice}/send", HttpMethod.POST)
-        ].each {endpointMetaModel ->
-            endpointMetaModels.put(endpointMetaModel.getId(), endpointMetaModel)
-        }
-
-        metaModelContext.setEndpointMetaModels(endpointMetaModels)
+        MetaModelContext metaModelContext = createMetaModelContextWithEndpoints()
 
         when:
         EndpointMetaModelContextNodeCreator.loadEndpointNodes(metaModelContext)
@@ -113,11 +97,4 @@ class EndpointMetaModelContextNodeCreatorTest extends Specification {
         ex.message == "Already exists endpoint with method: ${HttpMethod.PUT} and URL: /users/{$VARIABLE_URL_PART}, problematic URL: users/{otherId}"
     }
 
-    private static EndpointMetaModel newEndpointMetaModel(Long id, String rawUrl, HttpMethod httpMethod) {
-        EndpointMetaModel.builder()
-            .id(id)
-            .urlMetamodel(BaseUrlModelResolver.resolveUrl(rawUrl))
-            .httpMethod(httpMethod)
-            .build()
-    }
 }

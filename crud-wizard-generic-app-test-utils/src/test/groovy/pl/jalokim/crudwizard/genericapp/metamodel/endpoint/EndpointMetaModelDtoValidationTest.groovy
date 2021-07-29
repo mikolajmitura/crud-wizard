@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
-import static org.springframework.http.HttpMethod.POST
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
@@ -12,6 +11,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithClassName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples.createMetaModelContextWithOneEndpointInNodes
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPutEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
@@ -28,8 +28,6 @@ import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
-import pl.jalokim.crudwizard.core.metamodels.url.UrlPart
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
@@ -38,7 +36,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
-import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
@@ -58,17 +55,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
     @Unroll
     def "should return expected messages for default context of EndpointMetaModelDto"() {
         given:
-        MetaModelContext metaModelContext = new MetaModelContext()
-        metaModelContext.getEndpointMetaModelContextNode()
-            .putNextNodeOrGet(UrlPart.normalUrlPart("users"))
-            .putNextNodeOrGet(UrlPart.variableUrlPart("userId"))
-            .putNextNodeOrGet(UrlPart.normalUrlPart("orders"))
-            .putNextNodeOrGet(UrlPart.variableUrlPart("orderId"))
-            .putEndpointByMethod(EndpointMetaModel.builder()
-                .urlMetamodel(BaseUrlModelResolver.resolveUrl("users/{usersIdVar}/orders/{ordersIdVar}"))
-                .httpMethod(POST)
-                .operationName("existOperationName")
-                .build())
+        MetaModelContext metaModelContext = createMetaModelContextWithOneEndpointInNodes()
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
 

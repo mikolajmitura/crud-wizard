@@ -36,4 +36,5 @@ public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
     List<DataStorageConnectorMetaModel> dataStorageConnectors;
 
     // TODO maybe here which headers distinct to this endpoint
+    // TODO consume type and response type application/xml and application/json etc???
 }

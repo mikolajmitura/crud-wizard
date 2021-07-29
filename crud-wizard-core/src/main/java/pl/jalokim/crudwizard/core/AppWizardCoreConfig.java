@@ -4,8 +4,12 @@ import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.creat
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMainMessageSource;
 
 import java.time.Clock;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -19,7 +23,7 @@ import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorWithDefaultGr
 @Configuration
 @ComponentScan("pl.jalokim.crudwizard.core")
 @EnableAspectJAutoProxy
-public class AppWizardCoreConfig {
+public class AppWizardCoreConfig implements BeanDefinitionRegistryPostProcessor {
 
     @Bean
     Clock clock() {
@@ -49,5 +53,22 @@ public class AppWizardCoreConfig {
         ValidatorWithDefaultGroupFactoryBean bean = new ValidatorWithDefaultGroupFactoryBean();
         bean.setValidationMessageSource(messageSource);
         return bean;
+    }
+
+    @Override
+    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+        removeBeanDefinitionWhenExists(registry, "jacksonObjectMapper");
+        removeBeanDefinitionWhenExists(registry, "defaultValidator");
+    }
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+
+    }
+
+    private void removeBeanDefinitionWhenExists(BeanDefinitionRegistry registry, String beanName) {
+        if (registry.containsBeanDefinition(beanName)) {
+            registry.removeBeanDefinition(beanName);
+        }
     }
 }

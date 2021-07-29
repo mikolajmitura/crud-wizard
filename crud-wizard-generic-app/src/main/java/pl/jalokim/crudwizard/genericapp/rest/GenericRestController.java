@@ -27,7 +27,8 @@ public class GenericRestController {
     @RequestMapping
     @ApiOperation("generic endpoint method for handle other endpoints")
     public ResponseEntity<Object> invokeHttpMethod(@RequestBody(required = false) Map<String, Object> requestBody,
-        @RequestParam Map<String, Object> httpQueryParams, @RequestHeader Map<String, String> headers,
+        @RequestParam(required = false) Map<String, String> httpQueryParams,
+        @RequestHeader(required = false) Map<String, String> headers,
         HttpServletRequest request, HttpServletResponse response) {
 
         return genericServiceDelegator.findAndInvokeHttpMethod(

@@ -43,6 +43,10 @@ public class EndpointMetaModelContextNode {
         return nextNodesByPath.get(urlPartMetamodel.getPathOrVariable());
     }
 
+    public EndpointMetaModelContextNode getVariableContextNode() {
+        return nextNodesByPath.get(VARIABLE_URL_PART);
+    }
+
     public void putEndpointByMethod(EndpointMetaModel endpointMetaModel) {
         EndpointMetaModel currentEndpointMetaModel = getEndpointByHttpMethod(endpointMetaModel.getHttpMethod());
         if (currentEndpointMetaModel == null) {

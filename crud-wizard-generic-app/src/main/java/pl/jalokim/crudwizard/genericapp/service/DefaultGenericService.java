@@ -9,7 +9,7 @@ import pl.jalokim.crudwizard.genericapp.config.GenericService;
 @Service
 @RequiredArgsConstructor
 @GenericService
-public class GenericServiceBean {
+public class DefaultGenericService {
 
     @GenericMethod
     public ResponseEntity<Object> saveOrReadFromDataStorages(GenericServiceArgument genericServiceArgument) {

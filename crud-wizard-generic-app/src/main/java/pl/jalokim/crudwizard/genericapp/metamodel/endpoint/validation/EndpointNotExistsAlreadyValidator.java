@@ -26,7 +26,7 @@ import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorW
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNode;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 @Component
@@ -100,7 +100,7 @@ public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidato
         HttpMethod newHttpMethod = validationContext.getNewHttpMethod();
         if (currentHttpMethods.contains(newHttpMethod.toString())) {
             for (String pattern : key.getPatternsCondition().getPatterns()) {
-                UrlMetamodel currentRestControllerUrlModel = BaseUrlModelResolver.resolveUrl(pattern);
+                UrlMetamodel currentRestControllerUrlModel = UrlModelResolver.resolveUrl(pattern);
                 List<UrlPart> currentUrlParts = currentRestControllerUrlModel.getUrlParts();
                 if (newUrlParts.size() == currentRestControllerUrlModel.getUrlParts().size()) {
                     verifyTheUrlIsTheSame(validationContext, value, newUrlParts, currentUrlParts);
@@ -166,7 +166,7 @@ public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidato
         public EndpointValidationContext(ConstraintValidatorContext context, EndpointMetaModelDto endpointMetaModelDto) {
             this.context = context;
             this.endpointMetaModelDto = endpointMetaModelDto;
-            newUrlMetamodel = BaseUrlModelResolver.resolveUrl(endpointMetaModelDto.getBaseUrl());
+            newUrlMetamodel = UrlModelResolver.resolveUrl(endpointMetaModelDto.getBaseUrl());
             newHttpMethod = endpointMetaModelDto.getHttpMethod();
             newUrlParts = newUrlMetamodel.getUrlParts();
         }

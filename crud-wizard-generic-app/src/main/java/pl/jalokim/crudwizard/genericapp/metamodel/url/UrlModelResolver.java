@@ -11,7 +11,7 @@ import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 
 @UtilityClass
-public class BaseUrlModelResolver {
+public class UrlModelResolver {
 
     private static final String PATH_VARIABLE_REGEX = "\\{([a-zA-Z0-9])+}";
 

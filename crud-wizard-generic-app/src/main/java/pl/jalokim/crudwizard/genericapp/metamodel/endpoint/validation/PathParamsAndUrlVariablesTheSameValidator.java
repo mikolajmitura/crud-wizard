@@ -18,7 +18,7 @@ import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorW
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.url.BaseUrlModelResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 
 public class PathParamsAndUrlVariablesTheSameValidator
     implements BaseConstraintValidatorWithDynamicMessage<PathParamsAndUrlVariablesTheSame, EndpointMetaModelDto> {
@@ -40,7 +40,7 @@ public class PathParamsAndUrlVariablesTheSameValidator
 
     private boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context,
         String baseUrl, ClassMetaModelDto pathParams) {
-        UrlMetamodel urlMetamodel = BaseUrlModelResolver.resolveUrl(baseUrl);
+        UrlMetamodel urlMetamodel = UrlModelResolver.resolveUrl(baseUrl);
         var pathVariablesNames = nullableElements(urlMetamodel.getPathVariablesNames()).asList();
 
         var pathParamsFields = nullableElements(

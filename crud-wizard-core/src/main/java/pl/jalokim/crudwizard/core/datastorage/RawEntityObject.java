@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.core.datastorage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class RawEntityObject extends HashMap<String, Object> {
 
@@ -21,9 +22,10 @@ public class RawEntityObject extends HashMap<String, Object> {
         return this;
     }
 
-    public static RawEntityObject fromMap(Map<String, Object> map) {
+    public static RawEntityObject fromMap(Map<String, ?> fromMap) {
         var rawEntity = newRawEntity();
-        map.forEach(rawEntity::field);
+        Optional.ofNullable(fromMap)
+            .ifPresent(map -> map.forEach(rawEntity::field));
         return rawEntity;
     }
 }
