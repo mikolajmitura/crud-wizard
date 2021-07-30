@@ -2,8 +2,6 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 
 class ClassMetaModelDtoSamples {
@@ -43,20 +41,6 @@ class ClassMetaModelDtoSamples {
         FieldMetaModelDto.builder()
             .fieldName(fieldName)
             .fieldType(createClassMetaModelDtoFromClass(fieldType))
-            .build()
-    }
-
-    static FieldMetaModel createValidFieldMetaModel(String fieldName, Class<?> fieldType) {
-        FieldMetaModel.builder()
-            .fieldName(fieldName)
-            .fieldType(createClassMetaModelFromClass(fieldType))
-            .build()
-    }
-
-    static ClassMetaModel createClassMetaModelFromClass(Class<?> metaModelClass) {
-        ClassMetaModel.builder()
-            .className(metaModelClass.canonicalName)
-            .realClass(metaModelClass)
             .build()
     }
 }

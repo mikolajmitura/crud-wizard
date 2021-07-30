@@ -1,8 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.service
 
+import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createHttpQueryParams
+import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBody
+
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.utils.test.DataFakerHelper
 import spock.mock.DetachedMockFactory
@@ -16,22 +18,12 @@ class GenericServiceArgumentSamples {
      */
     static GenericServiceArgument createInputGenericServiceArgument(HttpServletRequest request = MOCK_FACTORY.Mock(HttpServletRequest),
         HttpServletResponse response = MOCK_FACTORY.Mock(HttpServletResponse)) {
-
-        def requestBody = [
-            name   : DataFakerHelper.randomText(),
-            surname: DataFakerHelper.randomText()
-        ]
-        def headers = [
-            cookie: DataFakerHelper.randomText()
-        ]
-        def httpQueryParams = [
-            queryParam: DataFakerHelper.randomText()
-        ]
-
         GenericServiceArgument.builder()
-            .requestBody(RawEntityObject.fromMap(requestBody))
-            .httpQueryParams(RawEntityObject.fromMap(httpQueryParams))
-            .headers(headers)
+            .requestBody(createRequestBody())
+            .httpQueryParams(createHttpQueryParams())
+            .headers([
+                cookie: DataFakerHelper.randomText()
+            ])
             .request(request)
             .response(response)
             .build()

@@ -3,7 +3,9 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context
 import static org.springframework.http.HttpMethod.GET
 import static org.springframework.http.HttpMethod.POST
 import static org.springframework.http.HttpMethod.PUT
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createHttpQueryParamsMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createRequestBodyClassMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 
 import org.springframework.http.HttpMethod
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
@@ -23,6 +25,8 @@ class MetaModelContextSamples {
             .putEndpointByMethod(EndpointMetaModel.builder()
                 .urlMetamodel(UrlModelResolver.resolveUrl("users/{usersIdVar}/orders/{ordersIdVar}"))
                 .httpMethod(POST)
+                .payloadMetamodel(createRequestBodyClassMetaModel())
+                .queryArguments(createHttpQueryParamsMetaModel())
                 .pathParams(ClassMetaModel.builder()
                     .name("pathParamsMeta")
                     .fields([

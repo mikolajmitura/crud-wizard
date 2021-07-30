@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils;
+import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator;
+import pl.jalokim.crudwizard.genericapp.validation.generic.GenericValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -17,12 +19,19 @@ public class GenericServiceDelegator {
 
     private final DelegatedServiceMethodInvoker delegatedServiceMethodInvoker;
     private final EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils;
+    private final RawEntityObjectTranslator rawEntityObjectTranslator;
+    private final GenericValidator genericValidator;
 
-    // TODO #03 test this whole method
     public ResponseEntity<Object> findAndInvokeHttpMethod(GenericServiceArgument genericServiceArgument) {
-        var newGenericServiceArgument = searchForEndpointByRequest(genericServiceArgument);
-        // TODO #01 translate fields, translate raw map<String, String> request to map with real classes.
-        // TODO #02 invoke validation on fields and objects translated object
+        var newGenericServiceArgument = searchForEndpointByRequest(genericServiceArgument).toBuilder()
+            .requestBodyTranslated(rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getRequestBody()))
+            .httpQueryTranslated(rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getHttpQueryParams()))
+            .build();
+
+        var foundEndpoint =  newGenericServiceArgument.getEndpointMetaModel();
+        genericValidator.validate(newGenericServiceArgument.getHttpQueryTranslated(), foundEndpoint.getQueryArguments());
+        genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated(), foundEndpoint.getPayloadMetamodel());
+
         return delegatedServiceMethodInvoker.invokeMethod(newGenericServiceArgument);
     }
 

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class DelegatedServiceMethodInvoker {
 
     public ResponseEntity<Object> invokeMethod(GenericServiceArgument genericServiceArgument) {
-        // TODO send to generic service or try invoke methods in provided class service or translate to real dto class and others service arguments
+        // TODO #03 send to generic service or try invoke methods in provided class service or translate to real dto class and others service arguments
         return null;
     }
 }
