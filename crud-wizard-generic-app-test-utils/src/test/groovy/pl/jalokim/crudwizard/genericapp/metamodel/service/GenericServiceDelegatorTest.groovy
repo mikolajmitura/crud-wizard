@@ -16,6 +16,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextServic
 import pl.jalokim.crudwizard.genericapp.service.DelegatedServiceMethodInvoker
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceDelegator
+import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator
 import pl.jalokim.crudwizard.genericapp.validation.generic.GenericValidator
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
@@ -27,7 +28,8 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
     DelegatedServiceMethodInvoker delegatedServiceMethodInvoker = Mock()
     RawEntityObjectTranslator rawEntityObjectTranslator = Mock()
     GenericValidator genericValidator = Mock()
-    EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(createObjectMapper(), metaModelContextService)
+    JsonObjectMapper jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
+    EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
     HttpServletRequest request = Mock()
 
     GenericServiceDelegator testCase = new GenericServiceDelegator(delegatedServiceMethodInvoker, endpointMetaModelContextNodeUtils,

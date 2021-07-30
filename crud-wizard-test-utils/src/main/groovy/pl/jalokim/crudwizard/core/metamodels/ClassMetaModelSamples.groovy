@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.core.metamodels
 import java.time.LocalDate
 import java.time.LocalDateTime
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
+import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 
 class ClassMetaModelSamples {
 
@@ -38,6 +39,7 @@ class ClassMetaModelSamples {
                 createValidFieldMetaModel("applicationDateTime", LocalDateTime),
                 createValidFieldMetaModel("age", Integer),
                 createValidFieldMetaModel("applicationDateTime", Integer),
+                createValidFieldMetaModel("personData", SamplePersonDto),
                 createValidFieldMetaModel("addresses", createClassMetaModelFromClass(ArrayList).toBuilder()
                     .genericTypes([
                         ClassMetaModel.builder()

@@ -2,7 +2,6 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
 import static java.util.Optional.ofNullable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +13,15 @@ import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
+import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
+import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 @Component
 @RequiredArgsConstructor
 public class EndpointMetaModelContextNodeUtils {
 
-    private final ObjectMapper objectMapper;
+    private final JsonObjectMapper jsonObjectMapper;
     private final MetaModelContextService metaModelContextService;
 
     public FoundEndpointMetaModel findEndpointByUrl(String url, HttpMethod httpMethod) {
@@ -65,7 +66,8 @@ public class EndpointMetaModelContextNodeUtils {
             for (int pathParamIndex = 0; pathParamIndex < urlPathParamsValue.size(); pathParamIndex++) {
                 String rawParamValue = urlPathParamsValue.get(pathParamIndex);
                 FieldMetaModel fieldMetaModel = pathParamFields.get(pathParamIndex);
-                Object convertedValue = objectMapper.convertValue(rawParamValue, fieldMetaModel.getFieldType().getRealClass());
+                Object convertedValue = jsonObjectMapper.convertToObject(ObjectNodePath.rootNode().nextNode(fieldMetaModel.getFieldName()),
+                    rawParamValue, fieldMetaModel.getFieldType().getRealClass());
                 pathParamsMap.put(fieldMetaModel.getFieldName(), convertedValue);
             }
         }

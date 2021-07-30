@@ -15,11 +15,11 @@ class StringBlankToNullModule extends SimpleModule {
         addDeserializer(String.class, new StdScalarDeserializer<String>(String.class) {
             @Override
             public String deserialize(JsonParser jsonParser, DeserializationContext ctx) throws IOException {
-                String textValue = jsonParser.getValueAsString().trim();
+                String textValue = jsonParser.getValueAsString();
                 if (StringUtils.isBlank(textValue)) {
                     return null;
                 }
-                return textValue;
+                return textValue.trim();
             }
         });
     }

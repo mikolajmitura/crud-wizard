@@ -34,4 +34,9 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
             .getFirst();
     }
 
+    public List<String> getFieldNames() {
+        return nullableElements(fields)
+            .map(FieldMetaModel::getFieldName)
+            .asList();
+    }
 }

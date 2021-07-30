@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.core.datastorage
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 
 class RawEntityObjectSamples {
 
@@ -12,6 +13,10 @@ class RawEntityObjectSamples {
             surname            : "Doe",
             birthDate          : "1990-01-14",
             applicationDateTime: "2021-04-12T12:01:15",
+            personData         : [
+                name   : "XYZ",
+                surname: "QWERTY"
+            ],
             age                : 12,
             addresses          : [
                 [
@@ -40,6 +45,7 @@ class RawEntityObjectSamples {
             surname            : "Doe",
             birthDate          : LocalDate.of(1990, 1, 14),
             applicationDateTime: LocalDateTime.of(2021, 4, 12, 12, 01, 15),
+            personData         : new SamplePersonDto("XYZ", "QWERTY"),
             age                : 12,
             addresses          : [
                 [

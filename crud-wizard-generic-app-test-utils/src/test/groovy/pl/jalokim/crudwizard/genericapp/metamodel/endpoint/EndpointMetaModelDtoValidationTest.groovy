@@ -38,17 +38,17 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
+import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
-import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
 
 class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
 
     private MetaModelContextService metaModelContextService = Mock()
-    private EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(createObjectMapper(),
-        metaModelContextService)
     private ApplicationContext applicationContext = Mock()
-    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext)
+    private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
+    private endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
+    private validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext)
 
     def setup() {
         RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
