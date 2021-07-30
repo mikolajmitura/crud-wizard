@@ -38,7 +38,7 @@ class ClassMetaModelSamples {
                 createValidFieldMetaModel("applicationDateTime", LocalDateTime),
                 createValidFieldMetaModel("age", Integer),
                 createValidFieldMetaModel("applicationDateTime", Integer),
-                createValidFieldMetaModel("addresses", createClassMetaModelFromClass(List).toBuilder()
+                createValidFieldMetaModel("addresses", createClassMetaModelFromClass(ArrayList).toBuilder()
                     .genericTypes([
                         ClassMetaModel.builder()
                             .name("address")
@@ -50,10 +50,10 @@ class ClassMetaModelSamples {
                             .build()
                     ])
                     .build()),
-                createValidFieldMetaModel("hobbies", createClassMetaModelFromClass(Set).toBuilder()
+                createValidFieldMetaModel("hobbies", createClassMetaModelFromClass(HashSet).toBuilder()
                     .genericTypes([createClassMetaModelFromClass(String)])
                     .build()),
-                createValidFieldMetaModel("contactData", createClassMetaModelFromClass(Map).toBuilder()
+                createValidFieldMetaModel("contactData", createClassMetaModelFromClass(HashMap).toBuilder()
                     .genericTypes([
                         createClassMetaModelFromClass(String),
                         createClassMetaModelFromClass(String)

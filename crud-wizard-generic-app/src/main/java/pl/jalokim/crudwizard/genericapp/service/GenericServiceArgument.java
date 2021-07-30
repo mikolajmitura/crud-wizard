@@ -5,29 +5,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 
 @Value
 @Builder(toBuilder = true)
 public class GenericServiceArgument {
 
-    RawEntityObject httpQueryParams;
+    Map<String, Object> httpQueryParams;
     /**
      * Translated to read classes based on class meta model by field 'queryArguments'
      * in EndpointMetaModel
      */
-    RawEntityObject httpQueryTranslated;
-    RawEntityObject requestBody;
+    Map<String, Object> httpQueryTranslated;
+    Map<String, Object> requestBody;
 
     /**
      * Translated to read classes based on class meta model by field 'payloadMetamodel'
      * in EndpointMetaModel
      */
-    RawEntityObject requestBodyTranslated;
+    Map<String, Object> requestBodyTranslated;
     Map<String, String> headers;
     HttpServletRequest request;
     HttpServletResponse response;
-    RawEntityObject urlPathParams;
+    Map<String, Object> urlPathParams;
     EndpointMetaModel endpointMetaModel;
 }

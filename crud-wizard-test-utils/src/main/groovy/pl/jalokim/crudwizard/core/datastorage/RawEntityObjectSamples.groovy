@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 
 class RawEntityObjectSamples {
 
-    static RawEntityObject createRequestBody() {
-        def requestBody = [
+    static Map<String, Object> createRequestBody() {
+        [
             bankField          : "",
             name               : "John",
             surname            : "Doe",
@@ -31,11 +31,10 @@ class RawEntityObjectSamples {
                 email      : "test12@domain.com",
             ]
         ]
-        RawEntityObject.fromMap(requestBody)
     }
 
-    static RawEntityObject createRequestBodyTranslated() {
-        def requestBody = [
+    static Map<String, Object> createRequestBodyTranslated() {
+        [
             bankField          : null,
             name               : "John",
             surname            : "Doe",
@@ -54,29 +53,26 @@ class RawEntityObjectSamples {
                     someEnum: ExampleEnum.ENUM2
                 ]
             ],
-            hobbies            : ["sport", "music"],
+            hobbies            : ["sport", "music"] as Set,
             contactData        : [
                 phoneNumber: "+48 123 456 789",
                 email      : "test12@domain.com",
             ]
         ]
-        RawEntityObject.fromMap(requestBody)
     }
 
-    static RawEntityObject createHttpQueryParams() {
-        def httpQueryParams = [
+    static Map<String, Object> createHttpQueryParams() {
+        [
             lastContact: "2021-01-14",
             lastText   : "some text",
         ]
-        RawEntityObject.fromMap(httpQueryParams)
     }
 
-    static RawEntityObject createHttpQueryParamsTranslated() {
-        def httpQueryParams = [
+    static Map<String, Object> createHttpQueryParamsTranslated() {
+        [
             lastContact: LocalDate.of(2021, 1, 14),
             lastText   : "some text",
         ]
-        RawEntityObject.fromMap(httpQueryParams)
     }
 
 }

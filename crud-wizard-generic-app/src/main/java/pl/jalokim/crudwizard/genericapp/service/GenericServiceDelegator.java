@@ -23,12 +23,16 @@ public class GenericServiceDelegator {
     private final GenericValidator genericValidator;
 
     public ResponseEntity<Object> findAndInvokeHttpMethod(GenericServiceArgument genericServiceArgument) {
-        var newGenericServiceArgument = searchForEndpointByRequest(genericServiceArgument).toBuilder()
-            .requestBodyTranslated(rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getRequestBody()))
-            .httpQueryTranslated(rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getHttpQueryParams()))
+        var newGenericServiceArgument = searchForEndpointByRequest(genericServiceArgument);
+        var foundEndpoint =  newGenericServiceArgument.getEndpointMetaModel();
+
+        newGenericServiceArgument = newGenericServiceArgument.toBuilder()
+            .httpQueryTranslated(rawEntityObjectTranslator.translateToRealObjects(
+                genericServiceArgument.getHttpQueryParams(), foundEndpoint.getQueryArguments()))
+            .requestBodyTranslated(rawEntityObjectTranslator.translateToRealObjects(
+                genericServiceArgument.getRequestBody(), foundEndpoint.getPayloadMetamodel()))
             .build();
 
-        var foundEndpoint =  newGenericServiceArgument.getEndpointMetaModel();
         genericValidator.validate(newGenericServiceArgument.getHttpQueryTranslated(), foundEndpoint.getQueryArguments());
         genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated(), foundEndpoint.getPayloadMetamodel());
 

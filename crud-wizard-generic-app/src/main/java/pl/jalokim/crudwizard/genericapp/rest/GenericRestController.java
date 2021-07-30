@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceDelegator;
 
@@ -27,14 +26,14 @@ public class GenericRestController {
     @RequestMapping
     @ApiOperation("generic endpoint method for handle other endpoints")
     public ResponseEntity<Object> invokeHttpMethod(@RequestBody(required = false) Map<String, Object> requestBody,
-        @RequestParam(required = false) Map<String, String> httpQueryParams,
+        @RequestParam(required = false) Map<String, Object> httpQueryParams,
         @RequestHeader(required = false) Map<String, String> headers,
         HttpServletRequest request, HttpServletResponse response) {
 
         return genericServiceDelegator.findAndInvokeHttpMethod(
             GenericServiceArgument.builder()
-                .requestBody(RawEntityObject.fromMap(requestBody))
-                .httpQueryParams(RawEntityObject.fromMap(httpQueryParams))
+                .requestBody(requestBody)
+                .httpQueryParams(httpQueryParams)
                 .headers(headers)
                 .request(request)
                 .response(response)

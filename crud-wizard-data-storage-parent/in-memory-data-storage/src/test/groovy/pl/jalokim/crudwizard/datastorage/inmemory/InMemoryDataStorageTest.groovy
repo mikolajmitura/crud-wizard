@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.datastorage.inmemory
 
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
@@ -20,28 +19,28 @@ class InMemoryDataStorageTest extends Specification {
     def "should save, update, delete few entities in in memory data storage"() {
         given:
         def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE)
-        def firstPerson = RawEntityObject.fromMap([
+        def firstPerson = [
             name     : DataFakerHelper.randomText(),
             firstName: DataFakerHelper.randomText()
-        ])
+        ]
 
-        def secondPerson = RawEntityObject.fromMap([
+        def secondPerson = [
             name     : DataFakerHelper.randomText(),
             firstName: DataFakerHelper.randomText()
-        ])
+        ]
 
-        def address = RawEntityObject.fromMap([
+        def address = [
             city  : DataFakerHelper.randomText(),
             street: DataFakerHelper.randomText()
-        ])
+        ]
 
-        def firstJob = RawEntityObject.fromMap([
+        def firstJob = [
             jobName: DataFakerHelper.randomText()
-        ])
+        ]
 
-        def secondJob = RawEntityObject.fromMap([
+        def secondJob = [
             jobName: DataFakerHelper.randomText()
-        ])
+        ]
 
         when: 'should save few new'
         Long firstPersonId = inMemoryStorage.saveEntity(personMetaModel, firstPerson)
@@ -73,7 +72,7 @@ class InMemoryDataStorageTest extends Specification {
 
         and: "update to new entity for certain id"
         when:
-        def updatedFirstPerson = RawEntityObject.fromMap(firstPerson)
+        def updatedFirstPerson = firstPerson
         updatedFirstPerson.name = firstPerson.name + DataFakerHelper.randomText()
 
         Long updatedFirstPersonId = inMemoryStorage.saveEntity(personMetaModel, updatedFirstPerson)

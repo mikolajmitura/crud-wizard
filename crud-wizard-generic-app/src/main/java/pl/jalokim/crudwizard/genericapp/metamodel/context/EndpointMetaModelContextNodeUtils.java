@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
@@ -73,7 +72,7 @@ public class EndpointMetaModelContextNodeUtils {
 
         return FoundEndpointMetaModel.builder()
             .endpointMetaModel(foundEndpoint)
-            .urlPathParams(RawEntityObject.fromMap(pathParamsMap))
+            .urlPathParams(pathParamsMap)
             .build();
     }
 }

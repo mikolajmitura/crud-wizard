@@ -27,7 +27,7 @@ public class BeanMethodMetaModel {
     // by type HttpServletRequest from GenericServiceArgument
     // by type HttpServletResponse from GenericServiceArgument
     // by @RequestHeader from headers from GenericServiceArgument only as simple values, as String, Numbers or List<simple>
-    // by @RequestParam as RawEntityObject or just Map or real java bean provided from httpQueryTranslated from GenericServiceArgument
+    // by @RequestParam as Map<String, Object> or real java bean provided from httpQueryTranslated from GenericServiceArgument
     // by @RequestHeader as whole map from headers from GenericServiceArgument
-    // by @RequestBody as RawEntityObject or Map or real java bean
+    // by @RequestBody as Map<String, Object> or real java bean
 }

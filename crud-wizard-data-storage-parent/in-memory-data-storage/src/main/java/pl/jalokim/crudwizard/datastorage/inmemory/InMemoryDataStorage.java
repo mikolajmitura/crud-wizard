@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
@@ -34,7 +33,7 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, RawEntityObject entity) {
+    public Object saveEntity(ClassMetaModel classMetaModel, Map<String, Object> entity) {
         EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
             entityBag = new EntityStorage(classMetaModel, idGenerators);
@@ -60,20 +59,20 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public RawEntityObject getEntityById(ClassMetaModel classMetaModel, Object idObject) {
+    public Map<String, Object> getEntityById(ClassMetaModel classMetaModel, Object idObject) {
         EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         return Optional.ofNullable(entityBag.getById(idObject))
             .orElseThrow(() -> new EntityNotFoundException(String.format("not exists with id: %s entity name: %s", idObject, classMetaModel.getName())));
     }
 
     @Override
-    public Page<RawEntityObject> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
+    public Page<Map<String, Object>> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
         // TODO how to do queries? eq, not eq, contains, in how?
         return null;
     }
 
     @Override
-    public List<RawEntityObject> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
+    public List<Map<String, Object>> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
         // TODO how to do queries? eq, not eq, contains, in how?
         return null;
     }

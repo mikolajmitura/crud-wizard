@@ -8,7 +8,6 @@ import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.get
 
 import javax.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
@@ -47,10 +46,10 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
 
         then:
         verifyAll(newGenericServiceArgument) {
-            urlPathParams == RawEntityObject.fromMap([
+            urlPathParams == [
                 usersIdVar : "12",
                 ordersIdVar: 14,
-            ])
+            ]
             endpointMetaModel == endpointMetaModelContextNodeUtils
                 .findEndpointByUrl("/users/{userId}/orders/{orderId}", POST)
                 .getEndpointMetaModel()
@@ -89,19 +88,22 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
         request.getRequestURI() >> "/users/12/orders/14"
         def expectedResponseEntity = ResponseEntity.created().body(12)
         GenericServiceArgument passedGenericServiceArgument = null
-        def expectedRequestBodyTranslated = createRequestBodyTranslated()
-        rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getRequestBody()) >> expectedRequestBodyTranslated
-        def expectedHttpQueryParamsTranslated = createHttpQueryParamsTranslated()
-        rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getHttpQueryParams()) >> expectedHttpQueryParamsTranslated
 
         def foundEndpointMetaModel = endpointMetaModelContextNodeUtils
             .findEndpointByUrl("/users/{userId}/orders/{orderId}", POST)
             .getEndpointMetaModel()
 
+        def expectedRequestBodyTranslated = createRequestBodyTranslated()
+        rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getRequestBody(),
+            foundEndpointMetaModel.getPayloadMetamodel()) >> expectedRequestBodyTranslated
+        def expectedHttpQueryParamsTranslated = createHttpQueryParamsTranslated()
+        rawEntityObjectTranslator.translateToRealObjects(genericServiceArgument.getHttpQueryParams(),
+            foundEndpointMetaModel.getQueryArguments()) >> expectedHttpQueryParamsTranslated
+
         boolean validatedHttpParams = false
         boolean validatedPayload = false
 
-        genericValidator.validate(_ as RawEntityObject, _ as ClassMetaModel) >> { args ->
+        genericValidator.validate(_ as Map<String, Object>, _ as ClassMetaModel) >> { args ->
             if (expectedHttpQueryParamsTranslated == args[0]
                 && foundEndpointMetaModel.queryArguments == args[1]) {
                 validatedHttpParams = true
@@ -125,10 +127,10 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
 
         verifyAll(passedGenericServiceArgument) {
             verifyAll(endpointMetaModel) {
-                urlPathParams == RawEntityObject.fromMap([
+                urlPathParams == [
                     usersIdVar : "12",
                     ordersIdVar: 14,
-                ])
+                ]
                 endpointMetaModel == foundEndpointMetaModel
             }
             requestBodyTranslated == expectedRequestBodyTranslated

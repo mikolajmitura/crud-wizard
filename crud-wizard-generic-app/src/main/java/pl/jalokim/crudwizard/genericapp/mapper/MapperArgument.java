@@ -1,8 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 
 @Value
@@ -10,7 +10,7 @@ import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 public class MapperArgument {
 
     ClassMetaModel sourceMetaModel;
-    RawEntityObject sourceObject;
+    Map<String, Object> sourceObject;
     ClassMetaModel targetMetaModel;
 
 }

@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
@@ -26,7 +25,7 @@ public class JdbcDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, RawEntityObject entity) {
+    public Object saveEntity(ClassMetaModel classMetaModel, Map<String, Object> entity) {
         return null;
     }
 
@@ -36,17 +35,17 @@ public class JdbcDataStorage implements DataStorage {
     }
 
     @Override
-    public RawEntityObject getEntityById(ClassMetaModel classMetaModel, Object idObject) {
+    public Map<String, Object> getEntityById(ClassMetaModel classMetaModel, Object idObject) {
         return null;
     }
 
     @Override
-    public Page<RawEntityObject> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
+    public Page<Map<String, Object>> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
         return null;
     }
 
     @Override
-    public List<RawEntityObject> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
+    public List<Map<String, Object>> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
         return null;
     }
 

@@ -3,7 +3,6 @@ package pl.jalokim.crudwizard.datastorage.inmemory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
@@ -14,17 +13,17 @@ public class EntityStorage {
 
     ClassMetaModel forModel;
     IdGenerators idGenerators;
-    Map<Object, RawEntityObject> entitiesById = new ConcurrentHashMap<>();
+    Map<Object, Map<String, Object>> entitiesById = new ConcurrentHashMap<>();
 
-    public synchronized RawEntityObject getById(Object idObject) {
+    public synchronized Map<String, Object> getById(Object idObject) {
         return entitiesById.get(idObject);
     }
 
-    public synchronized Object saveEntity(Object idObject, FieldMetaModel fieldWithId, RawEntityObject entity) {
+    public synchronized Object saveEntity(Object idObject, FieldMetaModel fieldWithId, Map<String, Object> entity) {
         Object idObjectToReturn = idObject;
         if (idObjectToReturn == null) {
             idObjectToReturn = idGenerators.getNextFor(fieldWithId.getFieldType().getRealClass());
-            entity.field(fieldWithId.getFieldName(), idObjectToReturn);
+            entity.put(fieldWithId.getFieldName(), idObjectToReturn);
         } else {
             if (entitiesById.containsKey(idObjectToReturn)) {
                 delete(idObjectToReturn);

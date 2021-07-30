@@ -1,11 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.rest
 
-import static pl.jalokim.crudwizard.core.datastorage.RawEntityObject.newRawEntity
-
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.springframework.http.ResponseEntity
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceDelegator
 import pl.jalokim.utils.test.DataFakerHelper
@@ -36,15 +33,16 @@ class GenericRestControllerTest extends Specification {
             requestBody,
             httpQueryParams,
             headers,
-            request, response
+            request,
+            response
         )
 
         then:
         result == responseEntity
         1 * genericServiceDelegator.findAndInvokeHttpMethod(
             GenericServiceArgument.builder()
-                .requestBody(RawEntityObject.fromMap(requestBody))
-                .httpQueryParams(newRawEntity())
+                .requestBody(requestBody)
+                .httpQueryParams(null)
                 .headers(headers)
                 .request(request)
                 .response(response)

@@ -1,9 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
+import java.util.Map;
 import java.util.Objects;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.datastorage.RawEntityObject;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 
 @Value
@@ -11,7 +11,7 @@ import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 public class FoundEndpointMetaModel {
 
     EndpointMetaModel endpointMetaModel;
-    RawEntityObject urlPathParams;
+    Map<String, Object> urlPathParams;
 
     public boolean isFound() {
         return Objects.nonNull(endpointMetaModel) && Objects.nonNull(urlPathParams);
