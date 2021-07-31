@@ -36,7 +36,7 @@ public class MessagePlaceholder {
      * Will create MessagePlaceholder for message key which as prefix has canonical class name + propertySuffix and all given placeholderArgs will try wrap as
      * placeholder or try translate:
      * <ul>
-     *  <li> so for example enum pl.gov.csioz.package.SomeEnum.ENTRY will be wrapped as {pl.gov.csioz.package.SomeEnum.ENTRY} </li>
+     *  <li> so for example enum pl.jalokim.package.SomeEnum.ENTRY will be wrapped as {pl.jalokim.package.SomeEnum.ENTRY} </li>
      *  <li> if some argument looks like property e.g. 'some.property.key' thn will be {some.property.key} </li>
      *  <li> if argument is instance of {@link #MessagePlaceholder} then method {@link #translateMessage()} will be invoked on it. </li>
      *  <li> rest of arguments will be passed as normal arguments so {@link Object#toString()}} will be invoked on them to populate message arguments. </li>
