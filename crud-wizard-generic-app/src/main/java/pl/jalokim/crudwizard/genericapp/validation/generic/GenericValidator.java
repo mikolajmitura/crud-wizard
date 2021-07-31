@@ -6,7 +6,7 @@ import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 @Component
 public class GenericValidator {
 
-    // TODO #02 invoke validation on fields and objects translated object
+    // TODO #03 invoke validation on fields and objects translated object
     public void validate(Object translatedObject, ClassMetaModel classMetaModel) {
 
     }
