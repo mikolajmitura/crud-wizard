@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.service.translator
+package pl.jalokim.crudwizard.genericapp.service.translator
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
 import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBody
@@ -20,9 +20,6 @@ import com.fasterxml.jackson.databind.node.TextNode
 import java.time.LocalDate
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
-import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
-import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath
-import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator
 import spock.lang.Specification
 
 class RawEntityObjectTranslatorTest extends Specification {

@@ -3,9 +3,13 @@ package pl.jalokim.crudwizard.genericapp.service.translator;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import java.lang.reflect.Type;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 
@@ -27,6 +31,15 @@ public class JsonObjectMapper {
             return objectMapper.readValue(jsonValue, targetClass);
         } catch (JsonProcessingException e) {
             throw cannotConvertException(objectNodePath, targetClass, jsonValue, e);
+        }
+    }
+
+    // TODO #001 impl this method in future and return TechnicalException message
+    public Object convertToObject(String jsonValue, JavaType javaType) {
+        try {
+            return objectMapper.readValue(jsonValue, javaType);
+        } catch (JsonProcessingException e) {
+            throw new TechnicalException("", e);
         }
     }
 
@@ -64,5 +77,10 @@ public class JsonObjectMapper {
         } catch (JsonProcessingException e) {
             throw new TechnicalException("Cannot write object " + jsonValue + " as json value in path " + objectNodePath.getFullPath(), e);
         }
+    }
+
+    public JavaType createJavaType(Type type, Class<?> contextClass) {
+        TypeFactory typeFactory = this.objectMapper.getTypeFactory();
+        return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
     }
 }

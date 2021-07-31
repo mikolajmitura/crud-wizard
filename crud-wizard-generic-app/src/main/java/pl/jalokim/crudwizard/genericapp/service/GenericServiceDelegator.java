@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils;
+import pl.jalokim.crudwizard.genericapp.service.invoker.DelegatedServiceMethodInvoker;
 import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator;
 import pl.jalokim.crudwizard.genericapp.validation.generic.GenericValidator;
 

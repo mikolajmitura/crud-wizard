@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.service
+package pl.jalokim.crudwizard.genericapp.service
 
 import static org.springframework.http.HttpMethod.POST
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
@@ -13,9 +13,8 @@ import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
-import pl.jalokim.crudwizard.genericapp.service.DelegatedServiceMethodInvoker
-import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
-import pl.jalokim.crudwizard.genericapp.service.GenericServiceDelegator
+import pl.jalokim.crudwizard.genericapp.metamodel.service.GenericServiceArgumentSamples
+import pl.jalokim.crudwizard.genericapp.service.invoker.DelegatedServiceMethodInvoker
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator
 import pl.jalokim.crudwizard.genericapp.validation.generic.GenericValidator

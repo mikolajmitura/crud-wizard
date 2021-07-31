@@ -13,4 +13,10 @@ public class ElementsUtils {
             .map(Elements::elements)
             .orElse(Elements.empty());
     }
+
+    public static <T> Elements<T> nullableElements(T... array) {
+        return Optional.ofNullable(array)
+            .map(Elements::elements)
+            .orElse(Elements.empty());
+    }
 }
