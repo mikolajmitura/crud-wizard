@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,13 +18,17 @@ public class GenericServiceArgument {
      * in EndpointMetaModel
      */
     Map<String, Object> httpQueryTranslated;
-    Map<String, Object> requestBody;
+
+    /**
+     * Raw payload json
+     */
+    JsonNode requestBody;
 
     /**
      * Translated to read classes based on class meta model by field 'payloadMetamodel'
      * in EndpointMetaModel
      */
-    Map<String, Object> requestBodyTranslated;
+    Object requestBodyTranslated;
     Map<String, String> headers;
     HttpServletRequest request;
     HttpServletResponse response;

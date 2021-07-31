@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 
-class StringBlankToNullModule extends SimpleModule {
+public class StringBlankToNullModule extends SimpleModule {
 
     private static final long serialVersionUID = 1L;
 
@@ -16,11 +16,15 @@ class StringBlankToNullModule extends SimpleModule {
             @Override
             public String deserialize(JsonParser jsonParser, DeserializationContext ctx) throws IOException {
                 String textValue = jsonParser.getValueAsString();
-                if (StringUtils.isBlank(textValue)) {
-                    return null;
-                }
-                return textValue.trim();
+                return blankTextToNull(textValue);
             }
         });
+    }
+
+    public static String blankTextToNull(String textValue) {
+        if (StringUtils.isBlank(textValue)) {
+            return null;
+        }
+        return textValue.trim();
     }
 }

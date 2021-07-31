@@ -1,12 +1,19 @@
 package pl.jalokim.crudwizard.core.datastorage
 
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
+
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
+import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath
 
 class RawEntityObjectSamples {
 
-    static Map<String, Object> createRequestBody() {
+    private static final JsonObjectMapper JSON_OBJECT_MAPPER = new JsonObjectMapper(createObjectMapper())
+
+    static Map<String, Object> createRequestBodyAsMap() {
         [
             bankField          : "",
             name               : "John",
@@ -34,8 +41,21 @@ class RawEntityObjectSamples {
             contactData        : [
                 phoneNumber: "+48 123 456 789",
                 email      : "test12@domain.com",
+            ],
+            someNumbersByEnums : [
+                "ENUM1": 12,
+                "enum2": "13",
             ]
         ]
+    }
+
+    static String createRequestBodyAsRawJson() {
+        JSON_OBJECT_MAPPER.asJsonValue(ObjectNodePath.rootNode(), createRequestBodyAsMap())
+    }
+
+    static JsonNode createRequestBody() {
+        def rawJson = createRequestBodyAsRawJson()
+        JSON_OBJECT_MAPPER.asJsonNode(ObjectNodePath.rootNode(), rawJson)
     }
 
     static Map<String, Object> createRequestBodyTranslated() {
@@ -63,7 +83,11 @@ class RawEntityObjectSamples {
             contactData        : [
                 phoneNumber: "+48 123 456 789",
                 email      : "test12@domain.com",
-            ]
+            ],
+            someNumbersByEnums : Map.of(
+                ExampleEnum.ENUM1, 12,
+                ExampleEnum.ENUM2, 13,
+            )
         ]
     }
 

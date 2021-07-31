@@ -60,6 +60,12 @@ class ClassMetaModelSamples {
                         createClassMetaModelFromClass(String),
                         createClassMetaModelFromClass(String)
                     ])
+                    .build()),
+                createValidFieldMetaModel("someNumbersByEnums", createClassMetaModelFromClass(HashMap).toBuilder()
+                    .genericTypes([
+                        createClassMetaModelFromClass(ExampleEnum),
+                        createClassMetaModelFromClass(Integer)
+                    ])
                     .build())
             ])
             .build()

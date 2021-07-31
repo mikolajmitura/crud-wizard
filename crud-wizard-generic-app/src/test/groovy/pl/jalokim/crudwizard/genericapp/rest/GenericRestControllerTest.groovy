@@ -1,5 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.rest
 
+import static pl.jalokim.utils.test.DataFakerHelper.randomText
+
+import com.fasterxml.jackson.databind.node.TextNode
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.springframework.http.ResponseEntity
@@ -16,12 +19,9 @@ class GenericRestControllerTest extends Specification {
     private GenericRestController genericRestController = new GenericRestController(genericServiceDelegator)
 
     def "should invoke GenericServiceDelegator with expected GenericServiceArgument object"() {
-        def requestBody = [
-            name   : DataFakerHelper.randomText(),
-            surname: DataFakerHelper.randomText()
-        ]
+        def jsonNode = new TextNode(randomText())
         def headers = [
-            cookie: DataFakerHelper.randomText()
+            cookie: randomText()
         ]
         def httpQueryParams = null
 
@@ -30,7 +30,7 @@ class GenericRestControllerTest extends Specification {
 
         when:
         def result = genericRestController.invokeHttpMethod(
-            requestBody,
+            jsonNode,
             httpQueryParams,
             headers,
             request,
@@ -41,7 +41,7 @@ class GenericRestControllerTest extends Specification {
         result == responseEntity
         1 * genericServiceDelegator.findAndInvokeHttpMethod(
             GenericServiceArgument.builder()
-                .requestBody(requestBody)
+                .requestBody(jsonNode)
                 .httpQueryParams(null)
                 .headers(headers)
                 .request(request)

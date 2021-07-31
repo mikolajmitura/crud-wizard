@@ -2,19 +2,26 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service.translator
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
 import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBody
+import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBodyAsMap
+import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBodyAsRawJson
 import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBodyTranslated
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createRequestBodyClassMetaModel
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.node.TextNode
 import java.time.LocalDate
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
-
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
+import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath
 import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator
 import spock.lang.Specification
 
@@ -27,7 +34,7 @@ class RawEntityObjectTranslatorTest extends Specification {
     def "should translate to expected raw object entity"() {
         given:
         def classMetaModel = createRequestBodyClassMetaModel()
-        def inputRawEntityObject = createRequestBody()
+        def inputRawEntityObject = jsonObjectMapper.asJsonNode(ObjectNodePath.rootNode(), createRequestBodyAsRawJson())
 
         when:
         def resultRawEntityObject = testCase.translateToRealObjects(inputRawEntityObject, classMetaModel)
@@ -36,14 +43,42 @@ class RawEntityObjectTranslatorTest extends Specification {
         resultRawEntityObject == createRequestBodyTranslated()
     }
 
+    def "should translate to expected simple raw object"() {
+        given:
+        def classMetaModel = createClassMetaModelFromClass(Double)
+        JsonNode jsonNode = jsonObjectMapper.asJsonNode(ObjectNodePath.rootNode(), "14.01")
+
+        when:
+        def resultRawSimpleNumber = testCase.translateToRealObjects(jsonNode, classMetaModel)
+
+        then:
+        resultRawSimpleNumber == 14.01
+    }
+
+    def "should translate to expected simple array object"() {
+        given:
+        def classMetaModel = createClassMetaModelFromClass(ArrayList).toBuilder()
+            .genericTypes([createClassMetaModelFromClass(String)])
+            .build()
+        def rawJson = "[\"first\", \"second\"]"
+        JsonNode jsonNode = jsonObjectMapper.asJsonNode(ObjectNodePath.rootNode(), rawJson)
+
+        when:
+        def resultRawSimpleNumber = testCase.translateToRealObjects(jsonNode, classMetaModel)
+
+        then:
+        resultRawSimpleNumber == ["first", "second"]
+    }
+
     def "should inform about that field name not exists"() {
         given:
         def classMetaModel = createRequestBodyClassMetaModel()
-        def invalidInputRawEntityObject = createRequestBody()
+        def invalidInputRawEntityObject = createRequestBodyAsMap()
         invalidInputRawEntityObject.addresses[1].notExistField = null
+        def jsonNode = asJsonNode(invalidInputRawEntityObject)
 
         when:
-        testCase.translateToRealObjects(invalidInputRawEntityObject, classMetaModel)
+        testCase.translateToRealObjects(jsonNode, classMetaModel)
 
         then:
         TechnicalException ex = thrown()
@@ -57,11 +92,12 @@ class RawEntityObjectTranslatorTest extends Specification {
     def "should inform about problem with conversion to some type"() {
         given:
         def classMetaModel = createRequestBodyClassMetaModel()
-        def invalidInputRawEntityObject = createRequestBody()
+        def invalidInputRawEntityObject = createRequestBodyAsMap()
         invalidInputRawEntityObject.birthDate = ["test"]
+        def jsonNode = asJsonNode(invalidInputRawEntityObject)
 
         when:
-        testCase.translateToRealObjects(invalidInputRawEntityObject, classMetaModel)
+        testCase.translateToRealObjects(jsonNode, classMetaModel)
 
         then:
         TechnicalException ex = thrown()
@@ -71,11 +107,12 @@ class RawEntityObjectTranslatorTest extends Specification {
     def "should convert expected String as json from map node"() {
         given:
         def classMetaModel = createRequestBodyClassMetaModel()
-        def invalidInputRawEntityObject = createRequestBody()
+        def invalidInputRawEntityObject = createRequestBodyAsMap()
         invalidInputRawEntityObject.name = [firstName: "test", "secondName": "test2"]
+        def jsonNode = asJsonNode(invalidInputRawEntityObject)
 
         when:
-        def resultRawEntityObject = testCase.translateToRealObjects(invalidInputRawEntityObject, classMetaModel)
+        def resultRawEntityObject = testCase.translateToRealObjects(jsonNode, classMetaModel)
 
         then:
         resultRawEntityObject.name == "{\"firstName\":\"test\",\"secondName\":\"test2\"}"
@@ -84,43 +121,46 @@ class RawEntityObjectTranslatorTest extends Specification {
     def "instead of data for address (should be map) but was some list"() {
         given:
         def classMetaModel = createRequestBodyClassMetaModel()
-        def invalidInputRawEntityObject = createRequestBody()
+        def invalidInputRawEntityObject = createRequestBodyAsMap()
         invalidInputRawEntityObject.addresses[0] = ["test"]
+        def jsonNode = asJsonNode(invalidInputRawEntityObject)
 
         when:
-        testCase.translateToRealObjects(invalidInputRawEntityObject, classMetaModel)
+        testCase.translateToRealObjects(jsonNode, classMetaModel)
 
         then:
         TechnicalException ex = thrown()
-        ex.message == cannotCastMessage(ArrayList, Map, "addresses[0]", "[\"test\"]")
+        ex.message == cannotCastMessage(ArrayNode, ObjectNode, "addresses[0]", "[\"test\"]")
     }
 
     def "instead of data for contactData (should be map) but was some String"() {
         given:
         def classMetaModel = createRequestBodyClassMetaModel()
-        def invalidInputRawEntityObject = createRequestBody()
+        def invalidInputRawEntityObject = createRequestBodyAsMap()
         invalidInputRawEntityObject.contactData = "text"
+        def jsonNode = asJsonNode(invalidInputRawEntityObject)
 
         when:
-        testCase.translateToRealObjects(invalidInputRawEntityObject, classMetaModel)
+        testCase.translateToRealObjects(jsonNode, classMetaModel)
 
         then:
         TechnicalException ex = thrown()
-        ex.message == cannotCastMessage(String, Map, "contactData", "\"text\"")
+        ex.message == cannotCastMessage(TextNode, ObjectNode, "contactData", "\"text\"")
     }
 
     def "instead of data for hobbies (should be list) but was some map"() {
         given:
         def classMetaModel = createRequestBodyClassMetaModel()
-        def invalidInputRawEntityObject = createRequestBody()
+        def invalidInputRawEntityObject = createRequestBodyAsMap()
         invalidInputRawEntityObject.hobbies = [ field: "someText"]
+        def jsonNode = asJsonNode(invalidInputRawEntityObject)
 
         when:
-        testCase.translateToRealObjects(invalidInputRawEntityObject, classMetaModel)
+        testCase.translateToRealObjects(jsonNode, classMetaModel)
 
         then:
         TechnicalException ex = thrown()
-        ex.message == cannotCastMessage(LinkedHashMap, Collection, "hobbies", "{\"field\":\"someText\"}")
+        ex.message == cannotCastMessage(ObjectNode, ArrayNode, "hobbies", "{\"field\":\"someText\"}")
     }
 
     def "should convert meta model with usage new attached object mapper module"() {
@@ -138,6 +178,10 @@ class RawEntityObjectTranslatorTest extends Specification {
 
         then:
         resultRawEntityObject == expectedResult
+    }
+
+    private JsonNode asJsonNode(Object fromObject) {
+        jsonObjectMapper.asJsonNode(ObjectNodePath.rootNode(), fromObject)
     }
 
     static String cannotCastMessage(Class<?> fromClass, Class<?> toClass, String path, String jsonValue) {

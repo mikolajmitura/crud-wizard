@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.service.translator;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -45,11 +46,23 @@ public class JsonObjectMapper {
             + " in path: " + objectNodePath.getFullPath(), e);
     }
 
-    private String asJsonValue(ObjectNodePath objectNodePath, Object sourceObject) {
+    public String asJsonValue(ObjectNodePath objectNodePath, Object sourceObject) {
         try {
             return objectMapper.writeValueAsString(sourceObject);
         } catch (JsonProcessingException e) {
             throw new TechnicalException("Cannot write object " + sourceObject + " as json value in path " + objectNodePath.getFullPath(), e);
+        }
+    }
+
+    public JsonNode asJsonNode(ObjectNodePath objectNodePath, Object sourceObject) {
+        return asJsonNode(objectNodePath, asJsonValue(objectNodePath, sourceObject));
+    }
+
+    public JsonNode asJsonNode(ObjectNodePath objectNodePath, String jsonValue) {
+        try {
+            return objectMapper.readTree(jsonValue);
+        } catch (JsonProcessingException e) {
+            throw new TechnicalException("Cannot write object " + jsonValue + " as json value in path " + objectNodePath.getFullPath(), e);
         }
     }
 }

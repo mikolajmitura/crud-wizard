@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.rest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class GenericRestController {
 
     @RequestMapping
     @ApiOperation("generic endpoint method for handle other endpoints")
-    public ResponseEntity<Object> invokeHttpMethod(@RequestBody(required = false) Map<String, Object> requestBody,
+    public ResponseEntity<Object> invokeHttpMethod(@RequestBody(required = false) JsonNode requestBody,
         @RequestParam(required = false) Map<String, Object> httpQueryParams,
         @RequestHeader(required = false) Map<String, String> headers,
         HttpServletRequest request, HttpServletResponse response) {
