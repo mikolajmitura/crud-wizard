@@ -28,9 +28,10 @@ public class MethodSignatureMetaModelResolver {
         GenericsContext context = GenericsResolver.resolve(instanceClass);
         MethodGenericsContext methodContext = context.method(method);
         Type methodReturnType = methodContext.resolveReturnType();
+        Class<?> rawReturnClass = methodContext.resolveReturnClass();
 
         return MethodSignatureMetaModel.builder()
-            .returnType(createJavaTypeMetaModel(instanceClass, methodReturnType))
+            .returnType(createJavaTypeMetaModel(instanceClass, rawReturnClass, methodReturnType))
             .methodArguments(resolveMethodArguments(instanceClass, methodContext))
             .build();
     }
@@ -42,21 +43,24 @@ public class MethodSignatureMetaModelResolver {
         for (int parameterIndex = 0; parameterIndex < method.getParameterCount(); parameterIndex++) {
             Annotation[] argumentAnnotations = method.getParameterAnnotations()[parameterIndex];
             Type parameterType = methodContext.resolveParameterType(parameterIndex);
+            GenericsContext genericsContext = methodContext.parameterType(parameterIndex);
+
             methodArgumentMetaModels.add(MethodArgumentMetaModel.builder()
-                .annotations(nullableElements(argumentAnnotations).asSet())
-                .argumentType(createJavaTypeMetaModel(instanceClass, parameterType))
+                .annotations(nullableElements(argumentAnnotations).asList())
+                .parameter(method.getParameters()[parameterIndex])
+                .argumentType(createJavaTypeMetaModel(instanceClass, genericsContext.currentClass(), parameterType))
                 .build());
         }
         return methodArgumentMetaModels;
     }
 
-    private JavaTypeMetaModel createJavaTypeMetaModel(Class<?> instanceClass, Type type) {
+    private JavaTypeMetaModel createJavaTypeMetaModel(Class<?> contextClass, Class<?> rawClassOfType, Type type) {
         JavaTypeMetaModel javaTypeMetaModel;
         if (type instanceof Class) {
             javaTypeMetaModel = createWithRawClass((Class<?>) type);
         } else {
-            var javaType = jsonObjectMapper.createJavaType(type, instanceClass);
-            javaTypeMetaModel = JavaTypeMetaModel.createWithType(type, javaType);
+            var javaType = jsonObjectMapper.createJavaType(type, contextClass);
+            javaTypeMetaModel = JavaTypeMetaModel.createWithType(rawClassOfType, type, javaType);
         }
         return javaTypeMetaModel;
     }

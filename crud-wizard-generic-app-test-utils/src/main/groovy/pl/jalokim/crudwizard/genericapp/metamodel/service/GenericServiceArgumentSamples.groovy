@@ -22,7 +22,8 @@ class GenericServiceArgumentSamples {
             .requestBody(createRequestBody())
             .httpQueryParams(createHttpQueryParams())
             .headers([
-                cookie: DataFakerHelper.randomText()
+                cookie: DataFakerHelper.randomText(),
+                responseType: DataFakerHelper.randomText(),
             ])
             .request(request)
             .response(response)

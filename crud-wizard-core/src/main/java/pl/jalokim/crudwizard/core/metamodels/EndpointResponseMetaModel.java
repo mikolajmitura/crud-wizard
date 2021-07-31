@@ -14,5 +14,5 @@ public class EndpointResponseMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;
     ClassMetaModel classMetaModel;
-    Long successHttpCode;
+    Integer successHttpCode;
 }

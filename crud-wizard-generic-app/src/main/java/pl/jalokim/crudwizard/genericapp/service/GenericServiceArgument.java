@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.Builder;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
+import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 
 @Value
 @Builder(toBuilder = true)
@@ -25,10 +26,10 @@ public class GenericServiceArgument {
     JsonNode requestBody;
 
     /**
-     * Translated to read classes based on class meta model by field 'payloadMetamodel'
+     * Translated to real classes based on class meta model by field 'payloadMetamodel'
      * in EndpointMetaModel
      */
-    Object requestBodyTranslated;
+    TranslatedPayload requestBodyTranslated;
     Map<String, String> headers;
     HttpServletRequest request;
     HttpServletResponse response;

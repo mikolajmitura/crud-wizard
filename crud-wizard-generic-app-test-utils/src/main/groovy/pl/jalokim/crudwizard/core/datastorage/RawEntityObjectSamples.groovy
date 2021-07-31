@@ -93,15 +93,17 @@ class RawEntityObjectSamples {
 
     static Map<String, Object> createHttpQueryParams() {
         [
-            lastContact: "2021-01-14",
-            lastText   : "some text",
+            lastContact : "2021-01-14",
+            lastText    : "some text",
+            numberAsText: "12",
         ]
     }
 
     static Map<String, Object> createHttpQueryParamsTranslated() {
         [
-            lastContact: LocalDate.of(2021, 1, 14),
-            lastText   : "some text",
+            lastContact : LocalDate.of(2021, 1, 14),
+            lastText    : "some text",
+            numberAsText: "12"
         ]
     }
 

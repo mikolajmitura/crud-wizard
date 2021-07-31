@@ -76,7 +76,8 @@ class ClassMetaModelSamples {
             .name("somePersonApplication-queryParams")
             .fields([
                 createValidFieldMetaModel("lastContact", LocalDate),
-                createValidFieldMetaModel("lastText", String)])
+                createValidFieldMetaModel("lastText", String),
+                createValidFieldMetaModel("numberAsText", String)])
             .build()
     }
 }

@@ -15,15 +15,24 @@ public class JavaTypeMetaModel {
         return new JavaTypeMetaModel(rawClass, null, null);
     }
 
-    public static JavaTypeMetaModel createWithType(Type originalType, JavaType jacksonJavaType) {
-        return new JavaTypeMetaModel(null, originalType, jacksonJavaType);
+    public static JavaTypeMetaModel createWithType(Class<?> rawClass, Type originalType, JavaType jacksonJavaType) {
+        return new JavaTypeMetaModel(rawClass, originalType, jacksonJavaType);
     }
 
     public boolean isRawClass() {
-        return rawClass != null;
+        return originalType == null && jacksonJavaType == null;
     }
 
     public boolean isGenericType() {
         return !isRawClass();
+    }
+
+    @Override
+    public String toString() {
+        if (isRawClass()) {
+            return "rawClass=" + rawClass.getCanonicalName();
+        } else {
+            return "generic type=" + originalType.toString();
+        }
     }
 }

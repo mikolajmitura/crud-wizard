@@ -11,6 +11,7 @@ import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils;
 import pl.jalokim.crudwizard.genericapp.service.invoker.DelegatedServiceMethodInvoker;
 import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator;
+import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 import pl.jalokim.crudwizard.genericapp.validation.generic.GenericValidator;
 
 @Service
@@ -25,19 +26,19 @@ public class GenericServiceDelegator {
 
     public ResponseEntity<Object> findAndInvokeHttpMethod(GenericServiceArgument genericServiceArgument) {
         var newGenericServiceArgument = searchForEndpointByRequest(genericServiceArgument);
-        var foundEndpoint =  newGenericServiceArgument.getEndpointMetaModel();
+        var foundEndpoint = newGenericServiceArgument.getEndpointMetaModel();
 
         newGenericServiceArgument = newGenericServiceArgument.toBuilder()
             .httpQueryTranslated(rawEntityObjectTranslator.translateToRealObjects(
                 genericServiceArgument.getHttpQueryParams(), foundEndpoint.getQueryArguments()))
-            .requestBodyTranslated(rawEntityObjectTranslator.translateToRealObjects(
-                genericServiceArgument.getRequestBody(), foundEndpoint.getPayloadMetamodel()))
+            .requestBodyTranslated(TranslatedPayload.translatedPayload(rawEntityObjectTranslator.translateToRealObjects(
+                genericServiceArgument.getRequestBody(), foundEndpoint.getPayloadMetamodel())))
             .build();
 
         genericValidator.validate(newGenericServiceArgument.getHttpQueryTranslated(), foundEndpoint.getQueryArguments());
-        genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated(), foundEndpoint.getPayloadMetamodel());
+        genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated().getRealValue(), foundEndpoint.getPayloadMetamodel());
 
-        return delegatedServiceMethodInvoker.invokeMethod(newGenericServiceArgument);
+        return delegatedServiceMethodInvoker.callMethod(newGenericServiceArgument);
     }
 
     private GenericServiceArgument searchForEndpointByRequest(GenericServiceArgument genericServiceArgument) {

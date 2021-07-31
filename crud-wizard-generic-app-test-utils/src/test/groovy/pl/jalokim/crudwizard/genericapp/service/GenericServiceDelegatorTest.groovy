@@ -121,7 +121,7 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
 
         then:
         responseEntity == expectedResponseEntity
-        delegatedServiceMethodInvoker.invokeMethod(_ as GenericServiceArgument) >> {args ->
+        delegatedServiceMethodInvoker.callMethod(_ as GenericServiceArgument) >> {args ->
             passedGenericServiceArgument = args[0]
             expectedResponseEntity
         }
@@ -134,7 +134,7 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
                 ]
                 endpointMetaModel == foundEndpointMetaModel
             }
-            requestBodyTranslated == expectedRequestBodyTranslated
+            requestBodyTranslated.realValue == expectedRequestBodyTranslated
             httpQueryTranslated == expectedHttpQueryParamsTranslated
         }
 

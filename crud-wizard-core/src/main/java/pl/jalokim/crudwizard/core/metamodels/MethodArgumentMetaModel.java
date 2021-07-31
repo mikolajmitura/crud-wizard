@@ -1,7 +1,8 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
 import java.lang.annotation.Annotation;
-import java.util.Set;
+import java.lang.reflect.Parameter;
+import java.util.List;
 import lombok.Builder;
 import lombok.Value;
 
@@ -9,7 +10,10 @@ import lombok.Value;
 @Builder
 public class MethodArgumentMetaModel {
 
-    Set<Annotation> annotations;
+    List<Annotation> annotations;
 
     JavaTypeMetaModel argumentType;
+
+    Parameter parameter;
+
 }

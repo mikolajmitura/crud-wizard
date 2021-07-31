@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
+import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel;
 
 @Component
 @RequiredArgsConstructor
@@ -34,12 +35,19 @@ public class JsonObjectMapper {
         }
     }
 
-    // TODO #001 impl this method in future and return TechnicalException message
-    public Object convertToObject(String jsonValue, JavaType javaType) {
+    public Object convertToObject(String jsonValue, JavaTypeMetaModel javaTypeMetaModel) {
         try {
-            return objectMapper.readValue(jsonValue, javaType);
+            if (javaTypeMetaModel.isRawClass()) {
+                if (String.class.isAssignableFrom(javaTypeMetaModel.getRawClass()) && !jsonValue.trim().matches("\"(.)+\"")) {
+                    var wrappedJsonValue = String.format("\"%s\"", jsonValue);
+                    return objectMapper.readValue(wrappedJsonValue, javaTypeMetaModel.getRawClass());
+                }
+                return objectMapper.readValue(jsonValue, javaTypeMetaModel.getRawClass());
+            } else {
+                return objectMapper.readValue(jsonValue, javaTypeMetaModel.getJacksonJavaType());
+            }
         } catch (JsonProcessingException e) {
-            throw new TechnicalException("", e);
+            throw new TechnicalException(String.format("Cannot convert from: %s to %s", jsonValue, javaTypeMetaModel), e);
         }
     }
 
@@ -65,6 +73,10 @@ public class JsonObjectMapper {
         } catch (JsonProcessingException e) {
             throw new TechnicalException("Cannot write object " + sourceObject + " as json value in path " + objectNodePath.getFullPath(), e);
         }
+    }
+
+    public JsonNode asJsonNode(String jsonValue) {
+        return asJsonNode(ObjectNodePath.rootNode(), jsonValue);
     }
 
     public JsonNode asJsonNode(ObjectNodePath objectNodePath, Object sourceObject) {

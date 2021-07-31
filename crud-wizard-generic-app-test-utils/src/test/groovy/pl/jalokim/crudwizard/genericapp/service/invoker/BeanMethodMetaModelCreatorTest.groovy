@@ -1,19 +1,22 @@
 package pl.jalokim.crudwizard.genericapp.service.invoker
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
-import static pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator.findMethodByName
+import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.type.MapType
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
+import javax.websocket.server.PathParam
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
+import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
-import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringServiceImpl
+import pl.jalokim.crudwizard.genericapp.service.invoker.sample.MapGenericService
+import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import spock.lang.Specification
 
@@ -26,16 +29,16 @@ class BeanMethodMetaModelCreatorTest extends Specification {
 
     def "should resolve getSmSamplePersonDto method in NormalSpringService class"() {
         given:
-        def methodName = "getSamplePersonDto"
+        def methodName = "getSamplePersonDtoInvalid"
 
         when:
         def resultMethodMetaModel = testCase.createBeanMethodMetaModel(methodName,
-            NormalSpringServiceImpl.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4')
+            NormalSpringService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4')
 
         then:
         verifyAll(resultMethodMetaModel) {
             name == methodName
-            originalMethod == findMethodByName(NormalSpringServiceImpl, methodName)
+            originalMethod == findMethodByName(NormalSpringService, methodName)
             verifyAll(methodSignatureMetaModel) {
                 !returnType.isGenericType()
                 returnType.isRawClass()
@@ -54,7 +57,7 @@ class BeanMethodMetaModelCreatorTest extends Specification {
                 }
                 verifyAll(methodArguments[3]) {
                     annotations*.annotationType() as Set == [RequestHeader] as Set
-                    argumentType.rawClass == null
+                    argumentType.rawClass == Map
                     argumentType.originalType.toString() == "Map<String, Object>"
                     MapType mapType = ((MapType) argumentType.jacksonJavaType)
                     mapType.keyType.toString() == "[simple type, class java.lang.String]"
@@ -68,9 +71,62 @@ class BeanMethodMetaModelCreatorTest extends Specification {
         }
     }
 
-    // TODO #00 test cases
-    // resolve bean with generic fields (will be two services one generic, tested will be concrete service)
-    // method duplication
-    // cannot find class
-    // cannot find method
+    def "should resolve generic types of method via generic parent service"() {
+        given:
+        def methodName = "processObject"
+
+        when:
+        def resultMethodMetaModel = testCase.createBeanMethodMetaModel(methodName,
+            MapGenericService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4')
+
+        then:
+        verifyAll(resultMethodMetaModel) {
+            name == methodName
+            originalMethod == findMethodByName(MapGenericService, methodName)
+            verifyAll(methodSignatureMetaModel) {
+                returnType.isGenericType()
+                !returnType.isRawClass()
+                returnType.rawClass == MapGenericService.SomeGenericValue
+                returnType.originalType.toString() == "MapGenericService.SomeGenericValue<Long, Double>"
+                returnType.jacksonJavaType.toString() == "[simple type, class $MapGenericService.canonicalName\$SomeGenericValue<$Long.canonicalName,$Double.canonicalName>]"
+                verifyAll(methodArguments[0]) {
+                    annotations*.annotationType() as Set == [Validated, RequestBody] as Set
+                    argumentType.originalType.toString() == "Map<Long, List<String>>"
+                }
+                verifyAll(methodArguments[1]) {
+                    annotations*.annotationType() as Set == [PathParam] as Set
+                    argumentType == JavaTypeMetaModel.createWithRawClass(Long)
+                }
+            }
+        }
+    }
+
+    def "found more than one method by name"() {
+        given:
+        def methodName = "duplicatedMethodName"
+        def foundMethodsAsText = NormalSpringService.getMethods()
+            .findAll {
+                it.name == methodName
+            }
+            .join(System.lineSeparator())
+
+        when:
+        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName)
+
+        then:
+        TechnicalException ex = thrown()
+        ex.message == "Found more than one method with name '$methodName' in class: $NormalSpringService.canonicalName found methods: $foundMethodsAsText"
+    }
+
+    def "cannot find method by name"() {
+        given:
+        def methodName = "notExistMethodName"
+
+        when:
+        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName)
+
+        then:
+        TechnicalException ex = thrown()
+        ex.message == "Cannot find method with name: '$methodName' in class $NormalSpringService.canonicalName"
+    }
 }
