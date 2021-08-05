@@ -35,6 +35,9 @@ public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
     // verify that newly added serviceMetaModel does not exists already, then use existing id
     ServiceMetaModel serviceMetaModel;
 
+    // TODO add it to Dto, Entity as well
+    Boolean invokeValidation;
+
     EndpointResponseMetaModel responseMetaModel;
 
     List<DataStorageConnectorMetaModel> dataStorageConnectors;

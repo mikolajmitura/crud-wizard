@@ -77,9 +77,28 @@ public class DelegatedServiceMethodInvoker {
      * by @RequestParam by name from {@link GenericServiceArgument.httpQueryTranslated} converted to real simple class
      *
      * by @RequestBody as JsonNode from {@link GenericServiceArgument.requestBody}, as TranslatedPayload from {@link
-     * GenericServiceArgument.requestBodyTranslated} or real java bean, dto translated from {@link GenericServiceArgument.requestBody}
+     * GenericServiceArgument.requestBodyTranslated}, as String as raw json, or real java bean, dto translated from {@link GenericServiceArgument.requestBody}
      *
      * by @PathVariable by name from {@link GenericServiceArgument.urlPathParams}
+     *
+     * example:
+     * <pre>
+     * &#64;Service
+     * public class UserService {
+     *
+     *   public List&#60;String&#62; updateUser(JsonNode userAsJsonNode, &#64;PathVariable Long userId,
+     *      &#64;RequestParam Map&#60;String, Object&#62; allQueryParams,
+     *      Map&#60;String, String&#62; allHeaders){
+     *          // your service code
+     *   }
+     *
+     *   public List&#60;String&#62; updateUserByJsonNode(&#64;RequestBody UserDto userDto, &#64;PathVariable("user-id") Long userId,
+     *      &#64;RequestParam queryArg1, &#64;RequestParam("someVarName") queryArg1,
+     *      &#64;RequestHeader headerName, &#64;RequestHeader("x-cookie) cookie){
+     *        // your service code
+     *   }
+     * }
+     * </pre>
      */
 
     public ResponseEntity<Object> callMethod(GenericServiceArgument genericServiceArgument) {

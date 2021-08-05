@@ -95,6 +95,7 @@ class DelegatedServiceMethodInvokerTest extends Specification {
     // required @RequestBody not exists
     // required @PathVariable not exists
     // conversion problem from json to some dto
+    // for expected return values. EntityObject passed directly or indirectly and return code based on endpoint config
 
     DelegatedServiceMethodInvokerArgs createValidInvokerArgs(String methodName, Object serviceInstance) {
         def args = new DelegatedServiceMethodInvokerArgs()
