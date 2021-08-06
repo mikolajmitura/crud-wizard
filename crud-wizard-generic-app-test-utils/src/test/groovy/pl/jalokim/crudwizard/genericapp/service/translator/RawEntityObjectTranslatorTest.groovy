@@ -168,7 +168,7 @@ class RawEntityObjectTranslatorTest extends Specification {
         module.addDeserializer(SamplePersonDto.class, new SamplePersonDeserializer())
         objectMapper.registerModule(module)
         def expectedResult = createRequestBodyTranslated()
-        expectedResult.personData = new SamplePersonDto("#####", "######")
+        expectedResult.personData = new SamplePersonDto(null, "#####", "######")
 
         when:
         def resultRawEntityObject = testCase.translateToRealObjects(inputRawEntityObject, classMetaModel)
@@ -189,7 +189,7 @@ class RawEntityObjectTranslatorTest extends Specification {
 
         @Override
         SamplePersonDto deserialize(JsonParser p, DeserializationContext deserializationContext) {
-            new SamplePersonDto("#####", "######")
+            new SamplePersonDto(null, "#####", "######")
         }
     }
 }

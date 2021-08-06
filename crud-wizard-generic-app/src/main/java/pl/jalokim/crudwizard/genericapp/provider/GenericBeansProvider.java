@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.provider;
 
 import static java.util.Collections.unmodifiableList;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.clearCglibClassName;
+import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.annotation.Annotation;
@@ -13,7 +14,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.genericapp.config.GenericMapper;
 import pl.jalokim.crudwizard.genericapp.config.GenericMethod;
 import pl.jalokim.crudwizard.genericapp.config.GenericService;
@@ -52,7 +52,7 @@ public class GenericBeansProvider {
             Object beanInstance = genericMapperEntry.getValue();
             String genericInstanceClassName = beanInstance.getClass().getCanonicalName();
             String realClassName = clearCglibClassName(genericInstanceClassName);
-            Class<?> realClass = ClassUtils.loadRealClass(genericInstanceClassName);
+            Class<?> realClass = loadRealClass(genericInstanceClassName);
 
             genericInstanceBeanMetaModel.add(BeanInstanceMetaModel.builder()
                 .beanInstance(beanInstance)
@@ -67,5 +67,15 @@ public class GenericBeansProvider {
                 .build());
         }
         return unmodifiableList(genericInstanceBeanMetaModel);
+    }
+
+    public BeanInstanceMetaModel loadBeanInstanceFromSpringContext(String className, String beanName, String methodName) {
+        Object beanInstance = applicationContext.getBean(beanName, loadRealClass(className));
+        return BeanInstanceMetaModel.builder()
+            .beanInstance(beanInstance)
+            .className(className)
+            .beanName(beanName)
+            .genericMethodMetaModels(List.of(beanMethodMetaModelCreator.createBeanMethodMetaModel(methodName, className)))
+            .build();
     }
 }

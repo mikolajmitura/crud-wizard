@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig
+import pl.jalokim.crudwizard.core.rest.response.error.ErrorResponseDto
 import pl.jalokim.crudwizard.test.utils.rest.EndpointActions
 
 @Component("rawOperationsOnRestController")
@@ -94,6 +95,15 @@ class RawOperationsOnEndpoints implements EndpointActions {
 
     static List<Map> extractResponseAsJsonArray(ResultActions response) {
         return toJson(extractResponseAsString(response)) as List
+    }
+
+    static <T> List<T> extractResponseAsObjectList(ResultActions response, Class<T> elementTargetClass) {
+        extractResponseAsJsonArray(response)
+        .collect { objectMapper.convertValue(it, elementTargetClass)}
+    }
+
+    static ErrorResponseDto extractErrorResponseDto(ResultActions response) {
+        extractResponseAsClass(response, ErrorResponseDto)
     }
 
     static Long extractResponseAsLong(ResultActions response) {

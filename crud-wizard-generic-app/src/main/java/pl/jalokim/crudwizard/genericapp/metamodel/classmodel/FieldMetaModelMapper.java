@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
+import static pl.jalokim.crudwizard.core.utils.NullableCollectionUtils.nullableMapToList;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper.newClassMetaModel;
-import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,7 +25,7 @@ public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<Fiel
         return toMetaModel(field).toBuilder()
             .fieldType(newClassMetaModel(field.getFieldType().getId()))
             .ownerOfField(classMetaModel)
-            .validators(mapToList(
+            .validators(nullableMapToList(
                 field.getValidators(),
                 validator -> metaModelContext.getValidatorMetaModels()
                     .getById(validator.getId())))

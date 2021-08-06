@@ -5,12 +5,15 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
+import pl.jalokim.crudwizard.core.datetime.TimeProvider;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefreshEvent;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 
@@ -25,6 +28,8 @@ public class EndpointMetaModelService {
     private final ServiceMetaModelService serviceMetaModelService;
     private final EndpointResponseMetaModelRepository endpointResponseMetaModelRepository;
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final TimeProvider timeProvider;
 
     public Long createNewEndpoint(@Validated EndpointMetaModelDto createEndpointMetaModelDto) {
         final var endpointMetaModelEntity = endpointMetaModelMapper.toEntity(createEndpointMetaModelDto);
@@ -62,13 +67,21 @@ public class EndpointMetaModelService {
                 );
         }
 
-        // TODO reload metamodel context
-        return endpointMetaModelRepository.persist(endpointMetaModelEntity).getId();
+        EndpointMetaModelEntity newEndpoint = endpointMetaModelRepository.persist(endpointMetaModelEntity);
+        var newEndpointId = newEndpoint.getId();
+
+        applicationEventPublisher.publishEvent(new MetaModelContextRefreshEvent(createNewEndpointReason(newEndpointId),
+            timeProvider.getCurrentOffsetDateTime()));
+        return newEndpointId;
     }
 
     public List<EndpointMetaModel> findAllMetaModels(MetaModelContext metaModelContext) {
         return elements(endpointMetaModelRepository.findAll())
             .map(endpointMetaModelEntity -> endpointMetaModelMapper.toFullMetaModel(metaModelContext, endpointMetaModelEntity))
             .asList();
+    }
+
+    public static String createNewEndpointReason(Long newEndpointId) {
+        return "createNewEndpoint with id: " + newEndpointId;
     }
 }

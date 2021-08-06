@@ -13,8 +13,11 @@ public class ReflectionUtils {
     public static Object invokeMethod(Object target, Method method, Object... methodArgs) {
         try {
             return method.invoke(target, methodArgs);
-        } catch (Exception e) {
-            throw new ReflectionOperationException("Cannot invoke method",e);
+        } catch (ReflectiveOperationException e) {
+            if (e.getCause() != null && e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw new ReflectionOperationException("Cannot invoke method", e);
         }
     }
 

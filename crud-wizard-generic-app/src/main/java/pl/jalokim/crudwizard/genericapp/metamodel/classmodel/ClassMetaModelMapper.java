@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
-import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
+import static pl.jalokim.crudwizard.core.utils.NullableCollectionUtils.nullableMapToList;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -26,20 +26,20 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
 
     public ClassMetaModel toSwallowDto(MetaModelContext metaModelContext, ClassMetaModelEntity classMetaModelEntity) {
         ClassMetaModel classMetaModel = toMetaModel(classMetaModelEntity);
-        classMetaModel.setGenericTypes(mapToList(
+        classMetaModel.setGenericTypes(nullableMapToList(
             classMetaModelEntity.getGenericTypes(),
             genericType -> newClassMetaModel(genericType.getId())));
 
-        classMetaModel.setFields(mapToList(classMetaModelEntity.getFields(),
+        classMetaModel.setFields(nullableMapToList(classMetaModelEntity.getFields(),
             field -> fieldMetaModelMapper.toMetaModel(metaModelContext, classMetaModel, field)));
 
-        classMetaModel.setValidators(mapToList(
+        classMetaModel.setValidators(nullableMapToList(
             classMetaModelEntity.getValidators(),
             validator -> metaModelContext.getValidatorMetaModels()
                 .getById(validator.getId())
         ));
 
-        classMetaModel.setExtendsFromModels(mapToList(
+        classMetaModel.setExtendsFromModels(nullableMapToList(
             classMetaModelEntity.getExtendsFromModels(),
             extendsFromModel -> newClassMetaModel(extendsFromModel.getId())
         ));

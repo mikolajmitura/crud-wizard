@@ -109,7 +109,9 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
                 && foundEndpointMetaModel.queryArguments == args[1]) {
                 validatedHttpParams = true
             }
+        }
 
+        genericValidator.validate(_ , _ , _) >> { args ->
             if (expectedRequestBodyTranslated == args[0]
                 && foundEndpointMetaModel.payloadMetamodel == args[1]) {
                 validatedPayload = true

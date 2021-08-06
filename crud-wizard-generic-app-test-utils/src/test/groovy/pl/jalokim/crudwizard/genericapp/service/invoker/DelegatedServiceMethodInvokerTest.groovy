@@ -9,17 +9,20 @@ import static pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayl
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.ValueConstants
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
 import pl.jalokim.crudwizard.core.metamodels.EndpointResponseMetaModel
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.core.utils.ReflectionUtils
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload
 import pl.jalokim.utils.test.DataFakerHelper
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class DelegatedServiceMethodInvokerTest extends Specification {
 
@@ -48,7 +51,7 @@ class DelegatedServiceMethodInvokerTest extends Specification {
             jsonNode2 == genericServiceArgument.requestBody
             jsonNodeTranslated == invokerArgs.translatedPayload
             jsonNodeTranslated2 == invokerArgs.translatedPayload
-            samplePersonDto == new SamplePersonDto(invokerArgs.expectedName, invokerArgs.expectedSurname)
+            samplePersonDto == new SamplePersonDto(null, invokerArgs.expectedName, invokerArgs.expectedSurname)
             headers == genericServiceArgument.headers
             cookieValue == genericServiceArgument.headers["cookie"]
             lastContactAsText == genericServiceArgument.httpQueryTranslated["lastContact"].toString()
@@ -89,15 +92,90 @@ class DelegatedServiceMethodInvokerTest extends Specification {
         ex.message == expectedMessage
     }
 
-    // TODO #01 test cases
-    // required @RequestHeader not exists
-    // required @RequestParam not exists
-    // required @RequestBody not exists
-    // required @PathVariable not exists
-    // conversion problem from json to some dto
-    // for expected return values. EntityObject passed directly or indirectly and return code based on endpoint config
+    @Unroll
+    def "return ResponseEntity with #expectedHttpStatus and #expetedBody when invoked method: #methodName and #endpointSuccessHttpCode"() {
+        given:
+        NormalSpringService normalSpringService = new NormalSpringService()
+        def invokerArgs = createValidInvokerArgs(methodName, normalSpringService, endpointSuccessHttpCode, httpMethod)
+        def genericServiceArgument = invokerArgs.genericServiceArgument
 
-    DelegatedServiceMethodInvokerArgs createValidInvokerArgs(String methodName, Object serviceInstance) {
+        when:
+        def response = testCase.callMethod(genericServiceArgument)
+
+        then:
+        response.statusCode == expectedHttpStatus
+        response.body == expetedBody
+
+        where:
+        expectedHttpStatus    | expetedBody   | endpointSuccessHttpCode | methodName                    | httpMethod
+        HttpStatus.OK         | null          | 200                     | "returnVoid"                  | HttpMethod.POST
+        HttpStatus.NO_CONTENT | null          | null                    | "returnVoid"                  | HttpMethod.GET
+        HttpStatus.CREATED    | 998           | null                    | "returnInteger"               | HttpMethod.POST
+        HttpStatus.OK         | "StringValue" | null                    | "returnString"                | HttpMethod.GET
+        HttpStatus.NO_CONTENT | null          | null                    | "returnVoid"                  | HttpMethod.DELETE
+        HttpStatus.NO_CONTENT | null          | null                    | "returnVoid"                  | HttpMethod.PUT
+        HttpStatus.NO_CONTENT | null          | null                    | "returnVoid"                  | HttpMethod.PATCH
+        HttpStatus.CREATED    | 998           | 201                     | "returnInteger"               | HttpMethod.PATCH
+        HttpStatus.ACCEPTED   | 998           | 202                     | "returnInteger"               | HttpMethod.POST
+        HttpStatus.ACCEPTED   | 998           | 202                     | "returnInteger"               | HttpMethod.POST
+        HttpStatus.NOT_FOUND  | false         | 400                     | "returnResponseEntityBoolean" | HttpMethod.POST
+    }
+
+    def "cannot convert json node to InvalidJavaBean instance"() {
+        given:
+        NormalSpringService normalSpringService = new NormalSpringService()
+        def methodName = "methodWithInvalidJavaBean"
+        def invokerArgs = createValidInvokerArgs(methodName, normalSpringService)
+        def genericServiceArgument = invokerArgs.genericServiceArgument
+
+        when:
+        testCase.callMethod(genericServiceArgument)
+
+        then:
+        TechnicalException ex = thrown()
+        ex.message == "Cannot convert from value: '$invokerArgs.rawJson' to class $NormalSpringService.InvalidJavaBean.canonicalName"
+        ex.cause.message.contains("Cannot construct instance of `$NormalSpringService.canonicalName\$InvalidJavaBean`")
+    }
+
+    @Unroll
+    def "inform about lack of required method param"() {
+        NormalSpringService normalSpringService = new NormalSpringService()
+        def invokerArgs = createValidInvokerArgs(methodName, normalSpringService)
+        invokerArgs.genericServiceArgument = invokerArgs.genericServiceArgument.toBuilder()
+            .requestBody(null)
+            .requestBodyTranslated(null)
+            .headers(null)
+            .build()
+
+        def genericServiceArgument = invokerArgs.genericServiceArgument
+
+        when:
+        testCase.callMethod(genericServiceArgument)
+
+        then:
+        TechnicalException ex = thrown()
+        ex.message == expectedMsgPart
+
+        where:
+        methodName                | expectedMsgPart
+        "missingReqRequestHeader" | "Cannot find required header value with header name: someRequiredHeader"
+        "missingReqRequestParam"  | "Cannot find required http request parameter with name: someRequiredParam"
+        "missingReqRequestBody"   |
+            "Argument annotated @org.springframework.web.bind.annotation.RequestBody(required=true) is required at index: 1$System.lineSeparator" +
+            "in class: $NormalSpringService.canonicalName$System.lineSeparator" +
+            "with method name: missingReqRequestBody$System.lineSeparator" +
+            "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestBody')}".toString()
+        "missingReqPathVariable"  | "Cannot find required path variable value with name: someRequiredVariable"
+        "missingReqRequestAllHeaders"   |
+            "Argument annotated @org.springframework.web.bind.annotation.RequestHeader(name=\"\", value=\"\", defaultValue=\"$ValueConstants.DEFAULT_NONE\"," +
+            " required=true) is required at index: 1$System.lineSeparator" +
+            "in class: $NormalSpringService.canonicalName$System.lineSeparator" +
+            "with method name: missingReqRequestAllHeaders$System.lineSeparator" +
+            "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestAllHeaders')}".toString()
+    }
+
+    DelegatedServiceMethodInvokerArgs createValidInvokerArgs(String methodName, Object serviceInstance,
+        Integer successHttpCode = 200, HttpMethod httpMethod = HttpMethod.POST) {
         def args = new DelegatedServiceMethodInvokerArgs()
         def jsonValue = "{\"name\":\"$args.expectedName\",\"surname\":\"$args.expectedSurname\"}".toString()
         args.genericServiceArgument = createInputGenericServiceArgument().toBuilder()
@@ -106,9 +184,9 @@ class DelegatedServiceMethodInvokerTest extends Specification {
             .requestBodyTranslated(args.translatedPayload)
             .urlPathParams([objectId: 15, objectUuid: DataFakerHelper.randomText()])
             .endpointMetaModel(EndpointMetaModel.builder()
-                .httpMethod(HttpMethod.POST)
+                .httpMethod(httpMethod)
                 .responseMetaModel(EndpointResponseMetaModel.builder()
-                    .successHttpCode(200)
+                    .successHttpCode(successHttpCode)
                     .build())
                 .serviceMetaModel(ServiceMetaModel.builder()
                     .serviceInstance(serviceInstance)

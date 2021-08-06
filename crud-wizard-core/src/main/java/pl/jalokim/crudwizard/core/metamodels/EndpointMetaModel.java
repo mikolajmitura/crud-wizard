@@ -26,6 +26,8 @@ public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
     String operationName;
 
     ClassMetaModel payloadMetamodel;
+    List<ValidatorMetaModel> payloadMetamodelAdditionalValidators;
+
     ClassMetaModel queryArguments;
     ClassMetaModel pathParams;
 

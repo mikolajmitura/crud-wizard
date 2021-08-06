@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
@@ -59,7 +60,9 @@ public class EndpointMetaModelContextNodeUtils {
     private FoundEndpointMetaModel createFoundEndpointMetaModel(EndpointMetaModel foundEndpoint, List<String> urlPathParamsValue) {
         var pathParamsMap = new HashMap<String, Object>();
         List<FieldMetaModel> pathParamFields = ofNullable(foundEndpoint)
-            .map(endpointMeta -> endpointMeta.getPathParams().getFields())
+            .map(endpointMeta -> ofNullable(endpointMeta.getPathParams())
+                .map(ClassMetaModel::getFields)
+                .orElse(List.of()))
             .orElse(List.of());
 
         if (CollectionUtils.isNotEmpty(pathParamFields)) {

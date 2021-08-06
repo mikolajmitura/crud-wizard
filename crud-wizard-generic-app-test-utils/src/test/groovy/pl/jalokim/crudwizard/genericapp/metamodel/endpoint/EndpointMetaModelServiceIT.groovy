@@ -6,24 +6,30 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createM
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService.createNewEndpointReason
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import javax.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
-import pl.jalokim.crudwizard.GenericAppBaseIntegrationSpecification
+import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.context.ContextRefreshStatus
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefreshRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 
-class EndpointMetaModelServiceIT extends GenericAppBaseIntegrationSpecification {
+class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecification {
 
     @Autowired
     private EndpointMetaModelService endpointMetaModelService
 
     @Autowired
     private EndpointMetaModelRepository endpointMetaModelRepository
+
+    @Autowired
+    private MetaModelContextRefreshRepository metaModelContextRefreshRepository
 
     def "should save simple POST new endpoint with default mapper, service, data storage"() {
         given:
@@ -62,6 +68,11 @@ class EndpointMetaModelServiceIT extends GenericAppBaseIntegrationSpecification 
                     successHttpCode == createEndpointMetaModelDto.responseMetaModel.successHttpCode
                 }
             }
+        }
+        inTransaction {
+           def foundRefreshEntity = metaModelContextRefreshRepository.findAll()
+               .find { it.refreshReason == createNewEndpointReason(createdId)}
+            assert foundRefreshEntity.contextRefreshStatus == ContextRefreshStatus.CORRECT
         }
     }
 

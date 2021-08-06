@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +33,28 @@ public class NormalSpringService {
         return null;
     }
 
-    // TODO #02 in IT check that @Validated @Valid @NotBlank invoked
+    public void returnVoid(@Validated @RequestBody SamplePersonDto samplePersonDto) {
+
+    }
+
+    public String returnString() {
+        return "StringValue";
+    }
+
+    public Integer returnInteger() {
+        return 998;
+    }
+
+
+    public ResponseEntity<Boolean> returnResponseEntityBoolean(@RequestHeader String cookie) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(false);
+    }
+
+    public SamplePersonDto createSamplePersonDtoWithValidated(@RequestBody @Validated SamplePersonDto samplePersonDto) {
+        return new SamplePersonDto(1L, samplePersonDto.getName(), samplePersonDto.getSurname());
+    }
+
     public Map<String, Object> returnAllInputs(@RequestBody @NotNull JsonNode jsonNode,
         @RequestBody @Validated SamplePersonDto samplePersonDto,
         @RequestBody TranslatedPayload jsonNodeTranslated,
@@ -82,5 +105,44 @@ public class NormalSpringService {
 
     public String duplicatedMethodName(Double value) {
         return null;
+    }
+
+    public String methodWithInvalidJavaBean(@RequestBody InvalidJavaBean invalidJavaBean) {
+        return "invoked";
+    }
+
+    public void missingReqRequestHeader(@RequestHeader String someRequiredHeader) {
+
+    }
+
+    public void missingReqRequestAllHeaders(@RequestHeader Map<String, String> allHeaders) {
+
+    }
+
+    public void missingReqRequestParam(@RequestParam String someRequiredParam) {
+
+    }
+
+    public void missingReqRequestBody(@RequestBody String rawJson) {
+
+    }
+
+    public void missingReqPathVariable(@PathVariable String someRequiredVariable) {
+
+    }
+
+    public static class InvalidJavaBean {
+
+        public String field1;
+        public String field2;
+
+        public InvalidJavaBean(String field1) {
+            this.field1 = field1;
+        }
+
+        public InvalidJavaBean(String field1, String field2) {
+            this.field1 = field1;
+            this.field2 = field2;
+        }
     }
 }

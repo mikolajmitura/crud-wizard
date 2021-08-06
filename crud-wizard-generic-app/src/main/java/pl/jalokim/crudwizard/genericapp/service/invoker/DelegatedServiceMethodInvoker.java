@@ -212,7 +212,10 @@ public class DelegatedServiceMethodInvoker {
     private void resolveHeaderValueByHeaderName(GenericServiceArgument genericServiceArgument, RequestHeader requestHeader,
         AtomicReference<Object> returnObjectRef,
         JavaTypeMetaModel argumentMetaModel, String headerName) {
-        String headerValue = genericServiceArgument.getHeaders().get(headerName);
+        String headerValue = Optional.ofNullable(genericServiceArgument.getHeaders())
+            .map(headers -> headers.get(headerName))
+            .orElse(null);
+
         if (headerValue == null) {
             if (requestHeader.required()) {
                 throw new TechnicalException("Cannot find required header value with header name: " + headerName);
@@ -307,12 +310,15 @@ public class DelegatedServiceMethodInvoker {
 
     @SuppressWarnings("unchecked")
     private ResponseEntity<Object> resolveReturnObject(Object result, EndpointMetaModel endpointMetaModel) {
+        var successHttpCodeOptional = Optional.ofNullable(endpointMetaModel.getResponseMetaModel().getSuccessHttpCode());
         if (result == null) {
-            return ResponseEntity.noContent().build();
+            return successHttpCodeOptional
+                .map(integer -> ResponseEntity.status(integer).build())
+                .orElseGet(() -> ResponseEntity.noContent().build());
         } else if (result instanceof ResponseEntity) {
             return (ResponseEntity<Object>) result;
         }
-        HttpStatus httpStatus = Optional.ofNullable(endpointMetaModel.getResponseMetaModel().getSuccessHttpCode())
+        HttpStatus httpStatus = successHttpCodeOptional
             .map(HttpStatus::resolve)
             .orElseGet(() -> STATUS_BY_METHOD.get(endpointMetaModel.getHttpMethod()));
 

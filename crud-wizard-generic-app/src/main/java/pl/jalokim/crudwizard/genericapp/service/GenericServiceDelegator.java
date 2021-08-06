@@ -36,7 +36,8 @@ public class GenericServiceDelegator {
             .build();
 
         genericValidator.validate(newGenericServiceArgument.getHttpQueryTranslated(), foundEndpoint.getQueryArguments());
-        genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated().getRealValue(), foundEndpoint.getPayloadMetamodel());
+        genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated().getRealValue(),
+            foundEndpoint.getPayloadMetamodel(), foundEndpoint.getPayloadMetamodelAdditionalValidators());
 
         return delegatedServiceMethodInvoker.callMethod(newGenericServiceArgument);
     }

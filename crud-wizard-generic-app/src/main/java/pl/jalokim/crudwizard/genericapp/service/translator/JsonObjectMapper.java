@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.service.translator;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,21 +58,22 @@ public class JsonObjectMapper {
             return (T) targetClass.cast(sourceObject);
         } catch (ClassCastException ex) {
             throw new TechnicalException("Cannot cast from: " + sourceObject.getClass().getCanonicalName()
-                + " to " + targetClass.getCanonicalName() + " in path: " + objectNodePath.getFullPath()
+                + " to " + targetClass.getCanonicalName() + inJsonPath(objectNodePath)
                 + " invalid json part: " + asJsonValue(objectNodePath, sourceObject), ex);
         }
     }
 
     public static TechnicalException cannotConvertException(ObjectNodePath objectNodePath, Class<?> targetClass, String jsonValue, JsonProcessingException e) {
-        return new TechnicalException("Cannot convert from value: '" + jsonValue + "' to class " + targetClass.getCanonicalName()
-            + " in path: " + objectNodePath.getFullPath(), e);
+        return new TechnicalException("Cannot convert from value: '" + jsonValue
+            + "' to class " + targetClass.getCanonicalName()
+            + inJsonPath(objectNodePath), e);
     }
 
     public String asJsonValue(ObjectNodePath objectNodePath, Object sourceObject) {
         try {
             return objectMapper.writeValueAsString(sourceObject);
         } catch (JsonProcessingException e) {
-            throw new TechnicalException("Cannot write object " + sourceObject + " as json value in path " + objectNodePath.getFullPath(), e);
+            throw new TechnicalException("Cannot write object " + sourceObject + " as json value" + inJsonPath(objectNodePath), e);
         }
     }
 
@@ -87,8 +89,12 @@ public class JsonObjectMapper {
         try {
             return objectMapper.readTree(jsonValue);
         } catch (JsonProcessingException e) {
-            throw new TechnicalException("Cannot write object " + jsonValue + " as json value in path " + objectNodePath.getFullPath(), e);
+            throw new TechnicalException("Cannot write object " + jsonValue + " as json value" + inJsonPath(objectNodePath), e);
         }
+    }
+
+    public static String inJsonPath(ObjectNodePath objectNodePath) {
+        return EMPTY.equals(objectNodePath.getFullPath()) ? EMPTY : " in path: " + objectNodePath.getFullPath();
     }
 
     public JavaType createJavaType(Type type, Class<?> contextClass) {

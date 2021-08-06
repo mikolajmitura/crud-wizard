@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
@@ -33,13 +35,20 @@ public class RawEntityObjectTranslator {
     private final JsonObjectMapper jsonObjectMapper;
 
     @SuppressWarnings("unchecked")
-    public <T> T translateToRealObjects(JsonNode jsonNode, ClassMetaModel classMetaModel) {
-        return (T) convertObject(rootNode(), jsonNode, classMetaModel);
+    public <T> T translateToRealObjects(@Nullable JsonNode jsonNode, @Nullable ClassMetaModel nullableClassMetaModel) {
+        if (jsonNode == null) {
+            return null;
+        }
+        return (T) Optional.ofNullable(nullableClassMetaModel)
+            .map(classMetaModel -> convertObject(rootNode(), jsonNode, classMetaModel))
+        .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T translateToRealObjects(Map<String, Object> sourceMap, ClassMetaModel classMetaModel) {
-        return (T) translateToRealObjects(jsonObjectMapper.asJsonNode(rootNode(), sourceMap), classMetaModel);
+    public <T> T translateToRealObjects(Map<String, Object> sourceMap, @Nullable ClassMetaModel nullableClassMetaModel) {
+        return (T) Optional.ofNullable(nullableClassMetaModel)
+            .map(classMetaModel -> translateToRealObjects(jsonObjectMapper.asJsonNode(rootNode(), sourceMap), classMetaModel))
+            .orElse(null);
     }
 
     private Object convertObject(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {

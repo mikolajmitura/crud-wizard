@@ -6,6 +6,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
@@ -28,6 +29,7 @@ import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService;
 
 @MetamodelService
 @RequiredArgsConstructor
+@Slf4j
 public class MetaModelContextService implements ApplicationRunner {
 
     public AtomicReference<MetaModelContext> metaModelContextReference = new AtomicReference<>();
@@ -46,8 +48,6 @@ public class MetaModelContextService implements ApplicationRunner {
     // some endpoint with another data storage.
     // some endpoint with another generic service
     // some endpoint with another generic service with another mapper
-    // some endpoint with normal service class with map class (without data storage then)
-    // some endpoint with normal service class with concrete meta model classes as argument
     // validators on some models, fields.
 
     @Override
@@ -68,6 +68,7 @@ public class MetaModelContextService implements ApplicationRunner {
         loadEndpointMetaModels(metaModelContext);
         loadEndpointNodes(metaModelContext);
         metaModelContextReference.set(metaModelContext);
+        log.info("Reloaded meta model context");
     }
 
     private void loadDataStorages(MetaModelContext metaModelContext) {

@@ -2,9 +2,22 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import java.time.LocalDate
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 
 class ClassMetaModelDtoSamples {
+
+    static ClassMetaModelDto simplePersonClassMetaModel() {
+        ClassMetaModelDto.builder()
+            .name("person")
+            .fields([
+                createValidFieldMetaModelDto("id", Long),
+                createValidFieldMetaModelDto("name", String),
+                createValidFieldMetaModelDto("surname", String),
+                createValidFieldMetaModelDto("birthDate", LocalDate),
+            ])
+            .build()
+    }
 
     static ClassMetaModelDto createValidClassMetaModelDtoWithName() {
         ClassMetaModelDto.builder()

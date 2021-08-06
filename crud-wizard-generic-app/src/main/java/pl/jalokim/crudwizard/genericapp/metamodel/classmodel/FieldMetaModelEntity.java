@@ -25,7 +25,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEn
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"fieldType"})
 @Table(name = "field_meta_models")
 public class FieldMetaModelEntity extends WithAdditionalPropertiesEntity {
 

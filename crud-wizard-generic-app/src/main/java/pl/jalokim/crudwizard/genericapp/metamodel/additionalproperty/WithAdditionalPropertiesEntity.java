@@ -9,7 +9,7 @@ import lombok.Setter;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
 
 @Getter
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "additionalProperties")
 @MappedSuperclass
 @Setter
 public abstract class WithAdditionalPropertiesEntity extends BaseEntity {
