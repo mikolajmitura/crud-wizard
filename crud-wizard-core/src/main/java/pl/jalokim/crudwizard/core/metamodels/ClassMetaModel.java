@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
-import static pl.jalokim.crudwizard.core.utils.ElementsUtils.nullableElements;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import lombok.AccessLevel;
@@ -29,13 +29,13 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
     List<ClassMetaModel> extendsFromModels;
 
     public FieldMetaModel getFieldByName(String fieldName) {
-        return nullableElements(fields)
+        return elements(fields)
             .filter(field -> field.getFieldName().equals(fieldName))
             .getFirst();
     }
 
     public List<String> getFieldNames() {
-        return nullableElements(fields)
+        return elements(fields)
             .map(FieldMetaModel::getFieldName)
             .asList();
     }

@@ -5,21 +5,9 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import java.lang.reflect.Method;
 import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.utils.reflection.ReflectionOperationException;
 
 @UtilityClass
 public class ReflectionUtils {
-
-    public static Object invokeMethod(Object target, Method method, Object... methodArgs) {
-        try {
-            return method.invoke(target, methodArgs);
-        } catch (ReflectiveOperationException e) {
-            if (e.getCause() != null && e.getCause() instanceof RuntimeException) {
-                throw (RuntimeException) e.getCause();
-            }
-            throw new ReflectionOperationException("Cannot invoke method", e);
-        }
-    }
 
     public static Method findMethodByName(Class<?> fromClass, String methodName) {
         var foundMethods = elements(fromClass.getMethods())

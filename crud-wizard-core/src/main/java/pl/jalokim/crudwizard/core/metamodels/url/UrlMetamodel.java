@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels.url;
 
-import static pl.jalokim.crudwizard.core.utils.ElementsUtils.nullableElements;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import lombok.Value;
@@ -12,7 +12,7 @@ public class UrlMetamodel {
     String rawUrl;
 
     public List<String> getPathVariablesNames() {
-        return nullableElements(urlParts)
+        return elements(urlParts)
             .filter(UrlPart::isPathVariable)
             .map(UrlPart::getVariableName)
             .asList();

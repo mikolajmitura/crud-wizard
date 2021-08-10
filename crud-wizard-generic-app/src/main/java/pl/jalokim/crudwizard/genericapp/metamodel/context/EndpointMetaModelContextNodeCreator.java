@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
-import static pl.jalokim.crudwizard.core.utils.ElementsUtils.nullableElements;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.experimental.UtilityClass;
@@ -14,7 +14,7 @@ public class EndpointMetaModelContextNodeCreator {
         metaModelContext.getEndpointMetaModels().getModelsById().values()
             .forEach(endpointMetaModel -> {
                 var currentEndpointMetaModelNodeRef = new AtomicReference<>(rootEndpointMetaModelNode);
-                nullableElements(endpointMetaModel.getUrlMetamodel().getUrlParts())
+                elements(endpointMetaModel.getUrlMetamodel().getUrlParts())
                     .forEachWithIndexed(indexedUrlPart -> {
                         currentEndpointMetaModelNodeRef.set(currentEndpointMetaModelNodeRef.get()
                             .putNextNodeOrGet(indexedUrlPart.getValue()));

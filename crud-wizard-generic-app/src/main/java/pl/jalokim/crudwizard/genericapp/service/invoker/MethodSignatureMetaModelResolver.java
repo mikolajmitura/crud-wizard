@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.service.invoker;
 
 import static pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel.createWithRawClass;
-import static pl.jalokim.crudwizard.core.utils.ElementsUtils.nullableElements;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -46,7 +46,7 @@ public class MethodSignatureMetaModelResolver {
             GenericsContext genericsContext = methodContext.parameterType(parameterIndex);
 
             methodArgumentMetaModels.add(MethodArgumentMetaModel.builder()
-                .annotations(nullableElements(argumentAnnotations).asList())
+                .annotations(elements(argumentAnnotations).asList())
                 .parameter(method.getParameters()[parameterIndex])
                 .argumentType(createJavaTypeMetaModel(instanceClass, genericsContext.currentClass(), parameterType))
                 .build());

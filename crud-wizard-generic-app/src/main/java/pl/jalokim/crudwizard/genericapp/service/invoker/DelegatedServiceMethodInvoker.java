@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.service.invoker;
 
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.reflection.InvokableReflectionUtils.invokeMethod;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.lang.annotation.Annotation;
@@ -27,7 +28,6 @@ import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
-import pl.jalokim.crudwizard.core.utils.ReflectionUtils;
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
@@ -106,7 +106,7 @@ public class DelegatedServiceMethodInvoker {
         ServiceMetaModel serviceMetaModel = endpointMetaModel.getServiceMetaModel();
         List<Object> methodArguments = collectMethodArguments(genericServiceArgument, serviceMetaModel);
         Method originalMethod = serviceMetaModel.getMethodMetaModel().getOriginalMethod();
-        Object result = ReflectionUtils.invokeMethod(serviceMetaModel.getServiceInstance(), originalMethod, methodArguments.toArray());
+        Object result = invokeMethod(serviceMetaModel.getServiceInstance(), originalMethod, methodArguments.toArray());
         return resolveReturnObject(result, endpointMetaModel);
     }
 

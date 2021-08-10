@@ -5,8 +5,8 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
-import static pl.jalokim.crudwizard.core.utils.ElementsUtils.nullableElements;
 import static pl.jalokim.crudwizard.core.utils.NullableHelper.helpWithNulls;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.HashSet;
 import java.util.List;
@@ -41,16 +41,16 @@ public class PathParamsAndUrlVariablesTheSameValidator
     private boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context,
         String baseUrl, ClassMetaModelDto pathParams) {
         UrlMetamodel urlMetamodel = UrlModelResolver.resolveUrl(baseUrl);
-        var pathVariablesNames = nullableElements(urlMetamodel.getPathVariablesNames()).asList();
+        var pathVariablesNames = elements(urlMetamodel.getPathVariablesNames()).asList();
 
-        var pathParamsFields = nullableElements(
+        var pathParamsFields = elements(
             ofNullable(pathParams)
                 .map(ClassMetaModelDto::getFields)
                 .orElse(List.of()))
             .asSet();
 
         if (isNotEmpty(pathVariablesNames) || isNotEmpty(pathParamsFields)) {
-            boolean allHaveClassName = nullableElements(pathParamsFields)
+            boolean allHaveClassName = elements(pathParamsFields)
                 .map(FieldMetaModelDto::getFieldType)
                 .map(ClassMetaModelDto::getClassName)
                 .allMatch(className -> nonNull(className) && (
@@ -63,7 +63,7 @@ public class PathParamsAndUrlVariablesTheSameValidator
                 return false;
             }
             setupCustomMessage(endpointMetaModelDto, context);
-            var fieldsNames = nullableElements(pathParamsFields)
+            var fieldsNames = elements(pathParamsFields)
                 .map(FieldMetaModelDto::getFieldName)
                 .asSet();
 
@@ -78,7 +78,7 @@ public class PathParamsAndUrlVariablesTheSameValidator
             "baseUrl", ofNullable(endpointMetaModelDto.getBaseUrl())
                 .orElse(EMPTY),
             "fieldName", MessagePlaceholder.wrapAsExternalPlaceholder("pathParams"),
-            "fieldNames", nullableElements(helpWithNulls(() -> endpointMetaModelDto.getPathParams().getFields()))
+            "fieldNames", elements(helpWithNulls(() -> endpointMetaModelDto.getPathParams().getFields()))
                 .map(FieldMetaModelDto::getFieldName)
                 .asConcatText(", ")
         );
