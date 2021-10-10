@@ -7,19 +7,31 @@ import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
-import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelRepository;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
 @RequiredArgsConstructor
 @MetamodelService
 public class ClassMetaModelService {
 
     private final ClassMetaModelRepository classMetaModelRepository;
-    private final ValidatorMetaModelRepository validatorMetaModelRepository;
+    private final ValidatorMetaModelService validatorMetaModelService;
     private final ClassMetaModelMapper classMetaModelMapper;
 
     public ClassMetaModelEntity saveClassModel(ClassMetaModelEntity classMetaModelEntity) {
+
+        if (classMetaModelEntity.shouldBeSimpleRawClass()) {
+            return classMetaModelRepository.findByRawClassName(classMetaModelEntity.getClassName())
+                .orElseGet(() -> {
+                    classMetaModelEntity.setSimpleRawClass(true);
+                    return classMetaModelRepository.persist(classMetaModelEntity);
+                });
+        }
+
         elements(classMetaModelEntity.getFields())
-            .forEach(field -> field.setFieldType(saveClassModel(field.getFieldType())));
+            .forEach(field -> {
+                validatorMetaModelService.saveOrCreateNewValidators(field.getValidators());
+                field.setFieldType(saveClassModel(field.getFieldType()));
+            });
 
         elements(classMetaModelEntity.getGenericTypes())
             .forEachWithIndexed(indexed -> {
@@ -29,13 +41,7 @@ public class ClassMetaModelService {
                 }
             });
 
-        elements(classMetaModelEntity.getValidators())
-            .forEachWithIndexed(indexed -> {
-                var validatorEntry = indexed.getValue();
-                if (validatorEntry.getId() == null) {
-                    classMetaModelEntity.getValidators().set(indexed.getIndex(), validatorMetaModelRepository.persist(validatorEntry));
-                }
-            });
+        validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntity.getValidators());
 
         elements(classMetaModelEntity.getExtendsFromModels())
             .forEachWithIndexed(indexed -> {

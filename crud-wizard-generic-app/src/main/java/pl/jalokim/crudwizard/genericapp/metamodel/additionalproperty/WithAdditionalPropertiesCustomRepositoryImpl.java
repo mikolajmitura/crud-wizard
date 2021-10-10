@@ -15,7 +15,7 @@ public class WithAdditionalPropertiesCustomRepositoryImpl<T extends WithAddition
     private EntityManager entityManager;
 
     @Override
-    public  T persist(T withAdditionalPropertiesEntity) {
+    public T persist(T withAdditionalPropertiesEntity) {
         var newInstance = entityManager.merge(withAdditionalPropertiesEntity);
 
         withAdditionalPropertiesEntity.getAdditionalProperties()

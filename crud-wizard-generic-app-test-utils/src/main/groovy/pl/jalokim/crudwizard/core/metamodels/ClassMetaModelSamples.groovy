@@ -2,29 +2,33 @@ package pl.jalokim.crudwizard.core.metamodels
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Period
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 
 class ClassMetaModelSamples {
 
-    static FieldMetaModel createValidFieldMetaModel(String fieldName, Class<?> fieldType) {
+    static FieldMetaModel createValidFieldMetaModel(String fieldName, Class<?> fieldType, List<ValidatorMetaModel> validators = []) {
         FieldMetaModel.builder()
             .fieldName(fieldName)
             .fieldType(createClassMetaModelFromClass(fieldType))
+            .validators(validators)
             .build()
     }
 
-    static FieldMetaModel createValidFieldMetaModel(String fieldName, ClassMetaModel fieldType) {
+    static FieldMetaModel createValidFieldMetaModel(String fieldName, ClassMetaModel fieldType, List<ValidatorMetaModel> validators = []) {
         FieldMetaModel.builder()
             .fieldName(fieldName)
             .fieldType(fieldType)
+            .validators(validators)
             .build()
     }
 
-    static ClassMetaModel createClassMetaModelFromClass(Class<?> metaModelClass) {
+    static ClassMetaModel createClassMetaModelFromClass(Class<?> metaModelClass, List<ValidatorMetaModel> validators = []) {
         ClassMetaModel.builder()
             .className(metaModelClass.canonicalName)
             .realClass(metaModelClass)
+            .validators(validators)
             .build()
     }
 
@@ -33,41 +37,46 @@ class ClassMetaModelSamples {
             .name("somePersonApplication")
             .fields([
                 createValidFieldMetaModel("bankField", String),
-                createValidFieldMetaModel("name", String),
-                createValidFieldMetaModel("surname", String),
+                createValidFieldMetaModel("name",
+                    createClassMetaModelFromClass(String, [ValidatorMetaModelSamples.SIZE_3_20_VALIDATOR_METAMODEL]),
+                    [ValidatorMetaModelSamples.NOT_NULL_VALIDATOR_METAMODEL]),
+                createValidFieldMetaModel("surname",
+                    createClassMetaModelFromClass(String, [ValidatorMetaModelSamples.SIZE_2_30_VALIDATOR_METAMODEL]),
+                    [ValidatorMetaModelSamples.NOT_NULL_VALIDATOR_METAMODEL]),
                 createValidFieldMetaModel("birthDate", LocalDate),
                 createValidFieldMetaModel("applicationDateTime", LocalDateTime),
                 createValidFieldMetaModel("age", Integer),
-                createValidFieldMetaModel("applicationDateTime", Integer),
+                createValidFieldMetaModel("applicationDateTimeAsNumber", Integer),
                 createValidFieldMetaModel("personData", SamplePersonDto),
-                createValidFieldMetaModel("addresses", createClassMetaModelFromClass(ArrayList).toBuilder()
+                createValidFieldMetaModel("addresses", createClassMetaModelFromClass(List).toBuilder()
                     .genericTypes([
                         ClassMetaModel.builder()
                             .name("address")
                             .fields([
                                 createValidFieldMetaModel("street", String),
-                                createValidFieldMetaModel("houseNr", String),
+                                createValidFieldMetaModel("houseNr", String, [ValidatorMetaModelSamples.NOT_NULL_VALIDATOR_METAMODEL]),
                                 createValidFieldMetaModel("someEnum", ExampleEnum),
                             ])
                             .build()
                     ])
-                    .build()),
-                createValidFieldMetaModel("hobbies", createClassMetaModelFromClass(HashSet).toBuilder()
+                    .build(), [ValidatorMetaModelSamples.SIZE_1_MAX_VALIDATOR_METAMODEL]),
+                createValidFieldMetaModel("hobbies", createClassMetaModelFromClass(Set).toBuilder()
                     .genericTypes([createClassMetaModelFromClass(String)])
                     .build()),
-                createValidFieldMetaModel("contactData", createClassMetaModelFromClass(HashMap).toBuilder()
+                createValidFieldMetaModel("contactData", createClassMetaModelFromClass(Map).toBuilder()
                     .genericTypes([
                         createClassMetaModelFromClass(String),
                         createClassMetaModelFromClass(String)
                     ])
                     .build()),
-                createValidFieldMetaModel("someNumbersByEnums", createClassMetaModelFromClass(HashMap).toBuilder()
+                createValidFieldMetaModel("someNumbersByEnums", createClassMetaModelFromClass(Map).toBuilder()
                     .genericTypes([
                         createClassMetaModelFromClass(ExampleEnum),
                         createClassMetaModelFromClass(Integer)
                     ])
                     .build())
             ])
+            .validators([ValidatorMetaModelSamples.NOT_NULL_VALIDATOR_METAMODEL])
             .build()
     }
 
@@ -78,6 +87,43 @@ class ClassMetaModelSamples {
                 createValidFieldMetaModel("lastContact", LocalDate),
                 createValidFieldMetaModel("lastText", String),
                 createValidFieldMetaModel("numberAsText", String)])
+            .build()
+    }
+
+    static ClassMetaModel createClassMetaModelWithParents() {
+        ClassMetaModel.builder()
+            .name("modelWithParents")
+            .fields([
+                createValidFieldMetaModel("applicationDateTime", Long),
+                createValidFieldMetaModel("age", Period),
+                createValidFieldMetaModel("someUnique", String),
+                createValidFieldMetaModel("someOtherObject", ClassMetaModel.builder()
+                    .name("some-Other-Object")
+                    .fields([
+                        createValidFieldMetaModel("someField1", String),
+                        createValidFieldMetaModel("someField2", String)
+                    ])
+                    .validators([ValidatorMetaModelSamples.SOME_OTHER_OBJECT_VALIDATOR_METAMODEL])
+                    .build()),
+            ])
+            .extendsFromModels([
+                ClassMetaModel.builder()
+                    .name("first-parent")
+                    .fields([
+                        createValidFieldMetaModel("lastContact", LocalDateTime),
+                        createValidFieldMetaModel("firsParentField", String),
+                    ])
+                    .extendsFromModels([
+                        ClassMetaModel.builder()
+                            .name("root-parent")
+                            .fields([
+                                createValidFieldMetaModel("rootParentField", LocalDateTime)
+                            ])
+                            .build()
+                    ])
+                    .build(),
+                createRequestBodyClassMetaModel(), createHttpQueryParamsMetaModel()])
+            .validators([ValidatorMetaModelSamples.CUSTOM_TEST_VALIDATOR_METAMODEL])
             .build()
     }
 }

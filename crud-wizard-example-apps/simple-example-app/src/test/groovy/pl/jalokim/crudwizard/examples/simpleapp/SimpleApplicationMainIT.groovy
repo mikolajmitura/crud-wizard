@@ -12,7 +12,7 @@ import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 @TestExecutionListeners(value = [DatabaseCleanupListener], mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 class SimpleApplicationMainIT extends BaseIntegrationSpecification {
 
-    // TODO test in future that was added some endpoint via maitenance and can be invoked
+    // TODO test in future that was added some endpoint via maintenance and can be invoked
 
     def "should load data from SimpleRestController.getAll()"() {
         when:

@@ -8,28 +8,34 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.genericapp.metamodel.validation.javax.ClassExists;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
 @FieldShouldWhenOther(field = ServiceMetaModelDto.CLASS_NAME, should = NULL, whenField = ServiceMetaModelDto.SERVICE_SCRIPT, is = NOT_NULL)
 @FieldShouldWhenOther(field = ServiceMetaModelDto.BEAN_NAME, should = NULL, whenField = ServiceMetaModelDto.SERVICE_SCRIPT, is = NOT_NULL)
 @FieldShouldWhenOther(field = ServiceMetaModelDto.METHOD_NAME, should = NULL, whenField = ServiceMetaModelDto.SERVICE_SCRIPT, is = NOT_NULL)
 @FieldShouldWhenOther(field = ServiceMetaModelDto.SERVICE_SCRIPT, should = NULL, whenField = ServiceMetaModelDto.CLASS_NAME, is = NOT_NULL)
 @FieldShouldWhenOther(field = ServiceMetaModelDto.SERVICE_SCRIPT, should = NULL, whenField = ServiceMetaModelDto.METHOD_NAME, is = NOT_NULL)
 @FieldShouldWhenOther(field = ServiceMetaModelDto.SERVICE_SCRIPT, should = NULL, whenField = ServiceMetaModelDto.BEAN_NAME, is = NOT_NULL)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ServiceMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     public static final String CLASS_NAME = "className";
     public static final String SERVICE_SCRIPT = "serviceScript";
     public static final String METHOD_NAME = "methodName";
     public static final String BEAN_NAME = "beanName";
+
     Long id;
+
+    @ClassExists
     String className;
     String beanName;
     String methodName;

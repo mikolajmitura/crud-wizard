@@ -1,12 +1,19 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
+@Data
+@NoArgsConstructor
+@Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)
-@Value
-@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ApiTagMetamodel extends ObjectWithVersion {
 
     Long id;

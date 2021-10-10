@@ -1,5 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
+import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
+import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.string.StringUtils.isNotBlank;
+
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -39,6 +43,11 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     private String className;
 
+    /**
+     * When true then it means that this metamodel is used for simple, raw field like number, enum, text.
+     */
+    private Boolean simpleRawClass;
+
     @ManyToMany
     @JoinTable(
         name = "class_meta_models_generic_types",
@@ -53,7 +62,7 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     @ManyToMany
     @JoinTable(
-        name = "meta_models_validators",
+        name = "class_validators",
         joinColumns = { @JoinColumn(name = CLASS_META_MODEL_ID) },
         inverseJoinColumns = { @JoinColumn(name = "validator_meta_model_id") }
     )
@@ -66,4 +75,12 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
         inverseJoinColumns = { @JoinColumn(name = "extends_from_model_id") }
     )
     private List<ClassMetaModelEntity> extendsFromModels;
+
+    public boolean shouldBeSimpleRawClass() {
+        return isNotBlank(getClassName())
+            && isEmpty(elements(getFields()))
+            && isEmpty(elements(getGenericTypes()))
+            && isEmpty(elements(getExtendsFromModels()))
+            && isEmpty(elements(getValidators()));
+    }
 }

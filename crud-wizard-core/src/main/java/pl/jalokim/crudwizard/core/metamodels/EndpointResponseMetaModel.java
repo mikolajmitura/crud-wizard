@@ -1,15 +1,19 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
 @Builder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class EndpointResponseMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;

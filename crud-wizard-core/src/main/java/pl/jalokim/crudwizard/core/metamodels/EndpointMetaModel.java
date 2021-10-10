@@ -2,17 +2,21 @@ package pl.jalokim.crudwizard.core.metamodels;
 
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlMetamodel;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
 @Builder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
 
     Long id;
@@ -26,7 +30,7 @@ public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
     String operationName;
 
     ClassMetaModel payloadMetamodel;
-    List<ValidatorMetaModel> payloadMetamodelAdditionalValidators;
+    AdditionalValidatorsMetaModel payloadMetamodelAdditionalValidators;
 
     ClassMetaModel queryArguments;
     ClassMetaModel pathParams;

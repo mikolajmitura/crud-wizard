@@ -16,6 +16,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefreshEvent;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
 @RequiredArgsConstructor
 @MetamodelService
@@ -28,6 +29,7 @@ public class EndpointMetaModelService {
     private final ServiceMetaModelService serviceMetaModelService;
     private final EndpointResponseMetaModelRepository endpointResponseMetaModelRepository;
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
+    private final ValidatorMetaModelService validatorMetaModelService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TimeProvider timeProvider;
 
@@ -42,6 +44,9 @@ public class EndpointMetaModelService {
         if (payloadMetamodel != null && payloadMetamodel.getId() == null) {
             endpointMetaModelEntity.setPayloadMetamodel(classMetaModelService.saveClassModel(payloadMetamodel));
         }
+
+        elements(endpointMetaModelEntity.getPayloadMetamodelAdditionalValidators())
+            .forEach(additionalValidatorsEntity -> validatorMetaModelService.saveOrCreateNewValidators(additionalValidatorsEntity.getValidators()));
 
         var serviceMetaModel = endpointMetaModelEntity.getServiceMetaModel();
         if (serviceMetaModel != null && serviceMetaModel.getId() == null) {

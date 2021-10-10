@@ -1,7 +1,6 @@
 package pl.jalokim.crudwizard.core.validation.javax;
 
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ALL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ANY;
@@ -24,45 +23,36 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.WIT
 import static pl.jalokim.utils.collection.CollectionUtils.intersection;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.constants.Constants.SPACE;
-import static pl.jalokim.utils.reflection.InvokableReflectionUtils.getValueOfField;
 import static pl.jalokim.utils.string.StringUtils.concat;
 import static pl.jalokim.utils.string.StringUtils.concatElements;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
-import javax.validation.ConstraintValidatorContext;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
-import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.constants.Constants;
-import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.string.StringUtils;
 import pl.jalokim.utils.template.TemplateAsText;
 
+@RequiredArgsConstructor
+@Getter
 @SuppressWarnings({"PMD.GodClass", "PMD.NPathComplexity"})
-public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWithDynamicMessage<FieldShouldWhenOther, Object> {
+public class FieldShouldWhenOtherCoreValidator {
 
     private static final String FIELD_SHOULD_BE_EXPECTED_TYPE =
-        "field '${field}' in class ${class} should be one of class: [${expectedClasses}] when used one of ${otherFieldMatchEnums}";
+        "field '${field}' in ${structure_type}: ${owner_type_name} should be one of class: [${expectedClasses}] when used one of ${otherFieldMatchEnums}";
 
-    private String field;
-    private ExpectedFieldState should;
-    private List<String> fieldValues;
-    private String whenField;
-    private ExpectedFieldState is;
-    private List<String> otherFieldValues;
-
-    private static final Map<ExpectedFieldState, BiPredicate<FieldMeta, DependValuesMeta>> VALIDATION_BY_PREDICATE = Map.ofEntries(
+    private final Map<ExpectedFieldState, BiPredicate<FieldMeta, DependValuesMeta>> validationByPredicate = Map.ofEntries(
         entry(EQUAL_TO_ANY, (fieldMeta, v) -> v.getValues().stream()
             .map(Object::toString)
             .anyMatch(entry -> entry.equals(toStringOrNull(fieldMeta)))),
@@ -80,42 +70,37 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         entry(EMPTY_OR_NULL, (fieldMeta, v) -> isNull(fieldMeta) || isEmpty(fieldMeta)),
         entry(NOT_BLANK, (fieldMeta, v) -> StringUtils.isNotBlank(getStringText(fieldMeta))),
         entry(NOT_EMPTY, (fieldMeta, v) -> isNotNull(fieldMeta) && isNotEmpty(fieldMeta)),
-        entry(MAX, FieldShouldWhenOtherValidator::hasMaxValue),
-        entry(MIN, FieldShouldWhenOtherValidator::hasMinValue)
+        entry(MAX, this::hasMaxValue),
+        entry(MIN, this::hasMinValue)
     );
 
-    @Override
-    public void initialize(FieldShouldWhenOther fieldShouldWhenOther) {
-        validateFieldConfiguration("field", fieldShouldWhenOther.field(),
-            "should", fieldShouldWhenOther.should(),
-            "fieldValues", Arrays.asList(fieldShouldWhenOther.fieldValues()));
+    private final FieldMetadataExtractor fieldMetadataExtractor;
+    private final String field;
+    private final ExpectedFieldState should;
+    private final List<String> fieldValues;
+    private final String whenField;
+    private final ExpectedFieldState is;
+    private final List<String> otherFieldValues;
 
-        validateFieldConfiguration("whenField", fieldShouldWhenOther.whenField(),
-            "is", fieldShouldWhenOther.is(),
-            "otherFieldValues", Arrays.asList(fieldShouldWhenOther.otherFieldValues()));
+    public static FieldShouldWhenOtherCoreValidator newValidator(FieldMetadataExtractor fieldMetadataExtractor, String field,
+        ExpectedFieldState should, List<String> fieldValues, String whenField, ExpectedFieldState is, List<String> otherFieldValues) {
+        validateFieldConfiguration("field", field,
+            "should", should,
+            "fieldValues", fieldValues);
 
-        this.field = fieldShouldWhenOther.field();
-        this.should = fieldShouldWhenOther.should();
-        this.fieldValues = Arrays.asList(fieldShouldWhenOther.fieldValues());
-        this.whenField = fieldShouldWhenOther.whenField();
-        this.is = fieldShouldWhenOther.is();
-        this.otherFieldValues = Arrays.asList(fieldShouldWhenOther.otherFieldValues());
+        validateFieldConfiguration("whenField", whenField,
+            "is", is,
+            "otherFieldValues", otherFieldValues);
+
+        return new FieldShouldWhenOtherCoreValidator(fieldMetadataExtractor, field, should, fieldValues, whenField, is, otherFieldValues);
     }
 
-    @Override
-    public void setupCustomMessage(Object value, ConstraintValidatorContext context) {
-        customMessage(context, createMessagePlaceholder(
-            messagePlaceholder(context), messagePlaceholderArgs(value, context)
-        ).translateMessage(), field);
-    }
-
-    @Override
-    public boolean isValidValue(Object value, ConstraintValidatorContext context) {
-        boolean mainFieldResult = VALIDATION_BY_PREDICATE.get(should)
+    public boolean isValidValue(Object value) {
+        boolean mainFieldResult = validationByPredicate.get(should)
             .test(buildFieldMeta(value, field),
                 new DependValuesMeta(fieldValues, "field", should, "fieldValues"));
 
-        boolean otherFieldResult = VALIDATION_BY_PREDICATE.get(is)
+        boolean otherFieldResult = validationByPredicate.get(is)
             .test(buildFieldMeta(value, whenField),
                 new DependValuesMeta(otherFieldValues, "whenField", is, "otherFieldValues"));
 
@@ -125,8 +110,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         return true;
     }
 
-    @Override
-    public Map<String, Object> messagePlaceholderArgs(Object value, ConstraintValidatorContext context) {
+    public Map<String, Object> getMessagePlaceholderArgs() {
         return Map.of(
             "should", getAppMessageSource().getMessageByEnumWithPrefix("shouldBe", should),
             "fieldValues", getValuesWhenCan(should, fieldValues),
@@ -144,12 +128,13 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         return Objects.nonNull(fieldMeta.getValue());
     }
 
-    private static boolean isNotEmpty(FieldMeta fieldMeta) {
+    private boolean isNotEmpty(FieldMeta fieldMeta) {
         if (fieldMeta.getValue() instanceof String) {
             return StringUtils.isNotEmpty(castObject(fieldMeta));
         }
         if (fieldMeta.getValue() instanceof Collection) {
-            return CollectionUtils.isNotEmpty(castObject(fieldMeta));
+            Collection<?> collection = castObject(fieldMeta);
+            return CollectionUtils.isNotEmpty(collection);
         }
         if (fieldMeta.getValue() instanceof Map) {
             return !((Map<?, ?>) castObject(fieldMeta)).isEmpty();
@@ -157,31 +142,33 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         throw expectedElementsTypeOrString(fieldMeta);
     }
 
-    private static IllegalArgumentException expectedElementsTypeOrString(FieldMeta fieldMeta) {
+    private IllegalArgumentException expectedElementsTypeOrString(FieldMeta fieldMeta) {
         return expectedElementsOfSomeTypeException(fieldMeta,
             List.of(String.class, Collection.class, Map.class),
             FOR_STRING_AND_COLLECTION);
     }
 
-    private static IllegalArgumentException expectedElementsOfSomeTypeException(FieldMeta fieldMeta,
+    private IllegalArgumentException expectedElementsOfSomeTypeException(FieldMeta fieldMeta,
         List<Class<?>> expectedClasses, List<ExpectedFieldState> otherFieldMatchEnums) {
-        TemplateAsText templateAsText = TemplateAsText.fromText(FIELD_SHOULD_BE_EXPECTED_TYPE);
-        templateAsText.overrideVariable("field", fieldMeta.getFieldName());
-        templateAsText.overrideVariable("class", fieldMeta.getFieldOwner().getCanonicalName());
-        templateAsText.overrideVariable("expectedClasses",
-            elements(expectedClasses)
-                .map(Class::getCanonicalName).asConcatText(", "));
-        templateAsText.overrideVariable("otherFieldMatchEnums", concatElements(otherFieldMatchEnums, ", "));
+        TemplateAsText templateAsText = TemplateAsText.fromText(FIELD_SHOULD_BE_EXPECTED_TYPE)
+            .overrideVariable("field", fieldMeta.getFieldName())
+            .overrideVariable("structure_type", fieldMetadataExtractor.validatedStructureType())
+            .overrideVariable("owner_type_name", fieldMeta.getOwnerTypeName())
+            .overrideVariable("expectedClasses",
+                elements(expectedClasses)
+                    .map(Class::getCanonicalName).asConcatText(", "))
+            .overrideVariable("otherFieldMatchEnums", concatElements(otherFieldMatchEnums, ", "));
 
         return new IllegalArgumentException(templateAsText.getCurrentTemplateText());
     }
 
-    private static boolean isEmpty(FieldMeta fieldMeta) {
+    private boolean isEmpty(FieldMeta fieldMeta) {
         if (fieldMeta.getValue() instanceof String) {
             return StringUtils.isEmpty(castObject(fieldMeta));
         }
         if (fieldMeta.getValue() instanceof Collection) {
-            return CollectionUtils.isEmpty(castObject(fieldMeta));
+            Collection<?> collection = castObject(fieldMeta);
+            return CollectionUtils.isEmpty(collection);
         }
         if (fieldMeta.getValue() instanceof Map) {
             return ((Map<?, ?>) castObject(fieldMeta)).isEmpty();
@@ -189,7 +176,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         throw expectedElementsTypeOrString(fieldMeta);
     }
 
-    private static boolean hasMaxValue(FieldMeta fieldMeta, DependValuesMeta dependValuesMeta) {
+    private boolean hasMaxValue(FieldMeta fieldMeta, DependValuesMeta dependValuesMeta) {
         if (fieldMeta.getValue() == null) {
             return false;
         }
@@ -225,7 +212,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
             FOR_STRING_AND_COLLECTION_AND_NUMBER);
     }
 
-    private static boolean hasMinValue(FieldMeta fieldMeta, DependValuesMeta dependValuesMeta) {
+    private boolean hasMinValue(FieldMeta fieldMeta, DependValuesMeta dependValuesMeta) {
         if (fieldMeta.getValue() == null) {
             return false;
         }
@@ -267,7 +254,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
             .orElse(null);
     }
 
-    public static String getStringText(FieldMeta fieldMeta) {
+    public String getStringText(FieldMeta fieldMeta) {
         if (fieldMeta.getValue() == null) {
             return null;
         }
@@ -277,7 +264,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         throw expectedElementsOfSomeTypeException(fieldMeta, List.of(String.class), FOR_STRING);
     }
 
-    private static Elements<String> elementsToString(FieldMeta fieldMeta) {
+    private Elements<String> elementsToString(FieldMeta fieldMeta) {
         if (fieldMeta.getValue() == null) {
             return Elements.empty();
         }
@@ -288,7 +275,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         throw expectedElementsOfSomeTypeException(fieldMeta, List.of(Collection.class), FOR_COLLECTIONS);
     }
 
-    private void validateFieldConfiguration(String fieldByPositionName, String fieldByPositionValue,
+    private static void validateFieldConfiguration(String fieldByPositionName, String fieldByPositionValue,
         String isOrShouldName, ExpectedFieldState expectedFieldState,
         String otherFieldValueName, List<String> otherFieldValue) {
         if (WITHOUT_OTHER_FIELD_VALUES.contains(expectedFieldState) && CollectionUtils.isNotEmpty(otherFieldValue)) {
@@ -310,10 +297,6 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         }
     }
 
-    private static Object getFieldValue(Object targetObject, String fieldName) {
-        return getValueOfField(targetObject, fieldName);
-    }
-
     private String getValuesWhenCan(ExpectedFieldState otherFieldMatch, List<String> values) {
         if (List.of(NULL, NOT_NULL, EMPTY, EMPTY_OR_NULL, NOT_EMPTY, NOT_BLANK).contains(otherFieldMatch)) {
             return Constants.EMPTY;
@@ -321,8 +304,10 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         return concat(SPACE, elements(values).asConcatText(", "));
     }
 
-    private static FieldMeta buildFieldMeta(Object targetClass, String fieldName) {
-        return new FieldMeta(fieldName, MetadataReflectionUtils.getField(targetClass, fieldName), getFieldValue(targetClass, fieldName));
+    private FieldMeta buildFieldMeta(Object targetObject, String fieldName) {
+        return new FieldMeta(fieldName,
+            fieldMetadataExtractor.extractValueOfField(targetObject, fieldName),
+            fieldMetadataExtractor.extractOwnerTypeName(targetObject, fieldName));
     }
 
     private static <T> T castObject(FieldMeta fieldMeta) {
@@ -333,12 +318,8 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
     public static class FieldMeta {
 
         String fieldName;
-        Field field;
         Object value;
-
-        public Class<?> getFieldOwner() {
-            return field.getDeclaringClass();
-        }
+        String ownerTypeName;
     }
 
     @Value
@@ -372,7 +353,7 @@ public class FieldShouldWhenOtherValidator implements BaseConstraintValidatorWit
         }
     }
 
-    private boolean canParseToNumber(List<String> numberValue) {
+    private static boolean canParseToNumber(List<String> numberValue) {
         try {
             parseToNumber(numberValue);
             return true;

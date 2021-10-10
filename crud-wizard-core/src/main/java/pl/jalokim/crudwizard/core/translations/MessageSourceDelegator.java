@@ -3,15 +3,20 @@ package pl.jalokim.crudwizard.core.translations;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import pl.jalokim.utils.collection.Elements;
 
-@RequiredArgsConstructor
 public class MessageSourceDelegator implements MessageSource {
 
     private final List<MessageSource> messageSources;
+
+    public MessageSourceDelegator(List<MessageSourceProvider> messageSourceProviders) {
+        this.messageSources = Elements.elements(messageSourceProviders)
+            .map(MessageSourceProvider::getMessageSource)
+            .asList();
+    }
 
     @Override
     public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {

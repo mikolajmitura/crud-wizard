@@ -1,12 +1,11 @@
 package pl.jalokim.crudwizard.core;
 
-import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSource;
-import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMainMessageSource;
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSourceProvider;
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSourceDelegator;
 
 import java.time.Clock;
+import java.util.List;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -18,6 +17,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
+import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
 import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorWithDefaultGroupFactoryBean;
 
 @Configuration
@@ -31,20 +31,19 @@ public class AppWizardCoreConfig implements BeanDefinitionRegistryPostProcessor 
     }
 
     @Bean
-    MessageSource appMessageSource() {
-        return MessageSourceFactory.createMessageSource();
+    MessageSourceProvider appMessageSource() {
+        return MessageSourceFactory.createMessageSourceProvider();
     }
 
     @Bean
-    MessageSource commonMessageSource() {
-        return createCommonMessageSource();
+    MessageSourceProvider commonMessageSource() {
+        return createCommonMessageSourceProvider();
     }
 
     @Bean
     @Primary
-    MessageSource mainMessageSource(@Qualifier("appMessageSource") @Autowired(required = false) MessageSource appMessageSource,
-        @Qualifier("commonMessageSource") MessageSource commonMessageSource) {
-        return createMainMessageSource(appMessageSource, commonMessageSource);
+    MessageSource mainMessageSource(List<MessageSourceProvider> messageSourceProviders) {
+        return createMessageSourceDelegator(messageSourceProviders);
     }
 
     @Bean

@@ -11,14 +11,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
+import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 
 @Entity
-@Builder
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
+@NoArgsConstructor
+@Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "validator_meta_models")
 public class ValidatorMetaModelEntity extends WithAdditionalPropertiesEntity {
 
@@ -27,4 +30,23 @@ public class ValidatorMetaModelEntity extends WithAdditionalPropertiesEntity {
     private Long id;
 
     private String className;
+    private String validatorName;
+
+    /**
+     * Does it mean that this validator metamodel have overridden some parameters or have additional properties set.
+     */
+    private Boolean parametrized;
+    /**
+     * below values can to overridden, when is not set then will used from
+     *
+     * @see DataValidator#namePlaceholder()
+     */
+    private String namePlaceholder;
+
+    /**
+     * When is not set then will used from
+     *
+     * @see DataValidator#messagePlaceholder() ()
+     */
+    private String messagePlaceholder;
 }

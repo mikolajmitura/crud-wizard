@@ -5,11 +5,13 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
+import pl.jalokim.crudwizard.genericapp.metamodel.validation.javax.ClassExists
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
@@ -29,10 +31,15 @@ class ServiceMetaModelDtoValidationTest extends UnitTestSpec {
         where:
         serviceMetaModelDtoSamples               | expectedErrors
         createValidServiceMetaModelDto()         | []
+        createValidServiceMetaModelDto().toBuilder()
+            .className("not.exist.class")
+            .build()                             | [
+            errorEntry("className", messageForValidator(ClassExists, "typeOfClass", Object.canonicalName))
+        ]
         createValidServiceMetaModelDtoAsScript() | []
         createValidServiceMetaModelDtoAsScript()
             .toBuilder()
-            .className(randomText())
+            .className(Object.class.getCanonicalName())
             .beanName(randomText())
             .methodName(randomText())
             .build()                             | [

@@ -104,7 +104,7 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
         boolean validatedHttpParams = false
         boolean validatedPayload = false
 
-        genericValidator.validate(_ as Map<String, Object>, _ as ClassMetaModel) >> { args ->
+        genericValidator.validate(_ as Object, _ as ClassMetaModel) >> { args ->
             if (expectedHttpQueryParamsTranslated == args[0]
                 && foundEndpointMetaModel.queryArguments == args[1]) {
                 validatedHttpParams = true

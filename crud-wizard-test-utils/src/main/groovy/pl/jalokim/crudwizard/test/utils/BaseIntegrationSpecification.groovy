@@ -20,7 +20,6 @@ import pl.jalokim.crudwizard.core.datetime.TimeProvider
 import pl.jalokim.crudwizard.core.datetime.TimeProviderHolder
 import pl.jalokim.crudwizard.core.translations.AppMessageSource
 import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
-import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorFactoryHolder
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -53,7 +52,6 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     def setup() {
         AppMessageSourceHolder.setAppMessageSource(appMessageSource)
         TimeProviderHolder.setTimeProvider(timeProvider)
-        ValidatorFactoryHolder.setValidatorFactory(validatorFactory)
     }
 
     def cleanup() {

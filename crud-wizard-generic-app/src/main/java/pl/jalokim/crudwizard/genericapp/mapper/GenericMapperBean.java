@@ -13,6 +13,7 @@ public class GenericMapperBean {
     @GenericMethod
     public Map<String, Object> mapToTarget(MapperArgument mapperArgument) {
         if (mapperArgument.getTargetMetaModel().equals(mapperArgument.getSourceMetaModel())) {
+            // TODO should be deep copy. 
             return new HashMap<>(mapperArgument.getSourceObject());
         }
         // TODO should map from one meta model to another meta model.

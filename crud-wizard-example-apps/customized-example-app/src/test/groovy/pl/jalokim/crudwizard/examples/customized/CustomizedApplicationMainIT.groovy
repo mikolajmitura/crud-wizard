@@ -16,7 +16,7 @@ class CustomizedApplicationMainIT extends BaseIntegrationSpecification {
 
     public static final String CUSTOM_USERS_URL = "/custom/users"
 
-    // TODO test in future that was added some endpoint via maitenance and can be invoked
+    // TODO test in future that was added some endpoint via maintenance and can be invoked
 
     def "should save few users and get all of them"() {
         given:

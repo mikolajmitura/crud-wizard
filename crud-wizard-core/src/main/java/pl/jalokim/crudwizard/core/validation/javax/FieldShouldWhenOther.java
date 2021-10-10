@@ -13,7 +13,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(FieldShouldWhenOther.List.class)
 @Documented
-@Constraint(validatedBy = FieldShouldWhenOtherValidator.class)
+@Constraint(validatedBy = FieldShouldWhenOtherJavaxValidator.class)
 public @interface FieldShouldWhenOther {
 
     String field();

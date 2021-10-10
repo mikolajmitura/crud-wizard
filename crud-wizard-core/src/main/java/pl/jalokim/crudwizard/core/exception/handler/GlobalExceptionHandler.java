@@ -100,13 +100,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomValidationException.class)
     public ResponseEntity<ErrorResponseDto> handleCustomValidationException(CustomValidationException dataValidationException) {
-        return  ResponseEntity
+        return ResponseEntity
             .status(dataValidationException.getStatusCode())
             .body(ErrorResponseDto.builder()
                 .message(dataValidationException.getMessage())
                 .errors(convertToErrorsDto(dataValidationException.getErrors()))
                 .build());
-
     }
 
     @ExceptionHandler(Exception.class)

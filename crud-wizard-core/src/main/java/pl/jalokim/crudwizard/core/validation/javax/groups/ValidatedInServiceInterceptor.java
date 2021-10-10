@@ -29,7 +29,7 @@ public class ValidatedInServiceInterceptor {
                     if (annotation.annotationType().equals(Validated.class)) {
                         var methodArguments = pjp.getArgs();
                         Class<?>[] groups = ((Validated) annotation).value();
-                        ValidatorFactoryHolder.validateBean(validatorFactory.getValidator(), methodArguments[parameterIndex], groups);
+                        ValidationUtils.validateBean(validatorFactory.getValidator(), methodArguments[parameterIndex], groups);
                     }
                 }
             }

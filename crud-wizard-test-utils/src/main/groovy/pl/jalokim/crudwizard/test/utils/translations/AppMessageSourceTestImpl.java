@@ -4,9 +4,8 @@ import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEP
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.APPLICATION_TRANSLATIONS_PATH;
-import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSource;
-import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMainMessageSource;
-import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSource;
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.CORE_APPLICATION_TRANSLATIONS;
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSourceDelegator;
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.EMAIL_MESSAGE_PROPERTY;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.LENGTH_MESSAGE_PROPERTY;
@@ -18,75 +17,62 @@ import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageCon
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.PATTERN_MESSAGE_PROPERTY;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.RANGE_MESSAGE_PROPERTY;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.SIZE_MESSAGE_PROPERTY;
+import static pl.jalokim.crudwizard.test.utils.validation.TestingConstraintValidatorFactory.createTestingValidatorFactory;
 import static pl.jalokim.utils.collection.Elements.elements;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.File;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
+import javax.validation.ValidatorFactory;
 import lombok.SneakyThrows;
-import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.MessageSource;
+import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
+import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
 import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource;
 import pl.jalokim.crudwizard.core.translations.TestAppMessageSourceHolder;
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
-import pl.jalokim.crudwizard.test.utils.validation.TestingConstraintValidatorFactory;
 import pl.jalokim.utils.constants.Constants;
 
 /**
  * Useful for testing without spring context.
  */
-public class AppMessageSourceTestImpl extends SpringAppMessageSource {
+public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
 
-    public static final String EXPECTED_TEST_TRANSLATIONS = "expected-test-translations";
-    public static final AppMessageSourceTestImpl EXPECTED_MESSAGES = new AppMessageSourceTestImpl(EXPECTED_TEST_TRANSLATIONS, false);
+    public static final String TEST_APPLICATION_TRANSLATIONS_PATH = "test-application-translations";
 
-    private final Properties properties = new Properties();
+    public static AppMessageSourceTestImpl initStaticAppMessageSource() {
+        return initStaticAppMessageSource(APPLICATION_TRANSLATIONS_PATH, CORE_APPLICATION_TRANSLATIONS, TEST_APPLICATION_TRANSLATIONS_PATH);
+    }
 
-    public static void initStaticAppMessageSource() {
-        new AppMessageSourceTestImpl();
+    public static AppMessageSourceTestImpl initStaticAppMessageSource(String... resourcePaths) {
+        return initStaticAppMessageSource(true, resourcePaths);
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    public static AppMessageSourceTestImpl initStaticAppMessageSource(boolean setupInStaticHolder, String... resourcePaths) {
+        MessageSource messageSourceDelegator = createMessageSourceDelegator(createMessageSources(resourcePaths));
+        ValidatorFactory testingValidatorFactory = createTestingValidatorFactory(messageSourceDelegator);
+        return new AppMessageSourceTestImpl(setupInStaticHolder, messageSourceDelegator, testingValidatorFactory);
     }
 
     @SneakyThrows
-    public AppMessageSourceTestImpl(String resourcePath) {
-        this(resourcePath, true);
-    }
-
-    @SneakyThrows
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
-    public AppMessageSourceTestImpl(String resourcePath, boolean setupInStaticHolder) {
-        super(createMainMessageSource(createMessageSource(resourcePath), createCommonMessageSource()));
+    private AppMessageSourceTestImpl(boolean setupInStaticHolder, MessageSource messageSource, ValidatorFactory testingValidatorFactory) {
+        super(messageSource, testingValidatorFactory);
         if (setupInStaticHolder) {
             TestAppMessageSourceHolder.setAppMessageSource(this);
-            TestingConstraintValidatorFactory.initStaticValidatorFactoryHolder();
         }
     }
 
-    @SneakyThrows
-    @Deprecated
-    public AppMessageSourceTestImpl(File pathToPropertiesFile) {
-        super(null);
-        try (InputStream inputStream = Files.newInputStream(pathToPropertiesFile.toPath())) {
-            properties.load(inputStream);
-        }
-        TestAppMessageSourceHolder.setAppMessageSource(this);
+    public static MessageSourceProvider createMessageSourceProvider(String propertyPath) {
+        return MessageSourceFactory.createMessageSourceProvider(propertyPath);
     }
 
-    public AppMessageSourceTestImpl() {
-        this(APPLICATION_TRANSLATIONS_PATH);
-    }
-
-    @Override
-    public String getMessage(String propertyKey) {
-        if (getMessageSource() != null) {
-            return super.getMessage(propertyKey);
-        }
-        return Optional.ofNullable(properties.getProperty(propertyKey)).orElseThrow(() -> new NoSuchMessageException(propertyKey));
+    public static List<MessageSourceProvider> createMessageSources(String... resourcePaths) {
+        return elements(resourcePaths)
+            .map(AppMessageSourceTestImpl::createMessageSourceProvider)
+            .asList();
     }
 
     public static String notNullMessage() {
@@ -109,12 +95,16 @@ public class AppMessageSourceTestImpl extends SpringAppMessageSource {
         return getAppMessageSource().getMessage(PATTERN_MESSAGE_PROPERTY, Map.of("regexp", regexp));
     }
 
-    public static String invalidSizeMessage(int min, int max) {
-        return getAppMessageSource().getMessage(SIZE_MESSAGE_PROPERTY, Map.of("min", min, "max", max));
+    public static String invalidSizeMessage(Integer min, Integer max) {
+        int minValue = Optional.ofNullable(min).orElse(0);
+        int maxValue = Optional.ofNullable(max).orElse(Integer.MAX_VALUE);
+        return getAppMessageSource().getMessage(SIZE_MESSAGE_PROPERTY, Map.of("min", minValue, "max", maxValue));
     }
 
-    public static String invalidLengthMessage(int min, int max) {
-        return getAppMessageSource().getMessage(LENGTH_MESSAGE_PROPERTY, Map.of("min", min, "max", max));
+    public static String invalidLengthMessage(Integer min, Integer max) {
+        int minValue = Optional.ofNullable(min).orElse(0);
+        int maxValue = Optional.ofNullable(max).orElse(Integer.MAX_VALUE);
+        return getAppMessageSource().getMessage(LENGTH_MESSAGE_PROPERTY, Map.of("min", minValue, "max", maxValue));
     }
 
     public static String invalidRangeMessage(Number min, Number max) {
@@ -164,6 +154,6 @@ public class AppMessageSourceTestImpl extends SpringAppMessageSource {
     }
 
     private static String joinValues(List<String> list) {
-        return  " " + elements(list).asConcatText(", ");
+        return " " + elements(list).asConcatText(", ");
     }
 }

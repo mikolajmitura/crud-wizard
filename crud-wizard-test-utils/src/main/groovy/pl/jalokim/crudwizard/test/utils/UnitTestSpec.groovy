@@ -2,7 +2,7 @@ package pl.jalokim.crudwizard.test.utils
 
 import pl.jalokim.crudwizard.core.datetime.TimeProviderHolder
 import pl.jalokim.crudwizard.test.utils.datetime.UnitTestTimeProvider
-import pl.jalokim.crudwizard.test.utils.validation.TestingConstraintValidatorFactory
+import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -12,7 +12,7 @@ abstract class UnitTestSpec extends Specification implements UsesTimeProvider {
     UnitTestTimeProvider sharedTimeProvider = new UnitTestTimeProvider()
 
     def setupSpec() {
-        TestingConstraintValidatorFactory.initStaticValidatorFactoryHolder()
+        AppMessageSourceTestImpl.initStaticAppMessageSource()
     }
 
     def setup() {

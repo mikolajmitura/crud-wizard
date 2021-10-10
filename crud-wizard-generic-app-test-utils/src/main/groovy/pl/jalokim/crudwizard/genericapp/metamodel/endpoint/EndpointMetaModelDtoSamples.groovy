@@ -3,6 +3,8 @@ package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import org.springframework.http.HttpMethod
@@ -15,14 +17,21 @@ class EndpointMetaModelDtoSamples {
 
     static EndpointMetaModelDto createValidPostEndpointMetaModelDto() {
         EndpointMetaModelDto.builder()
-            .baseUrl(randomText())
+            .baseUrl("users")
+            .operationName("createUser")
             .apiTag(ApiTagDto.builder()
                 .name(randomText())
                 .build())
             .httpMethod(HttpMethod.POST)
-            .operationName(randomText())
             .payloadMetamodel(createValidClassMetaModelDtoWithName())
             .responseMetaModel(createValidEndpointResponseMetaModelDto())
+            .build()
+    }
+
+    static EndpointMetaModelDto createValidPostExtendedUserWithValidators() {
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(extendedPersonClassMetaModel())
+            .payloadMetamodelAdditionalValidators(createAdditionalValidatorsForExtendedPerson())
             .build()
     }
 

@@ -6,7 +6,7 @@ class ServiceMetaModelDtoSamples {
 
     static ServiceMetaModelDto createValidServiceMetaModelDto() {
         ServiceMetaModelDto.builder()
-            .className(randomText())
+            .className(Object.class.getCanonicalName())
             .beanName(randomText())
             .methodName(randomText())
             .build()

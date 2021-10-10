@@ -9,13 +9,18 @@ import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
+import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.PropertyPathResolver;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 // TODO try use uses to inject others mapper, now is problem with ambiguity from AdditionalPropertyMapper
@@ -34,6 +39,7 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
     @Mapping(target = "queryArguments", ignore = true)
     @Mapping(target = "serviceMetaModel", ignore = true)
     @Mapping(target = "responseMetaModel", ignore = true)
+    @Mapping(target = "payloadMetamodelAdditionalValidators", ignore = true)
     public abstract EndpointMetaModel toMetaModel(EndpointMetaModelEntity endpointMetaModelEntity);
 
     public EndpointMetaModel toFullMetaModel(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {
@@ -49,17 +55,40 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
                 .orElse(metaModelContext.getDefaultServiceMetaModel()))
             .responseMetaModel(endpointResponseMetaModelMapper.toEndpointResponseMetaModel(metaModelContext, endpointMetaModelEntity.getResponseMetaModel()))
             .dataStorageConnectors(getStorageConnectors(metaModelContext, endpointMetaModelEntity))
+            .payloadMetamodelAdditionalValidators(createAdditionalValidatorsMetaModel(metaModelContext,
+                endpointMetaModelEntity.getPayloadMetamodelAdditionalValidators()))
             .build();
     }
 
     private List<DataStorageConnectorMetaModel> getStorageConnectors(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {
         if (CollectionUtils.isNotEmpty(endpointMetaModelEntity.getDataStorageConnectors())) {
             return elements(endpointMetaModelEntity.getDataStorageConnectors())
-                .map(dataStorageConnectorEntity ->
-                    dataStorageConnectorMetaModelMapper.toFullMetaModel(metaModelContext, dataStorageConnectorEntity))
+                .map(dataStorageConnectorEntity -> dataStorageConnectorMetaModelMapper.toFullMetaModel(metaModelContext, dataStorageConnectorEntity))
                 .asList();
         } else {
             return metaModelContext.getDefaultDataStorageConnectorMetaModels();
         }
+    }
+
+    static AdditionalValidatorsMetaModel createAdditionalValidatorsMetaModel(MetaModelContext metaModelContext,
+        List<AdditionalValidatorsEntity> payloadAdditionalValidators) {
+        AdditionalValidatorsMetaModel rootAdditionalValidatorsMetaModel = AdditionalValidatorsMetaModel.empty();
+        for (AdditionalValidatorsEntity additionalValidatorsByPath : elements(payloadAdditionalValidators).asList()) {
+            String fullPropertyPath = additionalValidatorsByPath.getFullPropertyPath();
+            PropertyPath propertyPath = PropertyPathResolver.resolvePath(fullPropertyPath);
+            List<PropertyPath> propertyPathsChain = propertyPath.getReversedPropertyPathsParts();
+            AdditionalValidatorsMetaModel currentAdditionalValidators = rootAdditionalValidatorsMetaModel;
+            for (int i = 0; i < propertyPathsChain.size(); i++) {
+                PropertyPath currentProperty = propertyPathsChain.get(i);
+                currentAdditionalValidators = currentAdditionalValidators.getOrCreateNextNode(currentProperty);
+                if (CollectionUtils.isLastIndex(propertyPathsChain, i)) {
+                    List<ValidatorMetaModel> validatorsMetaModel = currentAdditionalValidators.getValidatorsMetaModel();
+                    elements(additionalValidatorsByPath.getValidators())
+                        .map(validatorModelEntity -> metaModelContext.getValidatorMetaModels().getById(validatorModelEntity.getId()))
+                        .forEach(validatorsMetaModel::add);
+                }
+            }
+        }
+        return rootAdditionalValidatorsMetaModel;
     }
 }

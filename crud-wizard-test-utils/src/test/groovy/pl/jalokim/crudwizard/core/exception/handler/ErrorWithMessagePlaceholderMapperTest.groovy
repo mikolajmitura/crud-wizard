@@ -4,7 +4,7 @@ import static pl.jalokim.crudwizard.core.exception.handler.ErrorWithMessagePlace
 
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder
-import pl.jalokim.crudwizard.core.exception.ErrorWithMessagePlaceholder
+import pl.jalokim.crudwizard.core.exception.ErrorWithPlaceholders
 import pl.jalokim.utils.test.DataFakerHelper
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import spock.lang.Specification
@@ -30,13 +30,13 @@ class ErrorWithMessagePlaceholderMapperTest extends Specification {
         def innerRawMessage = DataFakerHelper.randomText()
         def innerErrorCode = DataFakerHelper.randomText()
 
-        Set<ErrorWithMessagePlaceholder> errorsDtoWithPlaceholder = Set.of(
-            ErrorWithMessagePlaceholder.builder()
+        Set<ErrorWithPlaceholders> errorsDtoWithPlaceholder = Set.of(
+            ErrorWithPlaceholders.builder()
                 .property(property1)
                 .rawMessage(rawMessage1)
                 .errorCode(fixedErrorCode1)
                 .build(),
-            ErrorWithMessagePlaceholder.builder()
+            ErrorWithPlaceholders.builder()
                 .property(property2)
                 .rawMessage(rawMessage2)
                 .errorCode(fixedErrorCode2)
@@ -44,13 +44,13 @@ class ErrorWithMessagePlaceholderMapperTest extends Specification {
                     .mainPlaceholder("example.property")
                     .errorCode(DataFakerHelper.randomText())
                     .build())
-                .errors(Set.of(ErrorWithMessagePlaceholder.builder()
+                .errors(Set.of(ErrorWithPlaceholders.builder()
                     .property(innerProperty)
                     .rawMessage(innerRawMessage)
                     .errorCode(innerErrorCode)
                     .build()))
                 .build(),
-            ErrorWithMessagePlaceholder.builder()
+            ErrorWithPlaceholders.builder()
                 .property(property3)
                 .messagePlaceholder(MessagePlaceholder.builder()
                     .mainPlaceholder("example.property")

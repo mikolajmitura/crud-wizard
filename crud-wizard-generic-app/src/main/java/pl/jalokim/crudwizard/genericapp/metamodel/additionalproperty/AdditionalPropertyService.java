@@ -22,7 +22,7 @@ public class AdditionalPropertyService {
     public List<AdditionalPropertyEntity> fetchAdditionalPropertiesFor(WithAdditionalPropertiesEntity withAdditionalPropertiesEntity) {
         return additionalPropertyRepository.findByOwnerIdAndOwnerClass(
             withAdditionalPropertiesEntity.getId(),
-            withAdditionalPropertiesEntity.getClass().getName());
+            withAdditionalPropertiesEntity.getClass().getSimpleName());
     }
 
     public static AdditionalPropertyService getInstance() {

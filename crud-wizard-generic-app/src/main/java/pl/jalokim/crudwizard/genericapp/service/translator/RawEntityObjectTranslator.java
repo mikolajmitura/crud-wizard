@@ -4,7 +4,6 @@ import static pl.jalokim.crudwizard.core.config.jackson.StringBlankToNullModule.
 import static pl.jalokim.crudwizard.genericapp.service.translator.JsonNodeUtils.getFieldsOfObjectNode;
 import static pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath.rootNode;
 import static pl.jalokim.utils.collection.Elements.elements;
-import static pl.jalokim.utils.reflection.InvokableReflectionUtils.newInstance;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isCollectionType;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isMapType;
 
@@ -16,7 +15,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -24,27 +22,28 @@ import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
+import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("unchecked")
 public class RawEntityObjectTranslator {
 
     /**
      * To add some custom deserializers and serializers inject ObjectMapper and add custom configuration to it.
      */
     private final JsonObjectMapper jsonObjectMapper;
+    private final DefaultClassesConfig defaultClassesConfig;
 
-    @SuppressWarnings("unchecked")
     public <T> T translateToRealObjects(@Nullable JsonNode jsonNode, @Nullable ClassMetaModel nullableClassMetaModel) {
         if (jsonNode == null) {
             return null;
         }
         return (T) Optional.ofNullable(nullableClassMetaModel)
             .map(classMetaModel -> convertObject(rootNode(), jsonNode, classMetaModel))
-        .orElse(null);
+            .orElse(null);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T translateToRealObjects(Map<String, Object> sourceMap, @Nullable ClassMetaModel nullableClassMetaModel) {
         return (T) Optional.ofNullable(nullableClassMetaModel)
             .map(classMetaModel -> translateToRealObjects(jsonObjectMapper.asJsonNode(rootNode(), sourceMap), classMetaModel))
@@ -77,15 +76,11 @@ public class RawEntityObjectTranslator {
     }
 
     private FieldMetaModel getFieldByName(ObjectNodePath objectNodePath, ClassMetaModel classMetaModel, String fieldName) {
-        try {
-            return classMetaModel.getFieldByName(fieldName);
-        } catch (NoSuchElementException ex) {
-            throw new TechnicalException("Cannot find field with name: '" + fieldName + "' in path: '" + objectNodePath.getFullPath()
-                + "' available fields: " + classMetaModel.getFieldNames() + " in named class meta model: '" + classMetaModel.getName() + "'", ex);
-        }
+        return Optional.ofNullable(classMetaModel.getFieldByName(fieldName))
+            .orElseThrow(() -> new TechnicalException("Cannot find field with name: '" + fieldName + "' in path: '" + objectNodePath.getFullPath()
+                + "' available fields: " + classMetaModel.getFieldNames() + " in named class meta model: '" + classMetaModel.getName() + "'"));
     }
 
-    @SuppressWarnings("unchecked")
     private Object convertObjectBasedOnRealClass(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {
         Class<?> realClass = classMetaModel.getRealClass();
 
@@ -109,7 +104,7 @@ public class RawEntityObjectTranslator {
             Collection<Object> targetCollection = (Collection<Object>) newInstance(realClass);
             ArrayNode arrayNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, ArrayNode.class);
 
-            elements(arrayNode).forEach((index, arrayNodeElement) ->
+            elements(arrayNode).forEachWithIndex((index, arrayNodeElement) ->
                 targetCollection.add(convertObject(objectNodePath.nextCollectionNode(index), arrayNodeElement, genericTypeOfCollection))
             );
             return targetCollection;
@@ -118,5 +113,10 @@ public class RawEntityObjectTranslator {
         }
 
         return jsonObjectMapper.convertToObject(objectNodePath, jsonNode, realClass);
+    }
+
+    private <T> T newInstance(Class<T> realClass) {
+        Class<T> classToInit = (Class<T>) defaultClassesConfig.returnConfig().getOrDefault(realClass, realClass);
+        return InvokableReflectionUtils.newInstance(classToInit);
     }
 }

@@ -11,7 +11,7 @@ public class EndpointMetaModelContextNodeCreator {
     public static void loadEndpointNodes(MetaModelContext metaModelContext) {
         var rootEndpointMetaModelNode = metaModelContext.getEndpointMetaModelContextNode();
 
-        metaModelContext.getEndpointMetaModels().getModelsById().values()
+        metaModelContext.getEndpointMetaModels().getObjectsById().values()
             .forEach(endpointMetaModel -> {
                 var currentEndpointMetaModelNodeRef = new AtomicReference<>(rootEndpointMetaModelNode);
                 elements(endpointMetaModel.getUrlMetamodel().getUrlParts())

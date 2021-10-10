@@ -7,16 +7,20 @@ import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.core.metamodels.MappingDirection;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
 @EqualsAndHashCode(callSuper = true)
-@Value
+@Data
 @Builder
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldShouldWhenOther(field = MapperMetaModelDto.CLASS_NAME, should = NULL, whenField = MapperMetaModelDto.MAPPER_SCRIPT, is = NOT_NULL)
 @FieldShouldWhenOther(field = MapperMetaModelDto.BEAN_NAME, should = NULL, whenField = MapperMetaModelDto.MAPPER_SCRIPT, is = NOT_NULL)
 @FieldShouldWhenOther(field = MapperMetaModelDto.METHOD_NAME, should = NULL, whenField = MapperMetaModelDto.MAPPER_SCRIPT, is = NOT_NULL)

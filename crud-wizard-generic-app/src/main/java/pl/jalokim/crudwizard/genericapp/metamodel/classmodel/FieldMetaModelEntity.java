@@ -1,7 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -39,9 +38,9 @@ public class FieldMetaModelEntity extends WithAdditionalPropertiesEntity {
     @JoinColumn(name = "class_metamodel_id")
     private ClassMetaModelEntity fieldType;
 
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany
     @JoinTable(
-        name = "meta_models_validators",
+        name = "field_validators",
         joinColumns = {@JoinColumn(name = "field_meta_model_id")},
         inverseJoinColumns = {@JoinColumn(name = "validator_meta_model_id")}
     )

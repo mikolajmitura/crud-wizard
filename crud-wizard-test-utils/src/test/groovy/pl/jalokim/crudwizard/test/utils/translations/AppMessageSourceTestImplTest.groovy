@@ -1,8 +1,9 @@
 package pl.jalokim.crudwizard.test.utils.translations
 
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
-import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSource
-import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSource
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSourceProvider
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSourceProvider
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.initStaticAppMessageSource
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_BLANK_MESSAGE_PROPERTY
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_NULL_MESSAGE_PROPERTY
@@ -20,9 +21,9 @@ import spock.lang.Specification
 
 class AppMessageSourceTestImplTest extends Specification {
 
-    AppMessageSourceTestImpl testCase = new AppMessageSourceTestImpl()
-    MessageSource commonsMessageSource = createCommonMessageSource()
-    MessageSource appMessageSource = createMessageSource()
+    AppMessageSourceTestImpl testCase = initStaticAppMessageSource()
+    MessageSource commonsMessageSource = createCommonMessageSourceProvider().getMessageSource()
+    MessageSource appMessageSource = createMessageSourceProvider().getMessageSource()
 
     private Validator validator
 

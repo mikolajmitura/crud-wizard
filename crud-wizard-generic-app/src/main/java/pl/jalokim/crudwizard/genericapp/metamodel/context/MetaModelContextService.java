@@ -106,7 +106,7 @@ public class MetaModelContextService implements ApplicationRunner {
         }
         metaModelContext.setClassMetaModels(classMetaModels);
 
-        classMetaModels.getModelsById()
+        classMetaModels.getObjectsById()
             .values()
             .forEach(classMetaModel -> {
 

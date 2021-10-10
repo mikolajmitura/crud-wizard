@@ -6,15 +6,19 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
+@Data
 @EqualsAndHashCode(callSuper = true)
-@Value
-@Builder
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@Builder(toBuilder = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldShouldWhenOther(field = "name", should = NOT_NULL, whenField = "id", is = NULL)
 @FieldShouldWhenOther(field = "className", should = NOT_NULL, whenField = "id", is = NULL)
 public class DataStorageMetaModelDto extends AdditionalPropertyMetaModelDto {

@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
@@ -22,12 +23,14 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDto;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@EqualsAndHashCode(callSuper = true)
 @Builder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldShouldWhenOther(field = "payloadMetamodel", should = NOT_NULL, whenField = EndpointMetaModelDto.HTTP_METHOD,
     is = EQUAL_TO_ANY, otherFieldValues = {"POST", "PUT", "PATCH"})
 @FieldShouldWhenOther(field = "responseMetaModel", should = NOT_NULL, whenField = EndpointMetaModelDto.HTTP_METHOD,
@@ -58,6 +61,8 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     @Valid
     ClassMetaModelDto payloadMetamodel;
+
+    List<@Valid AdditionalValidatorsMetaModelDto> payloadMetamodelAdditionalValidators;
 
     @Valid
     ClassMetaModelDto queryArguments;

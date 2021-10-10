@@ -12,28 +12,28 @@ public class CustomValidationException extends ApplicationException {
 
     private static final long serialVersionUID = 1L;
 
-    private final Set<ErrorWithMessagePlaceholder> errors;
+    private final Set<ErrorWithPlaceholders> errors;
     private final HttpStatus statusCode;
 
-    public CustomValidationException(String message, Set<ErrorWithMessagePlaceholder> errors) {
+    public CustomValidationException(String message, Set<ErrorWithPlaceholders> errors) {
         super(message);
         this.errors = errors;
         statusCode = BAD_REQUEST;
     }
 
-    public CustomValidationException(MessagePlaceholder messagePlaceHolder, Set<ErrorWithMessagePlaceholder> errors) {
+    public CustomValidationException(MessagePlaceholder messagePlaceHolder, Set<ErrorWithPlaceholders> errors) {
         super(messagePlaceHolder);
         this.errors = errors;
         statusCode = BAD_REQUEST;
     }
 
-    public CustomValidationException(String message, Set<ErrorWithMessagePlaceholder> errors, HttpStatus statusCode) {
+    public CustomValidationException(String message, Set<ErrorWithPlaceholders> errors, HttpStatus statusCode) {
         super(message);
         this.errors = errors;
         this.statusCode = statusCode;
     }
 
-    public CustomValidationException(MessagePlaceholder messagePlaceHolder, Set<ErrorWithMessagePlaceholder> errors,
+    public CustomValidationException(MessagePlaceholder messagePlaceHolder, Set<ErrorWithPlaceholders> errors,
         HttpStatus statusCode) {
         super(messagePlaceHolder);
         this.errors = errors;

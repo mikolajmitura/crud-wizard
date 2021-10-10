@@ -6,14 +6,10 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsP
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.validation.MessageInterpolator;
 import org.springframework.context.NoSuchMessageException;
-import pl.jalokim.crudwizard.core.validation.javax.groups.ContextFromPlaceholderArgs;
-import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorFactoryHolder;
 
 public interface AppMessageSource {
 
@@ -21,25 +17,26 @@ public interface AppMessageSource {
 
     default String getMessage(Class<?> classNameAsPrefix, String code, Object... placeholderArgs) {
         String fullPropertyKey = buildPropertyKey(getClassName(classNameAsPrefix), code);
-        if (placeholderArgs.length > 0) {
-            return getMessage(fullPropertyKey, placeholderArgs);
-        }
-        return getMessage(fullPropertyKey);
+        return getMessage(fullPropertyKey, placeholderArgs);
     }
 
     default String getMessage(String propertyKey, Object... placeholderArgs) {
-        Map<String, Object> placeholderArgsByIndexes = new HashMap<>();
-        for (int i = 0; i < placeholderArgs.length; i++) {
-            placeholderArgsByIndexes.put(Integer.toString(i), placeholderArgs[i]);
+        if (placeholderArgs.length > 0) {
+            Map<String, Object> placeholderArgsByIndexes = new HashMap<>();
+            for (int i = 0; i < placeholderArgs.length; i++) {
+                placeholderArgsByIndexes.put(Integer.toString(i), placeholderArgs[i]);
+            }
+            return getMessage(propertyKey, placeholderArgsByIndexes);
         }
-        return getMessage(propertyKey, placeholderArgsByIndexes);
+        return getMessage(propertyKey);
     }
 
     default String getMessage(String propertyKey, Map<String, Object> placeholderArgs) {
-        getMessage(propertyKey);
-        MessageInterpolator messageInterpolator = ValidatorFactoryHolder.getValidatorFactory().getMessageInterpolator();
-        return messageInterpolator.interpolate(wrapAsPlaceholder(propertyKey), new ContextFromPlaceholderArgs(placeholderArgs),
-            Locale.getDefault());
+        String message = getMessage(propertyKey);
+        for (var entryPlaceholder : placeholderArgs.entrySet()) {
+            message = message.replace(wrapAsPlaceholder(entryPlaceholder.getKey()), entryPlaceholder.getValue().toString());
+        }
+        return message;
     }
 
     default String getMessageByEnum(Enum<?> enumValue, Object... placeholderArgs) {

@@ -17,4 +17,12 @@ public class ErrorDto {
             .message(message)
             .build();
     }
+
+    public static ErrorDto errorEntry(String property, String message, String errorCode) {
+        return ErrorDto.builder()
+            .property(property)
+            .message(message)
+            .errorCode(errorCode)
+            .build();
+    }
 }

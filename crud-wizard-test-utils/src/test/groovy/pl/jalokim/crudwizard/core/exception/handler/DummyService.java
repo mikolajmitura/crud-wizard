@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import pl.jalokim.crudwizard.core.exception.BusinessLogicException;
 import pl.jalokim.crudwizard.core.exception.CustomValidationException;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
-import pl.jalokim.crudwizard.core.exception.ErrorWithMessagePlaceholder;
+import pl.jalokim.crudwizard.core.exception.ErrorWithPlaceholders;
 import pl.jalokim.crudwizard.core.exception.ResourceChangedException;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
@@ -55,15 +55,15 @@ public class DummyService {
     void dummyMethodThrowingDataValidationException() {
         throw new CustomValidationException("some error",
             Set.of(
-                ErrorWithMessagePlaceholder.builder()
+                ErrorWithPlaceholders.builder()
                     .property("property1")
                     .rawMessage("message 1")
                     .build(),
-                ErrorWithMessagePlaceholder.builder()
+                ErrorWithPlaceholders.builder()
                     .property("property2")
                     .rawMessage("message 2")
                     .build(),
-                ErrorWithMessagePlaceholder.builder()
+                ErrorWithPlaceholders.builder()
                     .property("property3")
                     .messagePlaceholder(MessagePlaceholder.builder()
                         .errorCode("error.code.from.placeholder")

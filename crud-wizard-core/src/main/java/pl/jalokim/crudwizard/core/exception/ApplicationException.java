@@ -59,7 +59,7 @@ public abstract class ApplicationException extends RuntimeException {
     }
 
     private static String translateWhenCan(String messageOrPlaceholder) {
-        if (existsAppMessageSource()) {
+        if (existsAppMessageSource() && messageOrPlaceholder != null) {
             return translateWhenIsPlaceholder(messageOrPlaceholder).toString();
         }
         return messageOrPlaceholder;

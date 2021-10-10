@@ -4,14 +4,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
-import pl.jalokim.crudwizard.core.exception.ErrorWithMessagePlaceholder;
+import pl.jalokim.crudwizard.core.exception.ErrorWithPlaceholders;
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 
 @UtilityClass
 public class ErrorWithMessagePlaceholderMapper {
 
-    public static Set<ErrorDto> convertToErrorsDto(Set<ErrorWithMessagePlaceholder> errorsDtoWithPlaceholder) {
+    public static Set<ErrorDto> convertToErrorsDto(Set<ErrorWithPlaceholders> errorsDtoWithPlaceholder) {
         if (errorsDtoWithPlaceholder == null) {
             return null;
         }

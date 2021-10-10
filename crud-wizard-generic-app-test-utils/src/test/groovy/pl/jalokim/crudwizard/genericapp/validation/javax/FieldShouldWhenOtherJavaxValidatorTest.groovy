@@ -19,21 +19,21 @@ import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenO
 import static pl.jalokim.utils.test.DataFakerHelper.randomInteger
 import static pl.jalokim.utils.test.DataFakerHelper.randomLong
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
-import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.EXPECTED_MESSAGES
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicReference
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
+import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther
-import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOtherValidator
+import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOtherJavaxValidator
+import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
-import spock.lang.Specification
 import spock.lang.Unroll
 
 @SuppressWarnings("UnusedPrivateField")
-class FieldShouldWhenOtherValidatorTest extends Specification {
+class FieldShouldWhenOtherJavaxValidatorTest extends UnitTestSpec {
 
     private ValidatorWithConverter validatorWithConverter
     private static AtomicReference<FieldShouldWhenOtherStub> fieldShouldWhenOtherStub = new AtomicReference<>()
@@ -102,7 +102,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
         Exception ex = thrown()
         def wholeClass = inputObject.getClass().canonicalName
         ex.getCause().message ==
-            "field '$fieldName' in class $wholeClass should be one of class: [java.lang.String, java.util.Collection, java.util.Map] when used one of EMPTY, EMPTY_OR_NULL, NOT_EMPTY"
+            "field '$fieldName' in class: $wholeClass should be one of class: [java.lang.String, java.util.Collection, java.util.Map] when used one of EMPTY, EMPTY_OR_NULL, NOT_EMPTY"
 
         where:
         inputObject                                             || fieldName
@@ -120,7 +120,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
         Exception ex = thrown()
         def wholeClass = inputObject.getClass().canonicalName
         ex.getCause().message ==
-            "field '$fieldName' in class $wholeClass should be one of class: [java.lang.String] when used one of NOT_BLANK"
+            "field '$fieldName' in class: $wholeClass should be one of class: [java.lang.String] when used one of NOT_BLANK"
 
         where:
         inputObject                                               || fieldName
@@ -136,7 +136,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
         Exception ex = thrown()
         def wholeClass = inputObject.getClass().canonicalName
         ex.getCause().message ==
-            "field 'notSupported' in class $wholeClass should be one of class:" +
+            "field 'notSupported' in class: $wholeClass should be one of class:" +
             " [java.util.Collection, java.util.Map, java.lang.String, java.lang.Number] when used one of MIN, MAX"
 
         where:
@@ -155,7 +155,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
             .build()
         )
 
-        def validator = new FieldShouldWhenOtherValidator()
+        def validator = new FieldShouldWhenOtherJavaxValidator()
 
         when:
         validator.initialize(mockFieldShouldWhenOther)
@@ -185,7 +185,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
             .build()
         )
 
-        def validator = new FieldShouldWhenOtherValidator()
+        def validator = new FieldShouldWhenOtherJavaxValidator()
 
         when:
         validator.initialize(mockFieldShouldWhenOther)
@@ -214,7 +214,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
             .build()
         )
 
-        def validator = new FieldShouldWhenOtherValidator()
+        def validator = new FieldShouldWhenOtherJavaxValidator()
 
         when:
         validator.initialize(mockFieldShouldWhenOther)
@@ -455,7 +455,7 @@ class FieldShouldWhenOtherValidatorTest extends Specification {
     }
 
     private static String message(String suffixCode) {
-        EXPECTED_MESSAGES.getMessage(FieldShouldWhenOtherValidatorTest, suffixCode)
+        AppMessageSourceHolder.getMessage(FieldShouldWhenOtherJavaxValidatorTest, suffixCode)
     }
 
     @FieldShouldWhenOther(field = "someInteger", should = EMPTY, whenField = "otherField", is = NOT_EMPTY)

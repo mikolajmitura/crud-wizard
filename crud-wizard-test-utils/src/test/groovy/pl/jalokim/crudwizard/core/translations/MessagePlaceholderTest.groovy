@@ -2,16 +2,16 @@ package pl.jalokim.crudwizard.core.translations
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.initStaticAppMessageSource
 
 import pl.jalokim.crudwizard.core.exception.handler.DummyRestController
-import pl.jalokim.utils.test.DataFakerHelper
-import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImplTest
+import pl.jalokim.utils.test.DataFakerHelper
 import spock.lang.Specification
 
 class MessagePlaceholderTest extends Specification {
 
-    AppMessageSource appMessageSource = new AppMessageSourceTestImpl()
+    AppMessageSource appMessageSource = initStaticAppMessageSource()
 
     def "should return expected values from MessagePlaceholder with only mainPlaceholder"() {
         given:

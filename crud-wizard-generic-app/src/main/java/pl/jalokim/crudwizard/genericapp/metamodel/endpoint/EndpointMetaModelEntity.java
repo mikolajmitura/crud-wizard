@@ -24,6 +24,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity;
 
 @Entity
 @Builder
@@ -53,6 +54,10 @@ public class EndpointMetaModelEntity extends WithAdditionalPropertiesEntity {
     @JoinColumn(name = "payload_metamodel_id")
     private ClassMetaModelEntity payloadMetamodel;
 
+    @OneToMany(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "endpoint_id")
+    private List<AdditionalValidatorsEntity> payloadMetamodelAdditionalValidators;
+
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "endpoint_meta_model_id")
     private ClassMetaModelEntity queryArguments;
@@ -70,6 +75,6 @@ public class EndpointMetaModelEntity extends WithAdditionalPropertiesEntity {
     private EndpointResponseMetaModelEntity responseMetaModel;
 
     @OneToMany
-    @JoinColumn(name = "service_meta_model_id")
+    @JoinColumn(name = "endpoint_id")
     private List<DataStorageConnectorMetaModelEntity> dataStorageConnectors;
 }

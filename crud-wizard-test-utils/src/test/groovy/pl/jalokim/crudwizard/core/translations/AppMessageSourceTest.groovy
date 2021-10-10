@@ -1,12 +1,13 @@
 package pl.jalokim.crudwizard.core.translations
 
-import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.initStaticAppMessageSource
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class AppMessageSourceTest extends Specification {
 
-    private AppMessageSource appMessageSource = new AppMessageSourceTestImpl("app_message_source_test")
+    private AppMessageSource appMessageSource = initStaticAppMessageSource(false, "app_message_source_test")
     private AppMessageSource testCase = new AppMessageSource() {
 
         @Override

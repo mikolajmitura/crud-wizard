@@ -1,12 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty
+import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLDER_PREFIX
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService.createNewEndpointReason
+import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
@@ -14,10 +17,19 @@ import javax.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ContextRefreshStatus
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefreshRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorInstanceCache
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelRepository
+import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
+import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 
 class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecification {
@@ -31,9 +43,20 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     @Autowired
     private MetaModelContextRefreshRepository metaModelContextRefreshRepository
 
-    def "should save simple POST new endpoint with default mapper, service, data storage"() {
+    @Autowired
+    private ValidatorInstanceCache validatorInstanceCache
+
+    @Autowired
+    private ValidatorMetaModelRepository validatorMetaModelRepository
+
+    def "should save POST new endpoint with default mapper, service, data storage"() {
         given:
-        def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto()
+        def validatorInstancesCache = validatorInstanceCache.dataValidatorsByKey
+        validatorInstancesCache.clear()
+        def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(extendedPersonClassMetaModel())
+            .payloadMetamodelAdditionalValidators(createAdditionalValidatorsForExtendedPerson())
+            .build()
 
         when:
         def createdId = endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -49,17 +72,37 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                 baseUrl == createEndpointMetaModelDto.baseUrl
                 httpMethod == createEndpointMetaModelDto.httpMethod
                 operationName == createEndpointMetaModelDto.operationName
-                def inputPayloadMetamodel = createEndpointMetaModelDto.payloadMetamodel
-                verifyAll(payloadMetamodel) {
-                    name == inputPayloadMetamodel.name
-                    fields.size() == 1
-                    verifyAll(fields[0]) {
-                        fieldName == inputPayloadMetamodel.fields[0].fieldName
-                        verifyAll(fieldType) {
-                            className == inputPayloadMetamodel.fields[0].fieldType.className
-                        }
-                    }
+
+                def allValidators = validatorMetaModelRepository.findAll()
+                allValidators.size() == 5
+                def notNullValidator = allValidators.find {
+                    it.className == NotNullValidator.canonicalName
                 }
+                def documentValueSizeValidator = findSizeValidator(allValidators, 5, 25)
+                def additionalPersonNameSizeValidator = findSizeValidator(allValidators, 2, 20)
+                def additionalPersonSurnameSizeValidator = findSizeValidator(allValidators, 2, 30)
+                def additionalDocumentsSizeValidator = findSizeValidator(allValidators, 1, null)
+
+                def inputPayloadMetamodel = createEndpointMetaModelDto.payloadMetamodel
+                assertClassMetaModels(payloadMetamodel, inputPayloadMetamodel)
+
+                def foundDocumentsEntity = payloadMetamodel.fields.find {
+                    it.fieldName == "documents"
+                }
+
+                def foundDocumentEntity = foundDocumentsEntity.fieldType.genericTypes[0]
+
+                def foundValueFieldEntity = foundDocumentEntity.fields.find {
+                    it.fieldName == "value"
+                }
+                foundDocumentEntity.validators == [notNullValidator]
+                foundValueFieldEntity.validators == [notNullValidator, documentValueSizeValidator]
+
+                assertAdditionalValidators(payloadMetamodelAdditionalValidators, "name", notNullValidator, additionalPersonNameSizeValidator)
+                assertAdditionalValidators(payloadMetamodelAdditionalValidators, "surname", notNullValidator, additionalPersonSurnameSizeValidator)
+                assertAdditionalValidators(payloadMetamodelAdditionalValidators, "documents", additionalDocumentsSizeValidator)
+                assertAdditionalValidators(payloadMetamodelAdditionalValidators, "documents[*].type", notNullValidator)
+
                 verifyAll(responseMetaModel) {
                     verifyAll(classMetaModel) {
                         name == null
@@ -70,10 +113,59 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             }
         }
         inTransaction {
-           def foundRefreshEntity = metaModelContextRefreshRepository.findAll()
-               .find { it.refreshReason == createNewEndpointReason(createdId)}
+            def foundRefreshEntity = metaModelContextRefreshRepository.findAll()
+                .find {
+                    it.refreshReason == createNewEndpointReason(createdId)
+                }
             assert foundRefreshEntity.contextRefreshStatus == ContextRefreshStatus.CORRECT
         }
+        validatorInstancesCache.size() == 2
+        validatorInstancesCache.get(NotNullValidator.canonicalName) != null
+        validatorInstancesCache.get(SizeValidator.canonicalName) != null
+    }
+
+    private boolean assertClassMetaModels(ClassMetaModelEntity classMetaModelEntity, ClassMetaModelDto classMetaModelDto) {
+        verifyAll(classMetaModelEntity) {
+            name == classMetaModelDto.name
+            className == classMetaModelDto.className
+
+            List<FieldMetaModelEntity> fieldsEntities = Optional.ofNullable(fields).orElse([])
+            List<FieldMetaModelDto> fieldsDto = Optional.ofNullable(classMetaModelDto.fields).orElse([])
+
+            fieldsEntities.size() == fieldsDto.size()
+            if (fieldsEntities.size() > 0) {
+                fieldsEntities.eachWithIndex {fieldEntity, index ->
+                    verifyAll(fieldEntity) {
+                        def fieldDto = fieldsDto[index]
+                        fieldName == fieldDto.fieldName
+                        assertClassMetaModels(fieldType, fieldDto.fieldType)
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    private ValidatorMetaModelEntity findSizeValidator(List<ValidatorMetaModelEntity> allValidators, Long min, Long max) {
+        allValidators.find {
+            it.className == SizeValidator.canonicalName &&
+                (min == null || foundValidatorPlaceholder(it.additionalProperties, "min", min)) &&
+                (max == null || foundValidatorPlaceholder(it.additionalProperties, "max", max))
+        }
+    }
+
+    private static boolean assertAdditionalValidators(List<AdditionalValidatorsEntity> additionalValidators,
+        String fullPropertyPath, ValidatorMetaModelEntity... expectedValidators) {
+        def foundAdditionalValidatorsEntry = additionalValidators.find {
+            it.fullPropertyPath == fullPropertyPath
+        }
+        foundAdditionalValidatorsEntry.getValidators() as Set == expectedValidators as Set
+    }
+
+    private static boolean foundValidatorPlaceholder(List<AdditionalPropertyEntity> additionalProperties, String name, Long value) {
+        additionalProperties.find {
+            it.name == PLACEHOLDER_PREFIX + name && it.jsonValue == value.toString()
+        } != null
     }
 
     def "should throw ConstraintViolationException when bean is invalid (verify only that aspect was invoked)"() {
