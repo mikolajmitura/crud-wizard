@@ -12,6 +12,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelConte
 import pl.jalokim.crudwizard.genericapp.service.invoker.DelegatedServiceMethodInvoker;
 import pl.jalokim.crudwizard.genericapp.service.translator.RawEntityObjectTranslator;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
+import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 import pl.jalokim.crudwizard.genericapp.validation.generic.GenericValidator;
 
 @Service
@@ -28,18 +29,23 @@ public class GenericServiceDelegator {
         var newGenericServiceArgument = searchForEndpointByRequest(genericServiceArgument);
         var foundEndpoint = newGenericServiceArgument.getEndpointMetaModel();
 
+        ValidationSessionContext validationContext = new GenericServiceValidationSessionContext();
         newGenericServiceArgument = newGenericServiceArgument.toBuilder()
             .httpQueryTranslated(rawEntityObjectTranslator.translateToRealObjects(
                 genericServiceArgument.getHttpQueryParams(), foundEndpoint.getQueryArguments()))
             .requestBodyTranslated(TranslatedPayload.translatedPayload(rawEntityObjectTranslator.translateToRealObjects(
                 genericServiceArgument.getRequestBody(), foundEndpoint.getPayloadMetamodel())))
+            .validationContext(validationContext)
             .build();
 
         genericValidator.validate(newGenericServiceArgument.getHttpQueryTranslated(), foundEndpoint.getQueryArguments());
         genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated().getRealValue(),
             foundEndpoint.getPayloadMetamodel(), foundEndpoint.getPayloadMetamodelAdditionalValidators());
 
-        return delegatedServiceMethodInvoker.callMethod(newGenericServiceArgument);
+        ResponseEntity<Object> methodInvocationResult = delegatedServiceMethodInvoker.callMethod(newGenericServiceArgument);
+        validationContext.throwExceptionWhenErrorsOccurred();
+
+        return methodInvocationResult;
     }
 
     private GenericServiceArgument searchForEndpointByRequest(GenericServiceArgument genericServiceArgument) {

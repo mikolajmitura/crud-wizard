@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
+import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
 @Service
 public class NormalSpringService {
@@ -35,6 +36,13 @@ public class NormalSpringService {
 
     public void returnVoid(@Validated @RequestBody SamplePersonDto samplePersonDto) {
 
+    }
+
+    public Long validationContextAsArg(@RequestBody SamplePersonDto samplePersonDto, ValidationSessionContext validationSessionContext) {
+        if (samplePersonDto.getId() == null && samplePersonDto.getSurname() == null) {
+            validationSessionContext.addNextMessage("_id_surname", "NormalSpringService.invalid.id");
+        }
+        return 10L;
     }
 
     public String returnString() {

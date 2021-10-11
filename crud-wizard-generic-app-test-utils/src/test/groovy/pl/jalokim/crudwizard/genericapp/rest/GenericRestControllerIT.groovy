@@ -2,11 +2,12 @@ package pl.jalokim.crudwizard.genericapp.rest
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
-import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
+import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntryWithErrorCode
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostWithSimplePerson
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractErrorResponseDto
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractResponseAsClass
+import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractResponseAsLong
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidSizeMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_NULL_MESSAGE_PROPERTY
@@ -39,9 +40,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
      */
     def "invoked validation in NormalSpringService.createSamplePersonDtoWithValidated on @Validated field and return validation errors"() {
         given:
-        def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto()
-            .toBuilder()
-            .payloadMetamodel(simplePersonClassMetaModel())
+        def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
                 .className(NormalSpringService.canonicalName)
                 .beanName("normalSpringService")
@@ -67,9 +66,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
      */
     def "return expected value of NormalSpringService.createSamplePersonDtoWithValidated with ok"() {
         given:
-        def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto()
-            .toBuilder()
-            .payloadMetamodel(simplePersonClassMetaModel())
+        def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
                 .className(NormalSpringService.canonicalName)
                 .beanName("normalSpringService")
@@ -119,6 +116,50 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             errorEntry("name", invalidSizeMessage(2, 20), SIZE_MESSAGE_PROPERTY),
             errorEntry("documents", invalidSizeMessage(1, null), SIZE_MESSAGE_PROPERTY)
         ])
+    }
+
+    def "invoked validation inside of NormalSpringService.createSamplePersonDtoWithValidated by used validation session and return validation errors"() {
+        given:
+        def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
+            .serviceMetaModel(ServiceMetaModelDto.builder()
+                .className(NormalSpringService.canonicalName)
+                .beanName("normalSpringService")
+                .methodName("validationContextAsArg")
+                .build())
+            .build()
+        endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
+
+        when:
+        def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"),
+            new ExampleUser(name: DataFakerHelper.randomText()))
+        httpResponse.andExpect(status().isBadRequest())
+        def errorResponse = extractErrorResponseDto(httpResponse)
+
+        then:
+        assertValidationResults(errorResponse.getErrors(), [
+            errorEntryWithErrorCode("_id_surname", "NormalSpringService.invalid.id")
+        ])
+    }
+
+    def "invoked validation inside of NormalSpringService.createSamplePersonDtoWithValidated by used validation session and without errors"() {
+        given:
+        def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
+            .serviceMetaModel(ServiceMetaModelDto.builder()
+                .className(NormalSpringService.canonicalName)
+                .beanName("normalSpringService")
+                .methodName("validationContextAsArg")
+                .build())
+            .build()
+        endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
+
+        when:
+        def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"),
+            new ExampleUser(id: DataFakerHelper.randomLong()))
+        httpResponse.andExpect(status().isCreated())
+        def createdId = extractResponseAsLong(httpResponse)
+
+        then:
+        createdId == 10L
     }
 
     private static class ExampleUser {

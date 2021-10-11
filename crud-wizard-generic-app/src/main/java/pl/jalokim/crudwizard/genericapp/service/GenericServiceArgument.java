@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
+import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
 @Value
 @Builder(toBuilder = true)
@@ -35,4 +36,5 @@ public class GenericServiceArgument {
     HttpServletResponse response;
     Map<String, Object> urlPathParams;
     EndpointMetaModel endpointMetaModel;
+    ValidationSessionContext validationContext;
 }

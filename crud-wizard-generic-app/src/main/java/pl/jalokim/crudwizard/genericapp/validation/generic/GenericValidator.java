@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.exception.CustomValidationException;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
@@ -43,10 +42,7 @@ public class GenericValidator {
             .currentAdditionalValidators(additionalValidators)
             .build());
 
-        if (validationContext.hasErrors()) {
-            throw new CustomValidationException(validationContext.getValidationResult().getMessage(),
-                elements(validationContext.getValidationResult().getEntries()).asSet());
-        }
+        validationContext.throwExceptionWhenErrorsOccurred();
     }
 
     private void validate(PropertyPathMetaModel propertyPathMetaModel) {

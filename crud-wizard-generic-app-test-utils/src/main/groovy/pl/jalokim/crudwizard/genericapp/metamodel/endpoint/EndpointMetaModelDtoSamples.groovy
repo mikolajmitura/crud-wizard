@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
@@ -33,6 +34,13 @@ class EndpointMetaModelDtoSamples {
             .payloadMetamodel(extendedPersonClassMetaModel())
             .payloadMetamodelAdditionalValidators(createAdditionalValidatorsForExtendedPerson())
             .build()
+    }
+
+    static EndpointMetaModelDto createValidPostWithSimplePerson() {
+        createValidPostEndpointMetaModelDto()
+            .toBuilder()
+            .payloadMetamodel(simplePersonClassMetaModel())
+        .build()
     }
 
     static EndpointMetaModelDto createValidPutEndpointMetaModelDto() {

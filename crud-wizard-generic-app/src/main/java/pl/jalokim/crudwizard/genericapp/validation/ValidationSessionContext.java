@@ -1,12 +1,14 @@
 package pl.jalokim.crudwizard.genericapp.validation;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.constants.Constants.DOT;
 import static pl.jalokim.utils.constants.Constants.EMPTY;
 
 import java.util.Map;
 import java.util.Optional;
 import lombok.Data;
+import pl.jalokim.crudwizard.core.exception.CustomValidationException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
@@ -23,7 +25,7 @@ public class ValidationSessionContext {
     private ValidatorModelContext currentValidatorContext;
 
     public void addNextMessage(PropertyPath propertyPath, String translationKey) {
-        addNextMessage(propertyPath, translationKey, createMessagePlaceholder(translationKey));
+        addNextMessage(propertyPath, createMessagePlaceholder(translationKey));
     }
 
     public void addNextMessage(PropertyPath propertyPath, String translationKey, Map<String, Object> arguments) {
@@ -36,6 +38,10 @@ public class ValidationSessionContext {
 
     public void addNextMessage(PropertyPath propertyPath, MessagePlaceholder messagePlaceholder) {
         addNextMessage(propertyPath.buildFullPath(), messagePlaceholder);
+    }
+
+    public void addNextMessage(String propertyPathAsText, String translationKey) {
+        addNextMessage(propertyPathAsText, createMessagePlaceholder(translationKey));
     }
 
     public void addNextMessage(String propertyPathAsText, MessagePlaceholder messagePlaceholder) {
@@ -63,6 +69,13 @@ public class ValidationSessionContext {
                 String translatedMessage = createMessagePlaceholder(translationKey, messagePlaceholders).translateMessage();
                 validationResult.addEntry(currentPath.buildFullPath(), translationKey, translatedMessage);
             }
+        }
+    }
+
+    public void throwExceptionWhenErrorsOccurred() {
+        if (hasErrors()) {
+            throw new CustomValidationException(getValidationResult().getMessage(),
+                elements(getValidationResult().getEntries()).asSet());
         }
     }
 

@@ -32,6 +32,7 @@ import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
+import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 import pl.jalokim.utils.string.StringUtils;
 
 @Component
@@ -67,6 +68,9 @@ public class DelegatedServiceMethodInvoker {
      * by type JsonNode from urlPathParams from {@link GenericServiceArgument.requestBody}
      *
      * by type TranslatedPayload from {@link GenericServiceArgument.requestBodyTranslated}
+     *
+     * by type ValidationSessionContext from {@link GenericServiceArgument.validationContext} for validation in service
+     * see {@link ValidationSessionContext} for usage of api, you can add validation message for some object node.
      *
      * by @RequestHeader as whole map {@link GenericServiceArgument.headers}
      *
@@ -134,6 +138,8 @@ public class DelegatedServiceMethodInvoker {
                 argumentToAdd = genericServiceArgument.getRequestBody();
             } else if (TranslatedPayload.class.isAssignableFrom(rawClassOfArgument)) {
                 argumentToAdd = genericServiceArgument.getRequestBodyTranslated();
+            } else if (ValidationSessionContext.class.isAssignableFrom(rawClassOfArgument)) {
+                argumentToAdd = genericServiceArgument.getValidationContext();
             } else {
                 Annotation firstRestAnnotation = getFirstRestAnnotation(methodArgumentMetaModel);
                 argumentToAdd = resolveArgumentObjectByAnnotation(genericServiceArgument, firstRestAnnotation, methodParameterInfo);
