@@ -36,6 +36,7 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
     Boolean simpleRawClass;
 
     Class<?> realClass;
+    EnumClassMetaModel enumClassMetaModel;
 
     // TODO how to deal with generic types in fields???
     List<ClassMetaModel> genericTypes;
@@ -51,6 +52,14 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
      */
     @Setter(AccessLevel.NONE)
     ParentMetamodelCacheContext parentMetamodelCacheContext;
+
+    /**
+     * when true then does it mean that this meta model
+     * is like generic enum metamodel
+     */
+    public boolean isGenericEnumType() {
+        return enumClassMetaModel != null;
+    }
 
     public FieldMetaModel getFieldByName(String fieldName) {
         Optional.ofNullable(parentMetamodelCacheContext)

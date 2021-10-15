@@ -53,6 +53,7 @@ class EndpointMetaModelDtoSamples {
             .operationName(randomText())
             .pathParams(ClassMetaModelDto.builder()
                 .name(randomText())
+                .isGenericEnumType(false)
                 .fields([
                     createValidFieldMetaModelDto("basePath", String),
                     createValidFieldMetaModelDto("nextId", Long)

@@ -52,10 +52,10 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         when:
         def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"),
             new ExampleUser(name: DataFakerHelper.randomText()))
-        httpResponse.andExpect(status().isBadRequest())
-        def errorResponse = extractErrorResponseDto(httpResponse)
 
         then:
+        def errorResponse = extractErrorResponseDto(httpResponse)
+        httpResponse.andExpect(status().isBadRequest())
         assertValidationResults(errorResponse.getErrors(), [
             errorEntry("surname", notNullMessage())
         ])
@@ -80,14 +80,14 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         when:
         def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"),
             new ExampleUser(name: name, surname: surname))
-        httpResponse.andExpect(status().isCreated())
         def samplePersonDto = extractResponseAsClass(httpResponse, SamplePersonDto)
 
         then:
+        httpResponse.andExpect(status().isCreated())
         samplePersonDto == new SamplePersonDto(1L, name, surname)
     }
 
-    def "invoke endpoint with default generic serivice, mappers, use default data storage with success"() {
+    def "invoke endpoint with default generic service, mappers, use default data storage with success"() {
         given:
         def createEndpointMetaModelDto = createValidPostExtendedUserWithValidators()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -97,7 +97,23 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
 
         then:
         httpResponse.andExpect(status().isCreated())
-        // TODO in future assert what was returned from datasource after save
+        // TODO in future assert that was returned some id and by that id assert what is in data storage
+    }
+
+    def "cannot map custom enum value by enum metamodel"() {
+        given:
+        def createEndpointMetaModelDto = createValidPostExtendedUserWithValidators()
+        endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
+        def personInput = createValidPerson()
+        personInput.documents = [new Document(enumField: "invalid enum")]
+
+        when:
+        def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personInput)
+
+        then:
+        httpResponse.andExpect(status().isBadRequest())
+        def errorResponse = extractErrorResponseDto(httpResponse)
+        errorResponse.message == "invalid enum value : 'invalid enum' in path: documents[0].enumField available enum values: ENUM1, ENUM2"
     }
 
     def "invoke endpoint with default generic serivice, mappers, use default data storage with failure"() {
@@ -107,10 +123,10 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
 
         when:
         def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), createInvalidPerson())
-        httpResponse.andExpect(status().isBadRequest())
-        def errorResponse = extractErrorResponseDto(httpResponse)
 
         then:
+        httpResponse.andExpect(status().isBadRequest())
+        def errorResponse = extractErrorResponseDto(httpResponse)
         assertValidationResults(errorResponse.getErrors(), [
             errorEntry("surname", notNullMessage(), NOT_NULL_MESSAGE_PROPERTY),
             errorEntry("name", invalidSizeMessage(2, 20), SIZE_MESSAGE_PROPERTY),
@@ -132,10 +148,10 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         when:
         def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"),
             new ExampleUser(name: DataFakerHelper.randomText()))
-        httpResponse.andExpect(status().isBadRequest())
-        def errorResponse = extractErrorResponseDto(httpResponse)
 
         then:
+        httpResponse.andExpect(status().isBadRequest())
+        def errorResponse = extractErrorResponseDto(httpResponse)
         assertValidationResults(errorResponse.getErrors(), [
             errorEntryWithErrorCode("_id_surname", "NormalSpringService.invalid.id")
         ])
@@ -155,10 +171,10 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         when:
         def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"),
             new ExampleUser(id: DataFakerHelper.randomLong()))
-        httpResponse.andExpect(status().isCreated())
-        def createdId = extractResponseAsLong(httpResponse)
 
         then:
+        httpResponse.andExpect(status().isCreated())
+        def createdId = extractResponseAsLong(httpResponse)
         createdId == 10L
     }
 
@@ -172,7 +188,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
     private static ExtendedPerson createValidPerson() {
         new ExtendedPerson(
             id: 12, name: randomText(2), surname: randomText(30), documents: [
-                new Document(type: 1, value: randomText(5))
+                new Document(type: 1, value: randomText(5), enumField: "ENUM1")
             ]
         )
     }
@@ -199,5 +215,6 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         String value
         LocalDate validFrom
         LocalDate validTo
+        String enumField
     }
 }

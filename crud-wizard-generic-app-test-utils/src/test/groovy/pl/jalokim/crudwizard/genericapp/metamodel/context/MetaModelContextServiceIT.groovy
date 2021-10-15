@@ -247,7 +247,7 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
 
     private static boolean foundValidatorPlaceholder(List<AdditionalPropertyDto> additionalProperties, String name, Long value) {
         additionalProperties.find {
-            it.name == PLACEHOLDER_PREFIX + name && it.value == value
+            it.name == PLACEHOLDER_PREFIX + name && it.realValue == value
         } != null
     }
 

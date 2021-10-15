@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -63,16 +64,29 @@ public class RawEntityObjectTranslator {
     }
 
     private Object convertObjectBasedOnMetaData(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {
-        ObjectNode mapObjectNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, ObjectNode.class);
-        Map<Object, Object> targetMap = new LinkedHashMap<>();
-        for (var jsonFieldEntry : getFieldsOfObjectNode(mapObjectNode)) {
-            String fieldName = jsonFieldEntry.getName();
-            JsonNode fieldValue = jsonFieldEntry.getJsonNode();
-            FieldMetaModel fieldByName = getFieldByName(objectNodePath, classMetaModel, fieldName);
-            ClassMetaModel fieldType = fieldByName.getFieldType();
-            targetMap.put(fieldName, convertObject(objectNodePath.nextNode(fieldName), fieldValue, fieldType));
+        if (classMetaModel.isGenericEnumType()) {
+            TextNode textNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, TextNode.class);
+            String textValue = textNode.textValue();
+            List<String> enumValues = classMetaModel.getEnumClassMetaModel().getEnumValues();
+            if (enumValues.contains(textValue)) {
+                return textNode.textValue();
+            }  else  {
+                throw new TechnicalException("invalid enum value : '" +  textValue + "' in path: " + objectNodePath.getFullPath()
+                    + " available enum values: " + elements(enumValues).asConcatText(", "));
+            }
+
+        } else {
+            ObjectNode mapObjectNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, ObjectNode.class);
+            Map<Object, Object> targetMap = new LinkedHashMap<>();
+            for (var jsonFieldEntry : getFieldsOfObjectNode(mapObjectNode)) {
+                String fieldName = jsonFieldEntry.getName();
+                JsonNode fieldValue = jsonFieldEntry.getJsonNode();
+                FieldMetaModel fieldByName = getFieldByName(objectNodePath, classMetaModel, fieldName);
+                ClassMetaModel fieldType = fieldByName.getFieldType();
+                targetMap.put(fieldName, convertObject(objectNodePath.nextNode(fieldName), fieldValue, fieldType));
+            }
+            return targetMap;
         }
-        return targetMap;
     }
 
     private FieldMetaModel getFieldByName(ObjectNodePath objectNodePath, ClassMetaModel classMetaModel, String fieldName) {

@@ -50,8 +50,7 @@ public class GenericValidator {
         Object objectToValidate = propertyPathMetaModel.getObjectToValidate();
 
         Class<?> metaModelRealClass = classMetaModel.getRealClass() == null ? Map.class : classMetaModel.getRealClass();
-
-        if (objectToValidate != null && !isTypeOf(objectToValidate, metaModelRealClass)) {
+        if (objectToValidate != null && !classMetaModel.isGenericEnumType() && !isTypeOf(objectToValidate, metaModelRealClass)) {
             String messageFormat = "Expected metamodel class: %s, but give was: %s, field path: %s";
             throw new IllegalStateException(String.format(messageFormat,
                 metaModelRealClass.getCanonicalName(),

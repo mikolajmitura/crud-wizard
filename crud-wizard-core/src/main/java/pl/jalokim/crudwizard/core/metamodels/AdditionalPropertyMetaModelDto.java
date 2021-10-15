@@ -10,6 +10,7 @@ import pl.jalokim.utils.collection.Elements;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+// TODO validator for check property name uniqueness
 public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
 
     protected List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
@@ -17,7 +18,7 @@ public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
     public Object getPropertyValue(String propertyName) {
         return Elements.elements(additionalProperties)
             .filter(property -> property.getName().equals(propertyName))
-            .map(AdditionalPropertyDto::getValue)
+            .map(AdditionalPropertyDto::getRealValue)
             .findFirst()
             .orElse(null);
     }
@@ -38,22 +39,26 @@ public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
             .orElse(null);
     }
 
-    public void addProperty(String propertyName, Object value) {
+    @SuppressWarnings("unchecked")
+    public <T> T addProperty(String propertyName, Object value) {
         additionalProperties.add(AdditionalPropertyDto.builder()
                 .name(propertyName)
-                .value(value)
+                .valueAsObject(value)
                 .valueRealClassName(getFullClassName(value))
                 .build()
         );
+        return (T) this;
     }
 
-    public void addNullProperty(String propertyName, Class<?> objectType) {
-        additionalProperties.add(AdditionalPropertyDto.builder()
-            .name(propertyName)
-            .value(null)
-            .valueRealClassName(objectType.getCanonicalName())
-            .build()
-        );
+    @SuppressWarnings("unchecked")
+    public <T> T updateProperty(String propertyName, Object value) {
+        for (int index = 0; index < additionalProperties.size(); index++) {
+            AdditionalPropertyDto additionalPropertyDto = additionalProperties.get(index);
+            if (additionalPropertyDto.getName().equals(propertyName)) {
+                additionalProperties.remove(index);
+                break;
+            }
+        }
+        return addProperty(propertyName, value);
     }
-
 }

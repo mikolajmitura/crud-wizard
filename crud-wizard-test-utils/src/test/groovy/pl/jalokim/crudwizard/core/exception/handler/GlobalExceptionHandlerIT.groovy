@@ -102,7 +102,7 @@ class GlobalExceptionHandlerIT extends DummyBaseIntegrationControllerSpec {
         def response = operationsOnRestController.perform(get("/test/technicalException"))
 
         then:
-        response.andExpect(status().isNotImplemented())
+        response.andExpect(status().isBadRequest())
         def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
         jsonResponse['message'].contains 'Technical exception'
     }

@@ -44,6 +44,12 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     private String className;
 
     /**
+     * when true then does it mean that this meta model
+     * is like generic enum metamodel
+     */
+    private Boolean isGenericEnumType;
+
+    /**
      * When true then it means that this metamodel is used for simple, raw field like number, enum, text.
      */
     private Boolean simpleRawClass;

@@ -4,7 +4,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 import static pl.jalokim.crudwizard.core.exception.handler.ErrorWithMessagePlaceholderMapper.convertToErrorsDto;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.hasPlaceholderFormat;
 
@@ -51,7 +50,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(TechnicalException.class)
-    @ResponseStatus(NOT_IMPLEMENTED)
+    @ResponseStatus(BAD_REQUEST)
     @ResponseBody
     public ErrorResponseDto handleTechnicalException(TechnicalException ex) {
         log.warn(EXCEPTION_HANDLED_MESSAGE, ex);

@@ -11,7 +11,7 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
-import pl.jalokim.crudwizard.genericapp.metamodel.validation.javax.ClassExists
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
@@ -34,7 +34,7 @@ class ServiceMetaModelDtoValidationTest extends UnitTestSpec {
         createValidServiceMetaModelDto().toBuilder()
             .className("not.exist.class")
             .build()                             | [
-            errorEntry("className", messageForValidator(ClassExists, "typeOfClass", Object.canonicalName))
+            errorEntry("className", messageForValidator(ClassExists, "expectedOfType", Object.canonicalName))
         ]
         createValidServiceMetaModelDtoAsScript() | []
         createValidServiceMetaModelDtoAsScript()

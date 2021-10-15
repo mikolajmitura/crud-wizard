@@ -164,7 +164,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
     private static boolean foundValidatorPlaceholder(List<AdditionalPropertyEntity> additionalProperties, String name, Long value) {
         additionalProperties.find {
-            it.name == PLACEHOLDER_PREFIX + name && it.jsonValue == value.toString()
+            it.name == PLACEHOLDER_PREFIX + name && it.rawJson == value.toString()
         } != null
     }
 
