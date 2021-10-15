@@ -141,7 +141,7 @@ public class DefaultBeansConfigService {
                 AdditionalPropertyDto.builder()
                     .name(propertyName)
                     .valueRealClassName(valueRealClass.getCanonicalName())
-                    .value(configValue)
+                    .valueAsObject(configValue)
                     .build()
             )
         );

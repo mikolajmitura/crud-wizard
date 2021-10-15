@@ -27,14 +27,16 @@ class RawEntityObjectSamples {
             age                : 12,
             addresses          : [
                 [
-                    street  : "mainStreet",
-                    houseNr : "12/1",
-                    someEnum: "enum1"
+                    street    : "mainStreet",
+                    houseNr   : "12/1",
+                    someEnum  : "enum1",
+                    customEnum: "ENUM1"
                 ],
                 [
-                    street  : "second Street",
-                    houseNr : "15",
-                    someEnum: "enum2"
+                    street    : "second Street",
+                    houseNr   : "15",
+                    someEnum  : "enum2",
+                    customEnum: "ENUM2"
                 ]
             ],
             hobbies            : ["sport", "music"],
@@ -71,12 +73,14 @@ class RawEntityObjectSamples {
                 [
                     street  : "mainStreet",
                     houseNr : "12/1",
-                    someEnum: ExampleEnum.ENUM1
+                    someEnum: ExampleEnum.ENUM1,
+                    customEnum: "ENUM1"
                 ],
                 [
                     street  : "second Street",
                     houseNr : "15",
-                    someEnum: ExampleEnum.ENUM2
+                    someEnum: ExampleEnum.ENUM2,
+                    customEnum: "ENUM2"
                 ]
             ],
             hobbies            : ["sport", "music"] as Set,

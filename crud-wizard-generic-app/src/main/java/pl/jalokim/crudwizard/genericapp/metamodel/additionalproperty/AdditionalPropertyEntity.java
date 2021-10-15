@@ -28,5 +28,5 @@ public class AdditionalPropertyEntity {
 
     private String name;
     private String valueRealClassName;
-    private String jsonValue;
+    private String rawJson;
 }

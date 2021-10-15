@@ -226,6 +226,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         createValidPutEndpointMetaModelDto().toBuilder()
             .pathParams(ClassMetaModelDto.builder()
                 .name(randomText())
+                .isGenericEnumType(false)
                 .fields([
                     createValidFieldMetaModelDto("basePath", Double),
                     FieldMetaModelDto.builder()

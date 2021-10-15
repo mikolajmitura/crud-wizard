@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.validation.javax.ClassExists;
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 
 @EqualsAndHashCode(callSuper = true)
@@ -21,7 +21,7 @@ public class ValidatorMetaModelDto extends AdditionalPropertyMetaModelDto {
     Long id;
 
     @NotNull
-    @ClassExists(typeOfClass = DataValidator.class)
+    @ClassExists(expectedOfType = DataValidator.class)
     String className;
 
     String validatorName;

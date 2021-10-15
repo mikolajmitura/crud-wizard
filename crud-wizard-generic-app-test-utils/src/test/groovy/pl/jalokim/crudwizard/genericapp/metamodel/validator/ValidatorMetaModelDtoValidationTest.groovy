@@ -7,7 +7,7 @@ import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssert
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator
-import pl.jalokim.crudwizard.genericapp.metamodel.validation.javax.ClassExists
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
@@ -33,7 +33,7 @@ class ValidatorMetaModelDtoValidationTest extends UnitTestSpec {
         createValidValidatorMetaModelDto().toBuilder()
             .className("not.exist")
             .build()                       | [
-            errorEntry("className", messageForValidator(ClassExists, "typeOfClass", DataValidator.canonicalName))
+            errorEntry("className", messageForValidator(ClassExists, "expectedOfType", DataValidator.canonicalName))
         ]
 
         createValidValidatorMetaModelDto().toBuilder()
@@ -43,7 +43,7 @@ class ValidatorMetaModelDtoValidationTest extends UnitTestSpec {
         createValidValidatorMetaModelDto().toBuilder()
             .className(BaseConstraintValidator.canonicalName)
             .build()                       | [
-            errorEntry("className", messageForValidator(ClassExists, "typeOfClass", DataValidator.canonicalName))
+            errorEntry("className", messageForValidator(ClassExists, "expectedOfType", DataValidator.canonicalName))
         ]
     }
 }

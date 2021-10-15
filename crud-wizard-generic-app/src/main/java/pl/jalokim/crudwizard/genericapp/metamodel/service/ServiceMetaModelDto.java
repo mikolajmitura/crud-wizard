@@ -11,8 +11,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
-import pl.jalokim.crudwizard.genericapp.metamodel.validation.javax.ClassExists;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

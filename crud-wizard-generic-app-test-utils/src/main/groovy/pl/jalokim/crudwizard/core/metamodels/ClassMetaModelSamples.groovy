@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.core.metamodels
 
+import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX
+
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -32,6 +34,15 @@ class ClassMetaModelSamples {
             .build()
     }
 
+    static ClassMetaModel createValidEnumMetaModel(String name, String... enumValues) {
+        ClassMetaModel enumMetaModel = ClassMetaModel.builder()
+            .name(name)
+            .build()
+            .addProperty(ENUM_VALUES_PREFIX, enumValues)
+        enumMetaModel.setEnumClassMetaModel(new EnumClassMetaModel(enumMetaModel))
+        enumMetaModel
+    }
+
     static ClassMetaModel createRequestBodyClassMetaModel() {
         ClassMetaModel.builder()
             .name("somePersonApplication")
@@ -56,6 +67,7 @@ class ClassMetaModelSamples {
                                 createValidFieldMetaModel("street", String),
                                 createValidFieldMetaModel("houseNr", String, [ValidatorMetaModelSamples.NOT_NULL_VALIDATOR_METAMODEL]),
                                 createValidFieldMetaModel("someEnum", ExampleEnum),
+                                createValidFieldMetaModel("customEnum", createValidEnumMetaModel("customEnumType", "ENUM1", "ENUM2"))
                             ])
                             .build()
                     ])

@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.core.config.jackson;
 
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getClassForName;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +9,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.OffsetDateTime;
+import java.util.concurrent.atomic.AtomicReference;
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -14,6 +18,8 @@ import org.springframework.data.domain.Page;
 
 @Configuration
 public class ObjectMapperConfig {
+
+    public static final AtomicReference<ObjectMapper> OBJECT_MAPPER_INSTANCE_REF = new AtomicReference<>(createObjectMapper());
 
     public static ObjectMapper createObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -39,6 +45,25 @@ public class ObjectMapperConfig {
     @Bean
     @Primary
     public ObjectMapper serializingObjectMapper() {
-        return createObjectMapper();
+        return OBJECT_MAPPER_INSTANCE_REF.get();
+    }
+
+    public static ObjectMapper getInstance() {
+        return OBJECT_MAPPER_INSTANCE_REF.get();
+    }
+
+    @SneakyThrows
+    public static Object rawJsonToObject(String rawJson, String realClassName) {
+        return rawJsonToObject(rawJson, getClassForName(realClassName));
+    }
+
+    @SneakyThrows
+    public static Object rawJsonToObject(String rawJson, Class<?> realClass) {
+        return ObjectMapperConfig.getInstance().readValue(rawJson, realClass);
+    }
+
+    @SneakyThrows
+    public static String objectToRawJson(Object valueAsObject) {
+        return ObjectMapperConfig.getInstance().writeValueAsString(valueAsObject);
     }
 }

@@ -1,12 +1,13 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getClassForName;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
-import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
 public abstract class RawAdditionalPropertyMapper {
@@ -21,7 +22,8 @@ public abstract class RawAdditionalPropertyMapper {
             .id(additionalPropertyEntity.getId())
             .name(additionalPropertyEntity.getName())
             .valueRealClassName(valueRealClassName)
-            .value(objectMapper.readValue(additionalPropertyEntity.getJsonValue(), MetadataReflectionUtils.getClassForName(valueRealClassName)))
+            .rawJson(additionalPropertyEntity.getRawJson())
+            .valueAsObject(objectMapper.readValue(additionalPropertyEntity.getRawJson(), getClassForName(valueRealClassName)))
             .build();
     }
 
@@ -32,7 +34,7 @@ public abstract class RawAdditionalPropertyMapper {
             .id(additionalPropertyDto.getId())
             .name(additionalPropertyDto.getName())
             .valueRealClassName(valueRealClassName)
-            .jsonValue(objectMapper.writeValueAsString(additionalPropertyDto.getValue()))
+            .rawJson(objectMapper.writeValueAsString(additionalPropertyDto.getRealValue()))
             .build();
     }
 }

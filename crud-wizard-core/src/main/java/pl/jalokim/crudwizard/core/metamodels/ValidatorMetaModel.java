@@ -37,7 +37,7 @@ public class ValidatorMetaModel extends AdditionalPropertyMetaModelDto {
         for (AdditionalPropertyDto additionalProperty : getAdditionalProperties()) {
             if (additionalProperty.getName().startsWith(PLACEHOLDER_PREFIX)) {
                 placeholders.put(additionalProperty.getName().replaceFirst(PLACEHOLDER_PREFIX, ""),
-                    additionalProperty.getValue()
+                    additionalProperty.getRealValue()
                 );
             }
         }

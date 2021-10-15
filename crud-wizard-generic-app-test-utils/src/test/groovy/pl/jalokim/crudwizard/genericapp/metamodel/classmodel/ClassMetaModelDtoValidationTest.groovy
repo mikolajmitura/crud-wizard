@@ -1,12 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
+import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
-import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EMPTY
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEmptyClassMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEnumMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithClassName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createEmptyValidatorMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
 import static pl.jalokim.utils.test.DataFakerHelper.randomLong
@@ -35,38 +38,62 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
         assertValidationResults(foundErrors, expectedErrors)
 
         where:
-        classMetaModelDto                           | expectedErrors
-        createValidClassMetaModelDtoWithName()      | []
-        createValidClassMetaModelDtoWithClassName() | []
-        createEmptyClassMetaModelDto()              | [errorEntry("name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))]
+        classMetaModelDto                                 | expectedErrors
+        createValidClassMetaModelDtoWithName()            | []
+
+        createValidEnumMetaModel()                        | []
+
+        createEnumMetaModel()                             | [
+            errorEntry("", getMessage("EnumValuesInAdditionalProperties.invalid.enumvalues.invalidSize")),
+        ]
+
+        createEnumMetaModel("VaLID_ENUM", "Invalid enum") | [
+            errorEntry("", getMessage("EnumValuesInAdditionalProperties.invalid.at.index", 1)),
+        ]
+
+        createValidEnumMetaModel().toBuilder().build()
+            .updateProperty(ENUM_VALUES_PREFIX, 1L)       | [
+            errorEntry("", getMessage("EnumValuesInAdditionalProperties.invalid.enumvalues.class")),
+        ]
+
+        createValidClassMetaModelDtoWithClassName()       | []
+
+        createEmptyClassMetaModelDto()                    | [
+            errorEntry("name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))
+        ]
+
         createValidClassMetaModelDtoWithClassName()
             .toBuilder()
             .name(randomText())
-            .build()                                | [
+            .build()                                      | [
             errorEntry("name", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
-            errorEntry("className", fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, [])),
-            errorEntry("fields", fieldShouldWhenOtherMessage(NOT_EMPTY, [], "name", NOT_NULL, []))
+            errorEntry("className", fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, []))
         ]
+
         createValidClassMetaModelDtoWithClassName()
             .toBuilder()
             .fields([FieldMetaModelDto.builder().build()])
-            .build()                                | [
-            errorEntry("fields", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
+            .build()                                      | [
             errorEntry("fields[0].fieldName", notNullMessage()),
             errorEntry("fields[0].fieldType", notNullMessage())
         ]
+
         createValidClassMetaModelDtoWithName().toBuilder()
-            .genericTypes([createEmptyClassMetaModelDto()])
+            .genericTypes([createEmptyClassMetaModelDto().toBuilder()
+                               .isGenericEnumType(null)
+                               .build()])
             .validators([createEmptyValidatorMetaModelDto()])
-            .build()                                | [
+            .build()                                      | [
             errorEntry("genericTypes", fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, [])),
+            errorEntry("genericTypes[0].isGenericEnumType", notNullMessage()),
             errorEntry("genericTypes[0].name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])),
             errorEntry("validators[0].className", notNullMessage())
         ]
+
         createValidClassMetaModelDtoWithClassName().toBuilder()
             .extendsFromModels([createEmptyClassMetaModelDto()])
             .validators([createValidValidatorMetaModelDto()])
-            .build()                                | [
+            .build()                                      | [
             errorEntry("extendsFromModels", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
             errorEntry("extendsFromModels[0].name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))
         ]

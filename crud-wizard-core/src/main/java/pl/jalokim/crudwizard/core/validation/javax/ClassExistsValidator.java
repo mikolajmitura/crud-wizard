@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.validation.javax;
+package pl.jalokim.crudwizard.core.validation.javax;
 
 import javax.validation.ConstraintValidatorContext;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
@@ -11,13 +11,13 @@ public class ClassExistsValidator implements BaseConstraintValidatorWithDynamicM
 
     @Override
     public void initialize(ClassExists constraintAnnotation) {
-        expectedClassType = constraintAnnotation.typeOfClass();
+        expectedClassType = constraintAnnotation.expectedOfType();
     }
 
     @Override
     public boolean isValidValue(String className, ConstraintValidatorContext context) {
         try {
-            addMessageParameter(context, "typeOfClass", expectedClassType.getCanonicalName());
+            addMessageParameter(context, "expectedOfType", expectedClassType.getCanonicalName());
             Class<?> realClass = ClassUtils.loadRealClass(className);
             return MetadataReflectionUtils.isTypeOf(realClass, expectedClassType);
         } catch (Exception ex) {

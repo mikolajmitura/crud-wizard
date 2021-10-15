@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
+import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
@@ -14,6 +15,7 @@ class ClassMetaModelDtoSamples {
     static ClassMetaModelDto simplePersonClassMetaModel() {
         ClassMetaModelDto.builder()
             .name("person")
+            .isGenericEnumType(false)
             .fields([
                 createValidFieldMetaModelDto("id", Long),
                 createValidFieldMetaModelDto("name", String),
@@ -33,6 +35,7 @@ class ClassMetaModelDtoSamples {
                     .fields([
                         createValidFieldMetaModelDto("id", Long),
                         createValidFieldMetaModelDto("type", Byte),
+                        createValidFieldMetaModelDto("enumField", createEnumMetaModel("ENUM1", "ENUM2")),
                         createValidFieldMetaModelDto("value", String, [
                             createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL),
                             createValidValidatorMetaModelDto(SizeValidator, SizeValidator.VALIDATOR_KEY_SIZE, [min: 5, max: 25])
@@ -46,6 +49,22 @@ class ClassMetaModelDtoSamples {
         personMetaModel
     }
 
+    static ClassMetaModelDto createValidEnumMetaModel() {
+        ClassMetaModelDto.builder()
+            .name("exampleEnum")
+            .isGenericEnumType(true)
+            .build()
+            .addProperty(ENUM_VALUES_PREFIX, ["VALUE_1", "VALUE_2"] as String[])
+    }
+
+    static ClassMetaModelDto createEnumMetaModel(String... enumValues) {
+        ClassMetaModelDto.builder()
+            .name("exampleEnum")
+            .isGenericEnumType(true)
+            .build()
+            .addProperty(ENUM_VALUES_PREFIX, enumValues)
+    }
+
     private static ClassMetaModelDto createListWithMetaModel(ClassMetaModelDto classMetaModelDto) {
         ClassMetaModelDto.builder()
             .className(List.canonicalName)
@@ -57,23 +76,27 @@ class ClassMetaModelDtoSamples {
         ClassMetaModelDto.builder()
             .name(randomText())
             .fields([createValidFieldMetaModelDto()])
+            .isGenericEnumType(false)
             .build()
     }
 
     static ClassMetaModelDto createValidClassMetaModelDtoWithClassName() {
         ClassMetaModelDto.builder()
             .className(String.canonicalName)
+            .isGenericEnumType(false)
             .build()
     }
 
     static ClassMetaModelDto createClassMetaModelDtoFromClass(Class<?> metaModelClass) {
         ClassMetaModelDto.builder()
             .className(metaModelClass.canonicalName)
+            .isGenericEnumType(false)
             .build()
     }
 
     static ClassMetaModelDto createEmptyClassMetaModelDto() {
         ClassMetaModelDto.builder()
+            .isGenericEnumType(false)
             .build()
     }
 

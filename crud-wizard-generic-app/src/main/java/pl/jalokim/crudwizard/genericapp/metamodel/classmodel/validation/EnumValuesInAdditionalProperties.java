@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.validation.javax;
+package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -8,17 +8,15 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-@Target({ElementType.FIELD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = ClassExistsValidator.class)
-public @interface ClassExists {
+@Constraint(validatedBy = EnumValuesInAdditionalPropertiesValidator.class)
+public @interface EnumValuesInAdditionalProperties {
 
     String message() default "";
 
     Class<?>[] groups() default {};
-
-    Class<?> typeOfClass() default Object.class;
 
     Class<? extends Payload>[] payload() default {};
 }
