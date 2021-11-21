@@ -21,11 +21,13 @@ import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderInstanceCache;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService;
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @MetamodelService
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class MetaModelContextService implements ApplicationRunner {
     private final ServiceMetaModelService serviceMetaModelService;
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
     private final EndpointMetaModelService endpointMetaModelService;
+    private final QueryProviderInstanceCache queryProviderInstanceCache;
 
     // TODO test it with few scenarios
     // some endpoint with another data storage.
@@ -64,11 +67,17 @@ public class MetaModelContextService implements ApplicationRunner {
         loadClassMetaModels(metaModelContext);
         loadMapperMetaModels(metaModelContext);
         loadServiceMetaModels(metaModelContext);
+        loadDefaultQueryProvider(metaModelContext);
         loadDefaultDataStorageConnectorsMetaModel(metaModelContext);
         loadEndpointMetaModels(metaModelContext);
         loadEndpointNodes(metaModelContext);
         metaModelContextReference.set(metaModelContext);
         log.info("Reloaded meta model context");
+    }
+
+    private void loadDefaultQueryProvider(MetaModelContext metaModelContext) {
+        String queryProviderClassName = defaultBeansService.getDefaultQueryProviderClassName();
+        metaModelContext.setDefaultDataStorageQueryProvider(queryProviderInstanceCache.loadQueryProvider(queryProviderClassName));
     }
 
     private void loadDataStorages(MetaModelContext metaModelContext) {

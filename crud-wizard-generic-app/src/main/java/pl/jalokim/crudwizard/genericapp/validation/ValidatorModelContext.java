@@ -24,7 +24,7 @@ public class ValidatorModelContext {
 
     public ValidatorModelContext(ValidatorMetaModel currentValidatorMetaModel, ClassMetaModel validatedClassMetaModel, PropertyPath currentPath) {
         this.currentValidatorMetaModel = currentValidatorMetaModel;
-        this.messagePlaceholders = currentValidatorMetaModel.getMessagePlaceholders();
+        this.messagePlaceholders = currentValidatorMetaModel.fetchMessagePlaceholders();
         this.currentPath = currentPath;
         this.validatedClassMetaModel = validatedClassMetaModel;
     }

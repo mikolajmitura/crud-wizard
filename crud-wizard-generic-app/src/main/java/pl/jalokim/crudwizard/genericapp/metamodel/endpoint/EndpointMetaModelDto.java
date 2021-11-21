@@ -22,6 +22,8 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
@@ -75,10 +77,14 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
     @Valid
     ServiceMetaModelDto serviceMetaModel;
 
+    Boolean invokeValidation;
+
     @Valid
     EndpointResponseMetaModelDto responseMetaModel;
 
     List<@Valid DataStorageConnectorMetaModelDto> dataStorageConnectors;
+
+    List<@Valid DataStorageResultsJoinerDto> dataStorageResultsJoiners;
 
     @Builder.Default
     List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();

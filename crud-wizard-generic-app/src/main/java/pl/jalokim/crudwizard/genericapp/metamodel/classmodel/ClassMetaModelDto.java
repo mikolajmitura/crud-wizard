@@ -66,6 +66,11 @@ public class ClassMetaModelDto extends AdditionalPropertyMetaModelDto {
     @Builder.Default
     Boolean isGenericEnumType = false;
 
+    /**
+     * Only for read only. This value is set
+     */
+    Boolean simpleRawClass;
+
     List<@Valid ClassMetaModelDto> genericTypes;
 
     List<@Valid FieldMetaModelDto> fields;

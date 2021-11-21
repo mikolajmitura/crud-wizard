@@ -14,8 +14,10 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAddition
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntityRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
@@ -29,6 +31,7 @@ public class DefaultBeansConfigService {
     private static final String DEFAULT_DATA_STORAGE_ID = "default-data-storage-id";
     private static final String DEFAULT_GENERIC_MAPPER_ID = "default-generic-mapper-id";
     private static final String DEFAULT_GENERIC_SERVICE_ID = "default-data-service-id";
+    private static final String DEFAULT_QUERY_PROVIDER_CLASS_NAME = "default-query-provider-class-name";
     private static final String DEFAULT_DATA_STORAGE_CONNECTORS_ID = "default-data-storage-connectors-id";
 
     private final List<DataStorage> dataStorages;
@@ -54,6 +57,7 @@ public class DefaultBeansConfigService {
     public void saveAllDefaultMetaModels() {
         saveDefaultsDataStorage();
         saveDefaultsGenericMapper();
+        saveDefaultQueryProvider();
         saveDefaultDataStorageConnectors();
         saveDefaultGenericService();
     }
@@ -103,6 +107,9 @@ public class DefaultBeansConfigService {
                     .dataStorageMetaModel(dataStorageMetaModelRepository.getOne(getDefaultDataStorageId()))
                     .mapperMetaModelForQuery(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))
                     .mapperMetaModelForReturn(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))
+                    .queryProvider(QueryProviderEntity.builder()
+                        .className(getDefaultQueryProviderClassName())
+                        .build())
                     .build())
                     .getId()
             };
@@ -130,6 +137,13 @@ public class DefaultBeansConfigService {
                 }
             )
         );
+    }
+
+    private void saveDefaultQueryProvider() {
+        String defaultQueryProviderClassName = getDefaultQueryProviderClassName();
+        if (defaultQueryProviderClassName == null) {
+            saveNewConfiguration(DEFAULT_QUERY_PROVIDER_CLASS_NAME, DefaultDataStorageQueryProvider.class.getCanonicalName(), String.class);
+        }
     }
 
     private void saveNewConfiguration(String propertyName, Object configValue) {
@@ -164,6 +178,10 @@ public class DefaultBeansConfigService {
 
     public Long getDefaultGenericServiceId() {
         return getConfigForDefault(DEFAULT_GENERIC_SERVICE_ID, Long.class);
+    }
+
+    public String getDefaultQueryProviderClassName() {
+        return getConfigForDefault(DEFAULT_QUERY_PROVIDER_CLASS_NAME, String.class);
     }
 
     @SuppressWarnings("unchecked")

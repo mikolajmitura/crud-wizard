@@ -61,7 +61,7 @@ public class EndpointMetaModelContextNodeUtils {
         var pathParamsMap = new HashMap<String, Object>();
         List<FieldMetaModel> pathParamFields = ofNullable(foundEndpoint)
             .map(endpointMeta -> ofNullable(endpointMeta.getPathParams())
-                .map(ClassMetaModel::getAllFields)
+                .map(ClassMetaModel::fetchAllFields)
                 .orElse(List.of()))
             .orElse(List.of());
 

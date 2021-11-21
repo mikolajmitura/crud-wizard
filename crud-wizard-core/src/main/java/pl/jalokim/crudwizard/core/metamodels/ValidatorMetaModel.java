@@ -37,7 +37,7 @@ public class ValidatorMetaModel extends AdditionalPropertyMetaModelDto {
     @Builder.Default
     List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
-    public Map<String, Object> getMessagePlaceholders() {
+    public Map<String, Object> fetchMessagePlaceholders() {
         Map<String, Object> placeholders = new HashMap<>();
         for (AdditionalPropertyDto additionalProperty : getAdditionalProperties()) {
             if (additionalProperty.getName().startsWith(PLACEHOLDER_PREFIX)) {

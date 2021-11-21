@@ -43,7 +43,7 @@ public class InMemoryDataStorage implements DataStorage {
             entitiesByName.put(classMetaModel.getName(), entityBag);
         }
 
-        FieldMetaModel fieldWithId = elements(classMetaModel.getAllFields())
+        FieldMetaModel fieldWithId = elements(classMetaModel.fetchAllFields())
             .filter(field -> field.getAdditionalProperties().stream()
                 .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
             .findFirst()

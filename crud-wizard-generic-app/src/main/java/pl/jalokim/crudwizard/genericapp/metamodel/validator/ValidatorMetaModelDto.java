@@ -28,6 +28,7 @@ public class ValidatorMetaModelDto extends AdditionalPropertyMetaModelDto {
     String className;
 
     String validatorName;
+    String validatorScript;
 
     Boolean parametrized;
     String namePlaceholder;

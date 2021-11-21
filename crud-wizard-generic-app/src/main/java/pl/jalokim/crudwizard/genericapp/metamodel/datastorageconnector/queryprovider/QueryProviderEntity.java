@@ -1,12 +1,9 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
+package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,8 +18,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditio
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "mapper_meta_models")
-public class MapperMetaModelEntity  extends WithAdditionalPropertiesEntity {
+public class QueryProviderEntity extends WithAdditionalPropertiesEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,9 +26,5 @@ public class MapperMetaModelEntity  extends WithAdditionalPropertiesEntity {
 
     private String className;
 
-    private String beanName;
-
-    private String methodName;
-
-    private String mapperScript;
+    private String rawQueryCode;
 }

@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.service;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -39,8 +40,10 @@ public class GenericServiceDelegator {
             .build();
 
         genericValidator.validate(newGenericServiceArgument.getHttpQueryTranslated(), foundEndpoint.getQueryArguments());
-        genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated().getRealValue(),
-            foundEndpoint.getPayloadMetamodel(), foundEndpoint.getPayloadMetamodelAdditionalValidators());
+        if (Optional.ofNullable(foundEndpoint.getInvokeValidation()).orElse(true)) {
+            genericValidator.validate(newGenericServiceArgument.getRequestBodyTranslated().getRealValue(),
+                foundEndpoint.getPayloadMetamodel(), foundEndpoint.getPayloadMetamodelAdditionalValidators());
+        }
 
         ResponseEntity<Object> methodInvocationResult = delegatedServiceMethodInvoker.callMethod(newGenericServiceArgument);
         validationContext.throwExceptionWhenErrorsOccurred();

@@ -4,6 +4,7 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.Optional;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
@@ -18,6 +19,11 @@ public abstract class ValidatorMetaModelMapper
     @Autowired
     private ValidatorInstanceCache validatorInstanceCache;
 
+    @Override
+    @Mapping(target = "realClass", ignore = true)
+    @Mapping(target = "validatorInstance", ignore = true)
+    public abstract ValidatorMetaModel toMetaModel(ValidatorMetaModelEntity entity);
+
     public ValidatorMetaModel toFullMetaModel(ValidatorMetaModelEntity entity) {
         DataValidator<?> dataValidatorInstance = validatorInstanceCache.loadInstance(entity.getClassName());
 
@@ -30,6 +36,7 @@ public abstract class ValidatorMetaModelMapper
             .build();
 
 
+        // TODO remove all mapping in other mappers like below should be that work out of the box
         validatorMetaModel.getAdditionalProperties().addAll(
             elements(entity.getAdditionalProperties())
                 .map(this::additionalPropertyToDto)

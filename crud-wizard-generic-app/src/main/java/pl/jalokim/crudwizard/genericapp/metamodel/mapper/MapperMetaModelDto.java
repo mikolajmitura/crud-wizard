@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
-import pl.jalokim.crudwizard.core.metamodels.MappingDirection;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
 @EqualsAndHashCode(callSuper = true)
@@ -42,8 +41,6 @@ public class MapperMetaModelDto extends AdditionalPropertyMetaModelDto {
     String beanName;
     String methodName;
     String mapperScript;
-    @NotNull
-    MappingDirection mappingDirection;
 
     @Builder.Default
     List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();

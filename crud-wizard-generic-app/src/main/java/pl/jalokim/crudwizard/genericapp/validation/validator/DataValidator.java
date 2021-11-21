@@ -32,7 +32,7 @@ public interface DataValidator<T> {
     }
 
     default Map<String, Object> messagePlaceholderArgs(ValidationSessionContext validationContext) {
-        return validationContext.getValidatorModelContext().getMessagePlaceholders();
+        return validationContext.getValidatorModelContext().fetchMessagePlaceholders();
     }
 
     static String formatPlaceholderFor(Class<?> type) {

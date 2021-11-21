@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 
 import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
@@ -15,6 +16,10 @@ public abstract class DataStorageMetaModelMapper
 
     @Autowired
     private List<DataStorage> dataStorages;
+
+    @Override
+    @Mapping(target = "dataStorage", ignore = true)
+    public abstract DataStorageMetaModel toMetaModel(DataStorageMetaModelEntity entity);
 
     public DataStorageMetaModel toFullMetaModel(DataStorageMetaModelEntity entity) {
         return toMetaModel(entity)
