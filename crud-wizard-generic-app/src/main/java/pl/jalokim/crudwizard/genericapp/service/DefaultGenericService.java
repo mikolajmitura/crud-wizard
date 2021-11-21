@@ -94,12 +94,12 @@ public class DefaultGenericService {
             }
         } else if (httpMethod.equals(HttpMethod.GET)) {
             Class<?> responseRealClass = responseClassMetaModel.getRealClass();
-            ClassMetaModel elementTypeInCollection = responseClassMetaModel.getGenericTypes().get(0);
             if (responseRealClass != null) {
                 if (isTypeOf(responseRealClass, Page.class)) {
                     // TODO #37 return collection when request params cannot be mapped to Pageable
                 } else if (isTypeOf(responseRealClass, Collection.class)) {
                     // TODO #37 return Page or collection when request params can be mapped to Pageable
+                    ClassMetaModel elementTypeInCollection = responseClassMetaModel.getGenericTypes().get(0);
                     Map<String, List<Object>> queriesResults = new HashMap<>();
                     DataStorageQueryArguments dataStorageQueryArguments = DataStorageQueryArguments.builder()
                         .headers(genericServiceArgument.getHeaders())

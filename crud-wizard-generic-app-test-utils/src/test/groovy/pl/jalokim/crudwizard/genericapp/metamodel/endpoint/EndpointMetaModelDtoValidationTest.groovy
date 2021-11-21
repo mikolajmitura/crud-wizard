@@ -207,7 +207,6 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "beanName", NOT_NULL, [])),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "methodName", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mappingDirection", notNullMessage()),
             errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])),
         ]
 

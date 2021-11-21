@@ -159,7 +159,6 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
                 beanName == "genericMapperBean"
                 methodName == "mapToTarget"
                 methodMetaModel.name == "mapToTarget"
-                mappingDirection == null
                 mapperScript == null
             }
 

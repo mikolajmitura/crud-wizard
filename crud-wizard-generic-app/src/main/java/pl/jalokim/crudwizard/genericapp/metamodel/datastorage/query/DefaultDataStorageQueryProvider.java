@@ -10,9 +10,6 @@ import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 @Value
 public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider {
 
-    Map<String, Object> queryArguments;
-    ClassMetaModel queryClassMetaModel;
-
     @Override
     public DataStorageQuery createQuery(DataStorageQueryArguments dataStorageQueryArguments, ClassMetaModel classMetaModelFromDataStore) {
         // TODO #37 fetch all not null values from requestParams make as likeignorecase
@@ -21,6 +18,8 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
         Map<String, Object> requestParams = dataStorageQueryArguments.getRequestParams();
         ClassMetaModel requestParamsClassMetaModel = dataStorageQueryArguments.getRequestParamsClassMetaModel();
 
-        return null;
+        return DataStorageQuery.builder()
+            .selectFrom(classMetaModelFromDataStore)
+            .build();
     }
 }
