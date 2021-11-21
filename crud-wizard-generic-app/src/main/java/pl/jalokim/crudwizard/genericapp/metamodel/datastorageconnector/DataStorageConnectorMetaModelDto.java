@@ -14,6 +14,7 @@ import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 
 @Data
@@ -38,4 +39,6 @@ public class DataStorageConnectorMetaModelDto extends AdditionalPropertyMetaMode
     List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     String nameOfQuery;
+
+    QueryProviderDto queryProvider;
 }

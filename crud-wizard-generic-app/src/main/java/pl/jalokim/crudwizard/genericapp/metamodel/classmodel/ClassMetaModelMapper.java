@@ -9,16 +9,12 @@ import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
-import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
-import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity;
 
-@Mapper(config = MapperAsSpringBeanConfig.class, uses = RawAdditionalPropertyMapper.class)
-public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
+@Mapper(config = MapperAsSpringBeanConfig.class)
+public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
     @Autowired
     private FieldMetaModelMapper fieldMetaModelMapper;

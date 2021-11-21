@@ -45,6 +45,7 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
     @Mapping(target = "apiTag", ignore = true)
     @Mapping(target = "payloadMetamodel", ignore = true)
     @Mapping(target = "queryArguments", ignore = true)
+    @Mapping(target = "pathParams", ignore = true)
     @Mapping(target = "serviceMetaModel", ignore = true)
     @Mapping(target = "responseMetaModel", ignore = true)
     @Mapping(target = "payloadMetamodelAdditionalValidators", ignore = true)
