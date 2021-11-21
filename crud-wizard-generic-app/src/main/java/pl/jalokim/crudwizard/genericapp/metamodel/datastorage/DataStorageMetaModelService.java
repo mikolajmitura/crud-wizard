@@ -3,27 +3,31 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 
 @MetamodelService
-@AllArgsConstructor
-public class DataStorageMetaModelService {
+public class DataStorageMetaModelService extends BaseService<DataStorageMetaModelEntity, DataStorageMetaModelRepository> {
 
     private final DataStorageMetaModelMapper dataStorageMetaModelMapper;
-    private final DataStorageMetaModelRepository dataStorageMetaModelRepository;
+
+    public DataStorageMetaModelService(DataStorageMetaModelRepository repository,
+        DataStorageMetaModelMapper dataStorageMetaModelMapper) {
+        super(repository);
+        this.dataStorageMetaModelMapper = dataStorageMetaModelMapper;
+    }
 
     public List<DataStorageMetaModel> findAllMetaModels() {
-        return mapToList(dataStorageMetaModelRepository.findAll(), dataStorageMetaModelMapper::toFullMetaModel);
+        return mapToList(repository.findAll(), dataStorageMetaModelMapper::toFullMetaModel);
     }
 
     public Long createNewAndGetId(DataStorageMetaModelDto dataStorageMetaModel) {
-        return dataStorageMetaModelRepository.persist(dataStorageMetaModelMapper.toEntity(dataStorageMetaModel))
+        return repository.save(dataStorageMetaModelMapper.toEntity(dataStorageMetaModel))
             .getId();
     }
 
     public boolean exists(DataStorageMetaModelDto dataStorageMetaModel) {
-        return dataStorageMetaModelRepository.existsByNameAndClassName(dataStorageMetaModel.getName(), dataStorageMetaModel.getClassName());
+        return repository.existsByNameAndClassName(dataStorageMetaModel.getName(), dataStorageMetaModel.getClassName());
     }
 }

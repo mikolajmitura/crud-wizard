@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,4 +32,6 @@ public class ServiceMetaModel extends AdditionalPropertyMetaModelDto {
     // TODO script will be loaded to serviceInstance in lazy way and cached then
     String serviceScript;
 
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

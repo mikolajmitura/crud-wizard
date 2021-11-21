@@ -31,7 +31,7 @@ public class ValidatorMetaModelService {
 
     private ValidatorMetaModelEntity findOrSaveNew(ValidatorMetaModelEntity validatorMetaModelEntity) {
         if (validatorMetaModelEntity.getParametrized()) {
-            return validatorMetaModelRepository.persist(validatorMetaModelEntity);
+            return validatorMetaModelRepository.save(validatorMetaModelEntity);
         }
 
         if (validatorMetaModelEntity.getClassName() != null) {
@@ -40,14 +40,14 @@ public class ValidatorMetaModelService {
                 .orElseGet(() -> {
                     DataValidator<?> dataValidator = validatorInstanceCache.loadInstance(validatorMetaModelEntity.getClassName());
                     validatorMetaModelEntity.setValidatorName(dataValidator.validatorName());
-                    return validatorMetaModelRepository.persist(validatorMetaModelEntity);
+                    return validatorMetaModelRepository.save(validatorMetaModelEntity);
                 });
         }
 
         if (validatorMetaModelEntity.getValidatorName() != null) {
             return validatorMetaModelRepository
                 .findByValidatorName(validatorMetaModelEntity.getValidatorName())
-                .orElseGet(() -> validatorMetaModelRepository.persist(validatorMetaModelEntity));
+                .orElseGet(() -> validatorMetaModelRepository.save(validatorMetaModelEntity));
         }
         throw new IllegalArgumentException("Cannot save validator metamodel without validator name or class name");
     }

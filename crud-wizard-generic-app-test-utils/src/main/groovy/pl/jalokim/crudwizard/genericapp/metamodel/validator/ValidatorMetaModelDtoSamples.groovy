@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.validator
 
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator
+import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 
 class ValidatorMetaModelDtoSamples {
 
@@ -31,5 +32,9 @@ class ValidatorMetaModelDtoSamples {
     static ValidatorMetaModelDto createEmptyValidatorMetaModelDto() {
         ValidatorMetaModelDto.builder()
             .build()
+    }
+
+    static ValidatorMetaModelDto notNullValidatorMetaModelDto() {
+        createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL)
     }
 }

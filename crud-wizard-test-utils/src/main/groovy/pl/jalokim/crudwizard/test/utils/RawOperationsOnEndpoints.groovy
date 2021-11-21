@@ -51,7 +51,12 @@ class RawOperationsOnEndpoints implements EndpointActions {
     }
 
     void putPayload(String url, Object payload) {
-        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.post(url), payload)
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.put(url), payload)
+        httpResponse.andExpect(status().isNoContent())
+    }
+
+    void delete(String url) {
+        def httpResponse = perform(MockMvcRequestBuilders.delete(url))
         httpResponse.andExpect(status().isNoContent())
     }
 

@@ -13,6 +13,7 @@ public class AdditionalPropertyService {
     private static final AtomicReference<AdditionalPropertyService> INSTANCE = new AtomicReference<>();
 
     private final AdditionalPropertyRepository additionalPropertyRepository;
+    private final RawWithAdditionalPropertiesCustomRepository rawWithAdditionalPropertiesCustomRepository;
 
     @PostConstruct
     public void postConstruct() {
@@ -23,6 +24,10 @@ public class AdditionalPropertyService {
         return additionalPropertyRepository.findByOwnerIdAndOwnerClass(
             withAdditionalPropertiesEntity.getId(),
             withAdditionalPropertiesEntity.getClass().getSimpleName());
+    }
+
+    public void persist(WithAdditionalPropertiesEntity withAdditionalPropertiesEntity) {
+        rawWithAdditionalPropertiesCustomRepository.persist(withAdditionalPropertiesEntity);
     }
 
     public static AdditionalPropertyService getInstance() {

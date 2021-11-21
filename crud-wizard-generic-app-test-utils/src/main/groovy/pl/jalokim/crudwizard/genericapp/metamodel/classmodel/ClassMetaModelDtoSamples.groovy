@@ -5,6 +5,8 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMeta
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
+import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
@@ -17,7 +19,7 @@ class ClassMetaModelDtoSamples {
             .name("person")
             .isGenericEnumType(false)
             .fields([
-                createValidFieldMetaModelDto("id", Long),
+                createValidFieldMetaModelDto("id", Long, [], [isIdFieldType()]),
                 createValidFieldMetaModelDto("name", String),
                 createValidFieldMetaModelDto("surname", String),
                 createValidFieldMetaModelDto("birthDate", LocalDate),
@@ -33,7 +35,7 @@ class ClassMetaModelDtoSamples {
                     .name("document")
                     .validators([createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL)])
                     .fields([
-                        createValidFieldMetaModelDto("id", Long),
+                        createValidFieldMetaModelDto("id", Long, [], [isIdFieldType()]),
                         createValidFieldMetaModelDto("type", Byte),
                         createValidFieldMetaModelDto("enumField", createEnumMetaModel("ENUM1", "ENUM2")),
                         createValidFieldMetaModelDto("value", String, [
@@ -107,11 +109,14 @@ class ClassMetaModelDtoSamples {
             .build()
     }
 
-    static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, Class<?> fieldType, List<ValidatorMetaModelDto> validators = []) {
+    static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, Class<?> fieldType,
+        List<ValidatorMetaModelDto> validators = [],
+        List<AdditionalPropertyDto> fieldAdditionalProperties = []) {
         FieldMetaModelDto.builder()
             .fieldName(fieldName)
             .fieldType(createClassMetaModelDtoFromClass(fieldType))
             .validators(validators)
+            .additionalProperties(fieldAdditionalProperties)
             .build()
     }
 
@@ -119,6 +124,12 @@ class ClassMetaModelDtoSamples {
         FieldMetaModelDto.builder()
             .fieldName(fieldName)
             .fieldType(classMetaModelDto)
+            .build()
+    }
+
+    static AdditionalPropertyDto isIdFieldType() {
+        AdditionalPropertyDto.builder()
+            .name(FieldMetaModel.IS_ID_FIELD)
             .build()
     }
 }

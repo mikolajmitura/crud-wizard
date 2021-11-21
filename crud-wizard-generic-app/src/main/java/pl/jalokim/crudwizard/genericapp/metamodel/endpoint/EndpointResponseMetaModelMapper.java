@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
+import static java.util.Optional.ofNullable;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContext;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContextByEntity;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,12 +17,20 @@ public abstract class EndpointResponseMetaModelMapper
 
     public EndpointResponseMetaModel toEndpointResponseMetaModel(MetaModelContext metaModelContext,
         EndpointResponseMetaModelEntity endpointResponseMetaModelEntity) {
+        if (endpointResponseMetaModelEntity == null) {
+            return null;
+        }
 
         return toModel(endpointResponseMetaModelEntity).toBuilder()
             .classMetaModel(getFromContext(metaModelContext::getClassMetaModels, () -> endpointResponseMetaModelEntity.getClassMetaModel().getId()))
+            .mapperMetaModel(ofNullable(getFromContextByEntity(
+                metaModelContext::getMapperMetaModels,
+                endpointResponseMetaModelEntity::getMapperMetaModel))
+                .orElse(metaModelContext.getDefaultMapperMetaModel()))
             .build();
     }
 
     @Mapping(target = "classMetaModel", ignore = true)
+    @Mapping(target = "mapperMetaModel", ignore = true)
     public abstract EndpointResponseMetaModel toModel(EndpointResponseMetaModelEntity endpointResponseMetaModelEntity);
 }

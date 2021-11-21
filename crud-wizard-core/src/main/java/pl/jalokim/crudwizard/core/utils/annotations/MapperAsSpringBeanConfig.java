@@ -5,9 +5,7 @@ import org.mapstruct.MapperConfig;
 import org.mapstruct.ReportingPolicy;
 
 @MapperConfig(
-    unmappedSourcePolicy = ReportingPolicy.IGNORE,
-    // TODO enable in future to ensure that all will be mapped as expected
-    //unmappedTargetPolicy = ReportingPolicy.ERROR,
+    unmappedTargetPolicy = ReportingPolicy.ERROR,
     componentModel = "spring",
     builder = @Builder(disableBuilder = true)
 )

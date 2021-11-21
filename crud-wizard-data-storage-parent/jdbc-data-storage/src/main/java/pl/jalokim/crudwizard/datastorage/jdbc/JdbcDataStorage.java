@@ -1,12 +1,13 @@
 package pl.jalokim.crudwizard.datastorage.jdbc;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
+import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
@@ -25,28 +26,28 @@ public class JdbcDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, Map<String, Object> entity) {
+    public Object saveEntity(ClassMetaModel classMetaModel, Object entity) {
         return null;
     }
 
     @Override
-    public void deleteEntity(ClassMetaModel classMetaModel, Object idObject) {
-
+    public Optional<Object> getOptionalEntityById(ClassMetaModel classMetaModel, Object idObject) {
+        return Optional.empty();
     }
 
     @Override
-    public Map<String, Object> getEntityById(ClassMetaModel classMetaModel, Object idObject) {
+    public Page<Object> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, DataStorageQuery query) {
         return null;
     }
 
     @Override
-    public Page<Map<String, Object>> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
+    public List<Object> findEntities(ClassMetaModel classMetaModel, DataStorageQuery query) {
         return null;
     }
 
     @Override
-    public List<Map<String, Object>> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
-        return null;
+    public void innerDeleteEntity(ClassMetaModel classMetaModel, Object idObject) {
+
     }
 
 }

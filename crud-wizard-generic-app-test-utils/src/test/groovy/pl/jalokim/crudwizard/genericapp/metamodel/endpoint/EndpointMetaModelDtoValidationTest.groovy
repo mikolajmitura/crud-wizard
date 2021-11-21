@@ -189,7 +189,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .dataStorageConnectors([
                 DataStorageConnectorMetaModelDto.builder()
                     .dataStorageMetaModel(DataStorageMetaModelDto.builder().build())
-                    .mapperMetaModel(MapperMetaModelDto.builder()
+                    .mapperMetaModelForReturn(MapperMetaModelDto.builder()
                         .className(randomText())
                         .beanName(randomText())
                         .methodName(randomText())
@@ -201,13 +201,13 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .build()                          | [
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name", fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className", fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModel.className", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModel.beanName", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModel.methodName", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModel.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModel.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "beanName", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModel.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "methodName", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModel.mappingDirection", notNullMessage()),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.className", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.beanName", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.methodName", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "beanName", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "methodName", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mappingDirection", notNullMessage()),
             errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])),
         ]
 

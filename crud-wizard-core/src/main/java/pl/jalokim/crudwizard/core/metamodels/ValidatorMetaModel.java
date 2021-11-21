@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,9 @@ public class ValidatorMetaModel extends AdditionalPropertyMetaModelDto {
 
     String namePlaceholder;
     String messagePlaceholder;
+
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     public Map<String, Object> getMessagePlaceholders() {
         Map<String, Object> placeholders = new HashMap<>();

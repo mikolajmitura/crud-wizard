@@ -177,7 +177,8 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
             defaultDataStorageConnectorMetaModels*.id as Set == defaultBeansService.getDefaultDataStorageConnectorsId() as Set
             verifyAll(defaultDataStorageConnectorMetaModels[0]) {
                 dataStorageMetaModel == defaultDataStorageMetaModel
-                mapperMetaModel == defaultMapperMetaModel
+                mapperMetaModelForQuery == defaultMapperMetaModel
+                mapperMetaModelForReturn == defaultMapperMetaModel
                 classMetaModelInDataStorage == null
             }
 

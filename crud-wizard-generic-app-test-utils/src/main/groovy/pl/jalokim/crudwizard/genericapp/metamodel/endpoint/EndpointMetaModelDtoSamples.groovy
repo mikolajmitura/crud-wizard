@@ -21,7 +21,7 @@ class EndpointMetaModelDtoSamples {
             .baseUrl("users")
             .operationName("createUser")
             .apiTag(ApiTagDto.builder()
-                .name(randomText())
+                .name("users")
                 .build())
             .httpMethod(HttpMethod.POST)
             .payloadMetamodel(createValidClassMetaModelDtoWithName())

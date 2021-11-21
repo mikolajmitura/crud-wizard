@@ -36,8 +36,12 @@ public class DataStorageConnectorMetaModelEntity extends WithAdditionalPropertie
     private DataStorageMetaModelEntity dataStorageMetaModel;
 
     @ManyToOne
-    @JoinColumn(name = "mapper_meta_model_id")
-    private MapperMetaModelEntity mapperMetaModel;
+    @JoinColumn(name = "return_mapper_meta_model_id")
+    private MapperMetaModelEntity mapperMetaModelForReturn;
+
+    @ManyToOne
+    @JoinColumn(name = "query_mapper_meta_model_id")
+    private MapperMetaModelEntity mapperMetaModelForQuery;
 
     @ManyToOne
     @JoinColumn(name = "class_meta_model_in_ds_id")

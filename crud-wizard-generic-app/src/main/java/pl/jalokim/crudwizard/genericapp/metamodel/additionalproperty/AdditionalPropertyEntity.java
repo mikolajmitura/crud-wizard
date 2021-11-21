@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity.TABLE_NAME;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,8 +18,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
-@Table(name = "additional_properties")
+@Table(name = TABLE_NAME)
 public class AdditionalPropertyEntity {
+
+    public static final String TABLE_NAME = "additional_properties";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

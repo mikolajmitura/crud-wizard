@@ -1,5 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
+import static pl.jalokim.utils.collection.Elements.elements;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,5 +22,9 @@ public class ObjectCache<K, V> {
 
     public void put(K id, V objectValue) {
         objectsById.put(id, objectValue);
+    }
+
+    public List<V> fetchAll() {
+        return elements(objectsById.values()).asList();
     }
 }

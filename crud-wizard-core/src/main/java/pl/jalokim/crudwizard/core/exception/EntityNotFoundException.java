@@ -16,7 +16,7 @@ public class EntityNotFoundException extends ApplicationException {
         super(message);
     }
 
-    public EntityNotFoundException(Long id) {
+    public EntityNotFoundException(Object id) {
         super(createMessagePlaceholder(EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY, id));
     }
 
@@ -24,7 +24,7 @@ public class EntityNotFoundException extends ApplicationException {
      * @param id id of entity
      * @param entityType will be translated to placeholder like "{full.package.SomeEntity}"
      */
-    public EntityNotFoundException(Long id, Class<?> entityType) {
+    public EntityNotFoundException(Object id, Class<?> entityType) {
         this(id, wrapAsPlaceholder(entityType));
     }
 
@@ -32,7 +32,7 @@ public class EntityNotFoundException extends ApplicationException {
      * @param id id of entity
      * @param translatedEntityNameOrPropertyKey real translated entity name or just property key provided as "{some.entity.name.property.key}"
      */
-    public EntityNotFoundException(Long id, String translatedEntityNameOrPropertyKey) {
+    public EntityNotFoundException(Object id, String translatedEntityNameOrPropertyKey) {
         super(createMessagePlaceholder(EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY, id, translatedEntityNameOrPropertyKey));
     }
 

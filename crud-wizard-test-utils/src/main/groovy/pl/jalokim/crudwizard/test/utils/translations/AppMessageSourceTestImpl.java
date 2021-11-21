@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.test.utils.translations;
 
+import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY;
 import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY;
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
@@ -131,8 +132,12 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
         return getAppMessageSource().getMessage(buildMessageForValidator(validatorAnnotation), placeholderArgs);
     }
 
-    public static String entityNotFoundMessage(Long id) {
+    public static String entityNotFoundMessage(Object id) {
         return getAppMessageSource().getMessage(EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY, id);
+    }
+
+    public static String entityNotFoundMessage(Object id, String entityName) {
+        return getAppMessageSource().getMessage(EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY, id, entityName);
     }
 
     public static String resourceAlreadyUpdatedMessage() {

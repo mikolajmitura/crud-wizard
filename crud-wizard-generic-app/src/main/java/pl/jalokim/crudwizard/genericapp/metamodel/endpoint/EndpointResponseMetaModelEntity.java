@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
 @Entity
 @Builder
@@ -32,6 +33,10 @@ public class EndpointResponseMetaModelEntity extends WithAdditionalPropertiesEnt
     @ManyToOne
     @JoinColumn(name = "reponse_metamodel_id")
     private ClassMetaModelEntity classMetaModel;
+
+    @ManyToOne
+    @JoinColumn(name = "reponse_mapper_id")
+    private MapperMetaModelEntity mapperMetaModel;
 
     private Long successHttpCode;
 }

@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQU
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpMethod;
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
@@ -77,4 +79,7 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
     EndpointResponseMetaModelDto responseMetaModel;
 
     List<@Valid DataStorageConnectorMetaModelDto> dataStorageConnectors;
+
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

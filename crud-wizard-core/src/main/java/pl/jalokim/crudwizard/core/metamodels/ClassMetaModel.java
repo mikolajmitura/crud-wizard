@@ -53,6 +53,9 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
     @Setter(AccessLevel.NONE)
     ParentMetamodelCacheContext parentMetamodelCacheContext;
 
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
+
     /**
      * when true then does it mean that this meta model
      * is like generic enum metamodel

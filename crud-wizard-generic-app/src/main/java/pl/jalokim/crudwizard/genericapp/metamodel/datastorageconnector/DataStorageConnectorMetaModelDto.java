@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,6 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
@@ -25,7 +28,12 @@ public class DataStorageConnectorMetaModelDto extends AdditionalPropertyMetaMode
     @Valid
     DataStorageMetaModelDto dataStorageMetaModel;
     @Valid
-    MapperMetaModelDto mapperMetaModel;
+    MapperMetaModelDto mapperMetaModelForReturn;
+    @Valid
+    MapperMetaModelDto mapperMetaModelForQuery;
     @Valid
     ClassMetaModelDto classMetaModelInDataStorage;
+
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

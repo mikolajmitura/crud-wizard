@@ -98,19 +98,18 @@ class InMemoryDataStorageTest extends Specification {
     }
 
     private ClassMetaModel newClassMetaModel(String name, String idFieldName, Class<?> typeOfId) {
-        def fieldMetaModel = FieldMetaModel.builder()
+        FieldMetaModel fieldMetaModel = FieldMetaModel.builder()
             .fieldName(idFieldName)
             .fieldType(ClassMetaModel.builder()
                 .className(typeOfId.canonicalName)
                 .realClass(typeOfId)
                 .build())
+            .additionalProperties([
+                AdditionalPropertyDto.builder()
+                    .name(FieldMetaModel.IS_ID_FIELD)
+                    .build()
+            ])
             .build()
-
-        fieldMetaModel.setAdditionalProperties([
-            AdditionalPropertyDto.builder()
-                .name(FieldMetaModel.IS_ID_FIELD)
-                .build()
-        ])
 
         ClassMetaModel.builder()
             .name(name)

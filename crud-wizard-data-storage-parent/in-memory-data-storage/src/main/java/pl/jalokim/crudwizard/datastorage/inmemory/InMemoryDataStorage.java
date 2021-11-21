@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.datastorage.inmemory;
 
+import static pl.jalokim.crudwizard.core.utils.DataFieldsHelper.getFieldValue;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
@@ -10,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
+import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
+import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
@@ -33,7 +36,7 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, Map<String, Object> entity) {
+    public Object saveEntity(ClassMetaModel classMetaModel, Object entity) {
         EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
             entityBag = new EntityStorage(classMetaModel, idGenerators);
@@ -43,38 +46,39 @@ public class InMemoryDataStorage implements DataStorage {
         FieldMetaModel fieldWithId = elements(classMetaModel.getAllFields())
             .filter(field -> field.getAdditionalProperties().stream()
                 .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
-            .getFirst();
+            .findFirst()
+            .orElseThrow(() -> new TechnicalException("Cannot find field annotated as 'is_id_field' for classMetaModel with id: "
+                + classMetaModel.getId() + " and name: " + classMetaModel.getName()));
 
-        Object idObject = entity.get(fieldWithId.getFieldName());
+        Object idObject = getFieldValue(entity, fieldWithId.getFieldName());
         return entityBag.saveEntity(idObject, fieldWithId, entity);
     }
 
     @Override
-    public void deleteEntity(ClassMetaModel classMetaModel, Object idObject) {
+    public Optional<Object> getOptionalEntityById(ClassMetaModel classMetaModel, Object idObject) {
+        return Optional.ofNullable(entitiesByName.get(classMetaModel.getName()))
+            .map(entityStorage -> entityStorage.getById(idObject));
+    }
+
+    @Override
+    public Page<Object> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, DataStorageQuery query) {
+        // TODO how to do queries? eq, not eq, contains, in how?
+        return null;
+    }
+
+    @Override
+    public List<Object> findEntities(ClassMetaModel classMetaModel, DataStorageQuery query) {
+        // TODO how to do queries? eq, not eq, contains, in how?
+        return null;
+    }
+
+    @Override
+    public void innerDeleteEntity(ClassMetaModel classMetaModel, Object idObject) {
         EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
             throw new EntityNotFoundException(String.format("Cannot find storage for entities: %s", classMetaModel.getName()));
         }
         entityBag.delete(idObject);
-    }
-
-    @Override
-    public Map<String, Object> getEntityById(ClassMetaModel classMetaModel, Object idObject) {
-        EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
-        return Optional.ofNullable(entityBag.getById(idObject))
-            .orElseThrow(() -> new EntityNotFoundException(String.format("not exists with id: %s entity name: %s", idObject, classMetaModel.getName())));
-    }
-
-    @Override
-    public Page<Map<String, Object>> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
-        // TODO how to do queries? eq, not eq, contains, in how?
-        return null;
-    }
-
-    @Override
-    public List<Map<String, Object>> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
-        // TODO how to do queries? eq, not eq, contains, in how?
-        return null;
     }
 
     public void clear() {
