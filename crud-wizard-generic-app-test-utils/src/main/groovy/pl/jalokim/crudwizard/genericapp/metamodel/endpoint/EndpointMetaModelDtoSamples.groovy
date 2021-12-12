@@ -40,7 +40,7 @@ class EndpointMetaModelDtoSamples {
         createValidPostEndpointMetaModelDto()
             .toBuilder()
             .payloadMetamodel(simplePersonClassMetaModel())
-        .build()
+            .build()
     }
 
     static EndpointMetaModelDto createValidPutEndpointMetaModelDto() {
@@ -61,6 +61,23 @@ class EndpointMetaModelDtoSamples {
                 .build())
             .payloadMetamodel(createValidClassMetaModelDtoWithName())
             .responseMetaModel(createValidEndpointResponseMetaModelDto())
+            .build()
+    }
+
+    static EndpointMetaModelDto createValidGetListOfPerson() {
+        EndpointMetaModelDto.builder()
+            .baseUrl("domain/person/")
+            .apiTag(ApiTagDto.builder()
+                .name(randomText())
+                .build())
+            .httpMethod(HttpMethod.GET)
+            .operationName("get list of person")
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(List).toBuilder()
+                    .genericTypes([simplePersonClassMetaModel()])
+                    .build())
+                .build()
+            )
             .build()
     }
 

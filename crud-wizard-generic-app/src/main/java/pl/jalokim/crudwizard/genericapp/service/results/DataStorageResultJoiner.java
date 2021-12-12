@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.service.results;
 
-import static pl.jalokim.crudwizard.genericapp.service.ValueExtractorFromPath.getValueFromPath;
+import static pl.jalokim.crudwizard.core.utils.ValueExtractorFromPath.getValueFromPath;
 import static pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRow.newJoinedResultsRow;
 import static pl.jalokim.utils.collection.Elements.elements;
 

@@ -30,7 +30,8 @@ class JoinedResultsRowMapperTest extends Specification {
         joinedResultsRow.addJoinedObject("ds3", person)
 
         when:
-        def result = testCase.mapToObject(joinedResultsRow)
+        // TODO #11 as first parameter pass target class which will be results in expected class type
+        def result = testCase.mapToObject(null, joinedResultsRow)
 
         then:
         result.person == [

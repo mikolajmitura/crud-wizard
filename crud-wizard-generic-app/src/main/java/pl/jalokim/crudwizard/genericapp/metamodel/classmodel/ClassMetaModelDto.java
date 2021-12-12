@@ -59,7 +59,7 @@ public class ClassMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     String name;
 
-    @ClassExists
+    @ClassExists(canBeAbstractOrInterface = true)
     String className;
 
     @NotNull

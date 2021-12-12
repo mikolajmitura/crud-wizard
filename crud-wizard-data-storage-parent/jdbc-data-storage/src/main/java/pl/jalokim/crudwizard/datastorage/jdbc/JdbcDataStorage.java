@@ -36,12 +36,12 @@ public class JdbcDataStorage implements DataStorage {
     }
 
     @Override
-    public Page<Object> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, DataStorageQuery query) {
+    public Page<Object> findPageOfEntity(Pageable pageable, DataStorageQuery query) {
         return null;
     }
 
     @Override
-    public List<Object> findEntities(ClassMetaModel classMetaModel, DataStorageQuery query) {
+    public List<Object> findEntities(DataStorageQuery query) {
         return null;
     }
 
@@ -49,5 +49,4 @@ public class JdbcDataStorage implements DataStorage {
     public void innerDeleteEntity(ClassMetaModel classMetaModel, Object idObject) {
 
     }
-
 }

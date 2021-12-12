@@ -3,7 +3,6 @@ package pl.jalokim.crudwizard.genericapp.service;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isTypeOf;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,11 +29,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument.GenericMapperArgumentBuilder;
 import pl.jalokim.crudwizard.genericapp.mapper.MapperDelegatorService;
 import pl.jalokim.crudwizard.genericapp.service.results.DataStorageResultJoiner;
-import pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRow;
-import pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRowMapper;
 import pl.jalokim.crudwizard.genericapp.service.translator.DefaultClassesConfig;
-import pl.jalokim.utils.collection.CollectionUtils;
-import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
@@ -46,7 +41,6 @@ public class DefaultGenericService {
     private final MapperDelegatorService mapperDelegatorService;
     private final DataStorageResultJoiner dataStorageResultJoiner;
     private final DefaultClassesConfig defaultClassesConfig;
-    private final JoinedResultsRowMapper joinedResultsRowMapper;
 
     @GenericMethod
     public Object saveOrReadFromDataStorages(GenericServiceArgument genericServiceArgument) {
@@ -96,15 +90,15 @@ public class DefaultGenericService {
             Class<?> responseRealClass = responseClassMetaModel.getRealClass();
             if (responseRealClass != null) {
                 if (isTypeOf(responseRealClass, Page.class)) {
-                    // TODO #37 return collection when request params cannot be mapped to Pageable
-                } else if (isTypeOf(responseRealClass, Collection.class)) {
                     // TODO #37 return Page or collection when request params can be mapped to Pageable
+                } else if (isTypeOf(responseRealClass, Collection.class)) {
+                    // TODO #37 return collection when request params cannot be mapped to Pageable
                     ClassMetaModel elementTypeInCollection = responseClassMetaModel.getGenericTypes().get(0);
                     Map<String, List<Object>> queriesResults = new HashMap<>();
                     DataStorageQueryArguments dataStorageQueryArguments = DataStorageQueryArguments.builder()
                         .headers(genericServiceArgument.getHeaders())
                         .pathVariables(genericServiceArgument.getUrlPathParams())
-                        .requestParams(genericServiceArgument.getHttpQueryParams())
+                        .requestParams(genericServiceArgument.getHttpQueryTranslated())
                         .requestParamsClassMetaModel(genericServiceArgument.getEndpointMetaModel().getQueryArguments())
                         .previousQueryResultsContext(queriesResults)
                         .build();
@@ -114,27 +108,24 @@ public class DefaultGenericService {
                         ClassMetaModel queriedClassMetaModel = Optional.ofNullable(dataStorageConnector.getClassMetaModelInDataStorage())
                             .orElse(elementTypeInCollection);
 
-                        DataStorageQuery query = queryProvider.createQuery(dataStorageQueryArguments, queriedClassMetaModel);
-                        List<Object> queryResults = dataStorageConnector.getDataStorage().findEntities(queriedClassMetaModel, query);
+                        DataStorageQuery query = queryProvider.createQuery(dataStorageQueryArguments.toBuilder()
+                            .queriedClassMetaModels(List.of(queriedClassMetaModel))
+                            .build());
+                        List<Object> queryResults = dataStorageConnector.getDataStorage().findEntities(query);
                         List<Object> objects = queriesResults.computeIfAbsent(Optional.ofNullable(dataStorageConnector.getNameOfQuery())
                             .orElse(dataStorageConnector.getDataStorageName()), (k) -> new ArrayList<>());
                         objects.addAll(queryResults);
                     }
 
-                    List<Object> resultsForFinalMapping;
+                    Collection<Object> results;
                     if (queriesResults.size() > 1) {
-                        List<JoinedResultsRow> joinedNodes = dataStorageResultJoiner.getJoinedNodes(
-                            endpointMetaModel.getDataStorageResultsJoiners(), queriesResults);
-                        resultsForFinalMapping = new ArrayList<>();
-                        for (JoinedResultsRow joinedNode : joinedNodes) {
-                            resultsForFinalMapping.add(joinedResultsRowMapper.mapToObject(joinedNode));
-                        }
+                        results = new ArrayList<>(dataStorageResultJoiner.getJoinedNodes(
+                            endpointMetaModel.getDataStorageResultsJoiners(), queriesResults));
                     } else {
-                        resultsForFinalMapping = elements(queriesResults.values()).getFirst();
+                        results = elements(queriesResults.values()).getFirst();
                     }
 
-                    Collection<Object> results = new ArrayList<>();
-                    for (Object entry : resultsForFinalMapping) {
+                    for (Object entry : results) {
                         GenericMapperArgument finalResultMapperArgument = genericMapperArgumentFactory.get()
                             .mappingContext(new HashMap<>())
                             .sourceObject(entry)
@@ -180,7 +171,7 @@ public class DefaultGenericService {
         if (queryProvider == null) {
             return results;
         }
-        // TODO use final query, some order or filter
+        // TODO #37 use final query, some order or filter
         throw new UnsupportedOperationException("not supported final query");
     }
 

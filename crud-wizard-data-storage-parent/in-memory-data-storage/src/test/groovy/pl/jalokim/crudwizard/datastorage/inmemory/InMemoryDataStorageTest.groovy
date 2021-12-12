@@ -18,7 +18,7 @@ class InMemoryDataStorageTest extends Specification {
 
     def "should save, update, delete few entities in in memory data storage"() {
         given:
-        def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE)
+        def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE, new InMemoryWhereExpressionTranslator())
         def firstPerson = [
             name     : DataFakerHelper.randomText(),
             firstName: DataFakerHelper.randomText()

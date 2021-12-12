@@ -7,12 +7,13 @@ import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class DataStorageQueryArguments {
 
     Map<String, String> headers;
     Map<String, Object> pathVariables;
     Map<String, Object> requestParams;
+    List<ClassMetaModel> queriedClassMetaModels;
     ClassMetaModel requestParamsClassMetaModel;
     /**
      *  results of previous Data storages results.

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,9 +26,10 @@ public class InMemoryDataStorage implements DataStorage {
     private final String name;
     private final Map<String, EntityStorage> entitiesByName = new ConcurrentHashMap<>();
     private final IdGenerators idGenerators;
+    private final InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator;
 
-    public InMemoryDataStorage(IdGenerators idGenerators) {
-        this(DEFAULT_DS_NAME, idGenerators);
+    public InMemoryDataStorage(IdGenerators idGenerators, InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator) {
+        this(DEFAULT_DS_NAME, idGenerators, inMemoryWhereExpressionTranslator);
     }
 
     @Override
@@ -61,15 +63,20 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Page<Object> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, DataStorageQuery query) {
+    public Page<Object> findPageOfEntity(Pageable pageable, DataStorageQuery query) {
         // TODO how to do queries? eq, not eq, contains, in how?
         return null;
     }
 
     @Override
-    public List<Object> findEntities(ClassMetaModel classMetaModel, DataStorageQuery query) {
-        // TODO how to do queries? eq, not eq, contains, in how?
-        return null;
+    public List<Object> findEntities(DataStorageQuery query) {
+        Predicate<Object> objectPredicate = inMemoryWhereExpressionTranslator.translateWhereExpression(query.getWhere());
+        ClassMetaModel selectFromClassMetaModel = query.getSelectFrom();
+        EntityStorage entityStorage = entitiesByName.get(selectFromClassMetaModel.getName());
+
+        return elements(entityStorage.fetchStream())
+            .filter(objectPredicate)
+            .asList();
     }
 
     @Override

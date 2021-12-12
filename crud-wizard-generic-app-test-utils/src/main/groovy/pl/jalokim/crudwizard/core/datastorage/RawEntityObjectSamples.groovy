@@ -67,7 +67,7 @@ class RawEntityObjectSamples {
             surname            : "Doe",
             birthDate          : LocalDate.of(1990, 1, 14),
             applicationDateTime: LocalDateTime.of(2021, 4, 12, 12, 01, 15),
-            personData         : new SamplePersonDto(null, "XYZ", "QWERTY"),
+            personData         : SamplePersonDto.builder().name("XYZ").surname("QWERTY").build(),
             age                : 12,
             addresses          : [
                 [

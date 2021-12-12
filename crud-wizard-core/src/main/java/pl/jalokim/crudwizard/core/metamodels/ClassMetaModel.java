@@ -65,11 +65,10 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
     }
 
     public FieldMetaModel getFieldByName(String fieldName) {
-        Optional.ofNullable(parentMetamodelCacheContext)
-            .orElseGet(() -> {
-                fetchAllFields();
-                return parentMetamodelCacheContext;
-            });
+        if (parentMetamodelCacheContext == null || parentMetamodelCacheContext.getFieldMetaModels() == null
+            || parentMetamodelCacheContext.getFieldsByName() == null) {
+            fetchAllFields();
+        }
 
         return parentMetamodelCacheContext.getFieldsByName().get(fieldName);
     }

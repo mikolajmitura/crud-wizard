@@ -1,0 +1,252 @@
+package pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation;
+
+import static java.util.Optional.ofNullable;
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
+import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.joinWithComma;
+import static pl.jalokim.utils.collection.CollectionUtils.addWhenNotExist;
+import static pl.jalokim.utils.collection.Elements.elements;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.validation.ConstraintValidatorContext;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.exception.TechnicalException;
+import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
+import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath;
+import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath.PropertyPathBuilder;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDto;
+import pl.jalokim.utils.collection.Elements;
+import pl.jalokim.utils.reflection.TypeMetadata;
+
+@Component
+@RequiredArgsConstructor
+public class DataStorageResultsJoinCorrectnessValidator
+    implements BaseConstraintValidator<DataStorageResultsJoinCorrectness, EndpointMetaModelDto> {
+
+    private final DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository;
+    private final MetaModelContextService metaModelContextService;
+    private final ClassMetaModelTypeExtractor classMetaModelTypeExtractor;
+
+    @Override
+    public boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context) {
+        List<DataStorageConnectorMetaModelDto> dataStorageConnectors = elements(endpointMetaModelDto.getDataStorageConnectors()).asList();
+        List<DataStorageResultsJoinerDto> dataStorageResultsJoiners = elements(endpointMetaModelDto.getDataStorageResultsJoiners()).asList();
+
+        int numberOfConnectors = dataStorageConnectors.size();
+        int numberOfJoiners = dataStorageResultsJoiners.size();
+        if (numberOfConnectors <= 1 && numberOfJoiners == 0) {
+            return true;
+        }
+
+        Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName = new HashMap<>();
+
+        return expectedNumberOfJoinersDueToDSConnectors(context, numberOfConnectors, numberOfJoiners)
+            && namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto)
+            && allJoinerCorrectlyConnected(dataStorageResultsJoiners, context)
+            && allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
+    }
+
+    private boolean expectedNumberOfJoinersDueToDSConnectors(ConstraintValidatorContext context, int numberOfConnectors, int numberOfJoiners) {
+        var isValid = numberOfConnectors - 1 == numberOfJoiners;
+        if (!isValid) {
+            customMessage(context,
+                wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "invalidJoinersNumber"),
+                PropertyPath.builder()
+                    .addNextProperty("dataStorageResultsJoiners")
+                    .build());
+        }
+        return isValid;
+    }
+
+    private boolean namesAreCorrect(List<DataStorageConnectorMetaModelDto> dataStorageConnectors,
+        List<DataStorageResultsJoinerDto> dataStorageResultsJoiners, ConstraintValidatorContext context,
+        Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName,
+        EndpointMetaModelDto endpointMetaModelDto) {
+
+        AtomicBoolean namesAreCorrect = new AtomicBoolean(true);
+        elements(dataStorageConnectors).forEachWithIndex((index, dsConnector) -> {
+
+            Pair<String, ClassMetaModelDto> queryOrDsNameWithReturnType = findQueryOrDsName(dsConnector, endpointMetaModelDto);
+
+            if (!classMetaModelDtoByDsQueryName.containsKey(queryOrDsNameWithReturnType.getKey())) {
+                classMetaModelDtoByDsQueryName.put(queryOrDsNameWithReturnType.getKey(),
+                    queryOrDsNameWithReturnType.getValue());
+            } else {
+                customMessage(context,
+                    wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "nonUniqueDsOrQueryName"),
+                    PropertyPath.builder()
+                        .addNextPropertyAndIndex("dataStorageConnectors", index)
+                        .build());
+                namesAreCorrect.set(false);
+            }
+        });
+
+        elements(dataStorageResultsJoiners).forEachWithIndex((index, joinerDto) -> {
+
+            if (!classMetaModelDtoByDsQueryName.containsKey(joinerDto.getLeftNameOfQueryResult())) {
+                customMessage(context,
+                    wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "notFound"),
+                    PropertyPath.builder()
+                        .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
+                        .addNextProperty("leftNameOfQueryResult")
+                        .build());
+                namesAreCorrect.set(false);
+            }
+
+            if (!classMetaModelDtoByDsQueryName.containsKey(joinerDto.getRightNameOfQueryResult())) {
+                customMessage(context,
+                    wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "notFound"),
+                    PropertyPath.builder()
+                        .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
+                        .addNextProperty("rightNameOfQueryResult")
+                        .build());
+                namesAreCorrect.set(false);
+            }
+        });
+
+        return namesAreCorrect.get();
+    }
+
+    private Pair<String, ClassMetaModelDto> findQueryOrDsName(DataStorageConnectorMetaModelDto dsConnector,
+        EndpointMetaModelDto endpointMetaModelDto) {
+        ClassMetaModelDto responseClassMetaModel = endpointMetaModelDto.getResponseMetaModel().getClassMetaModel();
+
+        return ofNullable(dsConnector.getId())
+            .map(dataStorageConnectorMetaModelRepository::findExactlyOneById)
+            .flatMap(connectorEntity ->
+                ofNullable(connectorEntity.getNameOfQuery())
+                    .or(() -> ofNullable(connectorEntity.getDataStorageMetaModel())
+                        .map(DataStorageMetaModelEntity::getName))
+                    .map(dsOrQueryName -> Pair.of(dsOrQueryName, ofNullable(connectorEntity.getClassMetaModelInDataStorage())
+                        .map(classMetaModelEntity -> ClassMetaModelDto.builder()
+                            .id(classMetaModelEntity.getId())
+                            .build())
+                        .orElse(responseClassMetaModel))))
+            .or(() -> ofNullable(dsConnector.getNameOfQuery())
+                .or(() -> ofNullable(dsConnector.getDataStorageMetaModel())
+                    .map(DataStorageMetaModelDto::getName))
+                .map(dsOrQueryName -> Pair.of(dsOrQueryName, ofNullable(dsConnector.getClassMetaModelInDataStorage())
+                    .orElse(responseClassMetaModel))))
+            .orElseGet(() -> Pair.of(getNameOfDefaultDataStorage(), responseClassMetaModel));
+    }
+
+    private boolean allJoinerCorrectlyConnected(List<DataStorageResultsJoinerDto> dataStorageResultsJoiners, ConstraintValidatorContext context) {
+        List<List<String>> groupsOfDsResults = new ArrayList<>();
+        AtomicBoolean correctlyConnected = new AtomicBoolean(true);
+
+        elements(dataStorageResultsJoiners).forEachWithIndex((index, dataStorageResultsJoiner) -> {
+            String leftNameOfQueryResult = dataStorageResultsJoiner.getLeftNameOfQueryResult();
+            List<String> leftGroup = findGroupByDsResultName(groupsOfDsResults, leftNameOfQueryResult);
+
+            String rightNameOfQueryResult = dataStorageResultsJoiner.getRightNameOfQueryResult();
+            List<String> rightGroup = findGroupByDsResultName(groupsOfDsResults, rightNameOfQueryResult);
+
+            List<String> groupForAdd;
+            if (leftGroup == null && rightGroup == null) {
+                groupForAdd = new ArrayList<>();
+                groupsOfDsResults.add(groupForAdd);
+            } else if (leftGroup == rightGroup) {
+                groupForAdd = leftGroup;
+                correctlyConnected.set(false);
+                customMessage(context,
+                    createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "existsInTheSameGroupAlready", joinWithComma(groupForAdd)),
+                    PropertyPath.builder()
+                        .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
+                        .build());
+            } else {
+                if (leftGroup != null && rightGroup != null) {
+                    groupForAdd = leftGroup;
+                    leftGroup.addAll(rightGroup);
+                    groupsOfDsResults.remove(rightGroup);
+                } else {
+                    groupForAdd = Elements.of(leftGroup, rightGroup)
+                        .filter(Objects::nonNull)
+                        .getFirst();
+                }
+            }
+            addWhenNotExist(groupForAdd, leftNameOfQueryResult);
+            addWhenNotExist(groupForAdd, rightNameOfQueryResult);
+        });
+
+        if (groupsOfDsResults.size() != 1) {
+            customMessage(context,
+                createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "notOneGroupResults",
+                    elements(groupsOfDsResults).asConcatText(", ")),
+                PropertyPath.builder()
+                    .addNextProperty("dataStorageResultsJoiners")
+                    .build());
+        }
+
+        return correctlyConnected.get();
+    }
+
+    private boolean allPathsCorrectAndTypeMatched(List<DataStorageResultsJoinerDto> dataStorageResultsJoiners,
+        ConstraintValidatorContext context, Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName) {
+        AtomicBoolean allPathsCorrect = new AtomicBoolean(true);
+        elements(dataStorageResultsJoiners).forEachWithIndex((index, joinEntry) -> {
+
+            Optional<TypeMetadata> leftJoinType = getTypeByPath(context, classMetaModelDtoByDsQueryName, allPathsCorrect,
+                joinEntry.getLeftNameOfQueryResult(), joinEntry.getLeftPath(), index, "leftPath");
+
+            Optional<TypeMetadata> rightJoinType = getTypeByPath(context, classMetaModelDtoByDsQueryName, allPathsCorrect,
+                joinEntry.getRightNameOfQueryResult(), joinEntry.getRightPath(), index, "rightPath");
+
+            if (leftJoinType.isPresent() && rightJoinType.isPresent()) {
+                if (!leftJoinType.get().equals(rightJoinType.get())) {
+                    customMessage(context, createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "notTheSameTypesForJoin",
+                        Map.of("leftType", leftJoinType.get().getCanonicalName(),
+                            "rightType", rightJoinType.get().getCanonicalName())),
+                        PropertyPath.builder()
+                            .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
+                            .build());
+                    allPathsCorrect.set(false);
+                }
+            }
+        });
+        return allPathsCorrect.get();
+    }
+
+    private Optional<TypeMetadata> getTypeByPath(ConstraintValidatorContext context, Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName,
+        AtomicBoolean allPathsCorrect, String nameOfQueryResult, String joinPath, Integer joinerIndex, String pathFieldName) {
+
+        ClassMetaModelDto classMetaModelDto = classMetaModelDtoByDsQueryName.get(nameOfQueryResult);
+        try {
+            return classMetaModelTypeExtractor.getTypeByPath(classMetaModelDto, joinPath);
+        } catch (TechnicalException ex) {
+            customMessage(context, ex.getMessage(),
+                PropertyPath.builder()
+                    .addNextPropertyAndIndex("dataStorageResultsJoiners", joinerIndex)
+                    .addNextProperty(pathFieldName)
+                    .build());
+            allPathsCorrect.set(false);
+            return Optional.empty();
+        }
+    }
+
+    private List<String> findGroupByDsResultName(List<List<String>> groupsOfDsResults, String dsResultName) {
+        return elements(groupsOfDsResults)
+            .filter(group -> group.contains(dsResultName))
+            .getFirstOrNull();
+    }
+
+    private String getNameOfDefaultDataStorage() {
+        return metaModelContextService.getMetaModelContext().getDefaultDataStorageMetaModel().getName();
+    }
+
+}

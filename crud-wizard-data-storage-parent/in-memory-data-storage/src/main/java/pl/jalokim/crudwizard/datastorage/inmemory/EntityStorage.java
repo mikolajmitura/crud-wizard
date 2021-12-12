@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.core.utils.DataFieldsHelper.setFieldValue;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
@@ -41,5 +42,9 @@ public class EntityStorage {
             throw new EntityNotFoundException(String.format("not exists with id: %s entity name: %s", idObject, forModel.getName()));
         }
         entitiesById.remove(idObject);
+    }
+
+    public synchronized Stream<Object> fetchStream() {
+        return entitiesById.values().stream();
     }
 }

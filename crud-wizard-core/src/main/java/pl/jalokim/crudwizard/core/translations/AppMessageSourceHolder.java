@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.core.translations;
 
+import static pl.jalokim.crudwizard.core.translations.AppMessageSource.buildPropertyKey;
+
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -30,6 +32,10 @@ public class AppMessageSourceHolder {
 
     public static String getMessage(Class<?> propertyKeyPrefix, String propertySuffix, Object... placeholderArgs) {
         return getAppMessageSource().getMessage(propertyKeyPrefix, propertySuffix, placeholderArgs);
+    }
+
+    public static String getMessage(Class<?> propertyKeyPrefix, String propertySuffix, Map<String, Object> placeholderArgsByName) {
+        return getAppMessageSource().getMessage(buildPropertyKey(propertyKeyPrefix, propertySuffix), placeholderArgsByName);
     }
 
     public static String getMessage(String propertyKey, Map<String, Object> placeholderArgsByName) {

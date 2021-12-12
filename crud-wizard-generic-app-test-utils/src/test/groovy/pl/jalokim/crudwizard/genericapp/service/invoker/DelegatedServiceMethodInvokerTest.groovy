@@ -51,7 +51,7 @@ class DelegatedServiceMethodInvokerTest extends Specification {
             jsonNode2 == genericServiceArgument.requestBody
             jsonNodeTranslated == invokerArgs.translatedPayload
             jsonNodeTranslated2 == invokerArgs.translatedPayload
-            samplePersonDto == new SamplePersonDto(null, invokerArgs.expectedName, invokerArgs.expectedSurname)
+            samplePersonDto == SamplePersonDto.builder().name(invokerArgs.expectedName).surname(invokerArgs.expectedSurname).build()
             headers == genericServiceArgument.headers
             cookieValue == genericServiceArgument.headers["cookie"]
             lastContactAsText == genericServiceArgument.httpQueryTranslated["lastContact"].toString()

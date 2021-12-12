@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 
 @Data
 @Builder(toBuilder = true)
@@ -22,6 +24,7 @@ public class DataStorageResultsJoinerDto {
     @NotNull
     String leftPath;
     @NotNull
+    @ClassExists(expectedOfType = ObjectsJoinerVerifier.class)
     String joinerVerifierClassName;
     @NotNull
     String rightNameOfQueryResult;

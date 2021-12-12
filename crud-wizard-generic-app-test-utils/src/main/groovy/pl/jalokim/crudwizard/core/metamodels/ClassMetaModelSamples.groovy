@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.time.Period
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 
 class ClassMetaModelSamples {
 
@@ -23,6 +24,32 @@ class ClassMetaModelSamples {
             .fieldName(fieldName)
             .fieldType(fieldType)
             .validators(validators)
+            .build()
+    }
+
+    static FieldMetaModel createValidFieldMetaModel(String fieldName, ClassMetaModel fieldType, Map<String, Object> additionalProperties) {
+        FieldMetaModel.builder()
+            .fieldName(fieldName)
+            .fieldType(fieldType)
+            .additionalProperties(additionalProperties.collect {
+                AdditionalPropertyDto.builder()
+                    .name(it.key)
+                    .valueAsObject(it.value)
+                    .build()
+            })
+            .build()
+    }
+
+    static FieldMetaModel createValidFieldMetaModel(String fieldName, Class<?> fieldType, Map<String, Object> additionalProperties) {
+        FieldMetaModel.builder()
+            .fieldName(fieldName)
+            .fieldType(createClassMetaModelFromClass(fieldType))
+            .additionalProperties(additionalProperties.collect {
+                AdditionalPropertyDto.builder()
+                    .name(it.key)
+                    .valueAsObject(it.value)
+                    .build()
+            })
             .build()
     }
 
@@ -43,7 +70,7 @@ class ClassMetaModelSamples {
         enumMetaModel
     }
 
-    static ClassMetaModel createRequestBodyClassMetaModel() {
+    static ClassMetaModel createSomePersonClassMetaModel() {
         ClassMetaModel.builder()
             .name("somePersonApplication")
             .fields([
@@ -102,6 +129,30 @@ class ClassMetaModelSamples {
             .build()
     }
 
+    static ClassMetaModel createHttpQueryParamsForPerson() {
+        ClassMetaModel.builder()
+            .name("person-queryParams")
+            .fields([
+                createValidFieldMetaModel("name", String, Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "LIKE")),
+                createValidFieldMetaModel("surname", String),
+                createValidFieldMetaModel("age", Integer, Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "GREATER_THAN")),
+                createValidFieldMetaModel("otherNumber", Integer, Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "LOWER_THAN")),
+                createValidFieldMetaModel("someTexts", createClassMetaModelFromClass(List).toBuilder()
+                    .genericTypes([createClassMetaModelFromClass(String)]).build(), Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "IN")),
+                createValidFieldMetaModel("someNumbers", createClassMetaModelFromClass(List).toBuilder()
+                    .genericTypes([createClassMetaModelFromClass(Integer)]).build(), Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "IN")),
+                createValidFieldMetaModel("pesel", Integer, Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "IS_NULL")),
+                createValidFieldMetaModel("nationality", Integer, Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "IS_NOT_NULL")),
+                createValidFieldMetaModel("documentType", String,
+                    Map.of(
+                        DefaultDataStorageQueryProvider.EXPRESSION_RIGHT_PATH, "rightPath.otherValue",
+                        DefaultDataStorageQueryProvider.EXPRESSION_LEFT_PATH, "document.type",
+                        DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "EQUALS")),
+                createValidFieldMetaModel("sortBy", String)]
+            )
+            .build()
+    }
+
     static ClassMetaModel createClassMetaModelWithParents() {
         ClassMetaModel.builder()
             .name("modelWithParents")
@@ -134,7 +185,7 @@ class ClassMetaModelSamples {
                             .build()
                     ])
                     .build(),
-                createRequestBodyClassMetaModel(), createHttpQueryParamsMetaModel()])
+                createSomePersonClassMetaModel(), createHttpQueryParamsMetaModel()])
             .validators([ValidatorMetaModelSamples.CUSTOM_TEST_VALIDATOR_METAMODEL])
             .build()
     }

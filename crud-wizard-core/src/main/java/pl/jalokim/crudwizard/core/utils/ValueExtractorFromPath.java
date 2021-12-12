@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.service;
+package pl.jalokim.crudwizard.core.utils;
 
 import static pl.jalokim.utils.collection.Elements.bySplitText;
 
@@ -9,7 +9,7 @@ public class ValueExtractorFromPath {
     public static Object getValueFromPath(Object object, String pathToRead) {
         Object currentObject = object;
         for (String pathPart : bySplitText(pathToRead, "\\.").asList()) {
-            Object fieldValue = DataFieldsHelper.getFieldValue(currentObject, pathPart);
+            Object fieldValue = DataFieldsHelper.getFieldValue(currentObject, pathPart.replaceFirst("\\?", ""));
             if (fieldValue == null) {
                 return null;
             }

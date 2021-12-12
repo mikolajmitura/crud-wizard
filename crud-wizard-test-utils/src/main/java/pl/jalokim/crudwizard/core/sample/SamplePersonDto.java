@@ -1,17 +1,30 @@
 package pl.jalokim.crudwizard.core.sample;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 
-@Value
+@AllArgsConstructor
+@Data
+@NoArgsConstructor
+@Builder
 public class SamplePersonDto {
 
     @NotNull(groups = UpdateContext.class)
-    Long id;
+    private Long id;
     @NotNull
-    String name;
+    private String name;
     @NotNull
-    String surname;
+    private String surname;
+
+    private LocalDate birthDay;
+
+    private LocalDateTime lastLogin;
 
 }

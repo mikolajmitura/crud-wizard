@@ -7,6 +7,7 @@ import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import java.time.LocalDate
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
@@ -22,7 +23,7 @@ class ClassMetaModelDtoSamples {
                 createValidFieldMetaModelDto("id", Long, [], [isIdFieldType()]),
                 createValidFieldMetaModelDto("name", String),
                 createValidFieldMetaModelDto("surname", String),
-                createValidFieldMetaModelDto("birthDate", LocalDate),
+                createValidFieldMetaModelDto("birthDate", LocalDate)
             ])
             .build()
     }
@@ -31,24 +32,58 @@ class ClassMetaModelDtoSamples {
         def personMetaModel = simplePersonClassMetaModel().toBuilder().build()
         personMetaModel.getFields().addAll([
             createValidFieldMetaModelDto("documents", createListWithMetaModel(
-                ClassMetaModelDto.builder()
-                    .name("document")
-                    .validators([createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL)])
-                    .fields([
-                        createValidFieldMetaModelDto("id", Long, [], [isIdFieldType()]),
-                        createValidFieldMetaModelDto("type", Byte),
-                        createValidFieldMetaModelDto("enumField", createEnumMetaModel("ENUM1", "ENUM2")),
-                        createValidFieldMetaModelDto("value", String, [
-                            createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL),
-                            createValidValidatorMetaModelDto(SizeValidator, SizeValidator.VALIDATOR_KEY_SIZE, [min: 5, max: 25])
-                        ]),
-                        createValidFieldMetaModelDto("validFrom", LocalDate),
-                        createValidFieldMetaModelDto("validTo", LocalDate),
-                    ])
-                    .build()
+                createDocumentClassMetaDto()
             ))
         ])
         personMetaModel
+    }
+
+    static ClassMetaModelDto createDocumentClassMetaDto() {
+        ClassMetaModelDto.builder()
+            .name("document")
+            .validators([createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL)])
+            .fields([
+                createValidFieldMetaModelDto("id", Long, [], [isIdFieldType()]),
+                createValidFieldMetaModelDto("type", Byte),
+                createValidFieldMetaModelDto("enumField", createEnumMetaModel("ENUM1", "ENUM2")),
+                createValidFieldMetaModelDto("value", String, [
+                    createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL),
+                    createValidValidatorMetaModelDto(SizeValidator, SizeValidator.VALIDATOR_KEY_SIZE, [min: 5, max: 25])
+                ]),
+                createValidFieldMetaModelDto("validFrom", LocalDate),
+                createValidFieldMetaModelDto("validTo", LocalDate),
+            ])
+            .build()
+    }
+
+    static ClassMetaModelDto exampleClassMetaModelDtoWithExtension() {
+        ClassMetaModelDto.builder()
+            .name("person-with-2-extends")
+            .isGenericEnumType(false)
+            .extendsFromModels([
+                extendedPersonClassMetaModel(), createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)
+            ])
+            .fields([
+                createValidFieldMetaModelDto("birthDate", Date)
+            ])
+            .build()
+    }
+
+    static ClassMetaModelDto createHttpQueryParamsClassMetaModelDto() {
+        ClassMetaModelDto.builder()
+            .name("person-queryParams")
+            .fields([
+                createValidFieldMetaModelDto("surname", String),
+                createValidFieldMetaModelDto("age", Integer, [],
+                    [additionalProperty(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "GREATER_THAN")]),
+                createValidFieldMetaModelDto("someNumbers", createClassMetaModelDtoFromClass(List).toBuilder()
+                    .genericTypes([createClassMetaModelDtoFromClass(Integer)])
+                    .build(), [], Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "IN")),
+                createValidFieldMetaModelDto("someTexts", createClassMetaModelDtoFromClass(List).toBuilder()
+                    .genericTypes([createClassMetaModelDtoFromClass(String)])
+                    .build(), [], Map.of(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "IN"))
+            ])
+            .build()
     }
 
     static ClassMetaModelDto createValidEnumMetaModel() {
@@ -120,16 +155,32 @@ class ClassMetaModelDtoSamples {
             .build()
     }
 
-    static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, ClassMetaModelDto classMetaModelDto) {
+    static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, ClassMetaModelDto classMetaModelDto,
+        List<ValidatorMetaModelDto> validators = [],
+        Map<String, Object> additionalProperties = [:]) {
         FieldMetaModelDto.builder()
             .fieldName(fieldName)
             .fieldType(classMetaModelDto)
+            .validators(validators)
+            .additionalProperties(additionalProperties.collect {
+                AdditionalPropertyDto.builder()
+                    .name(it.key)
+                    .valueAsObject(it.value)
+                    .build()
+            })
             .build()
     }
 
     static AdditionalPropertyDto isIdFieldType() {
         AdditionalPropertyDto.builder()
             .name(FieldMetaModel.IS_ID_FIELD)
+            .build()
+    }
+
+    static AdditionalPropertyDto additionalProperty(String name, Object value) {
+        AdditionalPropertyDto.builder()
+            .name(name)
+            .valueAsObject(value)
             .build()
     }
 }

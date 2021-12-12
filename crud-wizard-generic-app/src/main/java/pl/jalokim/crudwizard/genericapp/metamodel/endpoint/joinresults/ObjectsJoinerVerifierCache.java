@@ -11,10 +11,10 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 @RequiredArgsConstructor
 public class ObjectsJoinerVerifierCache {
 
-    private final Map<String, ObjectsJoinerVerifier<?, ?>> queryProvidersByClassName = new ConcurrentHashMap<>();
+    private final Map<String, ObjectsJoinerVerifier<?, ?>> objectJointerVerifierByClassName = new ConcurrentHashMap<>();
     private final InstanceLoader instanceLoader;
 
     public ObjectsJoinerVerifier<?, ?> loadJoinerVerifier(String className) {
-        return queryProvidersByClassName.computeIfAbsent(className, instanceLoader::createInstanceOrGetBean);
+        return objectJointerVerifierByClassName.computeIfAbsent(className, instanceLoader::createInstanceOrGetBean);
     }
 }

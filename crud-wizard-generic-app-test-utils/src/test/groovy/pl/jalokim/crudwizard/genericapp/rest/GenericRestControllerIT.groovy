@@ -3,7 +3,9 @@ package pl.jalokim.crudwizard.genericapp.rest
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntryWithErrorCode
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createHttpQueryParamsClassMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidEndpointResponseMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostWithSimplePerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.notNullValidatorMetaModelDto
@@ -105,7 +107,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
 
         then:
         httpResponse.andExpect(status().isCreated())
-        samplePersonDto == new SamplePersonDto(1L, name, surname)
+        samplePersonDto == SamplePersonDto.builder().id(1L).name(name).surname(surname).build()
     }
 
     def "invoke endpoints POST, GET by id, PUT and DELETE with default generic service, mappers, use default data storage with success"() {
@@ -308,6 +310,40 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         httpResponse.andExpect(status().isCreated())
         def createdId = extractResponseAsLong(httpResponse)
         createdId == 10L
+    }
+
+    def "return expected translated http query values"() {
+        given:
+        def someGetEndpoint = EndpointMetaModelDto.builder()
+            .baseUrl("some-url")
+            .apiTag(ApiTagDto.builder()
+                .name(randomText())
+                .build())
+            .httpMethod(HttpMethod.GET)
+            .operationName(randomText())
+            .queryArguments(createHttpQueryParamsClassMetaModelDto())
+            .serviceMetaModel(ServiceMetaModelDto.builder()
+                .className(NormalSpringService.canonicalName)
+                .beanName("normalSpringService")
+                .methodName("returnTranslatedHttpQuery")
+                .build())
+            .responseMetaModel(createValidEndpointResponseMetaModelDto().toBuilder()
+                .successHttpCode(200)
+                .build())
+            .build()
+        endpointMetaModelService.createNewEndpoint(someGetEndpoint)
+
+        when:
+        def response = rawOperationsOnEndpoints.getAndReturnJson("/some-url", [
+            some_numbers: "10, 12, 13", some_texts: "text1, text2",
+            surname: "surName", "age": 18
+        ])
+
+        then:
+        response == [
+            some_numbers: [10, 12, 13], some_texts: ["text1", "text2"],
+            surname: "surName", "age": 18
+        ]
     }
 
     private static class ExampleUser {

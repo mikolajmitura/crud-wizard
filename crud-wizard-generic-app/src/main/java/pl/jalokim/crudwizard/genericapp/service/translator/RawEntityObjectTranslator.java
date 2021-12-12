@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.service.translator;
 
 import static pl.jalokim.crudwizard.core.config.jackson.StringBlankToNullModule.blankTextToNull;
+import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.asLowerCamel;
+import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.asUnderscoreLowercase;
 import static pl.jalokim.crudwizard.genericapp.service.translator.JsonNodeUtils.getFieldsOfObjectNode;
 import static pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath.rootNode;
 import static pl.jalokim.utils.collection.Elements.elements;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
+import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 
 @Component
@@ -90,7 +93,7 @@ public class RawEntityObjectTranslator {
     }
 
     private FieldMetaModel getFieldByName(ObjectNodePath objectNodePath, ClassMetaModel classMetaModel, String fieldName) {
-        return Optional.ofNullable(classMetaModel.getFieldByName(fieldName))
+        return Optional.ofNullable(classMetaModel.getFieldByName(asLowerCamel(fieldName)))
             .orElseThrow(() -> new TechnicalException("Cannot find field with name: '" + fieldName + "' in path: '" + objectNodePath.getFullPath()
                 + "' available fields: " + classMetaModel.getFieldNames() + " in named class meta model: '" + classMetaModel.getName() + "'"));
     }
@@ -116,11 +119,22 @@ public class RawEntityObjectTranslator {
         } else if (isCollectionType(realClass)) {
             ClassMetaModel genericTypeOfCollection = classMetaModel.getGenericTypes().get(0);
             Collection<Object> targetCollection = (Collection<Object>) newInstance(realClass);
-            ArrayNode arrayNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, ArrayNode.class);
 
-            elements(arrayNode).forEachWithIndex((index, arrayNodeElement) ->
-                targetCollection.add(convertObject(objectNodePath.nextCollectionNode(index), arrayNodeElement, genericTypeOfCollection))
-            );
+            if (jsonNode instanceof TextNode) {
+                targetCollection.addAll(
+                    Elements.bySplitText(jsonNode.textValue(), ",")
+                        .map(String::trim)
+                        .map(text -> convertObject(objectNodePath, TextNode.valueOf(text), genericTypeOfCollection))
+                        .asList()
+                );
+
+            } else {
+                ArrayNode arrayNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, ArrayNode.class);
+                elements(arrayNode).forEachWithIndex((index, arrayNodeElement) ->
+                    targetCollection.add(convertObject(objectNodePath.nextCollectionNode(index), arrayNodeElement, genericTypeOfCollection))
+                );
+            }
+
             return targetCollection;
         } else if (String.class.isAssignableFrom(realClass)) {
             return jsonNode instanceof ContainerNode ? jsonNode.toString() : blankTextToNull(jsonNode.textValue());

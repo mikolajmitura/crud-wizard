@@ -20,5 +20,7 @@ public @interface ClassExists {
 
     Class<?> expectedOfType() default Object.class;
 
+    boolean canBeAbstractOrInterface() default false;
+
     Class<? extends Payload>[] payload() default {};
 }

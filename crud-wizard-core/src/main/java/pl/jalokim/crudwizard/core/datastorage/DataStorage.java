@@ -27,9 +27,9 @@ public interface DataStorage {
 
     Optional<Object> getOptionalEntityById(ClassMetaModel classMetaModel, Object idObject);
 
-    Page<Object> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, DataStorageQuery query);
+    Page<Object> findPageOfEntity(Pageable pageable, DataStorageQuery query);
 
-    List<Object> findEntities(ClassMetaModel classMetaModel, DataStorageQuery query);
+    List<Object> findEntities(DataStorageQuery query);
 
     void innerDeleteEntity(ClassMetaModel classMetaModel, Object idObject);
 

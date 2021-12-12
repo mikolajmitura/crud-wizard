@@ -40,5 +40,6 @@ public class DataStorageConnectorMetaModelDto extends AdditionalPropertyMetaMode
 
     String nameOfQuery;
 
+    @Valid
     QueryProviderDto queryProvider;
 }

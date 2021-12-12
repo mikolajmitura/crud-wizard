@@ -4,7 +4,7 @@ import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.crea
 import static pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel.empty
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelWithParents
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createRequestBodyClassMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator
@@ -51,7 +51,7 @@ class GenericValidatorTest extends UnitTestSpec {
         where:
         valueToVerify                 | classMetaModel                                                               | additionalValidators
         "text"                        | createClassMetaModelFromClass(String.class, [NOT_NULL_VALIDATOR_META_MODEL]) | empty()
-        createRequestBodyTranslated() | createRequestBodyClassMetaModel()                                            | empty()
+        createRequestBodyTranslated() | createSomePersonClassMetaModel() | empty()
     }
 
     @Unroll
@@ -71,7 +71,7 @@ class GenericValidatorTest extends UnitTestSpec {
             errorEntry("", notNullMessage(), NOT_NULL_MESSAGE_PROPERTY)
         ]
 
-        invalidPayload1()               | createRequestBodyClassMetaModel() |
+        invalidPayload1()               | createSomePersonClassMetaModel() |
             buildAdditionalValidatorsMetaModel()                                                   | [
             errorEntry("addresses[0].street", getAppMessageSource().getMessage("GenericValidatorTest.expected.message"),
                 buildMessageForValidator(FieldShouldWhenOther)),
@@ -81,7 +81,7 @@ class GenericValidatorTest extends UnitTestSpec {
             errorEntry("name", invalidSizeMessage(3, 20), SIZE_MESSAGE_PROPERTY),
         ]
 
-        invalidPayload1()               | createRequestBodyClassMetaModel() |
+        invalidPayload1()               | createSomePersonClassMetaModel() |
             empty()                                                                                | [
             errorEntry("addresses[1].houseNr", notNullMessage(), NOT_NULL_MESSAGE_PROPERTY),
             errorEntry("surname", notNullMessage(), NOT_NULL_MESSAGE_PROPERTY),

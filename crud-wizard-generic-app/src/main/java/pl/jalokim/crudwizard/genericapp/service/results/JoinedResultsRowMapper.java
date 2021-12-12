@@ -6,14 +6,17 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @Component
 public class JoinedResultsRowMapper {
 
-    public Object mapToObject(JoinedResultsRow joinedResultsRow) {
+    public Object mapToObject(ClassMetaModel targetMetaModel, JoinedResultsRow joinedResultsRow) {
         Map<String, Object> finalResult = new HashMap<>();
         Map<String, Object> joinedResultsByDsQueryName = joinedResultsRow.getJoinedResultsByDsQueryName();
+        // TODO #11 build final results based on targetMetaModel and resolve mapping field collision somehow...
+        //  resolving of field collision should be done via passed CWML script
         for (Object value : joinedResultsByDsQueryName.values()) {
             if (value instanceof Map) {
                 Map<String, Object> dsResultMap = (Map<String, Object>) value;

@@ -6,12 +6,16 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.config.GenericMapper;
 import pl.jalokim.crudwizard.genericapp.config.GenericMethod;
+import pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRow;
+import pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRowMapper;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @RequiredArgsConstructor
 @GenericMapper
 public class GenericMapperBean {
+
+    private final JoinedResultsRowMapper joinedResultsRowMapper;
 
     @GenericMethod
     public Object mapToTarget(GenericMapperArgument mapperArgument) {
@@ -20,6 +24,11 @@ public class GenericMapperBean {
                 // TODO should be deep copy.
                 return mapperArgument.getSourceObject();
             }
+            if (mapperArgument.getSourceObject() instanceof JoinedResultsRow) {
+                JoinedResultsRow joinedResultsRow = (JoinedResultsRow) mapperArgument.getSourceObject();
+                return joinedResultsRowMapper.mapToObject(mapperArgument.getTargetMetaModel(), joinedResultsRow);
+            }
+
             if (mapperArgument.getSourceMetaModel() == null) {
                 // simple work around for return first created id from DS or from all
                 Map<String, Object> resultsFrom = (Map<String, Object>) mapperArgument.getSourceObject();
