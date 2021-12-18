@@ -23,7 +23,7 @@ public class ClassMetaModelTypeExtractor {
 
     public Optional<TypeMetadata> getTypeByPath(ClassMetaModelDto classMetaModel, String path) {
         List<String> pathParts = Elements.bySplitText(path, "\\.").asList();
-        GenericModelType currentNode = genericModelTypeFactory.fromDto(classMetaModel);
+        GenericModelType currentNode = genericModelTypeFactory.fromDto(classMetaModel, null);
         String currentPath = "";
         for (String pathPart : pathParts) {
             TypeMetadata currentTypeMetadata = currentNode.extractTypeMetadata();

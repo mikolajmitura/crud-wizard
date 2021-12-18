@@ -40,11 +40,11 @@ class DefaultDataStorageQueryProviderTest extends Specification {
             .build())               | createDataStorageQuery(new EmptyExpression())
 
         queryArgs()                 | createDataStorageQuery(new EmptyExpression()
-            .and(RealExpression.equals(buildForPath("document.type"), buildForPath("rightPath.otherValue"))))
+            .and(RealExpression.isEqualsTo(buildForPath("document.type"), buildForPath("rightPath.otherValue"))))
 
         queryArgs(name: "someName") | createDataStorageQuery(new EmptyExpression()
             .and(RealExpression.like("name", "someName"))
-            .and(RealExpression.equals(buildForPath("document.type"), buildForPath("rightPath.otherValue"))))
+            .and(RealExpression.isEqualsTo(buildForPath("document.type"), buildForPath("rightPath.otherValue"))))
 
         queryArgs(name: "someName2",
             age: 12,
@@ -62,7 +62,7 @@ class DefaultDataStorageQueryProviderTest extends Specification {
             .and(RealExpression.in("someNumbers", List.of(12, 11, 10)))
             .and(RealExpression.isNull("pesel"))
             .and(RealExpression.isNotNull("nationality"))
-            .and(RealExpression.equals(buildForPath("document.type"), buildForPath("rightPath.otherValue"))))
+            .and(RealExpression.isEqualsTo(buildForPath("document.type"), buildForPath("rightPath.otherValue"))))
     }
 
     private static DataStorageQueryArguments queryArgs(Map<String, Object> requestParams = [:]) {

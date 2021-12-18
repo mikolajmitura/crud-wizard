@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.core.metamodels;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getFullClassName;
 
 import java.util.List;
+import javax.validation.Valid;
 import lombok.EqualsAndHashCode;
 import pl.jalokim.utils.collection.Elements;
 
@@ -13,7 +14,7 @@ public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
 
     public abstract List<AdditionalPropertyDto> getAdditionalProperties();
 
-    public abstract void setAdditionalProperties(List<AdditionalPropertyDto> additionalProperties);
+    public abstract void setAdditionalProperties(List<@Valid AdditionalPropertyDto> additionalProperties);
 
     public Object getPropertyValue(String propertyName) {
         return Elements.elements(getAdditionalProperties())

@@ -96,5 +96,5 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
     List<@Valid DataStorageResultsJoinerDto> dataStorageResultsJoiners;
 
     @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

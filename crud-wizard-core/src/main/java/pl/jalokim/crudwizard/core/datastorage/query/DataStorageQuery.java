@@ -12,6 +12,8 @@ import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 @EqualsAndHashCode
 public class DataStorageQuery {
 
+    // TODO #25 should be select from and should be relation to join other classMetaModel
+    //  or join to DataStorageQuery
     private ClassMetaModel selectFrom;
     private AbstractExpression where;
     private List<OrderPath> sortBy;

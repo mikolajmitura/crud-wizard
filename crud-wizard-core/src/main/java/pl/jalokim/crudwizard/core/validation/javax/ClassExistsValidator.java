@@ -23,6 +23,7 @@ public class ClassExistsValidator implements BaseConstraintValidatorWithDynamicM
         try {
             addMessageParameter(context, "expectedOfType", expectedClassType.getCanonicalName());
             Class<?> realClass = ClassUtils.loadRealClass(className);
+
             return isTypeOf(realClass, expectedClassType)
                 && (canBeAbstractOrInterface || isConcreteClass(realClass));
         } catch (Exception ex) {

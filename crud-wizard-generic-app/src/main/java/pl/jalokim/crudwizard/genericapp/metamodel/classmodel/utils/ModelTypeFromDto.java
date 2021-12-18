@@ -17,6 +17,12 @@ class ModelTypeFromDto extends GenericModelType {
 
     ClassMetaModelDto comesFromClassMetaModelDto;
 
+    public ModelTypeFromDto(ClassMetaModelDtoTempContext context,
+        ClassMetaModelDto comesFromClassMetaModelDto) {
+        super(context);
+        this.comesFromClassMetaModelDto = comesFromClassMetaModelDto;
+    }
+
     @Override
     public String getTypeName() {
         return Optional.ofNullable(comesFromClassMetaModelDto.getName())
@@ -35,16 +41,16 @@ class ModelTypeFromDto extends GenericModelType {
         return elements(comesFromClassMetaModelDto.getFields())
             .filter(field -> field.getFieldName().equals(fieldName))
             .map(FieldMetaModelDto::getFieldType)
-            .map(genericModelTypeFactory::fromDto)
+            .map(classMetaModelDto -> genericModelTypeFactory.fromDto(classMetaModelDto, getContext()))
             .findFirst()
             .or(() -> elements(comesFromClassMetaModelDto.getExtendsFromModels())
-                .map(genericModelTypeFactory::fromDto)
+                .map(classMetaModelDto -> genericModelTypeFactory.fromDto(classMetaModelDto, getContext()))
                 .map(genericModelType -> genericModelType.getFieldTypeByName(fieldName, genericModelTypeFactory))
                 .filter(Objects::nonNull)
                 .findFirst())
             .orElseGet(() -> Optional.ofNullable(comesFromClassMetaModelDto.getClassName())
                 .map(GenericModelType::typeMetadataByClassName)
-                .map(typeMetadata -> getFieldTypeByNameFor(typeMetadata, fieldName))
+                .map(typeMetadata -> getFieldTypeByNameFor(getContext(), typeMetadata, fieldName))
                 .orElse(null));
     }
 }

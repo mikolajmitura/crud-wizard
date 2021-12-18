@@ -80,5 +80,5 @@ public class ClassMetaModelDto extends AdditionalPropertyMetaModelDto {
     List<@Valid ClassMetaModelDto> extendsFromModels;
 
     @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

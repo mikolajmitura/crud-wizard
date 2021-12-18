@@ -39,7 +39,7 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
     private final static Map<ExpressionType, BiFunction<ExpressionArgument, ExpressionArgument, AbstractExpression>> EXPRESSION_BY_TYPE = Map.of(
         LIKE_IGNORE_CASE, RealExpression::likeIgnoreCase,
         LIKE, RealExpression::like,
-        EQUALS, RealExpression::equals,
+        EQUALS, RealExpression::isEqualsTo,
         LOWER_THAN, RealExpression::lowerThan,
         GREATER_THAN, RealExpression::greaterThan,
         IN, RealExpression::in,

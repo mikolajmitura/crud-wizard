@@ -36,7 +36,7 @@ public class DataStorageConnectorMetaModelDto extends AdditionalPropertyMetaMode
     ClassMetaModelDto classMetaModelInDataStorage;
 
     @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     String nameOfQuery;
 

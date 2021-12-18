@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSimplePersonMetaModel
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
@@ -17,7 +18,6 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.exampleClassMetaModelDtoWithExtension
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntitySamples.personMetaEntity
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples.createMetaModelContextWithOneEndpointInNodes
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetListOfPerson
@@ -39,16 +39,17 @@ import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.GenericModelTypeFactory
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
+import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity
@@ -63,14 +64,13 @@ import spock.lang.Unroll
 
 class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
 
-    private static def DS_CONNECTOR_ID = 1
-    private static def CLASS_METAMODEL = 2
+    private static def DS_CONNECTOR_ID = 1L
+    private static def CLASS_METAMODEL = 2L
 
     private MetaModelContextService metaModelContextService = Mock()
     private ApplicationContext applicationContext = Mock()
     private DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository = Mock()
-    private ClassMetaModelRepository classMetaModelRepository = Mock()
-    private GenericModelTypeFactory genericModelTypeFactory = new GenericModelTypeFactory(classMetaModelRepository)
+    private GenericModelTypeFactory genericModelTypeFactory = new GenericModelTypeFactory(metaModelContextService)
     private ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(genericModelTypeFactory)
     private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
     private endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
@@ -86,14 +86,15 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .nameOfQuery("some-query-name2")
             .classMetaModelInDataStorage(ClassMetaModelEntity.builder().id(CLASS_METAMODEL).build())
             .build()
-
-        classMetaModelRepository.findExactlyOneById(CLASS_METAMODEL) >> personMetaEntity()
     }
 
     @Unroll
     def "should return expected messages for: #caseName"() {
         given:
         MetaModelContext metaModelContext = createMetaModelContextWithOneEndpointInNodes()
+        ModelsCache<ClassMetaModel> classMetaModels = new ModelsCache<>()
+        classMetaModels.put(CLASS_METAMODEL, createSimplePersonMetaModel())
+        metaModelContext.setClassMetaModels(classMetaModels)
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
 

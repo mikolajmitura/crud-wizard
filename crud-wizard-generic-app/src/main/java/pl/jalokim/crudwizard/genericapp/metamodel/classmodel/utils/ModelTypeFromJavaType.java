@@ -1,15 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 import pl.jalokim.utils.reflection.ReflectionOperationException;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
 @EqualsAndHashCode(callSuper = true)
-@Value
 class ModelTypeFromJavaType extends GenericModelType {
 
     TypeMetadata comesFromJavaType;
+
+    public ModelTypeFromJavaType(ClassMetaModelDtoTempContext context, TypeMetadata comesFromJavaType) {
+        super(context);
+        this.comesFromJavaType = comesFromJavaType;
+    }
 
     @Override
     public String getTypeName() {
@@ -23,12 +26,12 @@ class ModelTypeFromJavaType extends GenericModelType {
 
     @Override
     public GenericModelType getFieldTypeByName(String fieldName, GenericModelTypeFactory genericModelTypeFactory) {
-        return getFieldTypeByNameFor(comesFromJavaType, fieldName);
+        return getFieldTypeByNameFor(getContext(), comesFromJavaType, fieldName);
     }
 
-    public static GenericModelType getFieldTypeByNameFor(TypeMetadata typeMetadata, String fieldName) {
+    public static GenericModelType getFieldTypeByNameFor(ClassMetaModelDtoTempContext context, TypeMetadata typeMetadata, String fieldName) {
         try {
-            return new ModelTypeFromJavaType(typeMetadata.getMetaForField(fieldName));
+            return new ModelTypeFromJavaType(context, typeMetadata.getMetaForField(fieldName));
         } catch (ReflectionOperationException ex) {
             return null;
         }

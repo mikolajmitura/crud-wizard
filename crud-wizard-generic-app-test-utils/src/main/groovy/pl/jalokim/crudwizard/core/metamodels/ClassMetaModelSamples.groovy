@@ -7,6 +7,8 @@ import java.time.LocalDateTime
 import java.time.Period
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.DepartmentDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 
 class ClassMetaModelSamples {
@@ -14,16 +16,18 @@ class ClassMetaModelSamples {
     static FieldMetaModel createValidFieldMetaModel(String fieldName, Class<?> fieldType, List<ValidatorMetaModel> validators = []) {
         FieldMetaModel.builder()
             .fieldName(fieldName)
-            .fieldType(createClassMetaModelFromClass(fieldType))
+            .fieldType(createClassMetaModelFromClass(fieldType, []))
             .validators(validators)
             .build()
     }
 
-    static FieldMetaModel createValidFieldMetaModel(String fieldName, ClassMetaModel fieldType, List<ValidatorMetaModel> validators = []) {
+    static FieldMetaModel createValidFieldMetaModel(String fieldName, ClassMetaModel fieldType,
+        List<ValidatorMetaModel> validators = [], ClassMetaModel ownerOfField = null) {
         FieldMetaModel.builder()
             .fieldName(fieldName)
             .fieldType(fieldType)
             .validators(validators)
+            .ownerOfField(ownerOfField)
             .build()
     }
 
@@ -187,6 +191,51 @@ class ClassMetaModelSamples {
                     .build(),
                 createSomePersonClassMetaModel(), createHttpQueryParamsMetaModel()])
             .validators([ValidatorMetaModelSamples.CUSTOM_TEST_VALIDATOR_METAMODEL])
+            .build()
+    }
+
+    static ClassMetaModel createSimplePersonMetaModel() {
+        def classMetamodel = ClassMetaModel.builder()
+            .name("person")
+            .fields([
+                createValidFieldMetaModel("id", Long),
+                createValidFieldMetaModel("name", String),
+                createValidFieldMetaModel("surname", String),
+                createValidFieldMetaModel("fullName", String),
+                createValidFieldMetaModel("passportData", createSimpleDocumentMetaModel()),
+                createValidFieldMetaModel("fatherData", ExtendedSamplePersonDto)
+            ])
+            .build()
+
+        classMetamodel.fields.each {
+            it.ownerOfField = classMetamodel
+        }
+
+        classMetamodel
+    }
+
+    static ClassMetaModel createSimpleDocumentMetaModel() {
+        ClassMetaModel.builder()
+            .name("document")
+            .fields([
+                createValidFieldMetaModel("id", Long),
+                createValidFieldMetaModel("documentNumber", String),
+                createValidFieldMetaModel("validTo", LocalDate)
+            ])
+            .build()
+    }
+
+    static ClassMetaModel createEmployeePersonMeta() {
+        ClassMetaModel.builder()
+            .name("employee-person")
+            .extendsFromModels([
+                createSimplePersonMetaModel(),
+                createClassMetaModelFromClass(DepartmentDto)])
+            .fields([
+                createValidFieldMetaModel("employeeId", Long),
+                createValidFieldMetaModel("fullName", Map),
+                createValidFieldMetaModel("boss", createSimplePersonMetaModel()),
+            ])
             .build()
     }
 }

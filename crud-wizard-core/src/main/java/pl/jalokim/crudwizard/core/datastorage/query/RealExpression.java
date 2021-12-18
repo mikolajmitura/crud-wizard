@@ -4,8 +4,10 @@ import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.bu
 import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.buildForPath;
 import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.buildForValue;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import lombok.EqualsAndHashCode;
+import lombok.Generated;
 import lombok.Value;
 
 @EqualsAndHashCode(callSuper = false)
@@ -45,15 +47,15 @@ public class RealExpression extends AbstractExpression {
         return new RealExpression(buildForPath(leftPath), buildForDataStorageQuery(dataStorageSubQuery), ExpressionType.LIKE);
     }
 
-    public static RealExpression equals(ExpressionArgument leftArg, ExpressionArgument rightArg) {
+    public static RealExpression isEqualsTo(ExpressionArgument leftArg, ExpressionArgument rightArg) {
         return new RealExpression(leftArg, rightArg, ExpressionType.EQUALS);
     }
 
-    public static RealExpression equals(String leftPath, Object expectedValue) {
+    public static RealExpression isEqualsTo(String leftPath, Object expectedValue) {
         return new RealExpression(buildForPath(leftPath), buildForValue(expectedValue), ExpressionType.EQUALS);
     }
 
-    public static RealExpression equals(String leftPath, DataStorageQuery dataStorageSubQuery) {
+    public static RealExpression isEqualsTo(String leftPath, DataStorageQuery dataStorageSubQuery) {
         return new RealExpression(buildForPath(leftPath), buildForDataStorageQuery(dataStorageSubQuery), ExpressionType.EQUALS);
     }
 

@@ -5,6 +5,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,5 +38,5 @@ public class DataStorageMetaModelDto extends AdditionalPropertyMetaModelDto {
     String className;
 
     @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

@@ -1,38 +1,19 @@
 package pl.jalokim.crudwizard.core.datastorage.query;
 
-import java.util.Objects;
-import lombok.Value;
-import pl.jalokim.utils.collection.Elements;
-
-@Value
-public class ExpressionArgument {
-
-    String fullPath;
-    Object realValue;
-    DataStorageQuery dataStorageQuery;
+public abstract class ExpressionArgument {
 
     public static ExpressionArgument buildForPath(String path) {
-        return new ExpressionArgument(path, null, null);
+        return new FullPathExpressionArgument(path);
     }
 
     public static ExpressionArgument buildForValue(Object realValue) {
-        return new ExpressionArgument(null, realValue, null);
+        return new RealValueExpressionArgument(realValue);
     }
 
     public static ExpressionArgument buildForDataStorageQuery(DataStorageQuery dataStorageQuery) {
-        return new ExpressionArgument(null, null, dataStorageQuery);
+        return new QueryExpressionArgument(dataStorageQuery);
     }
 
-    @Override
-    public String toString() {
-        return "ExpressionArgument(" + Elements.elements(printWhenNotNull("fullPath", fullPath),
-            printWhenNotNull("realValue", realValue),
-            printWhenNotNull("dataStorageQuery", dataStorageQuery))
-            .filter(Objects::nonNull)
-            .asConcatText(", ") + ")";
-    }
+    public abstract <T> T extractValue(Object argumentObject);
 
-    private String printWhenNotNull(String fieldName, Object value) {
-        return value != null ? fieldName + "=" + value : null;
-    }
 }

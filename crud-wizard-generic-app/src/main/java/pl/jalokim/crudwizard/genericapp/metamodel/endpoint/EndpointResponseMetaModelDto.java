@@ -16,7 +16,6 @@ import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 
 @Data
@@ -35,10 +34,12 @@ public class EndpointResponseMetaModelDto extends AdditionalPropertyMetaModelDto
     @Max(599)
     Long successHttpCode;
 
+    @Valid
     MapperMetaModelDto mapperMetaModel;
 
+    @Valid
     QueryProviderDto queryProvider;
 
     @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

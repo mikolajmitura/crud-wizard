@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.datastorage.inmemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
 
 @Configuration
@@ -15,7 +16,7 @@ public class InMemoryConfig {
     }
 
     @Bean
-    public InMemoryDataStorage inMemoryDataStorage(IdGenerators idGenerators, InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator) {
-        return new InMemoryDataStorage(idGenerators, inMemoryWhereExpressionTranslator);
+    public InMemoryDataStorage inMemoryDataStorage(IdGenerators idGenerators, InMemoryDsQueryRunner inMemoryDsQueryRunner) {
+        return new InMemoryDataStorage(idGenerators, inMemoryDsQueryRunner);
     }
 }

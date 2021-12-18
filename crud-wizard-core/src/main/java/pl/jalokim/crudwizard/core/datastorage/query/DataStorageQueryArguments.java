@@ -13,6 +13,9 @@ public class DataStorageQueryArguments {
     Map<String, String> headers;
     Map<String, Object> pathVariables;
     Map<String, Object> requestParams;
+
+    // TODO #25 should be select from and should be relation to join other classMetaModel
+    //  or join to DataStorageQuery
     List<ClassMetaModel> queriedClassMetaModels;
     ClassMetaModel requestParamsClassMetaModel;
     /**

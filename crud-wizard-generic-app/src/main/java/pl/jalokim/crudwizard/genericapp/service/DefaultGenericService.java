@@ -19,6 +19,7 @@ import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryArguments;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
@@ -41,6 +42,7 @@ public class DefaultGenericService {
     private final MapperDelegatorService mapperDelegatorService;
     private final DataStorageResultJoiner dataStorageResultJoiner;
     private final DefaultClassesConfig defaultClassesConfig;
+    private final InMemoryDsQueryRunner inMemoryDsQueryRunner;
 
     @GenericMethod
     public Object saveOrReadFromDataStorages(GenericServiceArgument genericServiceArgument) {
@@ -92,7 +94,6 @@ public class DefaultGenericService {
                 if (isTypeOf(responseRealClass, Page.class)) {
                     // TODO #37 return Page or collection when request params can be mapped to Pageable
                 } else if (isTypeOf(responseRealClass, Collection.class)) {
-                    // TODO #37 return collection when request params cannot be mapped to Pageable
                     ClassMetaModel elementTypeInCollection = responseClassMetaModel.getGenericTypes().get(0);
                     Map<String, List<Object>> queriesResults = new HashMap<>();
                     DataStorageQueryArguments dataStorageQueryArguments = DataStorageQueryArguments.builder()
@@ -135,7 +136,7 @@ public class DefaultGenericService {
                         results.add(mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument));
                     }
 
-                    results = runFinalQueryWhenShould(endpointMetaModel.getResponseMetaModel().getQueryProvider(), results);
+                    results = runFinalQueryWhenShould(dataStorageQueryArguments, endpointMetaModel.getResponseMetaModel().getQueryProvider(), results);
 
                     Class<?> nonAbstractCollectionClass = responseRealClass;
                     if (MetadataReflectionUtils.isConcreteClass(responseRealClass)) {
@@ -167,12 +168,12 @@ public class DefaultGenericService {
         return responseBody;
     }
 
-    private Collection<Object> runFinalQueryWhenShould(DataStorageQueryProvider queryProvider, Collection<Object> results) {
+    private Collection<Object> runFinalQueryWhenShould(DataStorageQueryArguments dataStorageQueryArguments,
+        DataStorageQueryProvider queryProvider, Collection<Object> results) {
         if (queryProvider == null) {
             return results;
         }
-        // TODO #37 use final query, some order or filter
-        throw new UnsupportedOperationException("not supported final query");
+        return inMemoryDsQueryRunner.runQuery(results.stream(), queryProvider.createQuery(dataStorageQueryArguments));
     }
 
     private MappedIdForDataStorage getResultFromDataStorageAndPutToContext(Map<String, Object> resultsByDataStorageName,

@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
@@ -26,10 +26,10 @@ public class InMemoryDataStorage implements DataStorage {
     private final String name;
     private final Map<String, EntityStorage> entitiesByName = new ConcurrentHashMap<>();
     private final IdGenerators idGenerators;
-    private final InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator;
+    private final InMemoryDsQueryRunner inMemoryDsQueryRunner;
 
-    public InMemoryDataStorage(IdGenerators idGenerators, InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator) {
-        this(DEFAULT_DS_NAME, idGenerators, inMemoryWhereExpressionTranslator);
+    public InMemoryDataStorage(IdGenerators idGenerators, InMemoryDsQueryRunner inMemoryDsQueryRunner) {
+        this(DEFAULT_DS_NAME, idGenerators, inMemoryDsQueryRunner);
     }
 
     @Override
@@ -70,13 +70,9 @@ public class InMemoryDataStorage implements DataStorage {
 
     @Override
     public List<Object> findEntities(DataStorageQuery query) {
-        Predicate<Object> objectPredicate = inMemoryWhereExpressionTranslator.translateWhereExpression(query.getWhere());
         ClassMetaModel selectFromClassMetaModel = query.getSelectFrom();
         EntityStorage entityStorage = entitiesByName.get(selectFromClassMetaModel.getName());
-
-        return elements(entityStorage.fetchStream())
-            .filter(objectPredicate)
-            .asList();
+        return inMemoryDsQueryRunner.runQuery(entityStorage.fetchStream(), query);
     }
 
     @Override

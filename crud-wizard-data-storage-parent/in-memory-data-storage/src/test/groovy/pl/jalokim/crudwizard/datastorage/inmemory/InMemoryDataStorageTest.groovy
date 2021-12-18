@@ -1,5 +1,11 @@
 package pl.jalokim.crudwizard.datastorage.inmemory
 
+import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery
+import pl.jalokim.crudwizard.core.datastorage.query.OrderPath
+import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryOrderByTranslator
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryWhereExpressionTranslator
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
@@ -16,16 +22,20 @@ class InMemoryDataStorageTest extends Specification {
     private ClassMetaModel addressMetaModel = newClassMetaModel(ADDRESSES, "uuid", String)
     private ClassMetaModel jobMetaModel = newClassMetaModel(JOBS, "idField", Integer)
 
-    def "should save, update, delete few entities in in memory data storage"() {
+    private InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator = new InMemoryWhereExpressionTranslator()
+    private InMemoryOrderByTranslator inMemoryOrderByTranslator = new InMemoryOrderByTranslator()
+    private InMemoryDsQueryRunner inMemoryDsQueryRunner = new InMemoryDsQueryRunner(inMemoryWhereExpressionTranslator, inMemoryOrderByTranslator)
+
+    def "should save, filter, order, update, delete few entities in in memory data storage"() {
         given:
-        def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE, new InMemoryWhereExpressionTranslator())
+        def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE, inMemoryDsQueryRunner)
         def firstPerson = [
-            name     : DataFakerHelper.randomText(),
+            name     : "John",
             firstName: DataFakerHelper.randomText()
         ]
 
         def secondPerson = [
-            name     : DataFakerHelper.randomText(),
+            name     : "Frank",
             firstName: DataFakerHelper.randomText()
         ]
 
@@ -62,6 +72,31 @@ class InMemoryDataStorageTest extends Specification {
         firstJobId == 0
         secondJobId == 1
         addressId == address.uuid
+
+        and: 'filter and sort person entities'
+        when:
+        def query1 = DataStorageQuery.builder()
+            .selectFrom(personMetaModel)
+            .where(RealExpression.isNotNull("name"))
+            .sortBy([OrderPath.newOrder("name")])
+            .build()
+        def results1 = inMemoryStorage.findEntities(query1)
+
+        def query2 = DataStorageQuery.builder()
+            .selectFrom(personMetaModel)
+            .where(RealExpression.isEqualsTo("name", "John"))
+            .build()
+        def results2 = inMemoryStorage.findEntities(query2)
+
+        def query3 = DataStorageQuery.builder()
+            .selectFrom(personMetaModel)
+            .build()
+        def results3 = inMemoryStorage.findEntities(query3)
+
+        then:
+        results1 == [secondPerson, firstPerson]
+        results2 == [firstPerson]
+        results3 == [firstPerson, secondPerson]
 
         and: "get entity by id"
         when:
