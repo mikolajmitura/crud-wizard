@@ -37,7 +37,7 @@ import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 @Component
 public class InMemoryWhereExpressionTranslator {
 
-    private final static Map<ExpressionType, TriPredicate> PREDICATE_BY_EXPRESSION_TYPE = Map.of(
+    private static final Map<ExpressionType, TriPredicate> PREDICATE_BY_EXPRESSION_TYPE = Map.of(
         LIKE_IGNORE_CASE, (realObject, leftArg, rightArg) ->
             StringUtils.containsIgnoreCase(
                 leftArg.extractValue(realObject),

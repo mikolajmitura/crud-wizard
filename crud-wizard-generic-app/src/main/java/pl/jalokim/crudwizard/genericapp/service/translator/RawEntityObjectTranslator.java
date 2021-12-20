@@ -2,7 +2,6 @@ package pl.jalokim.crudwizard.genericapp.service.translator;
 
 import static pl.jalokim.crudwizard.core.config.jackson.StringBlankToNullModule.blankTextToNull;
 import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.asLowerCamel;
-import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.asUnderscoreLowercase;
 import static pl.jalokim.crudwizard.genericapp.service.translator.JsonNodeUtils.getFieldsOfObjectNode;
 import static pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath.rootNode;
 import static pl.jalokim.utils.collection.Elements.elements;
@@ -12,6 +11,7 @@ import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isMapType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ContainerNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Collection;
@@ -79,6 +79,9 @@ public class RawEntityObjectTranslator {
             }
 
         } else {
+            if (jsonNode instanceof NullNode) {
+                return null;
+            }
             ObjectNode mapObjectNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, ObjectNode.class);
             Map<Object, Object> targetMap = new LinkedHashMap<>();
             for (var jsonFieldEntry : getFieldsOfObjectNode(mapObjectNode)) {

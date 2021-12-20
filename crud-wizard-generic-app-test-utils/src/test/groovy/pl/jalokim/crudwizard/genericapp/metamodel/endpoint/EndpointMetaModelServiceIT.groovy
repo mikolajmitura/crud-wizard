@@ -5,7 +5,7 @@ import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLD
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService.createNewEndpointReason
@@ -54,7 +54,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         def validatorInstancesCache = validatorInstanceCache.dataValidatorsByKey
         validatorInstancesCache.clear()
         def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto().toBuilder()
-            .payloadMetamodel(extendedPersonClassMetaModel())
+            .payloadMetamodel(extendedPersonClassMetaModel1())
             .payloadMetamodelAdditionalValidators(createAdditionalValidatorsForExtendedPerson())
             .build()
 

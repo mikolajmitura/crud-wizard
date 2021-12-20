@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.core.datastorage.query.inmemory
 
+@SuppressWarnings("UnusedPrivateField")
 class Person {
+
     private String name
     private String surname
     private Person father

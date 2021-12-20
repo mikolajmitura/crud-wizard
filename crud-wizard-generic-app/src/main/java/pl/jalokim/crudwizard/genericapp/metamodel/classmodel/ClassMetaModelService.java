@@ -42,9 +42,7 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
         elements(classMetaModelEntity.getGenericTypes())
             .forEachWithIndexed(indexed -> {
                 var genericTypeEntry = indexed.getValue();
-                if (genericTypeEntry.getId() == null) {
-                    classMetaModelEntity.getGenericTypes().set(indexed.getIndex(), saveNewOrLoadById(genericTypeEntry));
-                }
+                classMetaModelEntity.getGenericTypes().set(indexed.getIndex(), saveNewOrLoadById(genericTypeEntry));
             });
 
         validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntity.getValidators());
@@ -52,9 +50,7 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
         elements(classMetaModelEntity.getExtendsFromModels())
             .forEachWithIndexed(indexed -> {
                 var extendsFromEntry = indexed.getValue();
-                if (extendsFromEntry.getId() == null) {
-                    classMetaModelEntity.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
-                }
+                classMetaModelEntity.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
             });
 
         return repository.save(classMetaModelEntity);

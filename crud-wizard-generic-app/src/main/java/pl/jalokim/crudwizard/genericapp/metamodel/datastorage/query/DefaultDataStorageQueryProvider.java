@@ -35,6 +35,7 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
     public static final String EXPRESSION_TYPE = "#expression_type";
     public static final String EXPRESSION_RIGHT_PATH = "#expression_right_path";
     public static final String EXPRESSION_LEFT_PATH = "#expression_left_path";
+    public static final String IGNORE_IN_QUERY_PARAM = "#ignore_in_query_as_param";
 
     private final static Map<ExpressionType, BiFunction<ExpressionArgument, ExpressionArgument, AbstractExpression>> EXPRESSION_BY_TYPE = Map.of(
         LIKE_IGNORE_CASE, RealExpression::likeIgnoreCase,
@@ -56,6 +57,14 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
         AbstractExpression whereExpression = new EmptyExpression();
 
         for (FieldMetaModel field : requestParamsClassMetaModel.fetchAllFields()) {
+            Boolean ignoreField = Optional.ofNullable((String) field.getPropertyRealValue(IGNORE_IN_QUERY_PARAM))
+                .map(Boolean::valueOf)
+                .orElse(false);
+
+            if (ignoreField) {
+                continue;
+            }
+
             String expressionType = field.getPropertyRealValue(EXPRESSION_TYPE);
             String rightValueAsPath = field.getPropertyRealValue(EXPRESSION_RIGHT_PATH);
             String leftValueAsPath = field.getPropertyRealValue(EXPRESSION_LEFT_PATH);

@@ -1,9 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.additionalPropertyRawJsonString
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel2
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
@@ -12,6 +14,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 
 @Component
 class EndpointMetaModelDtoSamples {
@@ -31,7 +34,14 @@ class EndpointMetaModelDtoSamples {
 
     static EndpointMetaModelDto createValidPostExtendedUserWithValidators() {
         createValidPostEndpointMetaModelDto().toBuilder()
-            .payloadMetamodel(extendedPersonClassMetaModel())
+            .payloadMetamodel(extendedPersonClassMetaModel1())
+            .payloadMetamodelAdditionalValidators(createAdditionalValidatorsForExtendedPerson())
+            .build()
+    }
+
+    static EndpointMetaModelDto createValidPostExtendedUserWithValidators2() {
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(extendedPersonClassMetaModel2())
             .payloadMetamodelAdditionalValidators(createAdditionalValidatorsForExtendedPerson())
             .build()
     }
@@ -66,12 +76,24 @@ class EndpointMetaModelDtoSamples {
 
     static EndpointMetaModelDto createValidGetListOfPerson() {
         EndpointMetaModelDto.builder()
-            .baseUrl("domain/person/")
+            .baseUrl("domain/person")
             .apiTag(ApiTagDto.builder()
                 .name(randomText())
                 .build())
             .httpMethod(HttpMethod.GET)
-            .operationName("get list of person")
+            .operationName("getListOfPerson")
+            .queryArguments(ClassMetaModelDto.builder()
+                .name("")
+                .fields([
+                    createValidFieldMetaModelDto("surname", String),
+                    createValidFieldMetaModelDto("sortBy", String, [], [
+                        additionalPropertyRawJsonString(DefaultDataStorageQueryProvider.IGNORE_IN_QUERY_PARAM, "true")
+                    ]),
+                    createValidFieldMetaModelDto("name", String, [],
+                        [additionalPropertyRawJsonString(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "EQUALS")])
+                ])
+                .build()
+            )
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .classMetaModel(createClassMetaModelDtoFromClass(List).toBuilder()
                     .genericTypes([simplePersonClassMetaModel()])

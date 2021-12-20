@@ -4,10 +4,8 @@ import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.bu
 import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.buildForPath;
 import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.buildForValue;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import lombok.EqualsAndHashCode;
-import lombok.Generated;
 import lombok.Value;
 
 @EqualsAndHashCode(callSuper = false)

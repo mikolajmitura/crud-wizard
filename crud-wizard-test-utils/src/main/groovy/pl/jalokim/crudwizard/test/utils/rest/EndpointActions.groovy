@@ -15,6 +15,9 @@ trait EndpointActions {
     abstract String performAndReturnAsString(MockHttpServletRequestBuilder requestBuilder)
 
     ResultActions performQuery(String url, Map<String, Object> parameters = null) {
+        if (!url.startsWith("/")) {
+            url = "/" + url
+        }
         return performWithParameters(MockMvcRequestBuilders.get(url), parameters)
     }
 

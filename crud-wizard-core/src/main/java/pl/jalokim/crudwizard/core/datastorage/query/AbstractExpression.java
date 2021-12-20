@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.core.datastorage.query;
 
-
 public abstract class AbstractExpression {
 
     abstract LinkedExpression getLinkedExpression();

@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.service;
 
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isAbstractClassOrInterface;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isTypeOf;
 
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import pl.jalokim.crudwizard.genericapp.mapper.MapperDelegatorService;
 import pl.jalokim.crudwizard.genericapp.service.results.DataStorageResultJoiner;
 import pl.jalokim.crudwizard.genericapp.service.translator.DefaultClassesConfig;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
-import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +46,6 @@ public class DefaultGenericService {
 
     @GenericMethod
     public Object saveOrReadFromDataStorages(GenericServiceArgument genericServiceArgument) {
-        // TODO save or read from data storages
-        // when save to ds then get object map by mapper and save
-        // when read then map by mapper and return
         EndpointMetaModel endpointMetaModel = genericServiceArgument.getEndpointMetaModel();
         Map<String, Object> resultsByDataStorageName = new HashMap<>();
         HttpMethod httpMethod = genericServiceArgument.getEndpointMetaModel().getHttpMethod();
@@ -126,20 +123,20 @@ public class DefaultGenericService {
                         results = elements(queriesResults.values()).getFirst();
                     }
 
-                    for (Object entry : results) {
-                        GenericMapperArgument finalResultMapperArgument = genericMapperArgumentFactory.get()
-                            .mappingContext(new HashMap<>())
-                            .sourceObject(entry)
-                            .targetMetaModel(elementTypeInCollection)
-                            .build();
-
-                        results.add(mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument));
-                    }
+                    results = elements(results)
+                        .map(element -> {
+                            GenericMapperArgument finalResultMapperArgument = genericMapperArgumentFactory.get()
+                                .mappingContext(new HashMap<>())
+                                .sourceObject(element)
+                                .targetMetaModel(elementTypeInCollection)
+                                .build();
+                            return mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
+                        }).asList();
 
                     results = runFinalQueryWhenShould(dataStorageQueryArguments, endpointMetaModel.getResponseMetaModel().getQueryProvider(), results);
 
                     Class<?> nonAbstractCollectionClass = responseRealClass;
-                    if (MetadataReflectionUtils.isConcreteClass(responseRealClass)) {
+                    if (isAbstractClassOrInterface(responseRealClass)) {
                         nonAbstractCollectionClass = defaultClassesConfig.returnConfig().get(responseRealClass);
                     }
                     Collection<Object> finalCollection = (Collection<Object>) InvokableReflectionUtils.newInstance(nonAbstractCollectionClass);

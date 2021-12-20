@@ -24,6 +24,4 @@ class OrderPathTest extends Specification {
         newOrder("person.name", ASC)  | "person.name(asc)"
         newOrder("person.name", DESC) | "person.name(desc)"
     }
-
-
 }

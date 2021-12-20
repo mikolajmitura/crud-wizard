@@ -9,7 +9,7 @@ public class OrderPath {
     OrderDirection orderDirection;
 
     public static OrderPath orderPathFromText(String orderPath) {
-        if (orderPath.matches("(.)+\\((asc|desc)\\)")) {
+        if (orderPath.matches("(.)+\\((.)+\\)")) {
             String[] pathParts = orderPath.split("\\(");
             return OrderPath.newOrder(pathParts[0], OrderDirection.valueOf(pathParts[1].replace(")", "").toUpperCase()));
         }

@@ -31,6 +31,7 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidMinMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
@@ -171,12 +172,10 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("responseMetaModel", fieldShouldWhenOtherMessage(
                 NOT_NULL, [], "httpMethod", EQUAL_TO_ANY, ["GET", "POST"]
             )),
-            errorEntry("payloadMetamodel.name", fieldShouldWhenOtherMessage(
-                NOT_NULL, [], "className", NULL, []
-            )),
-            errorEntry("queryArguments.name", fieldShouldWhenOtherMessage(
-                NOT_NULL, [], "className", NULL, []
-            ))
+            errorEntry("payloadMetamodel.name",
+                whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
+            errorEntry("queryArguments.name",
+                whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])))
         ]                                                      | "invalid GET endpoint"
 
         createValidPostEndpointMetaModelDto().toBuilder()
@@ -212,7 +211,8 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 .build()
             )
             .build()                          | [
-            errorEntry("responseMetaModel.classMetaModel.name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])),
+            errorEntry("responseMetaModel.classMetaModel.name",
+                whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
             errorEntry("responseMetaModel.successHttpCode", invalidMinMessage(100))
         ]                                                      | "invalid responseMetaModel fields for some POST"
 
@@ -236,15 +236,24 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                     .build()
             ])
             .build()                          | [
-            errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name", fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
-            errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className", fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.className", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.beanName", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.methodName", fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "beanName", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript", fieldShouldWhenOtherMessage(NULL, [], "methodName", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])),
+            errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name",
+                fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
+            errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className",
+                fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.className",
+                fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.beanName",
+                fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.methodName",
+                fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript",
+                fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript",
+                fieldShouldWhenOtherMessage(NULL, [], "beanName", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript",
+                fieldShouldWhenOtherMessage(NULL, [], "methodName", NOT_NULL, [])),
+            errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name",
+                whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
         ]                                                      | "invalid dataStorageConnectors fields for some POST"
 
         createValidPutEndpointMetaModelDto()  | []             | "valid PUT endpoint"

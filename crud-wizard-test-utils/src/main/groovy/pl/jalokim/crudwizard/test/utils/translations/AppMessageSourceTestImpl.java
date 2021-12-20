@@ -34,6 +34,7 @@ import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource;
 import pl.jalokim.crudwizard.core.translations.TestAppMessageSourceHolder;
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
 import pl.jalokim.utils.constants.Constants;
 
 /**
@@ -156,6 +157,19 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
                 "otherFieldValues", otherFieldValues.isEmpty() ? Constants.EMPTY : joinValues(otherFieldValues)
             )
         );
+    }
+
+    public static String whenFieldIsInStateThenOthersShould(String whenField, ExpectedFieldState is, String nestedMessage) {
+        return whenFieldIsInStateThenOthersShould(whenField, is, List.of(), nestedMessage);
+    }
+
+    public static String whenFieldIsInStateThenOthersShould(String whenField, ExpectedFieldState is, List<String> fieldValues, String nestedMessage) {
+        return getAppMessageSource().getMessage(
+            buildMessageForValidator(WhenFieldIsInStateThenOthersShould.class),
+            Map.of("nestedMessage", nestedMessage,
+                "whenField", wrapAsExternalPlaceholder(whenField),
+                "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
+                "fieldValues", fieldValues.isEmpty() ? Constants.EMPTY : joinValues(fieldValues)));
     }
 
     private static String joinValues(List<String> list) {

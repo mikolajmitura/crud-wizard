@@ -28,12 +28,21 @@ class ClassMetaModelDtoSamples {
             .build()
     }
 
-    static ClassMetaModelDto extendedPersonClassMetaModel() {
+    static ClassMetaModelDto extendedPersonClassMetaModel1() {
         def personMetaModel = simplePersonClassMetaModel().toBuilder().build()
         personMetaModel.getFields().addAll([
-            createValidFieldMetaModelDto("documents", createListWithMetaModel(
-                createDocumentClassMetaDto()
-            ))
+            createValidFieldMetaModelDto("documents", createListWithMetaModel(createDocumentClassMetaDto()))
+        ])
+        personMetaModel
+    }
+
+    static ClassMetaModelDto extendedPersonClassMetaModel2() {
+        def personMetaModel = simplePersonClassMetaModel().toBuilder().build()
+        personMetaModel.getFields().addAll([
+            createValidFieldMetaModelDto("documents", createListWithMetaModel(createDocumentClassMetaDto())),
+            createValidFieldMetaModelDto("document", createDocumentClassMetaDto().toBuilder()
+                .validators([])
+                .build())
         ])
         personMetaModel
     }
@@ -61,11 +70,17 @@ class ClassMetaModelDtoSamples {
             .name("person-with-2-extends")
             .isGenericEnumType(false)
             .extendsFromModels([
-                extendedPersonClassMetaModel(), createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)
+                extendedPersonClassMetaModel1(), createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)
             ])
             .fields([
                 createValidFieldMetaModelDto("birthDate", Date)
             ])
+            .build()
+    }
+
+    static ClassMetaModelDto createClassMetaModelDtoWithId(Long id) {
+        ClassMetaModelDto.builder()
+            .id(id)
             .build()
     }
 
@@ -181,6 +196,14 @@ class ClassMetaModelDtoSamples {
         AdditionalPropertyDto.builder()
             .name(name)
             .valueAsObject(value)
+            .build()
+    }
+
+    static AdditionalPropertyDto additionalPropertyRawJsonString(String name, String value) {
+        AdditionalPropertyDto.builder()
+            .name(name)
+            .rawJson("\"$value\"")
+            .valueRealClassName(String.canonicalName)
             .build()
     }
 }

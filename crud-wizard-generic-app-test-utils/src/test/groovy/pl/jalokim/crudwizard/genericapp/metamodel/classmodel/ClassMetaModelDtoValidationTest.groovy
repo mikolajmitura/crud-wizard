@@ -5,6 +5,7 @@ import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEmptyClassMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEnumMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithClassName
@@ -12,6 +13,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createEmptyValidatorMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.utils.test.DataFakerHelper.randomLong
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
@@ -56,18 +58,20 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("", getMessage("EnumValuesInAdditionalProperties.invalid.enumvalues.class")),
         ]
 
+        createClassMetaModelDtoWithId(randomLong())       | []
+
         createValidClassMetaModelDtoWithClassName()       | []
 
         createEmptyClassMetaModelDto()                    | [
-            errorEntry("name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))
+            errorEntry("name", whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])))
         ]
 
         createValidClassMetaModelDtoWithClassName()
             .toBuilder()
             .name(randomText())
             .build()                                      | [
-            errorEntry("name", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
-            errorEntry("className", fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, []))
+            errorEntry("name", whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, []))),
+            errorEntry("className", whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, [])))
         ]
 
         createValidClassMetaModelDtoWithClassName()
@@ -86,7 +90,8 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
             .build()                                      | [
             errorEntry("genericTypes", fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, [])),
             errorEntry("genericTypes[0].isGenericEnumType", notNullMessage()),
-            errorEntry("genericTypes[0].name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])),
+            errorEntry("genericTypes[0].name",
+                whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
             errorEntry("validators[0].className", notNullMessage())
         ]
 
@@ -95,7 +100,8 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
             .validators([createValidValidatorMetaModelDto()])
             .build()                                      | [
             errorEntry("extendsFromModels", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
-            errorEntry("extendsFromModels[0].name", fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))
+            errorEntry("extendsFromModels[0].name", whenFieldIsInStateThenOthersShould(
+                "id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])))
         ]
     }
 

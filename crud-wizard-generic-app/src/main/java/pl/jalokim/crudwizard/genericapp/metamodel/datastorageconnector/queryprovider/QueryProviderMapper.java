@@ -18,4 +18,9 @@ public class QueryProviderMapper {
             .map(queryProvider -> queryProviderInstanceCache.loadQueryProvider(queryProvider.getClassName()))
             .orElseGet(metaModelContext::getDefaultDataStorageQueryProvider);
     }
+
+    public DataStorageQueryProvider mapInstanceOrNull(QueryProviderEntity queryProviderEntity) {
+        return ofNullable(queryProviderEntity)
+            .map(queryProvider -> queryProviderInstanceCache.loadQueryProvider(queryProvider.getClassName())).orElse(null);
+    }
 }

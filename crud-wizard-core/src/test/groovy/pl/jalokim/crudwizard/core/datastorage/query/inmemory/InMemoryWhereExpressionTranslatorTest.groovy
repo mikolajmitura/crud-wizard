@@ -17,6 +17,9 @@ import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings([
+    "ExplicitCallToAndMethod", "ExplicitCallToOrMethod"
+])
 class InMemoryWhereExpressionTranslatorTest extends Specification {
 
     InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator = new InMemoryWhereExpressionTranslator()

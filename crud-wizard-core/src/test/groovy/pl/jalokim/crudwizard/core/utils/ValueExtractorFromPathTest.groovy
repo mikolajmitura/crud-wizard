@@ -9,20 +9,20 @@ import spock.lang.Unroll
 
 class ValueExtractorFromPathTest extends Specification {
 
-    static def SOME_LONG_1 = randomLong()
-    static def SOME_LONG_2 = randomLong()
-    static def CORP_NAME = randomText()
+    final static SOME_LONG_1 = randomLong()
+    final static SOME_LONG_2 = randomLong()
+    final static CORP_NAME = randomText()
 
-    static def MOTHER = new Person(name: randomText(), surname: randomText(), additionalFields: [
+    final static MOTHER = new Person(name: randomText(), surname: randomText(), additionalFields: [
         someLong2: SOME_LONG_2
     ])
-    static def FATHER = new Person(name: randomText(), surname: randomText())
-    static def PERSON = new Person(name: randomText(), surname: randomText(),
+    final static FATHER = new Person(name: randomText(), surname: randomText())
+    final static PERSON = new Person(name: randomText(), surname: randomText(),
         mother: MOTHER, father: FATHER, additionalFields: [
         someLong1: SOME_LONG_1
     ])
 
-    static def OWNER_CORP = new CompanyOwner(name: randomText(), surname: randomText(), companyName: CORP_NAME)
+    final static OWNER_CORP = new CompanyOwner(name: randomText(), surname: randomText(), companyName: CORP_NAME)
 
     @Unroll
     def "return expected value of field by path"() {
@@ -52,6 +52,7 @@ class ValueExtractorFromPathTest extends Specification {
     }
 
     static class Person {
+
         String name
         String surname
         Person father
@@ -60,7 +61,7 @@ class ValueExtractorFromPathTest extends Specification {
     }
 
     static class CompanyOwner extends Person {
+
         String companyName
     }
 }
-

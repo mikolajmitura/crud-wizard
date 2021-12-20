@@ -1,7 +1,5 @@
-package pl.jalokim.crudwizard.core.validation.javax;
+package pl.jalokim.crudwizard.core.validation.javax.inner;
 
-import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ALL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.CONTAINS_ANY;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EMPTY;
@@ -18,12 +16,9 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EQUAL_TO_ALL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
-import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.WITHOUT_OTHER_FIELD_VALUES;
-import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.WITH_OTHER_FIELD_VALUES;
+import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator.parseToNumber;
 import static pl.jalokim.utils.collection.CollectionUtils.intersection;
 import static pl.jalokim.utils.collection.Elements.elements;
-import static pl.jalokim.utils.constants.Constants.SPACE;
-import static pl.jalokim.utils.string.StringUtils.concat;
 import static pl.jalokim.utils.string.StringUtils.concatElements;
 
 import java.math.BigDecimal;
@@ -34,20 +29,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
+import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
+import pl.jalokim.crudwizard.core.validation.javax.FieldMetadataExtractor;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.collection.Elements;
-import pl.jalokim.utils.constants.Constants;
 import pl.jalokim.utils.string.StringUtils;
 import pl.jalokim.utils.template.TemplateAsText;
 
 @RequiredArgsConstructor
-@Getter
-@SuppressWarnings({"PMD.GodClass", "PMD.NPathComplexity"})
-public class FieldShouldWhenOtherCoreValidator {
+public class ExpectedFieldStatePredicates {
 
     private static final String FIELD_SHOULD_BE_EXPECTED_TYPE =
         "field '${field}' in ${structure_type}: ${owner_type_name} should be one of class: [${expectedClasses}] when used one of ${otherFieldMatchEnums}";
@@ -75,49 +67,29 @@ public class FieldShouldWhenOtherCoreValidator {
     );
 
     private final FieldMetadataExtractor fieldMetadataExtractor;
-    private final String field;
-    private final ExpectedFieldState should;
-    private final List<String> fieldValues;
-    private final String whenField;
-    private final ExpectedFieldState is;
-    private final List<String> otherFieldValues;
 
-    public static FieldShouldWhenOtherCoreValidator newValidator(FieldMetadataExtractor fieldMetadataExtractor, String field,
-        ExpectedFieldState should, List<String> fieldValues, String whenField, ExpectedFieldState is, List<String> otherFieldValues) {
-        validateFieldConfiguration("field", field,
-            "should", should,
-            "fieldValues", fieldValues);
-
-        validateFieldConfiguration("whenField", whenField,
-            "is", is,
-            "otherFieldValues", otherFieldValues);
-
-        return new FieldShouldWhenOtherCoreValidator(fieldMetadataExtractor, field, should, fieldValues, whenField, is, otherFieldValues);
+    private FieldMeta buildFieldMeta(Object targetObject, String fieldName) {
+        return new FieldMeta(fieldName,
+            fieldMetadataExtractor.extractValueOfField(targetObject, fieldName),
+            fieldMetadataExtractor.extractOwnerTypeName(targetObject, fieldName));
     }
 
-    public boolean isValidValue(Object value) {
-        boolean mainFieldResult = validationByPredicate.get(should)
-            .test(buildFieldMeta(value, field),
-                new DependValuesMeta(fieldValues, "field", should, "fieldValues"));
-
-        boolean otherFieldResult = validationByPredicate.get(is)
-            .test(buildFieldMeta(value, whenField),
-                new DependValuesMeta(otherFieldValues, "whenField", is, "otherFieldValues"));
-
-        if (otherFieldResult) {
-            return mainFieldResult;
-        }
-        return true;
+    public boolean testState(String fieldByPositionName, String fieldName, ExpectedFieldState expectedFieldState,
+        String otherFieldValuesName, List<String> fieldValues, Object value) {
+        return validationByPredicate.get(expectedFieldState)
+            .test(buildFieldMeta(value, fieldName),
+                new DependValuesMeta(fieldValues, fieldByPositionName, expectedFieldState, otherFieldValuesName));
     }
 
-    public Map<String, Object> getMessagePlaceholderArgs() {
-        return Map.of(
-            "should", getAppMessageSource().getMessageByEnumWithPrefix("shouldBe", should),
-            "fieldValues", getValuesWhenCan(should, fieldValues),
-            "whenField", wrapAsExternalPlaceholder(whenField),
-            "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
-            "otherFieldValues", getValuesWhenCan(is, otherFieldValues)
-        );
+    private static Pair<ExpectedFieldState, BiPredicate<FieldMeta, DependValuesMeta>> entry(
+        ExpectedFieldState expectedFieldState,
+        BiPredicate<FieldMeta, DependValuesMeta> validationRule) {
+        return Pair.of(expectedFieldState, validationRule);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T castObject(FieldMeta fieldMeta) {
+        return (T) fieldMeta.getValue();
     }
 
     private static boolean isNull(FieldMeta fieldMeta) {
@@ -140,26 +112,6 @@ public class FieldShouldWhenOtherCoreValidator {
             return !((Map<?, ?>) castObject(fieldMeta)).isEmpty();
         }
         throw expectedElementsTypeOrString(fieldMeta);
-    }
-
-    private IllegalArgumentException expectedElementsTypeOrString(FieldMeta fieldMeta) {
-        return expectedElementsOfSomeTypeException(fieldMeta,
-            List.of(String.class, Collection.class, Map.class),
-            FOR_STRING_AND_COLLECTION);
-    }
-
-    private IllegalArgumentException expectedElementsOfSomeTypeException(FieldMeta fieldMeta,
-        List<Class<?>> expectedClasses, List<ExpectedFieldState> otherFieldMatchEnums) {
-        TemplateAsText templateAsText = TemplateAsText.fromText(FIELD_SHOULD_BE_EXPECTED_TYPE)
-            .overrideVariable("field", fieldMeta.getFieldName())
-            .overrideVariable("structure_type", fieldMetadataExtractor.validatedStructureType())
-            .overrideVariable("owner_type_name", fieldMeta.getOwnerTypeName())
-            .overrideVariable("expectedClasses",
-                elements(expectedClasses)
-                    .map(Class::getCanonicalName).asConcatText(", "))
-            .overrideVariable("otherFieldMatchEnums", concatElements(otherFieldMatchEnums, ", "));
-
-        return new IllegalArgumentException(templateAsText.getCurrentTemplateText());
     }
 
     private boolean isEmpty(FieldMeta fieldMeta) {
@@ -275,73 +227,24 @@ public class FieldShouldWhenOtherCoreValidator {
         throw expectedElementsOfSomeTypeException(fieldMeta, List.of(Collection.class), FOR_COLLECTIONS);
     }
 
-    private static void validateFieldConfiguration(String fieldByPositionName, String fieldByPositionValue,
-        String isOrShouldName, ExpectedFieldState expectedFieldState,
-        String otherFieldValueName, List<String> otherFieldValue) {
-        if (WITHOUT_OTHER_FIELD_VALUES.contains(expectedFieldState) && CollectionUtils.isNotEmpty(otherFieldValue)) {
-            throw new IllegalArgumentException(String.format(
-                "invalid @FieldShouldWhenOther for %s=%s for: %s=%s, field: %s should be empty",
-                fieldByPositionName, fieldByPositionValue, isOrShouldName, expectedFieldState, otherFieldValueName));
-        }
-
-        if (WITH_OTHER_FIELD_VALUES.contains(expectedFieldState) && CollectionUtils.isEmpty(otherFieldValue)) {
-            throw new IllegalArgumentException(String.format(
-                "invalid @FieldShouldWhenOther for %s=%s for: %s=%s, field: %s should not be empty",
-                fieldByPositionName, fieldByPositionValue, isOrShouldName, expectedFieldState, otherFieldValueName));
-        }
-
-        if (FOR_STRING_AND_COLLECTION_AND_NUMBER.contains(expectedFieldState) && !canParseToNumber(otherFieldValue)) {
-            throw new IllegalArgumentException(String.format(
-                "invalid @FieldShouldWhenOther for %s=%s for: %s=%s, field: %s should have only one element with number value",
-                fieldByPositionName, fieldByPositionValue, isOrShouldName, expectedFieldState, otherFieldValueName));
-        }
+    private IllegalArgumentException expectedElementsTypeOrString(FieldMeta fieldMeta) {
+        return expectedElementsOfSomeTypeException(fieldMeta,
+            List.of(String.class, Collection.class, Map.class),
+            FOR_STRING_AND_COLLECTION);
     }
 
-    private String getValuesWhenCan(ExpectedFieldState otherFieldMatch, List<String> values) {
-        if (List.of(NULL, NOT_NULL, EMPTY, EMPTY_OR_NULL, NOT_EMPTY, NOT_BLANK).contains(otherFieldMatch)) {
-            return Constants.EMPTY;
-        }
-        return concat(SPACE, elements(values).asConcatText(", "));
-    }
+    private IllegalArgumentException expectedElementsOfSomeTypeException(FieldMeta fieldMeta,
+        List<Class<?>> expectedClasses, List<ExpectedFieldState> otherFieldMatchEnums) {
+        TemplateAsText templateAsText = TemplateAsText.fromText(FIELD_SHOULD_BE_EXPECTED_TYPE)
+            .overrideVariable("field", fieldMeta.getFieldName())
+            .overrideVariable("structure_type", fieldMetadataExtractor.validatedStructureType())
+            .overrideVariable("owner_type_name", fieldMeta.getOwnerTypeName())
+            .overrideVariable("expectedClasses",
+                elements(expectedClasses)
+                    .map(Class::getCanonicalName).asConcatText(", "))
+            .overrideVariable("otherFieldMatchEnums", concatElements(otherFieldMatchEnums, ", "));
 
-    private FieldMeta buildFieldMeta(Object targetObject, String fieldName) {
-        return new FieldMeta(fieldName,
-            fieldMetadataExtractor.extractValueOfField(targetObject, fieldName),
-            fieldMetadataExtractor.extractOwnerTypeName(targetObject, fieldName));
-    }
-
-    private static <T> T castObject(FieldMeta fieldMeta) {
-        return (T) fieldMeta.getValue();
-    }
-
-    @Value
-    public static class FieldMeta {
-
-        String fieldName;
-        Object value;
-        String ownerTypeName;
-    }
-
-    @Value
-    public static class DependValuesMeta {
-
-        List<String> values;
-        String fieldByPositionName;
-        ExpectedFieldState expectedFieldStateFieldName;
-        String otherFieldValuesName;
-    }
-
-    private static Pair<ExpectedFieldState, BiPredicate<FieldMeta, DependValuesMeta>> entry(
-        ExpectedFieldState expectedFieldState,
-        BiPredicate<FieldMeta, DependValuesMeta> validationRule) {
-        return Pair.of(expectedFieldState, validationRule);
-    }
-
-    private static BigDecimal parseToNumber(List<String> numberValue) {
-        if (numberValue == null || numberValue.size() != 1) {
-            throw new NumberFormatException();
-        }
-        return new BigDecimal(numberValue.get(0));
+        return new IllegalArgumentException(templateAsText.getCurrentTemplateText());
     }
 
     private static BigInteger parseToBigIntegerNumber(FieldMeta fieldMeta, DependValuesMeta dependValuesMeta) {
@@ -350,15 +253,6 @@ public class FieldShouldWhenOtherCoreValidator {
         } catch (NumberFormatException ex) {
             throw invalidFieldShouldWhenOtherConfig(fieldMeta, dependValuesMeta,
                 String.format("value of field: %s should be not floating point number", dependValuesMeta.getOtherFieldValuesName()), ex);
-        }
-    }
-
-    private static boolean canParseToNumber(List<String> numberValue) {
-        try {
-            parseToNumber(numberValue);
-            return true;
-        } catch (NumberFormatException ex) {
-            return false;
         }
     }
 
