@@ -13,17 +13,19 @@ import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @RequiredArgsConstructor
 @GenericMapper
-public class GenericMapperBean {
+public class DefaultGenericMapper {
 
     private final JoinedResultsRowMapper joinedResultsRowMapper;
 
     @GenericMethod
+    @SuppressWarnings("unchecked")
     public Object mapToTarget(GenericMapperArgument mapperArgument) {
         if (mapperArgument.getTargetMetaModel() != null) {
             if (mapperArgument.getTargetMetaModel().equals(mapperArgument.getSourceMetaModel())) {
                 // TODO should be deep copy.
                 return mapperArgument.getSourceObject();
             }
+            // it returns list of maps where every map contains results from data storages.
             if (mapperArgument.getSourceObject() instanceof JoinedResultsRow) {
                 JoinedResultsRow joinedResultsRow = (JoinedResultsRow) mapperArgument.getSourceObject();
                 return joinedResultsRowMapper.mapToObject(mapperArgument.getTargetMetaModel(), joinedResultsRow);

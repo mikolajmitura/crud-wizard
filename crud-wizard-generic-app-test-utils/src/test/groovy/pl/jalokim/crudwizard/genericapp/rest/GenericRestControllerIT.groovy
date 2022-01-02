@@ -1,17 +1,28 @@
 package pl.jalokim.crudwizard.genericapp.rest
 
+import static org.springframework.http.HttpMethod.PUT
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.isEqualsTo
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntryWithErrorCode
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createHttpQueryParamsClassMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createListWithMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.isIdFieldType
+import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDtoSamples.createDataStorageMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDtoSamples.createDataStorageMetaModelDtoWithId
+import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageQuerySamples.createDsQuery
+import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDtoSamples.createQueryProviderDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidEndpointResponseMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetListOfPerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators2
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostWithSimplePerson
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDtoSamples.sampleJoinerDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDtoSamples.createMapperMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.notNullValidatorMetaModelDto
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractErrorResponseDto
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractResponseAsClass
@@ -38,12 +49,21 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDto
+import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.CreatePersonFinalMapper
+import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.FinalMapperForFewDs
+import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.GetByIdFromFewDsMapper
+import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.PersonDocumentInThirdDbIdMapper
+import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.PersonToSecondDbMapper
+import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.PersonToThirdDbMapper
+import pl.jalokim.crudwizard.genericapp.rest.samples.query.FinalQueryProvider1
+import pl.jalokim.crudwizard.genericapp.rest.samples.query.FinalQueryProviderForPersonResultEntry
+import pl.jalokim.crudwizard.genericapp.rest.samples.query.SecondDbPersonGetOneQuery
+import pl.jalokim.crudwizard.genericapp.rest.samples.query.ThirdQueryFindByIdFromFirstQueryResult
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints
 import pl.jalokim.utils.test.DataFakerHelper
@@ -256,11 +276,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def person4Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson4)
 
         when:
-        def peopleList1 = rawOperationsOnEndpoints.getAndReturnArrayJson("domain/person")
-        def peopleList2 = rawOperationsOnEndpoints.getAndReturnArrayJson("domain/person", [name: "John"])
-        def peopleList3 = rawOperationsOnEndpoints.getAndReturnArrayJson("domain/person", [name: "John", surname: "doe"])
-        def peopleList4 = rawOperationsOnEndpoints.getAndReturnArrayJson("domain/person", [surname: "do", "sort_by": "name(Desc),surname(Desc)"])
-        def peopleList5 = rawOperationsOnEndpoints.getAndReturnArrayJson("domain/person", [surname: "do", "sort_by": "name,surname(Desc)"])
+        def peopleList1 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person")
+        def peopleList2 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [name: "John"])
+        def peopleList3 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [name: "John", surname: "doe"])
+        def peopleList4 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [surname: "do", "sort_by": "name(Desc),surname(Desc)"])
+        def peopleList5 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [surname: "do", "sort_by": "name,surname(Desc)"])
 
         then:
         peopleList1.collect{ it.id } == [person1Id, person2Id, person3Id, person4Id]
@@ -280,9 +300,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .baseUrl("domain/person/final_query")
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
-                .queryProvider(QueryProviderDto.builder()
-                    .className("pl.jalokim.crudwizard.genericapp.rest.FinalQueryProvider1")
-                    .build())
+                .queryProvider(createQueryProviderDto(FinalQueryProvider1))
                 .classMetaModel(createClassMetaModelDtoFromClass(List).toBuilder()
                     .genericTypes([createClassMetaModelDtoWithId(personMetaModel.id)])
                     .build())
@@ -293,8 +311,8 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         endpointMetaModelService.createNewEndpoint(getListOfPersonEndpointWithFinalQuery)
 
         when:
-        def peopleListWithFinalQuery1 = rawOperationsOnEndpoints.getAndReturnArrayJson("domain/person/final_query")
-        def peopleListWithFinalQuery2 = rawOperationsOnEndpoints.getAndReturnArrayJson("domain/person/final_query", [surname: "kow"])
+        def peopleListWithFinalQuery1 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person/final_query")
+        def peopleListWithFinalQuery2 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person/final_query", [surname: "kow"])
 
         then:
         peopleListWithFinalQuery1.collect{ it.id } == [person1Id, person2Id]
@@ -303,13 +321,426 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         // TODO #37 test for return page
     }
 
-    // TODO #37 test for return get by id, few ds, everywhere other models, mappers in java
-    // TODO #37 test for return post, few ds, everywhere other models, mappers in java
-    // TODO #37 test for return delete, few ds, everywhere other models, mappers in java
-    // TODO #37 test for return list, few ds, everywhere other models, mapper in java
-    // TODO #37 test for return list, few ds, everywhere other models, mapper in java, with final query
-    // TODO #37 test for return page, few ds, everywhere other models, mapper in java
-    // TODO #37 test for return page, few ds, everywhere other models, mapper in java, with final query
+    def "invoke endpoints with default generic service, with mappers in java, use 3 data storages with success"() {
+        given: 'POST to few data storages'
+        long defaultDataStorageId = metaModelContextService.getMetaModelContext().getDefaultDataStorageMetaModel().getId()
+        def defaultDataStorageDto = createDataStorageMetaModelDtoWithId(defaultDataStorageId)
+
+        def personInSecondDbModel = ClassMetaModelDto.builder()
+            .name("personSecondDb")
+            .isGenericEnumType(false)
+            .fields([
+                createValidFieldMetaModelDto("uuid", String, [], [isIdFieldType()]),
+                createValidFieldMetaModelDto("name", String),
+                createValidFieldMetaModelDto("surname", String),
+                createValidFieldMetaModelDto("firstDbId", Long) // person.id
+            ])
+            .build()
+
+        def personDocumentInThirdDbModel = ClassMetaModelDto.builder()
+            .name("personDocumentDb")
+            .isGenericEnumType(false)
+            .fields([
+                createValidFieldMetaModelDto("uuid", String, [], [isIdFieldType()]),
+                createValidFieldMetaModelDto("firstDbId", Long), // person.id
+                createValidFieldMetaModelDto("documentValue", String) // person.document.value
+            ])
+            .build()
+
+        def secondDbName = "second-db"
+        def thirdDbName = "third-db"
+        def createPostPersonEndpoint = createValidPostExtendedUserWithValidators2().toBuilder()
+            .dataStorageConnectors([
+                createSampleDataStorageConnectorDto(null, defaultDataStorageDto),
+                createSampleDataStorageConnectorDto(personInSecondDbModel,
+                    createDataStorageMetaModelDto(secondDbName),
+                    createMapperMetaModelDto(PersonToSecondDbMapper.class, "personToSecondDbMapperCreate")),
+                createSampleDataStorageConnectorDto(personDocumentInThirdDbModel,
+                    createDataStorageMetaModelDto(thirdDbName),
+                    createMapperMetaModelDto(PersonToThirdDbMapper.class, "personToThirdDbMapperCreate"))
+            ])
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(Long))
+                .mapperMetaModel(createMapperMetaModelDto(CreatePersonFinalMapper.class, "returnIdFromDefaultDs"))
+                .build())
+            .build()
+        endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint)
+        def personCreatePayload = createPostValidPersonPayload()
+
+        when:
+        def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personCreatePayload)
+
+        then:
+        httpResponse.andExpect(status().isCreated())
+        def personSavedIds = rawOperationsOnEndpoints.extractResponseAsJson(httpResponse)
+        long savedPersonId = personSavedIds.personId
+        def personDocumentUUID = personSavedIds.personDocumentUUID
+
+        def metaContext = metaModelContextService.getMetaModelContext()
+        def dataStorages = metaContext.getDataStorages().fetchAll()
+        dataStorages.size() == 3
+        def defaultDataStorage = metaModelContextService.getDataStorageByName(InMemoryDataStorage.DEFAULT_DS_NAME)
+        def secondDataStorage = metaModelContextService.getDataStorageByName(secondDbName)
+        def thirdDataStorage = metaModelContextService.getDataStorageByName(thirdDbName)
+
+        def personClassModel = metaModelContextService.getClassMetaModelByName("person")
+        def personSecondDbClassModel = metaModelContextService.getClassMetaModelByName("personSecondDb")
+        def personDocumentDbClassModel = metaModelContextService.getClassMetaModelByName("personDocumentDb")
+
+        def personEntryNumberIn1Db = defaultDataStorage.count(createDsQuery(personClassModel))
+        def personEntryNumberIn2Db = secondDataStorage.count(createDsQuery(personSecondDbClassModel))
+        def personEntryNumberIn3Db = thirdDataStorage.count(createDsQuery(personDocumentDbClassModel))
+        personEntryNumberIn1Db == 1
+        personEntryNumberIn2Db == 1
+        personEntryNumberIn3Db == 1
+        def uuidForPersonIn2Db = secondDataStorage.findEntities(createDsQuery(personSecondDbClassModel)).find { it }.uuid
+
+        and: 'get via REST by id'
+        def createGetByIdPersonEndpoint = EndpointMetaModelDto.builder()
+            .baseUrl("users/{userId}")
+            .operationName("getUserById")
+            .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
+            .httpMethod(HttpMethod.GET)
+            .queryArguments(
+                ClassMetaModelDto.builder()
+                    .name("queryArguments")
+                    .fields([createValidFieldMetaModelDto("thirdDbId", String)])
+                    .build())
+            .pathParams(ClassMetaModelDto.builder()
+                .name("pathParams")
+                .fields([createValidFieldMetaModelDto("userId", Long)])
+                .build())
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .mapperMetaModel(createMapperMetaModelDto(GetByIdFromFewDsMapper, "mapPersonsResultsToOne"))
+                .classMetaModel(ClassMetaModelDto.builder()
+                    .name("personFrom3Dbs")
+                    .fields([
+                        createValidFieldMetaModelDto("firstDb", createClassMetaModelDtoWithId(personClassModel.id)),
+                        createValidFieldMetaModelDto("secondDb", createClassMetaModelDtoWithId(personSecondDbClassModel.id)),
+                        createValidFieldMetaModelDto("thirdDb", createClassMetaModelDtoWithId(personDocumentDbClassModel.id))
+                    ])
+                    .build())
+                .build())
+            .dataStorageConnectors([
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
+                    createDataStorageMetaModelDto(secondDbName),
+                    null, null,
+                    createQueryProviderDto(SecondDbPersonGetOneQuery)
+                ),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
+                    createDataStorageMetaModelDto(thirdDbName),
+                    null,
+                    createMapperMetaModelDto(PersonDocumentInThirdDbIdMapper, "mapToUuid"))
+            ])
+            .build()
+        endpointMetaModelService.createNewEndpoint(createGetByIdPersonEndpoint)
+
+        when:
+        def getByIdResponse = rawOperationsOnEndpoints.getAndReturnJson("/users/$savedPersonId", [thirdDbId: personDocumentUUID])
+
+        then:
+        verifyAll(getByIdResponse) {
+            verifyAll(firstDb) {
+                id == savedPersonId
+                name == personCreatePayload.name
+                surname == personCreatePayload.surname
+                birthDate == null
+                verifyAll(document) {
+                    type == personCreatePayload.document.type
+                    value == personCreatePayload.document.value
+                    enumField == "ENUM1"
+                }
+                verifyAll(documents[0]) {
+                    type == personCreatePayload.document.type
+                    value == personCreatePayload.document.value
+                    enumField == "ENUM1"
+                }
+            }
+            verifyAll(secondDb) {
+                uuid == uuidForPersonIn2Db
+                name == personCreatePayload.name
+                surname == personCreatePayload.surname
+                firstDbId == savedPersonId
+            }
+            verifyAll(thirdDb) {
+                uuid == personDocumentUUID
+                firstDbId == savedPersonId
+                documentValue == personCreatePayload.document.value
+            }
+        }
+
+        and: 'update in few DS'
+        def createPutPersonEndpoint = EndpointMetaModelDto.builder()
+            .httpMethod(PUT)
+            .operationName("updatePerson")
+            .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
+            .baseUrl("users/{userId}")
+            .payloadMetamodel(createClassMetaModelDtoWithId(personClassModel.id))
+            .dataStorageConnectors([
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
+                    createDataStorageMetaModelDto(secondDbName),
+                    createMapperMetaModelDto(PersonToSecondDbMapper.class, "personToSecondDbMapperCreate")),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
+                    createDataStorageMetaModelDto(thirdDbName),
+                    createMapperMetaModelDto(PersonToThirdDbMapper.class, "personToThirdDbMapperCreate"))
+            ])
+            .queryArguments(
+                ClassMetaModelDto.builder()
+                    .name("queryArguments")
+                    .fields([createValidFieldMetaModelDto("thirdDbId", String)])
+                    .build())
+            .pathParams(ClassMetaModelDto.builder()
+                .name("pathParams")
+                .fields([createValidFieldMetaModelDto("userId", Long)])
+                .build())
+            .build()
+        endpointMetaModelService.createNewEndpoint(createPutPersonEndpoint)
+
+        def personUpdatePayload = createPutValidPersonPayload(personCreatePayload, savedPersonId)
+
+        when:
+        rawOperationsOnEndpoints.putPayload("/users/$savedPersonId", personUpdatePayload, [thirdDbId: personDocumentUUID])
+
+        then:
+        def personIdFirstDb = defaultDataStorage.getEntityById(personClassModel, savedPersonId)
+        def personIdSecondDb = secondDataStorage.getEntityById(personSecondDbClassModel, uuidForPersonIn2Db)
+        def documentInThirdDb = thirdDataStorage.getEntityById(personDocumentDbClassModel, personDocumentUUID)
+
+        verifyAll(personIdFirstDb) {
+            name == personCreatePayload.name
+            surname == personUpdatePayload.surname
+            document.value == personUpdatePayload.document.value
+        }
+
+        verifyAll(personIdSecondDb) {
+            name == personCreatePayload.name
+            surname == personUpdatePayload.surname
+        }
+
+        verifyAll(documentInThirdDb) {
+            documentValue == personUpdatePayload.document.value
+        }
+
+        def personEntryNumberIn1DbAfterUpdate = defaultDataStorage.count(createDsQuery(personClassModel))
+        def personEntryNumberIn2DbAfterUpdate = secondDataStorage.count(createDsQuery(personSecondDbClassModel))
+        def personEntryNumberIn3DbAfterUpdate = thirdDataStorage.count(createDsQuery(personDocumentDbClassModel))
+        personEntryNumberIn1DbAfterUpdate == 1
+        personEntryNumberIn2DbAfterUpdate == 1
+        personEntryNumberIn3DbAfterUpdate == 1
+
+        and: 'delete via REST by id'
+        def createDeleteByIdPersonEndpoint = EndpointMetaModelDto.builder()
+            .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
+            .baseUrl("users/{userId}")
+            .httpMethod(HttpMethod.DELETE)
+            .operationName("deletePersonById")
+            .queryArguments(
+                ClassMetaModelDto.builder()
+                    .name("queryArguments")
+                    .fields([createValidFieldMetaModelDto("thirdDbId", String)])
+                    .build())
+            .pathParams(ClassMetaModelDto.builder()
+                .name("pathParams")
+                .fields([createValidFieldMetaModelDto("userId", Long)])
+                .build())
+            .dataStorageConnectors([
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
+                    createDataStorageMetaModelDto(secondDbName),
+                    null, null,
+                    createQueryProviderDto(SecondDbPersonGetOneQuery)
+                ),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
+                    createDataStorageMetaModelDto(thirdDbName),
+                    null,
+                    createMapperMetaModelDto(PersonDocumentInThirdDbIdMapper, "mapToUuid"))
+            ])
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(createDeleteByIdPersonEndpoint)
+
+        when:
+        rawOperationsOnEndpoints.delete("/users/$savedPersonId", [thirdDbId: personDocumentUUID])
+
+        then:
+        def personEntryNumberIn1DbAfterDelete = defaultDataStorage.count(createDsQuery(personClassModel))
+        def personEntryNumberIn2DbAfterDelete = secondDataStorage.count(createDsQuery(personSecondDbClassModel))
+        def personEntryNumberIn3DbAfterDelete = thirdDataStorage.count(createDsQuery(personDocumentDbClassModel))
+        personEntryNumberIn1DbAfterDelete == 0
+        personEntryNumberIn2DbAfterDelete == 0
+        personEntryNumberIn3DbAfterDelete == 0
+        def httpGetOneResponse = rawOperationsOnEndpoints.performQuery("/users/$savedPersonId", [thirdDbId: personDocumentUUID])
+        httpGetOneResponse.andExpect(status().isNotFound())
+
+        and: 'get list without final query'
+
+        def personPayload1 = createPostValidPersonPayload("John", "Doe")
+        def personPayload2 = createPostValidPersonPayload("John", "Hodoes")
+        def personPayload3 = createPostValidPersonPayload("Adam", "Adams")
+
+        rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personPayload1)
+        rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personPayload2)
+        rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personPayload3)
+
+        def nameOnlyIn2Db = "John"
+        def surnameOnlyIn2Db = "Novdoe"
+        secondDataStorage.saveOrUpdate(personSecondDbClassModel, [name: nameOnlyIn2Db, surname: surnameOnlyIn2Db])
+
+        def createGetListWithoutFinalQueryPersonEndpoint = EndpointMetaModelDto.builder()
+            .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
+            .baseUrl("users")
+            .httpMethod(HttpMethod.GET)
+            .operationName("getNormalListOfPeople")
+            .queryArguments(
+                ClassMetaModelDto.builder()
+                    .name("queryArguments")
+                    .fields([
+                        createValidFieldMetaModelDto("name", String),
+                        createValidFieldMetaModelDto("surname", String),
+                    ])
+                    .build())
+            .dataStorageConnectors([
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
+                    createDataStorageMetaModelDto(secondDbName), null, null, null, "second-query"
+                ),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
+                    createDataStorageMetaModelDto(thirdDbName),
+                    null,
+                    null, createQueryProviderDto(ThirdQueryFindByIdFromFirstQueryResult))
+            ])
+            .dataStorageResultsJoiners([
+                sampleJoinerDto(InMemoryDataStorage.DEFAULT_DS_NAME, "id", "second-query", "firstDbId"),
+                sampleJoinerDto(InMemoryDataStorage.DEFAULT_DS_NAME, "id", "third-db", "firstDbId"),
+            ])
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
+                .classMetaModel(createListWithMetaModel(ClassMetaModelDto.builder()
+                        .name("personResultEntry")
+                        .fields([
+                            createValidFieldMetaModelDto("uuid2", String),
+                            createValidFieldMetaModelDto("uuid3", String),
+                            createValidFieldMetaModelDto("name", String),
+                            createValidFieldMetaModelDto("lastname", String),
+                            createValidFieldMetaModelDto("documentValue", String),
+                            createValidFieldMetaModelDto("documentType", Byte),
+                            createValidFieldMetaModelDto("personId", Long),
+                        ])
+                        .build()
+                ))
+                .build())
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(createGetListWithoutFinalQueryPersonEndpoint)
+
+        when:
+        def getResultOfFewDsResult1 = rawOperationsOnEndpoints.getAndReturnArrayJson("/users")
+        def getResultOfFewDsResult2 = rawOperationsOnEndpoints.getAndReturnArrayJson("/users", [surname: "doe"])
+
+        then:
+        getResultOfFewDsResult1.size() == 4
+        def expectedInputPayloadsForResult1 = [personPayload1, personPayload2, personPayload3]
+
+        assertPayloadExistenceInResponseList(expectedInputPayloadsForResult1, getResultOfFewDsResult1,
+            defaultDataStorage, personClassModel, secondDataStorage,
+            personSecondDbClassModel, thirdDataStorage, personDocumentDbClassModel)
+
+        assertExistenceJonNovDoe(getResultOfFewDsResult1, nameOnlyIn2Db, surnameOnlyIn2Db,
+            secondDataStorage, personSecondDbClassModel)
+
+        getResultOfFewDsResult2.size() == 3
+        def expectedInputPayloadsForResult2 = [personPayload1, personPayload2]
+
+        assertPayloadExistenceInResponseList(expectedInputPayloadsForResult2, getResultOfFewDsResult2,
+            defaultDataStorage, personClassModel, secondDataStorage,
+            personSecondDbClassModel, thirdDataStorage, personDocumentDbClassModel)
+
+        assertExistenceJonNovDoe(getResultOfFewDsResult2, nameOnlyIn2Db, surnameOnlyIn2Db,
+            secondDataStorage, personSecondDbClassModel)
+
+        and: 'get list with final query'
+        def personResultEntriesListId = metaModelContextService.getMetaModelContext().getClassMetaModels()
+            .findOneBy { it.className = List.canonicalName &&
+                it.genericTypes.size() == 1 && it.genericTypes[0].name == "personResultEntry" }
+        .getId()
+
+        def createGetListWithFinalQueryPersonEndpoint = createGetListWithoutFinalQueryPersonEndpoint.toBuilder()
+            .baseUrl("users/with-final-query")
+            .responseMetaModel(
+                EndpointResponseMetaModelDto.builder()
+                    .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
+                    .classMetaModel(createClassMetaModelDtoWithId(personResultEntriesListId))
+                    .queryProvider(createQueryProviderDto(FinalQueryProviderForPersonResultEntry))
+                .build()
+            )
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(createGetListWithFinalQueryPersonEndpoint)
+
+        when:
+        def getResultOfFewDsResultWithFinalQuery = rawOperationsOnEndpoints.getAndReturnArrayJson("/users/with-final-query", [name: "John"])
+
+        then:
+        getResultOfFewDsResultWithFinalQuery.size() == 2
+        def expectedInputPayloadsForResultWithFinalQuery = [personPayload1, personPayload2]
+
+        assertPayloadExistenceInResponseList(expectedInputPayloadsForResultWithFinalQuery, getResultOfFewDsResultWithFinalQuery,
+            defaultDataStorage, personClassModel, secondDataStorage,
+            personSecondDbClassModel, thirdDataStorage, personDocumentDbClassModel)
+
+        getResultOfFewDsResultWithFinalQuery.find {
+            it.name == nameOnlyIn2Db && it.lastname == surnameOnlyIn2Db
+        } == null
+
+        // TODO #37 test for return page, few ds, everywhere other models, mapper in java
+        // TODO #37 test for return page, few ds, everywhere other models, mapper in java, with final query
+    }
+
+    private boolean assertExistenceJonNovDoe(List<Map> getResultOfFewDsResult1, nameOnlyIn2Db, surnameOnlyIn2Db,
+        secondDataStorage, personSecondDbClassModel) {
+        def foundEntry = getResultOfFewDsResult1.find {
+            it.name == nameOnlyIn2Db && it.lastname == surnameOnlyIn2Db
+        }
+
+        verifyAll(foundEntry) {
+            uuid2 == secondDataStorage.findEntities(createDsQuery(personSecondDbClassModel,
+                isEqualsTo("name", nameOnlyIn2Db).and(isEqualsTo("surname", surnameOnlyIn2Db))))[0].uuid
+            uuid3 == null
+            name == "John"
+            lastname == "Novdoe"
+            documentValue == null
+            documentType == null
+            personId == null
+        }
+        return true
+    }
+
+    private assertPayloadExistenceInResponseList(ArrayList<ExtendedPerson> inputPersonPayload, getResultOfFewDsResult1, defaultDataStorage, personClassModel,
+        secondDataStorage, personSecondDbClassModel, thirdDataStorage, personDocumentDbClassModel) {
+        inputPersonPayload.forEach({inputPayload ->
+            def foundEntry = getResultOfFewDsResult1.find {
+                it.name == inputPayload.name && it.lastname == inputPayload.surname
+            }
+            assert foundEntry != null
+            def whereExpression = isEqualsTo("name", inputPayload.name).and(isEqualsTo("surname", inputPayload.surname))
+            long personIdInFirstDb = defaultDataStorage.findEntities(createDsQuery(personClassModel, whereExpression))[0].id
+
+            verifyAll(foundEntry) {
+                uuid2 == secondDataStorage.findEntities(createDsQuery(personSecondDbClassModel,
+                    isEqualsTo("firstDbId", personIdInFirstDb)))[0].uuid
+                uuid3 == thirdDataStorage.findEntities(createDsQuery(personDocumentDbClassModel,
+                    isEqualsTo("firstDbId", personIdInFirstDb)))[0].uuid
+                name == inputPayload.name
+                lastname == inputPayload.surname
+                documentValue == inputPayload.document.value
+                documentType == inputPayload.document.type
+                personId == personIdInFirstDb
+            }
+        })
+        return true
+    }
 
     def "cannot map custom enum value by enum metamodel"() {
         given:
@@ -435,6 +866,15 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         Document document = new Document(type: 1, value: randomText(5), enumField: "ENUM1")) {
 
         new ExtendedPerson(name: name, surname: surname, documents: [document], document: document)
+    }
+
+    private static ExtendedPerson createPutValidPersonPayload(ExtendedPerson currentState, Long personId) {
+        def newSurname = randomText(5)
+        def newDocumentValue = randomText(12)
+        Document currentDocument = currentState.document
+        Document document = new Document(type: currentDocument.type,
+            value: newDocumentValue, enumField: currentDocument.enumField)
+        new ExtendedPerson(id: personId, name: currentState.name, surname: newSurname, documents: [document], document: document)
     }
 
     private static ExtendedPerson createPostInvalidPersonPayload() {

@@ -3,12 +3,14 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeCreator.loadEndpointNodes;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContext;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getListFromContext;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
@@ -21,7 +23,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderInstanceCache;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
@@ -45,13 +46,7 @@ public class MetaModelContextService implements ApplicationRunner {
     private final ServiceMetaModelService serviceMetaModelService;
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
     private final EndpointMetaModelService endpointMetaModelService;
-    private final QueryProviderInstanceCache queryProviderInstanceCache;
-
-    // TODO test it with few scenarios
-    // some endpoint with another data storage.
-    // some endpoint with another generic service
-    // some endpoint with another generic service with another mapper
-    // validators on some models, fields.
+    private final InstanceLoader instanceLoader;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -77,7 +72,7 @@ public class MetaModelContextService implements ApplicationRunner {
 
     private void loadDefaultQueryProvider(MetaModelContext metaModelContext) {
         String queryProviderClassName = defaultBeansService.getDefaultQueryProviderClassName();
-        metaModelContext.setDefaultDataStorageQueryProvider(queryProviderInstanceCache.loadQueryProvider(queryProviderClassName));
+        metaModelContext.setDefaultDataStorageQueryProvider(instanceLoader.createInstanceOrGetBean(queryProviderClassName));
     }
 
     private void loadDataStorages(MetaModelContext metaModelContext) {
@@ -180,5 +175,16 @@ public class MetaModelContextService implements ApplicationRunner {
 
     public MetaModelContext getMetaModelContext() {
         return metaModelContextReference.get();
+    }
+
+    public DataStorage getDataStorageByName(String dataStorageName) {
+        return getMetaModelContext().getDataStorages()
+            .findOneBy(dataStorageMetaModel -> dataStorageMetaModel.getName().equals(dataStorageName))
+            .getDataStorage();
+    }
+
+    public ClassMetaModel getClassMetaModelByName(String classMetaModelName) {
+        return getMetaModelContext().getClassMetaModels()
+            .findOneBy(classMetaModel -> classMetaModelName.equals(classMetaModel.getName()));
     }
 }

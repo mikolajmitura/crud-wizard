@@ -18,12 +18,14 @@ public interface DataStorage {
 
     /**
      * It save RawEntity and returns id of saved object. It can be used to update as well.
+     * When entity has not null id value then it will try update otherwise
+     * will generate new id and save as new object in storage.
      *
      * @param classMetaModel metamodel for entity
      * @param entity value of entity
      * @return id of saved object
      */
-    Object saveEntity(ClassMetaModel classMetaModel, Object entity);
+    Object saveOrUpdate(ClassMetaModel classMetaModel, Object entity);
 
     Optional<Object> getOptionalEntityById(ClassMetaModel classMetaModel, Object idObject);
 
@@ -42,6 +44,8 @@ public interface DataStorage {
             );
     }
 
+    void delete(DataStorageQuery query);
+
     default Object getEntityById(ClassMetaModel classMetaModel, Object idObject) {
         return getOptionalEntityById(classMetaModel, idObject)
             .orElseThrow(() -> new EntityNotFoundException(idObject, classMetaModel.getName()));
@@ -54,4 +58,6 @@ public interface DataStorage {
     default String getClassName() {
         return getClass().getCanonicalName();
     }
+
+    long count(DataStorageQuery query);
 }

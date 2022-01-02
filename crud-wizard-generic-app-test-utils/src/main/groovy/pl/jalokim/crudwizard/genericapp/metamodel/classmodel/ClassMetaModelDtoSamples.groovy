@@ -117,7 +117,7 @@ class ClassMetaModelDtoSamples {
             .addProperty(ENUM_VALUES_PREFIX, enumValues)
     }
 
-    private static ClassMetaModelDto createListWithMetaModel(ClassMetaModelDto classMetaModelDto) {
+    static ClassMetaModelDto createListWithMetaModel(ClassMetaModelDto classMetaModelDto) {
         ClassMetaModelDto.builder()
             .className(List.canonicalName)
             .genericTypes([classMetaModelDto])

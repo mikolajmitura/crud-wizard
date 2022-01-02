@@ -85,7 +85,7 @@ public class RealExpression extends AbstractExpression {
         return new RealExpression(leftArg, rightArg, ExpressionType.IN);
     }
 
-    public static RealExpression in(String leftPath, List<Object> expectedValues) {
+    public static RealExpression in(String leftPath, List<?> expectedValues) {
         return new RealExpression(buildForPath(leftPath), buildForValue(expectedValues), ExpressionType.IN);
     }
 

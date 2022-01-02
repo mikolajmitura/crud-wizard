@@ -26,9 +26,11 @@ public class FieldMetaModel extends AdditionalPropertyMetaModelDto {
     String fieldName;
 
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     ClassMetaModel fieldType;
 
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     ClassMetaModel ownerOfField;
 
     List<ValidatorMetaModel> validators;

@@ -6,6 +6,7 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsP
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.joinWithComma;
 import static pl.jalokim.utils.collection.CollectionUtils.addWhenNotExist;
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isCollectionType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,11 +18,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
+import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
+import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath;
-import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath.PropertyPathBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
@@ -30,8 +34,10 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaMod
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDto;
 import pl.jalokim.utils.collection.Elements;
+import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
 @Component
@@ -45,21 +51,32 @@ public class DataStorageResultsJoinCorrectnessValidator
 
     @Override
     public boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context) {
-        List<DataStorageConnectorMetaModelDto> dataStorageConnectors = elements(endpointMetaModelDto.getDataStorageConnectors()).asList();
-        List<DataStorageResultsJoinerDto> dataStorageResultsJoiners = elements(endpointMetaModelDto.getDataStorageResultsJoiners()).asList();
+        var httpMethod = endpointMetaModelDto.getHttpMethod();
+        Class<?> endpointResponseClass = Optional.ofNullable(endpointMetaModelDto.getResponseMetaModel())
+            .map(EndpointResponseMetaModelDto::getClassMetaModel)
+            .map(ClassMetaModelDto::getClassName)
+            .map(ClassUtils::loadRealClass)
+            .orElse(null);
 
-        int numberOfConnectors = dataStorageConnectors.size();
-        int numberOfJoiners = dataStorageResultsJoiners.size();
-        if (numberOfConnectors <= 1 && numberOfJoiners == 0) {
-            return true;
+        if (HttpMethod.GET.equals(httpMethod) && endpointResponseClass != null
+            && (isCollectionType(endpointResponseClass) || MetadataReflectionUtils.isTypeOf(endpointResponseClass, Page.class))) {
+            List<DataStorageConnectorMetaModelDto> dataStorageConnectors = elements(endpointMetaModelDto.getDataStorageConnectors()).asList();
+            List<DataStorageResultsJoinerDto> dataStorageResultsJoiners = elements(endpointMetaModelDto.getDataStorageResultsJoiners()).asList();
+
+            int numberOfConnectors = dataStorageConnectors.size();
+            int numberOfJoiners = dataStorageResultsJoiners.size();
+            if (numberOfConnectors <= 1 && numberOfJoiners == 0) {
+                return true;
+            }
+
+            Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName = new HashMap<>();
+
+            return expectedNumberOfJoinersDueToDSConnectors(context, numberOfConnectors, numberOfJoiners)
+                && namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto)
+                && allJoinerCorrectlyConnected(dataStorageResultsJoiners, context)
+                && allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
         }
-
-        Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName = new HashMap<>();
-
-        return expectedNumberOfJoinersDueToDSConnectors(context, numberOfConnectors, numberOfJoiners)
-            && namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto)
-            && allJoinerCorrectlyConnected(dataStorageResultsJoiners, context)
-            && allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
+        return true;
     }
 
     private boolean expectedNumberOfJoinersDueToDSConnectors(ConstraintValidatorContext context, int numberOfConnectors, int numberOfJoiners) {
@@ -125,7 +142,8 @@ public class DataStorageResultsJoinCorrectnessValidator
 
     private Pair<String, ClassMetaModelDto> findQueryOrDsName(DataStorageConnectorMetaModelDto dsConnector,
         EndpointMetaModelDto endpointMetaModelDto) {
-        ClassMetaModelDto responseClassMetaModel = endpointMetaModelDto.getResponseMetaModel().getClassMetaModel();
+        ClassMetaModelDto responseClassMetaModel = endpointMetaModelDto.getResponseMetaModel().getClassMetaModel()
+            .getGenericTypes().get(0);
 
         return ofNullable(dsConnector.getId())
             .map(dataStorageConnectorMetaModelRepository::findExactlyOneById)
@@ -141,6 +159,10 @@ public class DataStorageResultsJoinCorrectnessValidator
             .or(() -> ofNullable(dsConnector.getNameOfQuery())
                 .or(() -> ofNullable(dsConnector.getDataStorageMetaModel())
                     .map(DataStorageMetaModelDto::getName))
+                .or(() -> ofNullable(dsConnector.getDataStorageMetaModel())
+                    .map(DataStorageMetaModelDto::getId)
+                    .map(id -> metaModelContextService.getMetaModelContext().getDataStorages().getById(id))
+                    .map(DataStorageMetaModel::getName))
                 .map(dsOrQueryName -> Pair.of(dsOrQueryName, ofNullable(dsConnector.getClassMetaModelInDataStorage())
                     .orElse(responseClassMetaModel))))
             .orElseGet(() -> Pair.of(getNameOfDefaultDataStorage(), responseClassMetaModel));

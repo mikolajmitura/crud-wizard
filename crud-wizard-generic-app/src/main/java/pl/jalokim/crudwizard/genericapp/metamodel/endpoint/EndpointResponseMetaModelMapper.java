@@ -32,7 +32,7 @@ public abstract class EndpointResponseMetaModelMapper
                 metaModelContext::getMapperMetaModels,
                 endpointResponseMetaModelEntity::getMapperMetaModel))
                 .orElse(metaModelContext.getDefaultMapperMetaModel()))
-            .queryProvider(queryProviderMapper.mapInstanceOrNull(endpointResponseMetaModelEntity.getQueryProvider()))
+            .queryProvider(queryProviderMapper.mapInstance(endpointResponseMetaModelEntity.getQueryProvider()))
             .build();
     }
 

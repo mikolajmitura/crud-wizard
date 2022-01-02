@@ -26,4 +26,8 @@ public class JoinedResultsRow {
     boolean containsValueByQueryName(String queryName) {
         return joinedResultsByDsQueryName.containsKey(queryName);
     }
+
+    public Object get(String queryResultName) {
+        return joinedResultsByDsQueryName.get(queryResultName);
+    }
 }

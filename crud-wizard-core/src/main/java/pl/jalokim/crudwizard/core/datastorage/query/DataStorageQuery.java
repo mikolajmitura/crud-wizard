@@ -26,4 +26,11 @@ public class DataStorageQuery {
     private Map<String, Object> nativeQueryArguments;
 
     // TODO #25 select (fields) from (classmetamodels with join etc)
+
+    public static DataStorageQuery buildSelectFromAndWhere(ClassMetaModel selectFrom, AbstractExpression where) {
+        return DataStorageQuery.builder()
+            .selectFrom(selectFrom)
+            .where(where)
+            .build();
+    }
 }

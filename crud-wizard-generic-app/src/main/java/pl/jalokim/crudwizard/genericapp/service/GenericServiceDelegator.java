@@ -54,7 +54,7 @@ public class GenericServiceDelegator {
     private GenericServiceArgument searchForEndpointByRequest(GenericServiceArgument genericServiceArgument) {
         var httpMethod = HttpMethod.valueOf(genericServiceArgument.getRequest().getMethod());
         var requestedUrl = genericServiceArgument.getRequest().getRequestURI();
-        var foundEndpointInfo = endpointMetaModelContextNodeUtils.findEndpointByUrl(requestedUrl, httpMethod);
+        var foundEndpointInfo = endpointMetaModelContextNodeUtils.findEndpointForInvokeByUrl(requestedUrl, httpMethod);
 
         if (foundEndpointInfo.isNotFound()) {
             throw new EntityNotFoundException(createMessagePlaceholder("error.url.not.found", requestedUrl));

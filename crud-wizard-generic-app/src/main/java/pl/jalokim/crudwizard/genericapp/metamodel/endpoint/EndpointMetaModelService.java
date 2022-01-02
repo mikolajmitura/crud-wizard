@@ -62,8 +62,6 @@ public class EndpointMetaModelService {
                     dataStorageConnectorMetaModelService.saveNewDataStorageConnector(indexedValue.getValue()))
             );
 
-        // TODO #37 save joiners to db and create IT for save it to db...
-
         Optional.ofNullable(endpointMetaModelEntity.getQueryArguments())
             .ifPresent(queryArguments -> queryArguments.setName(createClassModelName(endpointMetaModelEntity, "QueryArguments")));
         endpointMetaModelEntity.setQueryArguments(classMetaModelService.saveNewOrLoadById(endpointMetaModelEntity.getQueryArguments()));

@@ -5,22 +5,17 @@ import static java.util.Optional.ofNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Component
 public class QueryProviderMapper {
 
     @Autowired
-    private QueryProviderInstanceCache queryProviderInstanceCache;
+    private InstanceLoader instanceLoader;
 
-    public DataStorageQueryProvider mapInstance(MetaModelContext metaModelContext, QueryProviderEntity queryProviderEntity) {
+    public DataStorageQueryProvider mapInstance(QueryProviderEntity queryProviderEntity) {
         return ofNullable(queryProviderEntity)
-            .map(queryProvider -> queryProviderInstanceCache.loadQueryProvider(queryProvider.getClassName()))
-            .orElseGet(metaModelContext::getDefaultDataStorageQueryProvider);
-    }
-
-    public DataStorageQueryProvider mapInstanceOrNull(QueryProviderEntity queryProviderEntity) {
-        return ofNullable(queryProviderEntity)
-            .map(queryProvider -> queryProviderInstanceCache.loadQueryProvider(queryProvider.getClassName())).orElse(null);
+            .map(queryProvider -> (DataStorageQueryProvider) instanceLoader.createInstanceOrGetBean(queryProvider.getClassName()))
+            .orElse(null);
     }
 }

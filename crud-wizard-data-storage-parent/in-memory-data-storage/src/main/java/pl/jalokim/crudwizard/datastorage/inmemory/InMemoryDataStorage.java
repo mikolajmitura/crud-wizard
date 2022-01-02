@@ -38,22 +38,26 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, Object entity) {
+    public Object saveOrUpdate(ClassMetaModel classMetaModel, Object entity) {
         EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
             entityBag = new EntityStorage(classMetaModel, idGenerators);
             entitiesByName.put(classMetaModel.getName(), entityBag);
         }
 
-        FieldMetaModel fieldWithId = elements(classMetaModel.fetchAllFields())
+        FieldMetaModel fieldWithId = findIdFieldMetaModel(classMetaModel);
+
+        Object idObject = getFieldValue(entity, fieldWithId.getFieldName());
+        return entityBag.saveEntity(idObject, fieldWithId, entity);
+    }
+
+    private FieldMetaModel findIdFieldMetaModel(ClassMetaModel classMetaModel) {
+        return elements(classMetaModel.fetchAllFields())
             .filter(field -> field.getAdditionalProperties().stream()
                 .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
             .findFirst()
             .orElseThrow(() -> new TechnicalException("Cannot find field annotated as 'is_id_field' for classMetaModel with id: "
                 + classMetaModel.getId() + " and name: " + classMetaModel.getName()));
-
-        Object idObject = getFieldValue(entity, fieldWithId.getFieldName());
-        return entityBag.saveEntity(idObject, fieldWithId, entity);
     }
 
     @Override
@@ -71,8 +75,9 @@ public class InMemoryDataStorage implements DataStorage {
     @Override
     public List<Object> findEntities(DataStorageQuery query) {
         ClassMetaModel selectFromClassMetaModel = query.getSelectFrom();
-        EntityStorage entityStorage = entitiesByName.get(selectFromClassMetaModel.getName());
-        return inMemoryDsQueryRunner.runQuery(entityStorage.fetchStream(), query);
+        return Optional.ofNullable(entitiesByName.get(selectFromClassMetaModel.getName()))
+            .map(entityStorage -> inMemoryDsQueryRunner.runQuery(entityStorage.fetchStream(), query))
+            .orElse(List.of());
     }
 
     @Override
@@ -82,6 +87,21 @@ public class InMemoryDataStorage implements DataStorage {
             throw new EntityNotFoundException(String.format("Cannot find storage for entities: %s", classMetaModel.getName()));
         }
         entityBag.delete(idObject);
+    }
+
+    @Override
+    public void delete(DataStorageQuery query) {
+        ClassMetaModel classMetaModel = query.getSelectFrom();
+        FieldMetaModel fieldWithId = findIdFieldMetaModel(classMetaModel);
+        findEntities(query).forEach(entry -> {
+            Object idObject = getFieldValue(entry, fieldWithId.getFieldName());
+            deleteEntity(classMetaModel, idObject);
+        });
+    }
+
+    @Override
+    public long count(DataStorageQuery query) {
+        return findEntities(query).size();
     }
 
     public void clear() {

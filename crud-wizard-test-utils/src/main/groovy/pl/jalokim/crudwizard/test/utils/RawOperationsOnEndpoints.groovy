@@ -50,13 +50,13 @@ class RawOperationsOnEndpoints implements EndpointActions {
         extractResponseAsLong(httpResponse)
     }
 
-    void putPayload(String url, Object payload) {
-        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.put(url), payload)
+    void putPayload(String url, Object payload, Map parameters = null) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.put(url), payload, parameters)
         httpResponse.andExpect(status().isNoContent())
     }
 
-    void delete(String url) {
-        def httpResponse = perform(MockMvcRequestBuilders.delete(url))
+    void delete(String url, Map parameters = null) {
+        def httpResponse = performWithParameters(MockMvcRequestBuilders.delete(url), parameters)
         httpResponse.andExpect(status().isNoContent())
     }
 
@@ -66,7 +66,7 @@ class RawOperationsOnEndpoints implements EndpointActions {
         extractResponseAsJsonArray(httpResponse)
     }
 
-    Object getAndReturnJson(String url, Map parameters = null) {
+    Map getAndReturnJson(String url, Map parameters = null) {
         def httpResponse = performQuery(url, parameters)
         httpResponse.andExpect(status().isOk())
         extractResponseAsJson(httpResponse)

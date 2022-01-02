@@ -37,7 +37,7 @@ public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
 
     ClassMetaModel pathParams;
 
-    // TODO validation when added new service metamodel
+    // TODO #1 validation when added new service metamodel
     // verify that this bean, class, method exists
     // verify that can method arguments will be resolved correctly
     // verify that newly added serviceMetaModel does not exists already, then use existing id

@@ -22,10 +22,10 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalP
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.ObjectsJoinerVerifierCache;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.PropertyPathResolver;
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 // TODO try use uses to inject others mapper, now is problem with ambiguity from AdditionalPropertyMapper
@@ -39,7 +39,7 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
     private DataStorageConnectorMetaModelMapper dataStorageConnectorMetaModelMapper;
 
     @Autowired
-    private ObjectsJoinerVerifierCache objectsJoinerVerifierCache;
+    private InstanceLoader instanceLoader;
 
     @Override
     @Mapping(target = "apiTag", ignore = true)
@@ -77,7 +77,7 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
     @Named("mapJoinerVerifierInstance")
     @SuppressWarnings("unchecked")
     protected ObjectsJoinerVerifier<Object, Object> mapJoinerVerifierInstance(String className) {
-        return (ObjectsJoinerVerifier<Object, Object>) objectsJoinerVerifierCache.loadJoinerVerifier(className);
+        return instanceLoader.createInstanceOrGetBean(className);
     }
 
     private List<DataStorageConnectorMetaModel> getStorageConnectors(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {

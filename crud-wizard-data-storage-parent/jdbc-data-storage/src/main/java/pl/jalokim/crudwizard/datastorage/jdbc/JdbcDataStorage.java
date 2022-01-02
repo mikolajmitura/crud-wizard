@@ -1,9 +1,11 @@
 package pl.jalokim.crudwizard.datastorage.jdbc;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
@@ -26,7 +28,7 @@ public class JdbcDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, Object entity) {
+    public Object saveOrUpdate(ClassMetaModel classMetaModel, Object entity) {
         return null;
     }
 
@@ -48,5 +50,15 @@ public class JdbcDataStorage implements DataStorage {
     @Override
     public void innerDeleteEntity(ClassMetaModel classMetaModel, Object idObject) {
 
+    }
+
+    @Override
+    public void delete(DataStorageQuery query) {
+
+    }
+
+    @Override
+    public long count(DataStorageQuery query) {
+        return 0;
     }
 }

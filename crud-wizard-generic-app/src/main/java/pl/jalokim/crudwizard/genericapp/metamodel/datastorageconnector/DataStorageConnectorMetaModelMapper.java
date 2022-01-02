@@ -27,8 +27,10 @@ public abstract class DataStorageConnectorMetaModelMapper
     @Mapping(target = "queryProvider", ignore = true)
     public abstract DataStorageConnectorMetaModel toMetaModel(DataStorageConnectorMetaModelEntity dataStorageConnectorMetaModelEntity);
 
-    public DataStorageConnectorMetaModel toFullMetaModel(MetaModelContext metaModelContext, DataStorageConnectorMetaModelEntity dataStorageConnectorEntity) {
-        return DataStorageConnectorMetaModel.builder()
+    public DataStorageConnectorMetaModel toFullMetaModel(MetaModelContext metaModelContext,
+        DataStorageConnectorMetaModelEntity dataStorageConnectorEntity) {
+
+        return toMetaModel(dataStorageConnectorEntity).toBuilder()
             .id(dataStorageConnectorEntity.getId())
             .dataStorageMetaModel(ofNullable(getFromContextByEntity(
                 metaModelContext::getDataStorages,
@@ -51,7 +53,7 @@ public abstract class DataStorageConnectorMetaModelMapper
                     dataStorageConnectorEntity::getClassMetaModelInDataStorage
                 )
             )
-            .queryProvider(queryProviderMapper.mapInstance(metaModelContext, dataStorageConnectorEntity.getQueryProvider()))
+            .queryProvider(queryProviderMapper.mapInstance(dataStorageConnectorEntity.getQueryProvider()))
             .build();
     }
 }

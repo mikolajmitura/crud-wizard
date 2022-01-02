@@ -27,8 +27,7 @@ public class MapperDelegatorService {
         BeanMethodMetaModel methodMetaModel = mapperMetaModel.getMethodMetaModel();
         MethodSignatureMetaModel methodSignatureMetaModel = methodMetaModel.getMethodSignatureMetaModel();
         List<MethodArgumentMetaModel> methodArguments = methodSignatureMetaModel.getMethodArguments();
-        return methodSignatureMetaModel.getReturnType().getRawClass().equals(Object.class)
-            && methodArguments.size() == 1
+        return methodArguments.size() == 1
             && methodArguments.get(0).getArgumentType().getRawClass().equals(GenericMapperArgument.class);
     }
 }

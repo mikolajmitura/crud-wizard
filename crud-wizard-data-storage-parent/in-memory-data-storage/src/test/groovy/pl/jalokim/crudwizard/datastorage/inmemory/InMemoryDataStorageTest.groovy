@@ -53,11 +53,11 @@ class InMemoryDataStorageTest extends Specification {
         ]
 
         when: 'should save few new'
-        Long firstPersonId = inMemoryStorage.saveEntity(personMetaModel, firstPerson)
-        Long secondPersonId = inMemoryStorage.saveEntity(personMetaModel, secondPerson)
-        String addressId = inMemoryStorage.saveEntity(addressMetaModel, address)
-        Integer firstJobId = inMemoryStorage.saveEntity(jobMetaModel, firstJob)
-        Integer secondJobId = inMemoryStorage.saveEntity(jobMetaModel, secondJob)
+        Long firstPersonId = inMemoryStorage.saveOrUpdate(personMetaModel, firstPerson)
+        Long secondPersonId = inMemoryStorage.saveOrUpdate(personMetaModel, secondPerson)
+        String addressId = inMemoryStorage.saveOrUpdate(addressMetaModel, address)
+        Integer firstJobId = inMemoryStorage.saveOrUpdate(jobMetaModel, firstJob)
+        Integer secondJobId = inMemoryStorage.saveOrUpdate(jobMetaModel, secondJob)
         def entitiesByName = inMemoryStorage.entitiesByName
 
         then:
@@ -110,7 +110,7 @@ class InMemoryDataStorageTest extends Specification {
         def updatedFirstPerson = firstPerson
         updatedFirstPerson.name = firstPerson.name + DataFakerHelper.randomText()
 
-        Long updatedFirstPersonId = inMemoryStorage.saveEntity(personMetaModel, updatedFirstPerson)
+        Long updatedFirstPersonId = inMemoryStorage.saveOrUpdate(personMetaModel, updatedFirstPerson)
         def getUpdatedFirstPerson = inMemoryStorage.getEntityById(personMetaModel, firstPersonId)
 
         then:

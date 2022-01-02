@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
@@ -25,7 +26,34 @@ public class EndpointMetaModelContextNodeUtils {
     private final JsonObjectMapper jsonObjectMapper;
     private final MetaModelContextService metaModelContextService;
 
-    public FoundEndpointMetaModel findEndpointByUrl(String url, HttpMethod httpMethod) {
+    public EndpointMetaModel findEndpointMetaModelByUrlDuringCreate(String url, HttpMethod httpMethod) {
+        MetaModelContext metaModelContext = metaModelContextService.getMetaModelContext();
+        var foundEndpointRef = new AtomicReference<EndpointMetaModel>();
+        var urlMetamodel = UrlModelResolver.resolveUrl(url);
+        var endpointNodeRef = new AtomicReference<>(metaModelContext.getEndpointMetaModelContextNode());
+        List<UrlPart> urlParts = urlMetamodel.getUrlParts();
+
+        for (int urlPartIndex = 0; urlPartIndex < urlParts.size(); urlPartIndex++) {
+            UrlPart urlPart = urlParts.get(urlPartIndex);
+            EndpointMetaModelContextNode nextEndpointNode = endpointNodeRef.get().getNodeByUrlPart(urlPart);
+            if (nextEndpointNode == null && urlPart.isPathVariable()) {
+                nextEndpointNode = endpointNodeRef.get().getVariableContextNode();
+            }
+            endpointNodeRef.set(nextEndpointNode);
+            if (endpointNodeRef.get() == null) {
+                break;
+            }
+
+            if (CollectionUtils.isLastIndex(urlParts, urlPartIndex)) {
+                EndpointMetaModel foundEndpoint = endpointNodeRef.get().getEndpointByHttpMethod(httpMethod);
+                foundEndpointRef.set(foundEndpoint);
+            }
+        }
+
+        return foundEndpointRef.get();
+    }
+
+    public FoundEndpointMetaModel findEndpointForInvokeByUrl(String url, HttpMethod httpMethod) {
         MetaModelContext metaModelContext = metaModelContextService.getMetaModelContext();
         var foundEndpointRef = new AtomicReference<EndpointMetaModel>();
         var urlMetamodel = UrlModelResolver.resolveUrl(url);
@@ -36,12 +64,10 @@ public class EndpointMetaModelContextNodeUtils {
         for (int urlPartIndex = 0; urlPartIndex < urlParts.size(); urlPartIndex++) {
             UrlPart urlPart = urlParts.get(urlPartIndex);
             EndpointMetaModelContextNode nextEndpointNode = endpointNodeRef.get().getNodeByUrlPart(urlPart);
-            if (nextEndpointNode == null || urlPart.isPathVariable()) {
+            if (nextEndpointNode == null) {
                 nextEndpointNode = endpointNodeRef.get().getVariableContextNode();
-                if (!urlPart.isPathVariable()) {
-                    ofNullable(nextEndpointNode)
-                        .ifPresent(notNullNextNode -> urlPathParamsValue.add(urlPart.getOriginalValue()));
-                }
+                ofNullable(nextEndpointNode)
+                    .ifPresent(notNullNextNode -> urlPathParamsValue.add(urlPart.getOriginalValue()));
             }
             endpointNodeRef.set(nextEndpointNode);
             if (endpointNodeRef.get() == null) {
@@ -69,9 +95,16 @@ public class EndpointMetaModelContextNodeUtils {
             for (int pathParamIndex = 0; pathParamIndex < urlPathParamsValue.size(); pathParamIndex++) {
                 String rawParamValue = urlPathParamsValue.get(pathParamIndex);
                 FieldMetaModel fieldMetaModel = pathParamFields.get(pathParamIndex);
-                Object convertedValue = jsonObjectMapper.convertToObject(ObjectNodePath.rootNode().nextNode(fieldMetaModel.getFieldName()),
-                    rawParamValue, fieldMetaModel.getFieldType().getRealClass());
-                pathParamsMap.put(fieldMetaModel.getFieldName(), convertedValue);
+                String fieldName = fieldMetaModel.getFieldName();
+                try {
+                    Object convertedValue = jsonObjectMapper.convertToObject(ObjectNodePath.rootNode().nextNode(fieldName),
+                        rawParamValue, fieldMetaModel.getFieldType().getRealClass());
+                    pathParamsMap.put(fieldName, convertedValue);
+                } catch (TechnicalException ex) {
+                    throw new TechnicalException(
+                        String.format("Problem with path variable name: %s in endpoint with url %s, method %s, invalid variable value: %s",
+                            fieldName, foundEndpoint.getUrlMetamodel().getRawUrl(), foundEndpoint.getHttpMethod(), rawParamValue), ex);
+                }
             }
         }
 

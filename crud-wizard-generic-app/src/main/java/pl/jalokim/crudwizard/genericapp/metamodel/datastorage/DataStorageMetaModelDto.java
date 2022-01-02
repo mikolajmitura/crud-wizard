@@ -31,7 +31,7 @@ public class DataStorageMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     Long id;
 
-    // TODO #37 verify that name of ds exists
+    // TODO #44 verify that name of ds exists
     String name;
 
     @ClassExists(expectedOfType = DataStorage.class)

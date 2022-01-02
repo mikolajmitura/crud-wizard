@@ -107,9 +107,6 @@ public class DefaultBeansConfigService {
                     .dataStorageMetaModel(dataStorageMetaModelRepository.getOne(getDefaultDataStorageId()))
                     .mapperMetaModelForQuery(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))
                     .mapperMetaModelForReturn(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))
-                    .queryProvider(QueryProviderEntity.builder()
-                        .className(getDefaultQueryProviderClassName())
-                        .build())
                     .build())
                     .getId()
             };

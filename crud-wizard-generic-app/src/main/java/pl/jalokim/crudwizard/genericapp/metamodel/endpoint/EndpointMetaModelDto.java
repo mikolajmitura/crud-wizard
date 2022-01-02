@@ -70,6 +70,7 @@ public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
     HttpMethod httpMethod;
 
     @NotNull
+    // TODO #44 verify that operationName is unique globally when create
     String operationName;
 
     @Valid

@@ -62,6 +62,7 @@ public class ClassMetaModelDto extends AdditionalPropertyMetaModelDto {
     @NotNull(groups = UpdateContext.class)
     Long id;
 
+    // TODO #44 verify that name is unique when create
     String name;
 
     @ClassExists(canBeAbstractOrInterface = true)

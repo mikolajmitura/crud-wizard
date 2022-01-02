@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import lombok.Getter;
 
 @Getter
@@ -26,5 +27,11 @@ public class ObjectCache<K, V> {
 
     public List<V> fetchAll() {
         return elements(objectsById.values()).asList();
+    }
+
+    public V findOneBy(Predicate<V> findBy) {
+        return elements(objectsById.values())
+            .filter(findBy)
+            .getFirstOrNull();
     }
 }

@@ -6,6 +6,9 @@ public class ValueExtractorFromPath {
 
     @SuppressWarnings("unchecked")
     public static <T> T getValueFromPath(Object object, String pathToRead) {
+        if (object == null) {
+            return null;
+        }
         Object currentObject = object;
         for (String pathPart : bySplitText(pathToRead, "\\.").asList()) {
             Object fieldValue = DataFieldsHelper.getFieldValue(currentObject, pathPart.replaceFirst("\\?", ""));
