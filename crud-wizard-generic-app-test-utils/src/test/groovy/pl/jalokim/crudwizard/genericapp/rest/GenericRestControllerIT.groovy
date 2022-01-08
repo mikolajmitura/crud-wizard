@@ -8,7 +8,9 @@ import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createHttpQueryParamsClassMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createIgnoredForQueryFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createListWithMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createPageWithMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.isIdFieldType
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDtoSamples.createDataStorageMetaModelDto
@@ -18,6 +20,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.Da
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDtoSamples.createQueryProviderDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidEndpointResponseMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetListOfPerson
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetPageOfPerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators2
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostWithSimplePerson
@@ -254,14 +257,8 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         errorResponse.message == entityNotFoundMessage(createdId, personMetaModel.name)
 
         and: 'return people list with default query provider'
-        def getListOfPersonEndpoint = createValidGetListOfPerson().toBuilder()
+        def getListOfPersonEndpoint = createValidGetListOfPerson(createClassMetaModelDtoWithId(personMetaModel.id)).toBuilder()
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
-            .responseMetaModel(EndpointResponseMetaModelDto.builder()
-                .classMetaModel(createClassMetaModelDtoFromClass(List).toBuilder()
-                    .genericTypes([createClassMetaModelDtoWithId(personMetaModel.id)])
-                    .build())
-                .build()
-            )
             .build()
 
         endpointMetaModelService.createNewEndpoint(getListOfPersonEndpoint)
@@ -279,8 +276,8 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def peopleList1 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person")
         def peopleList2 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [name: "John"])
         def peopleList3 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [name: "John", surname: "doe"])
-        def peopleList4 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [surname: "do", "sort_by": "name(Desc),surname(Desc)"])
-        def peopleList5 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person", [surname: "do", "sort_by": "name,surname(Desc)"])
+        def peopleList4 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person?surname=do&sort=name,desc&sort=surname,desc")
+        def peopleList5 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person?surname=do&sort=name&sort=surname,desc")
 
         then:
         peopleList1.collect{ it.id } == [person1Id, person2Id, person3Id, person4Id]
@@ -301,9 +298,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .queryProvider(createQueryProviderDto(FinalQueryProvider1))
-                .classMetaModel(createClassMetaModelDtoFromClass(List).toBuilder()
-                    .genericTypes([createClassMetaModelDtoWithId(personMetaModel.id)])
-                    .build())
+                .classMetaModel(createListWithMetaModel(createClassMetaModelDtoWithId(personMetaModel.id)))
                 .build()
             )
             .build()
@@ -318,7 +313,52 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         peopleListWithFinalQuery1.collect{ it.id } == [person1Id, person2Id]
         peopleListWithFinalQuery2.collect{ it.id } == [person2Id]
 
-        // TODO #37 test for return page
+        and: 'return second page of objects'
+        def getPageOfPersonEndpoint = createValidGetPageOfPerson(createClassMetaModelDtoWithId(personMetaModel.id))
+
+        endpointMetaModelService.createNewEndpoint(getPageOfPersonEndpoint)
+
+        def payloadPerson5 = createPostValidPersonPayload("Sandra", "Bond")
+        def person5Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson5)
+
+        def payloadPerson6 = createPostValidPersonPayload("Diana", "Bond")
+        def person6Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson6)
+
+        def payloadPerson7 = createPostValidPersonPayload("Adam", "Adams")
+        def person7Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson7)
+
+        when:
+        def firstPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size : 2, page : 0])
+        def secondPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size : 2, page : 1])
+        def fourthPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size : 2, page : 3])
+
+        then:
+        firstPageOfPerson.totalElements == 7
+        firstPageOfPerson.totalPages == 4
+        firstPageOfPerson.content.size() == 2
+
+        [person5Id, person3Id] == firstPageOfPerson.content*.id
+
+        secondPageOfPerson.totalElements == 7
+        secondPageOfPerson.totalPages == 4
+        secondPageOfPerson.content.size() == 2
+
+        def expectedIdsOrder = [person4Id, person2Id]
+        [payloadPerson4, payloadPerson2].eachWithIndex { payloadPerson, index ->
+            def personFromResponse = secondPageOfPerson.content[index]
+            verifyAll(personFromResponse) {
+                id == expectedIdsOrder[index]
+                name == payloadPerson.name
+                surname == payloadPerson.surname
+                document.value == payloadPerson.document.value
+            }
+        }.size() > 1
+
+        fourthPageOfPerson.totalElements == 7
+        fourthPageOfPerson.totalPages == 4
+        fourthPageOfPerson.content.size() == 1
+
+        [person7Id] == fourthPageOfPerson.content*.id
     }
 
     def "invoke endpoints with default generic service, with mappers in java, use 3 data storages with success"() {
@@ -661,17 +701,14 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             secondDataStorage, personSecondDbClassModel)
 
         and: 'get list with final query'
-        def personResultEntriesListId = metaModelContextService.getMetaModelContext().getClassMetaModels()
-            .findOneBy { it.className = List.canonicalName &&
-                it.genericTypes.size() == 1 && it.genericTypes[0].name == "personResultEntry" }
-        .getId()
+        def personResultEntriesClassId = metaModelContextService.getClassMetaModelByName("personResultEntry").id
 
         def createGetListWithFinalQueryPersonEndpoint = createGetListWithoutFinalQueryPersonEndpoint.toBuilder()
             .baseUrl("users/with-final-query")
             .responseMetaModel(
                 EndpointResponseMetaModelDto.builder()
                     .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
-                    .classMetaModel(createClassMetaModelDtoWithId(personResultEntriesListId))
+                    .classMetaModel(createListWithMetaModel(createClassMetaModelDtoWithId(personResultEntriesClassId)))
                     .queryProvider(createQueryProviderDto(FinalQueryProviderForPersonResultEntry))
                 .build()
             )
@@ -694,8 +731,53 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             it.name == nameOnlyIn2Db && it.lastname == surnameOnlyIn2Db
         } == null
 
-        // TODO #37 test for return page, few ds, everywhere other models, mapper in java
-        // TODO #37 test for return page, few ds, everywhere other models, mapper in java, with final query
+        and: 'return page from 3 data storages'
+        def getPageOfPersonFrom3DsEndpoint = createGetListWithoutFinalQueryPersonEndpoint.toBuilder()
+            .baseUrl("users/by-page")
+            .operationName("getPageOfPerson")
+            .queryArguments(
+                ClassMetaModelDto.builder()
+                    .name("queryArguments")
+                    .fields([
+                        createIgnoredForQueryFieldMetaModelDto("size", Integer),
+                        createIgnoredForQueryFieldMetaModelDto("page", Integer),
+                        createIgnoredForQueryFieldMetaModelDto("sort", String),
+                        createValidFieldMetaModelDto("name", String),
+                        createValidFieldMetaModelDto("surname", String),
+                    ])
+                    .build())
+            .responseMetaModel(
+                EndpointResponseMetaModelDto.builder()
+                    .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
+                    .classMetaModel(createPageWithMetaModel(createClassMetaModelDtoWithId(personResultEntriesClassId)))
+                    .build()
+            )
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(getPageOfPersonFrom3DsEndpoint)
+
+        def personPayload4 = createPostValidPersonPayload("John", "Zombie")
+        def personPayload5 = createPostValidPersonPayload("John", "Abba")
+        def personPayload6 = createPostValidPersonPayload("John", "Xyz")
+
+        rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personPayload4)
+        rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personPayload5)
+        rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), personPayload6)
+
+        when:
+        def secondPageOfPersonResult = rawOperationsOnEndpoints.getPageObObjects("/users/by-page?sort=name,asc&sort=surname,desc",
+            [name: "John", size: 2, page: 1])
+
+        then:
+        secondPageOfPersonResult.totalPages == 3
+        secondPageOfPersonResult.totalElements == 5
+        secondPageOfPersonResult.content.size() == 2
+
+        def expectedInputPayloadsForPage = [personPayload2, personPayload1]
+
+        assertPayloadExistenceInResponseList(expectedInputPayloadsForPage, secondPageOfPersonResult.content,
+            defaultDataStorage, personClassModel, secondDataStorage,
+            personSecondDbClassModel, thirdDataStorage, personDocumentDbClassModel)
     }
 
     private boolean assertExistenceJonNovDoe(List<Map> getResultOfFewDsResult1, nameOnlyIn2Db, surnameOnlyIn2Db,

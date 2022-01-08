@@ -63,6 +63,7 @@ public class GenericServiceDelegator {
         return genericServiceArgument.toBuilder()
             .endpointMetaModel(foundEndpointInfo.getEndpointMetaModel())
             .urlPathParams(foundEndpointInfo.getUrlPathParams())
+            .pageable(genericServiceArgument.getPageable())
             .build();
     }
 }

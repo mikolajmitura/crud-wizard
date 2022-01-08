@@ -5,6 +5,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMeta
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
+import org.springframework.data.domain.Page
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
@@ -124,6 +125,13 @@ class ClassMetaModelDtoSamples {
             .build()
     }
 
+    static ClassMetaModelDto createPageWithMetaModel(ClassMetaModelDto classMetaModelDto) {
+        ClassMetaModelDto.builder()
+            .className(Page.canonicalName)
+            .genericTypes([classMetaModelDto])
+            .build()
+    }
+
     static ClassMetaModelDto createValidClassMetaModelDtoWithName() {
         ClassMetaModelDto.builder()
             .name(randomText())
@@ -168,6 +176,12 @@ class ClassMetaModelDtoSamples {
             .validators(validators)
             .additionalProperties(fieldAdditionalProperties)
             .build()
+    }
+
+    static FieldMetaModelDto createIgnoredForQueryFieldMetaModelDto(String fieldName, Class<?> fieldType) {
+        createValidFieldMetaModelDto(fieldName, fieldType, [], [
+            additionalPropertyRawJsonString(DefaultDataStorageQueryProvider.IGNORE_IN_QUERY_PARAM, "true")
+        ])
     }
 
     static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, ClassMetaModelDto classMetaModelDto,

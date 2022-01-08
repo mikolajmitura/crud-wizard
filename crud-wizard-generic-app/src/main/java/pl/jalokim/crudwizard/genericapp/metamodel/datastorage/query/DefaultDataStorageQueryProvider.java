@@ -12,7 +12,6 @@ import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionType.LOWER_
 import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.likeIgnoreCase;
 import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.asUnderscoreLowercase;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -23,12 +22,10 @@ import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
 import pl.jalokim.crudwizard.core.datastorage.query.EmptyExpression;
 import pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument;
 import pl.jalokim.crudwizard.core.datastorage.query.ExpressionType;
-import pl.jalokim.crudwizard.core.datastorage.query.OrderPath;
 import pl.jalokim.crudwizard.core.datastorage.query.RealExpression;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.utils.collection.CollectionUtils;
-import pl.jalokim.utils.collection.Elements;
 
 public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider {
 
@@ -90,19 +87,8 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
         return DataStorageQuery.builder()
             .selectFrom(classMetaModelFromDataStore)
             .where(whereExpression)
-            .sortBy(createSortBy(requestParams))
+            .sortBy(dataStorageQueryArguments.getSortBy())
+            .pageable(dataStorageQueryArguments.getPageable())
             .build();
     }
-
-    private List<OrderPath> createSortBy(Map<String, Object> requestParams) {
-        return Optional.ofNullable(requestParams.get("sort_by"))
-            .map(sortExpression -> (String) sortExpression)
-            .map(sortExpression -> Elements.bySplitText(sortExpression, ","))
-            .map(sortExpressions -> sortExpressions
-                .map(OrderPath::orderPathFromText)
-                .asList())
-            .orElse(List.of());
-    }
-
-
 }

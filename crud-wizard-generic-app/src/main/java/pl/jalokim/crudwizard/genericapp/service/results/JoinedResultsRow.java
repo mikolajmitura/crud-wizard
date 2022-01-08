@@ -30,4 +30,8 @@ public class JoinedResultsRow {
     public Object get(String queryResultName) {
         return joinedResultsByDsQueryName.get(queryResultName);
     }
+
+    public boolean containsQueryResultsByName(String queryResultName) {
+        return joinedResultsByDsQueryName.containsKey(queryResultName);
+    }
 }

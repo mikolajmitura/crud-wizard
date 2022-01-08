@@ -1,13 +1,14 @@
 package pl.jalokim.crudwizard.core.datastorage.query;
 
-import java.util.List;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 
-@Builder
+@Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
 public class DataStorageQuery {
@@ -16,7 +17,9 @@ public class DataStorageQuery {
     //  or join to DataStorageQuery
     private ClassMetaModel selectFrom;
     private AbstractExpression where;
-    private List<OrderPath> sortBy;
+
+    private Pageable pageable;
+    private Sort sortBy;
     /**
      * It can be JPA query, or other that it can be used in specific data storage implementation.
      */

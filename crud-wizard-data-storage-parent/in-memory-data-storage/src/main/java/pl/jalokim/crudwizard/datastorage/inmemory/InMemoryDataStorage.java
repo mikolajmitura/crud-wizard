@@ -9,7 +9,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import pl.jalokim.crudwizard.core.config.jackson.SimplePageImpl;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
 import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
@@ -68,8 +70,20 @@ public class InMemoryDataStorage implements DataStorage {
 
     @Override
     public Page<Object> findPageOfEntity(Pageable pageable, DataStorageQuery query) {
-        // TODO how to do queries? eq, not eq, contains, in how?
-        return null;
+        DataStorageQuery withoutPageable = query.toBuilder()
+            .pageable(null)
+            .build();
+
+        List<Object> foundAll = findEntities(withoutPageable);
+
+        long totalElements = foundAll.size();
+
+        List<Object> pageContent = elements(foundAll)
+            .skip(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .asList();
+
+        return new PageImpl<>(pageContent, pageable, totalElements);
     }
 
     @Override

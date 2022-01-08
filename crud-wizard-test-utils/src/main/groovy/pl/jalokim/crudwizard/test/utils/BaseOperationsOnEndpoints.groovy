@@ -27,7 +27,7 @@ abstract class BaseOperationsOnEndpoints<INPUT> extends RawOperationsOnEndpoints
         extractResponseAsJson(httpResponse)
     }
 
-    public <T> T getById(Long id, Class<T> returnClass) {
+    def <T> T getById(Long id, Class<T> returnClass) {
         getAndReturnObject("${getEndpointUrl()}/$id", returnClass)
     }
 

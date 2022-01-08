@@ -152,7 +152,7 @@ class ClassMetaModelSamples {
                         DefaultDataStorageQueryProvider.EXPRESSION_RIGHT_PATH, "rightPath.otherValue",
                         DefaultDataStorageQueryProvider.EXPRESSION_LEFT_PATH, "document.type",
                         DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "EQUALS")),
-                createValidFieldMetaModel("sortBy", String)]
+                createValidFieldMetaModel("sort", String)]
             )
             .build()
     }

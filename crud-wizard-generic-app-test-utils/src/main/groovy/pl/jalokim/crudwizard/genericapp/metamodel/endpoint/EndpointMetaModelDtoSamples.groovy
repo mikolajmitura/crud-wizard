@@ -2,6 +2,8 @@ package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.additionalPropertyRawJsonString
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createIgnoredForQueryFieldMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createPageWithMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
@@ -10,6 +12,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import org.springframework.data.domain.Page
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
@@ -74,7 +77,7 @@ class EndpointMetaModelDtoSamples {
             .build()
     }
 
-    static EndpointMetaModelDto createValidGetListOfPerson() {
+    static EndpointMetaModelDto createValidGetListOfPerson(ClassMetaModelDto elementTypeInCollection = simplePersonClassMetaModel()) {
         EndpointMetaModelDto.builder()
             .baseUrl("domain/person")
             .apiTag(ApiTagDto.builder()
@@ -86,7 +89,7 @@ class EndpointMetaModelDtoSamples {
                 .name("")
                 .fields([
                     createValidFieldMetaModelDto("surname", String),
-                    createValidFieldMetaModelDto("sortBy", String, [], [
+                    createValidFieldMetaModelDto("sort", String, [], [
                         additionalPropertyRawJsonString(DefaultDataStorageQueryProvider.IGNORE_IN_QUERY_PARAM, "true")
                     ]),
                     createValidFieldMetaModelDto("name", String, [],
@@ -96,8 +99,35 @@ class EndpointMetaModelDtoSamples {
             )
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .classMetaModel(createClassMetaModelDtoFromClass(List).toBuilder()
-                    .genericTypes([simplePersonClassMetaModel()])
+                    .genericTypes([elementTypeInCollection])
                     .build())
+                .build()
+            )
+            .build()
+    }
+
+    static EndpointMetaModelDto createValidGetPageOfPerson(ClassMetaModelDto pageContentType = simplePersonClassMetaModel()) {
+        EndpointMetaModelDto.builder()
+            .baseUrl("domain/person/by-page")
+            .apiTag(ApiTagDto.builder()
+                .name(randomText())
+                .build())
+            .httpMethod(HttpMethod.GET)
+            .operationName("getPageOfPerson")
+            .queryArguments(ClassMetaModelDto.builder()
+                .name("")
+                .fields([
+                    createIgnoredForQueryFieldMetaModelDto("size", Integer),
+                    createIgnoredForQueryFieldMetaModelDto("page", Integer),
+                    createIgnoredForQueryFieldMetaModelDto("sort", String),
+                    createValidFieldMetaModelDto("surname", String),
+                    createValidFieldMetaModelDto("name", String, [],
+                        [additionalPropertyRawJsonString(DefaultDataStorageQueryProvider.EXPRESSION_TYPE, "EQUALS")])
+                ])
+                .build()
+            )
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createPageWithMetaModel(pageContentType))
                 .build()
             )
             .build()

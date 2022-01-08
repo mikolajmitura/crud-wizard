@@ -13,8 +13,10 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import pl.jalokim.crudwizard.core.config.jackson.SimplePageImpl;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryArguments;
@@ -63,7 +65,7 @@ public class DefaultGenericService {
 
         DataStorageQueryArgumentsFactory dataStorageQueryArgumentsFactory = new DataStorageQueryArgumentsFactory(genericServiceArgument);
 
-        // TODO invoke validation that path variable values are correct in whole url... search for 'TODO #38'
+        // TODO #38 invoke validation that path variable values are correct in whole url... search for 'TODO #38'
 
         if (httpMethod.equals(HttpMethod.POST) || httpMethod.equals(HttpMethod.PATCH) || httpMethod.equals(HttpMethod.PUT)) {
             createOrUpdate(genericServiceArgument, endpointMetaModel, resultsByDataStorageName, genericMapperArgumentFactory);
@@ -74,7 +76,8 @@ public class DefaultGenericService {
             Class<?> responseRealClass = responseClassMetaModel.getRealClass();
             if (responseRealClass != null) {
                 if (isTypeOf(responseRealClass, Page.class)) {
-                    // TODO #37 return Page or collection when request params can be mapped to Pageable
+                    return returnPage(genericServiceArgument, endpointMetaModel, responseClassMetaModel,
+                        dataStorageQueryArgumentsFactory, genericMapperArgumentFactory, responseMetaModel);
                 } else if (isTypeOf(responseRealClass, Collection.class)) {
                     return returnCollection(endpointMetaModel, responseMetaModel, responseClassMetaModel,
                         genericMapperArgumentFactory, responseRealClass, dataStorageQueryArgumentsFactory);
@@ -97,6 +100,59 @@ public class DefaultGenericService {
         return responseBody;
     }
 
+    private Page<Object> returnPage(GenericServiceArgument genericServiceArgument, EndpointMetaModel endpointMetaModel,
+        ClassMetaModel responseClassMetaModel, DataStorageQueryArgumentsFactory dataStorageQueryArgumentsFactory,
+        GenericMapperArgumentFactory genericMapperArgumentFactory, EndpointResponseMetaModel responseMetaModel) {
+
+        ClassMetaModel elementTypeInCollection = responseClassMetaModel.getGenericTypes().get(0);
+        Map<String, List<Object>> queriesResults = new HashMap<>();
+
+        var dataStorageConnectors = endpointMetaModel.getDataStorageConnectors();
+
+        DataStorageConnectorMetaModel mainDataStorageConnectorModel = dataStorageConnectors.get(0);
+
+        var query = extractDataStorageQuery(dataStorageQueryArgumentsFactory, elementTypeInCollection,
+            queriesResults, mainDataStorageConnectorModel);
+
+        Pageable pageable = Optional.ofNullable(genericServiceArgument.getPageable())
+            .orElse(Pageable.unpaged());
+        Page<Object> mainPageOfObjects = mainDataStorageConnectorModel.getDataStorage().findPageOfEntity(pageable, query);
+
+        String nameOfMainPageQueryResult = Optional.ofNullable(mainDataStorageConnectorModel.getNameOfQuery())
+            .orElseGet(mainDataStorageConnectorModel::getDataStorageName);
+        List<Object> objects = queriesResults.computeIfAbsent(nameOfMainPageQueryResult, (k) -> new ArrayList<>());
+        objects.addAll(mainPageOfObjects.getContent());
+
+        for (int i = 1; i < dataStorageConnectors.size(); i++) {
+            extractResultsFromDataStorage(dataStorageQueryArgumentsFactory, elementTypeInCollection,
+                queriesResults, dataStorageConnectors.get(i));
+        }
+
+        Page<Object> pageResult;
+        if (queriesResults.size() > 1) {
+            List<Object> joinedRows = elements(dataStorageResultJoiner.getJoinedNodes(
+                endpointMetaModel.getDataStorageResultsJoiners(), queriesResults))
+                .filter(element -> element.containsQueryResultsByName(nameOfMainPageQueryResult))
+                .map(element -> (Object) element)
+                .asList();
+
+            pageResult = new SimplePageImpl<>(joinedRows, mainPageOfObjects.getNumber(),
+                mainPageOfObjects.getSize(), mainPageOfObjects.getTotalElements());
+        } else {
+            pageResult = mainPageOfObjects;
+        }
+
+        return pageResult
+            .map(element -> {
+                GenericMapperArgument finalResultMapperArgument = genericMapperArgumentFactory.create()
+                    .mappingContext(new HashMap<>())
+                    .sourceObject(element)
+                    .targetMetaModel(elementTypeInCollection)
+                    .build();
+                return mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
+            });
+    }
+
     private void getResultById(GenericServiceArgument genericServiceArgument, EndpointMetaModel endpointMetaModel, Map<String, Object> resultsByDataStorageName,
         ClassMetaModel responseClassMetaModel, GenericMapperArgumentFactory genericMapperArgumentFactory,
         DataStorageQueryArgumentsFactory dataStorageQueryArgumentsFactory) {
@@ -117,22 +173,7 @@ public class DefaultGenericService {
         Map<String, List<Object>> queriesResults = new HashMap<>();
 
         for (DataStorageConnectorMetaModel dataStorageConnector : endpointMetaModel.getDataStorageConnectors()) {
-            DataStorageQueryProvider queryProvider = Optional.ofNullable(dataStorageConnector.getQueryProvider())
-                .orElseGet(() -> metaModelContextService.getMetaModelContext().getDefaultDataStorageQueryProvider());
-
-            ClassMetaModel queriedClassMetaModel = Optional.ofNullable(dataStorageConnector.getClassMetaModelInDataStorage())
-                .orElse(elementTypeInCollection);
-
-            DataStorageQuery query = queryProvider.createQuery(dataStorageQueryArguments.create()
-                .queriedClassMetaModels(List.of(queriedClassMetaModel))
-                .previousQueryResultsContext(queriesResults)
-                .build());
-
-            List<Object> queryResults = dataStorageConnector.getDataStorage().findEntities(query);
-            String nameOfQueryResult = Optional.ofNullable(dataStorageConnector.getNameOfQuery())
-                .orElseGet(dataStorageConnector::getDataStorageName);
-            List<Object> objects = queriesResults.computeIfAbsent(nameOfQueryResult, (k) -> new ArrayList<>());
-            objects.addAll(queryResults);
+            extractResultsFromDataStorage(dataStorageQueryArguments, elementTypeInCollection, queriesResults, dataStorageConnector);
         }
 
         Collection<Object> results;
@@ -153,7 +194,8 @@ public class DefaultGenericService {
                 return mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
             }).asList();
 
-        results = runFinalQueryWhenShould(dataStorageQueryArguments.create().build(), endpointMetaModel.getResponseMetaModel().getQueryProvider(), results);
+        results = runFinalQueryWhenShould(dataStorageQueryArguments.create().build(),
+            endpointMetaModel.getResponseMetaModel().getQueryProvider(), results);
 
         Class<?> nonAbstractCollectionClass = responseRealClass;
         if (isAbstractClassOrInterface(responseRealClass)) {
@@ -162,6 +204,32 @@ public class DefaultGenericService {
         Collection<Object> finalCollection = (Collection<Object>) InvokableReflectionUtils.newInstance(nonAbstractCollectionClass);
         finalCollection.addAll(results);
         return finalCollection;
+    }
+
+    private void extractResultsFromDataStorage(DataStorageQueryArgumentsFactory dataStorageQueryArguments, ClassMetaModel elementTypeInCollection,
+        Map<String, List<Object>> queriesResults, DataStorageConnectorMetaModel dataStorageConnector) {
+        var query = extractDataStorageQuery(dataStorageQueryArguments, elementTypeInCollection,
+            queriesResults, dataStorageConnector);
+
+        List<Object> queryResults = dataStorageConnector.getDataStorage().findEntities(query);
+        String nameOfQueryResult = Optional.ofNullable(dataStorageConnector.getNameOfQuery())
+            .orElseGet(dataStorageConnector::getDataStorageName);
+        List<Object> objects = queriesResults.computeIfAbsent(nameOfQueryResult, (k) -> new ArrayList<>());
+        objects.addAll(queryResults);
+    }
+
+    private DataStorageQuery extractDataStorageQuery(DataStorageQueryArgumentsFactory dataStorageQueryArguments, ClassMetaModel elementTypeInCollection,
+        Map<String, List<Object>> queriesResults, DataStorageConnectorMetaModel dataStorageConnector) {
+        DataStorageQueryProvider queryProvider = Optional.ofNullable(dataStorageConnector.getQueryProvider())
+            .orElseGet(() -> metaModelContextService.getMetaModelContext().getDefaultDataStorageQueryProvider());
+
+        ClassMetaModel queriedClassMetaModel = Optional.ofNullable(dataStorageConnector.getClassMetaModelInDataStorage())
+            .orElse(elementTypeInCollection);
+
+        return queryProvider.createQuery(dataStorageQueryArguments.create()
+            .queriedClassMetaModels(List.of(queriedClassMetaModel))
+            .previousQueryResultsContext(queriesResults)
+            .build());
     }
 
     private void delete(GenericServiceArgument genericServiceArgument, EndpointMetaModel endpointMetaModel, Map<String, Object> resultsByDataStorageName,
@@ -281,7 +349,9 @@ public class DefaultGenericService {
                 .headers(genericServiceArgument.getHeaders())
                 .pathVariables(genericServiceArgument.getUrlPathParams())
                 .requestParams(genericServiceArgument.getHttpQueryTranslated())
-                .requestParamsClassMetaModel(genericServiceArgument.getEndpointMetaModel().getQueryArguments());
+                .requestParamsClassMetaModel(genericServiceArgument.getEndpointMetaModel().getQueryArguments())
+                .pageable(genericServiceArgument.getPageable())
+                .sortBy(genericServiceArgument.getSortBy());
         }
     }
 }

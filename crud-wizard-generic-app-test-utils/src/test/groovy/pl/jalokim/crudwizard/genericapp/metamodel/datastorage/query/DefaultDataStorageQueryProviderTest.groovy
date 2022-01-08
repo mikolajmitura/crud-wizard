@@ -4,11 +4,11 @@ import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.bu
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createHttpQueryParamsForPerson
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 
+import org.springframework.data.domain.Sort
 import pl.jalokim.crudwizard.core.datastorage.query.AbstractExpression
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryArguments
 import pl.jalokim.crudwizard.core.datastorage.query.EmptyExpression
-import pl.jalokim.crudwizard.core.datastorage.query.OrderPath
 import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import spock.lang.Specification
@@ -79,7 +79,7 @@ class DefaultDataStorageQueryProviderTest extends Specification {
             .build()
     }
 
-    private static DataStorageQuery createDataStorageQuery(AbstractExpression whereExpression, List<OrderPath> sortBy = []) {
+    private static DataStorageQuery createDataStorageQuery(AbstractExpression whereExpression, Sort.Order sortBy = null) {
         DataStorageQuery.builder()
             .selectFrom(queriedClassMetaModel())
             .sortBy(sortBy)

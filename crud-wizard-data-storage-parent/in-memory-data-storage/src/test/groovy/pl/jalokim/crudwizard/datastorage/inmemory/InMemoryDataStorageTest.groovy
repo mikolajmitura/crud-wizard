@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.datastorage.inmemory
 
+import org.springframework.data.domain.Sort
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery
-import pl.jalokim.crudwizard.core.datastorage.query.OrderPath
 import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
 import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner
 import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryOrderByTranslator
@@ -78,7 +78,7 @@ class InMemoryDataStorageTest extends Specification {
         def query1 = DataStorageQuery.builder()
             .selectFrom(personMetaModel)
             .where(RealExpression.isNotNull("name"))
-            .sortBy([OrderPath.newOrder("name")])
+            .sortBy(Sort.by("name"))
             .build()
         def results1 = inMemoryStorage.findEntities(query1)
 

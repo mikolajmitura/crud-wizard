@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.core.datastorage.query.inmemory
 
-import static pl.jalokim.crudwizard.core.datastorage.query.OrderDirection.DESC
-import static pl.jalokim.crudwizard.core.datastorage.query.OrderPath.newOrder
+import static org.springframework.data.domain.Sort.Order.asc
+import static org.springframework.data.domain.Sort.Order.desc
 import static pl.jalokim.crudwizard.core.datastorage.query.inmemory.PersonDataSamples.PERSON1
 import static pl.jalokim.crudwizard.core.datastorage.query.inmemory.PersonDataSamples.PERSON2
 import static pl.jalokim.crudwizard.core.datastorage.query.inmemory.PersonDataSamples.PERSON3
@@ -9,6 +9,7 @@ import static pl.jalokim.crudwizard.core.datastorage.query.inmemory.PersonDataSa
 import static pl.jalokim.crudwizard.core.datastorage.query.inmemory.PersonDataSamples.PERSON5
 import static pl.jalokim.crudwizard.core.datastorage.query.inmemory.PersonDataSamples.peopleList
 
+import org.springframework.data.domain.Sort
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery
 import pl.jalokim.crudwizard.core.datastorage.query.EmptyExpression
 import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
@@ -40,10 +41,9 @@ class InMemoryDsQueryRunnerTest extends Specification {
         peopleList()                                  | new EmptyExpression()              | null
         peopleList()                                  | null                               | null
         [PERSON2, PERSON3, PERSON4, PERSON5]          | RealExpression.isNotNull("father") | null
-        [PERSON3, PERSON2, PERSON5, PERSON4]          | RealExpression.isNotNull("father") | [newOrder("someLong")]
-        [PERSON4, PERSON5, PERSON2, PERSON3]          | RealExpression.isNotNull("father") | [newOrder("someLong", DESC)]
-        [PERSON3, PERSON2, PERSON1, PERSON5, PERSON4] | RealExpression.isNotNull("name")   | [newOrder("someLong"), newOrder("name", DESC)]
-        [PERSON3, PERSON2, PERSON1, PERSON5, PERSON4] | RealExpression.isNotNull("name")   | [newOrder("someLong"), newOrder("name", DESC)]
-        [PERSON3, PERSON1, PERSON2, PERSON5, PERSON4] | RealExpression.isNotNull("name")   | [newOrder("someLong"), newOrder("name")]
+        [PERSON3, PERSON2, PERSON5, PERSON4]          | RealExpression.isNotNull("father") | Sort.by("someLong")
+        [PERSON4, PERSON5, PERSON2, PERSON3]          | RealExpression.isNotNull("father") | Sort.by(desc("someLong"))
+        [PERSON3, PERSON2, PERSON1, PERSON5, PERSON4] | RealExpression.isNotNull("name")   | Sort.by(asc("someLong"), desc("name"))
+        [PERSON3, PERSON1, PERSON2, PERSON5, PERSON4] | RealExpression.isNotNull("name")   | Sort.by(asc("someLong"), asc("name"))
     }
 }

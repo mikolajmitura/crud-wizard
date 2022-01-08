@@ -1,24 +1,26 @@
 package pl.jalokim.crudwizard.core.datastorage.query.inmemory;
 
-import static pl.jalokim.crudwizard.core.datastorage.query.OrderDirection.DESC;
 import static pl.jalokim.crudwizard.core.utils.ValueExtractorFromPath.getValueFromPath;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
-import pl.jalokim.crudwizard.core.datastorage.query.OrderPath;
 
 @Component
 public class InMemoryOrderByTranslator {
 
     public Comparator<Object> translateSortBy(DataStorageQuery query) {
-        List<OrderPath> sortByPaths = elements(query.getSortBy()).asList();
+        Sort sort = Optional.ofNullable(query.getSortBy())
+            .orElse(Sort.unsorted());
+        List<Sort.Order> sortByPaths = elements(sort.iterator()).asList();
 
         Comparator<Object> currentComparator = null;
 
-        for (OrderPath sortByPath : sortByPaths) {
+        for (Sort.Order sortByPath : sortByPaths) {
             if (currentComparator == null) {
                 currentComparator = comparatorFromOrderPath(sortByPath);
             } else {
@@ -30,9 +32,9 @@ public class InMemoryOrderByTranslator {
     }
 
     @SuppressWarnings("unchecked")
-    Comparator<Object> comparatorFromOrderPath(OrderPath orderPath) {
-        Comparator<Object> comparator = Comparator.comparing(object -> (Comparable<Object>) getValueFromPath(object, orderPath.getPath()));
-        if (DESC.equals(orderPath.getOrderDirection())) {
+    Comparator<Object> comparatorFromOrderPath(Sort.Order orderPath) {
+        Comparator<Object> comparator = Comparator.comparing(object -> (Comparable<Object>) getValueFromPath(object, orderPath.getProperty()));
+        if (Sort.Direction.DESC.equals(orderPath.getDirection())) {
             return comparator.reversed();
         }
         return comparator;
