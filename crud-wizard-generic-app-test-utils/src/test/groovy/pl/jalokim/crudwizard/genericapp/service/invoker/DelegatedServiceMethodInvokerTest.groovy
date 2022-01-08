@@ -154,24 +154,30 @@ class DelegatedServiceMethodInvokerTest extends Specification {
 
         then:
         TechnicalException ex = thrown()
-        ex.message == expectedMsgPart
+        expectedMsgParts.each {
+            assert ex.message.contains(it)
+        }
 
         where:
-        methodName                | expectedMsgPart
-        "missingReqRequestHeader" | "Cannot find required header value with header name: someRequiredHeader"
-        "missingReqRequestParam"  | "Cannot find required http request parameter with name: someRequiredParam"
+        methodName                | expectedMsgParts
+        "missingReqRequestHeader" | ["Cannot find required header value with header name: someRequiredHeader"]
+        "missingReqRequestParam"  | ["Cannot find required http request parameter with name: someRequiredParam"]
         "missingReqRequestBody"   |
-            "Argument annotated @org.springframework.web.bind.annotation.RequestBody(required=true) is required at index: 1$System.lineSeparator" +
-            "in class: $NormalSpringService.canonicalName$System.lineSeparator" +
-            "with method name: missingReqRequestBody$System.lineSeparator" +
-            "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestBody')}".toString()
-        "missingReqPathVariable"  | "Cannot find required path variable value with name: someRequiredVariable"
-        "missingReqRequestAllHeaders"   |
-            "Argument annotated @org.springframework.web.bind.annotation.RequestHeader(name=\"\", value=\"\", defaultValue=\"$ValueConstants.DEFAULT_NONE\"," +
-            " required=true) is required at index: 1$System.lineSeparator" +
-            "in class: $NormalSpringService.canonicalName$System.lineSeparator" +
-            "with method name: missingReqRequestAllHeaders$System.lineSeparator" +
-            "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestAllHeaders')}".toString()
+            ["Argument annotated @org.springframework.web.bind.annotation.RequestBody(required=true) is required at index: 1$System.lineSeparator",
+            "in class: $NormalSpringService.canonicalName$System.lineSeparator" ,
+            "with method name: missingReqRequestBody$System.lineSeparator" ,
+            "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestBody')}".toString()]
+        "missingReqPathVariable"  | ["Cannot find required path variable value with name: someRequiredVariable"]
+        "missingReqRequestAllHeaders"   | [
+            "Argument annotated @org.springframework.web.bind.annotation.RequestHeader(",
+            "name=\"\"",
+            "value=\"\"",
+            "defaultValue=\"$ValueConstants.DEFAULT_NONE\"",
+            "required=true",
+            " is required at index: 1$System.lineSeparator",
+            "in class: $NormalSpringService.canonicalName$System.lineSeparator",
+            "with method name: missingReqRequestAllHeaders$System.lineSeparator",
+            "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestAllHeaders')}".toString()]
     }
 
     DelegatedServiceMethodInvokerArgs createValidInvokerArgs(String methodName, Object serviceInstance,
