@@ -11,7 +11,7 @@ import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
-import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperBean
+import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
@@ -20,9 +20,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelServ
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService
-import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorInstanceCache
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 
@@ -56,13 +56,13 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
     private InMemoryDataStorage inMemoryDataStorage
 
     @Autowired
-    private GenericMapperBean genericMapperBean
+    private DefaultGenericMapper genericMapperBean
 
     @Autowired
     private DefaultGenericService genericServiceBean
 
     @Autowired
-    private ValidatorInstanceCache validatorInstanceCache
+    private InstanceLoader instanceLoader
 
     /*
     test for create new endpoint which doesn't use currently created meta model. It creates all of them.
@@ -108,8 +108,8 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
             def additionalPersonSurnameSizeValidatorModel = findSizeValidator(allValidators, 2, 30)
             def additionalDocumentsSizeValidatorModel = findSizeValidator(allValidators, 1, null)
 
-            def notNullValidator = validatorInstanceCache.loadInstance(NotNullValidator.canonicalName)
-            def sizeValidator = validatorInstanceCache.loadInstance(SizeValidator.canonicalName)
+            def notNullValidator = instanceLoader.createInstanceOrGetBean(NotNullValidator.canonicalName)
+            def sizeValidator = instanceLoader.createInstanceOrGetBean(SizeValidator.canonicalName)
             notNullValidator == notNullValidatorModel.validatorInstance
             sizeValidator == documentValueSizeValidatorModel.validatorInstance
             sizeValidator == additionalPersonNameSizeValidatorModel.validatorInstance
@@ -155,11 +155,10 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
             verifyAll(defaultMapperMetaModel) {
                 id == defaultBeansService.getDefaultGenericMapperId()
                 mapperInstance == genericMapperBean
-                className == GenericMapperBean.canonicalName
-                beanName == "genericMapperBean"
+                className == DefaultGenericMapper.canonicalName
+                beanName == "defaultGenericMapper"
                 methodName == "mapToTarget"
                 methodMetaModel.name == "mapToTarget"
-                mappingDirection == null
                 mapperScript == null
             }
 
@@ -177,7 +176,8 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
             defaultDataStorageConnectorMetaModels*.id as Set == defaultBeansService.getDefaultDataStorageConnectorsId() as Set
             verifyAll(defaultDataStorageConnectorMetaModels[0]) {
                 dataStorageMetaModel == defaultDataStorageMetaModel
-                mapperMetaModel == defaultMapperMetaModel
+                mapperMetaModelForQuery == defaultMapperMetaModel
+                mapperMetaModelForReturn == defaultMapperMetaModel
                 classMetaModelInDataStorage == null
             }
 

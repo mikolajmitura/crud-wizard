@@ -2,6 +2,8 @@ package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
 import java.util.List;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PostPersist;
+import javax.persistence.PostUpdate;
 import javax.persistence.Transient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,4 +29,10 @@ public abstract class WithAdditionalPropertiesEntity extends BaseEntity {
 
     @Override
     public abstract Long getId();
+
+    @PostPersist
+    @PostUpdate
+    public void saveAdditionalProperties() {
+        AdditionalPropertyService.getInstance().persist(this);
+    }
 }

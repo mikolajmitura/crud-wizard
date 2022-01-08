@@ -19,7 +19,7 @@ public class UrlModelResolver {
         List<UrlPart> urlParts = Elements.elements(baseUrl.split("/"))
             .filter(StringUtils::isNotBlank)
             .map(part -> newUrlPart(part, part.matches(PATH_VARIABLE_REGEX))).asList();
-        return new UrlMetamodel(urlParts, baseUrl);
+        return new UrlMetamodel(urlParts, baseUrl, null);
     }
 
     public static UrlPart newUrlPart(String originalUrl, boolean isPathVariable) {

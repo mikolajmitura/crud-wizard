@@ -13,7 +13,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<FieldMetaModelDto, FieldMetaModelEntity, FieldMetaModel>  {
+public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<FieldMetaModelDto, FieldMetaModelEntity, FieldMetaModel> {
 
     @Override
     @Mapping(target = "fieldType", ignore = true)

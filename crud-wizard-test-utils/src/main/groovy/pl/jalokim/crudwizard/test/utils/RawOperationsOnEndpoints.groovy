@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.MockMvc
@@ -50,8 +51,13 @@ class RawOperationsOnEndpoints implements EndpointActions {
         extractResponseAsLong(httpResponse)
     }
 
-    void putPayload(String url, Object payload) {
-        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.post(url), payload)
+    void putPayload(String url, Object payload, Map parameters = null) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.put(url), payload, parameters)
+        httpResponse.andExpect(status().isNoContent())
+    }
+
+    void delete(String url, Map parameters = null) {
+        def httpResponse = performWithParameters(MockMvcRequestBuilders.delete(url), parameters)
         httpResponse.andExpect(status().isNoContent())
     }
 
@@ -61,16 +67,22 @@ class RawOperationsOnEndpoints implements EndpointActions {
         extractResponseAsJsonArray(httpResponse)
     }
 
-    Object getAndReturnJson(String url, Map parameters = null) {
+    Map getAndReturnJson(String url, Map parameters = null) {
         def httpResponse = performQuery(url, parameters)
         httpResponse.andExpect(status().isOk())
         extractResponseAsJson(httpResponse)
     }
 
-    public <T> T getAndReturnObject(String url, Class<T> returnClass) {
+    def <T> T getAndReturnObject(String url, Class<T> returnClass) {
         def httpResponse = performQuery(url)
         httpResponse.andExpect(status().isOk())
         extractResponseAsClass(httpResponse, returnClass)
+    }
+
+    Page<Object> getPageObObjects(String url, Map parameters = null) {
+        def httpResponse = performQuery(url, parameters)
+        httpResponse.andExpect(status().isOk())
+        extractResponseAsClass(httpResponse, Page)
     }
 
     static def toJson(String text) {

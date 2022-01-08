@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
 @Entity
@@ -36,10 +38,20 @@ public class DataStorageConnectorMetaModelEntity extends WithAdditionalPropertie
     private DataStorageMetaModelEntity dataStorageMetaModel;
 
     @ManyToOne
-    @JoinColumn(name = "mapper_meta_model_id")
-    private MapperMetaModelEntity mapperMetaModel;
+    @JoinColumn(name = "return_mapper_meta_model_id")
+    private MapperMetaModelEntity mapperMetaModelForReturn;
+
+    @ManyToOne
+    @JoinColumn(name = "query_mapper_meta_model_id")
+    private MapperMetaModelEntity mapperMetaModelForQuery;
 
     @ManyToOne
     @JoinColumn(name = "class_meta_model_in_ds_id")
     private ClassMetaModelEntity classMetaModelInDataStorage;
+
+    private String nameOfQuery;
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "query_provide_id")
+    private QueryProviderEntity queryProvider;
 }

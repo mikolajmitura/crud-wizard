@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.datastorage.inmemory;
 
+import static pl.jalokim.crudwizard.core.utils.DataFieldsHelper.getFieldValue;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
@@ -8,9 +9,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
+import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
+import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
@@ -22,9 +27,10 @@ public class InMemoryDataStorage implements DataStorage {
     private final String name;
     private final Map<String, EntityStorage> entitiesByName = new ConcurrentHashMap<>();
     private final IdGenerators idGenerators;
+    private final InMemoryDsQueryRunner inMemoryDsQueryRunner;
 
-    public InMemoryDataStorage(IdGenerators idGenerators) {
-        this(DEFAULT_DS_NAME, idGenerators);
+    public InMemoryDataStorage(IdGenerators idGenerators, InMemoryDsQueryRunner inMemoryDsQueryRunner) {
+        this(DEFAULT_DS_NAME, idGenerators, inMemoryDsQueryRunner);
     }
 
     @Override
@@ -33,24 +39,62 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Object saveEntity(ClassMetaModel classMetaModel, Map<String, Object> entity) {
+    public Object saveOrUpdate(ClassMetaModel classMetaModel, Object entity) {
         EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
             entityBag = new EntityStorage(classMetaModel, idGenerators);
             entitiesByName.put(classMetaModel.getName(), entityBag);
         }
 
-        FieldMetaModel fieldWithId = elements(classMetaModel.getAllFields())
-            .filter(field -> field.getAdditionalProperties().stream()
-                .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
-            .getFirst();
+        FieldMetaModel fieldWithId = findIdFieldMetaModel(classMetaModel);
 
-        Object idObject = entity.get(fieldWithId.getFieldName());
+        Object idObject = getFieldValue(entity, fieldWithId.getFieldName());
         return entityBag.saveEntity(idObject, fieldWithId, entity);
     }
 
+    private FieldMetaModel findIdFieldMetaModel(ClassMetaModel classMetaModel) {
+        return elements(classMetaModel.fetchAllFields())
+            .filter(field -> field.getAdditionalProperties().stream()
+                .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
+            .findFirst()
+            .orElseThrow(() -> new TechnicalException("Cannot find field annotated as 'is_id_field' for classMetaModel with id: "
+                + classMetaModel.getId() + " and name: " + classMetaModel.getName()));
+    }
+
     @Override
-    public void deleteEntity(ClassMetaModel classMetaModel, Object idObject) {
+    public Optional<Object> getOptionalEntityById(ClassMetaModel classMetaModel, Object idObject) {
+        return Optional.ofNullable(entitiesByName.get(classMetaModel.getName()))
+            .map(entityStorage -> entityStorage.getById(idObject));
+    }
+
+    @Override
+    public Page<Object> findPageOfEntity(Pageable pageable, DataStorageQuery query) {
+        DataStorageQuery withoutPageable = query.toBuilder()
+            .pageable(null)
+            .build();
+
+        List<Object> foundAll = findEntities(withoutPageable);
+
+        long totalElements = foundAll.size();
+
+        List<Object> pageContent = elements(foundAll)
+            .skip(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .asList();
+
+        return new PageImpl<>(pageContent, pageable, totalElements);
+    }
+
+    @Override
+    public List<Object> findEntities(DataStorageQuery query) {
+        ClassMetaModel selectFromClassMetaModel = query.getSelectFrom();
+        return Optional.ofNullable(entitiesByName.get(selectFromClassMetaModel.getName()))
+            .map(entityStorage -> inMemoryDsQueryRunner.runQuery(entityStorage.fetchStream(), query))
+            .orElse(List.of());
+    }
+
+    @Override
+    public void innerDeleteEntity(ClassMetaModel classMetaModel, Object idObject) {
         EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
         if (entityBag == null) {
             throw new EntityNotFoundException(String.format("Cannot find storage for entities: %s", classMetaModel.getName()));
@@ -59,22 +103,18 @@ public class InMemoryDataStorage implements DataStorage {
     }
 
     @Override
-    public Map<String, Object> getEntityById(ClassMetaModel classMetaModel, Object idObject) {
-        EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
-        return Optional.ofNullable(entityBag.getById(idObject))
-            .orElseThrow(() -> new EntityNotFoundException(String.format("not exists with id: %s entity name: %s", idObject, classMetaModel.getName())));
+    public void delete(DataStorageQuery query) {
+        ClassMetaModel classMetaModel = query.getSelectFrom();
+        FieldMetaModel fieldWithId = findIdFieldMetaModel(classMetaModel);
+        findEntities(query).forEach(entry -> {
+            Object idObject = getFieldValue(entry, fieldWithId.getFieldName());
+            deleteEntity(classMetaModel, idObject);
+        });
     }
 
     @Override
-    public Page<Map<String, Object>> findPageOfEntity(ClassMetaModel classMetaModel, Pageable pageable, Map<String, Object> queryObject) {
-        // TODO how to do queries? eq, not eq, contains, in how?
-        return null;
-    }
-
-    @Override
-    public List<Map<String, Object>> findEntities(ClassMetaModel classMetaModel, Map<String, Object> queryObject) {
-        // TODO how to do queries? eq, not eq, contains, in how?
-        return null;
+    public long count(DataStorageQuery query) {
+        return findEntities(query).size();
     }
 
     public void clear() {

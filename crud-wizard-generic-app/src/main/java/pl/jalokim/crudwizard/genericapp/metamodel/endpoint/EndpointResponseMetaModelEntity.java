@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +16,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
 @Entity
 @Builder
@@ -33,5 +36,13 @@ public class EndpointResponseMetaModelEntity extends WithAdditionalPropertiesEnt
     @JoinColumn(name = "reponse_metamodel_id")
     private ClassMetaModelEntity classMetaModel;
 
+    @ManyToOne
+    @JoinColumn(name = "reponse_mapper_id")
+    private MapperMetaModelEntity mapperMetaModel;
+
     private Long successHttpCode;
+
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "query_provide_id")
+    private QueryProviderEntity queryProvider;
 }

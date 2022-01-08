@@ -3,6 +3,9 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +13,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import pl.jalokim.crudwizard.core.datastorage.DataStorage;
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
 @Data
@@ -25,8 +31,12 @@ public class DataStorageMetaModelDto extends AdditionalPropertyMetaModelDto {
 
     Long id;
 
+    // TODO #44 verify that name of ds exists
     String name;
 
+    @ClassExists(expectedOfType = DataStorage.class)
     String className;
 
+    @Builder.Default
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

@@ -1,5 +1,11 @@
 package pl.jalokim.crudwizard.datastorage.inmemory
 
+import org.springframework.data.domain.Sort
+import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery
+import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryOrderByTranslator
+import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryWhereExpressionTranslator
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
@@ -16,16 +22,20 @@ class InMemoryDataStorageTest extends Specification {
     private ClassMetaModel addressMetaModel = newClassMetaModel(ADDRESSES, "uuid", String)
     private ClassMetaModel jobMetaModel = newClassMetaModel(JOBS, "idField", Integer)
 
-    def "should save, update, delete few entities in in memory data storage"() {
+    private InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator = new InMemoryWhereExpressionTranslator()
+    private InMemoryOrderByTranslator inMemoryOrderByTranslator = new InMemoryOrderByTranslator()
+    private InMemoryDsQueryRunner inMemoryDsQueryRunner = new InMemoryDsQueryRunner(inMemoryWhereExpressionTranslator, inMemoryOrderByTranslator)
+
+    def "should save, filter, order, update, delete few entities in in memory data storage"() {
         given:
-        def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE)
+        def inMemoryStorage = new InMemoryDataStorage(IdGenerators.INSTANCE, inMemoryDsQueryRunner)
         def firstPerson = [
-            name     : DataFakerHelper.randomText(),
+            name     : "John",
             firstName: DataFakerHelper.randomText()
         ]
 
         def secondPerson = [
-            name     : DataFakerHelper.randomText(),
+            name     : "Frank",
             firstName: DataFakerHelper.randomText()
         ]
 
@@ -43,11 +53,11 @@ class InMemoryDataStorageTest extends Specification {
         ]
 
         when: 'should save few new'
-        Long firstPersonId = inMemoryStorage.saveEntity(personMetaModel, firstPerson)
-        Long secondPersonId = inMemoryStorage.saveEntity(personMetaModel, secondPerson)
-        String addressId = inMemoryStorage.saveEntity(addressMetaModel, address)
-        Integer firstJobId = inMemoryStorage.saveEntity(jobMetaModel, firstJob)
-        Integer secondJobId = inMemoryStorage.saveEntity(jobMetaModel, secondJob)
+        Long firstPersonId = inMemoryStorage.saveOrUpdate(personMetaModel, firstPerson)
+        Long secondPersonId = inMemoryStorage.saveOrUpdate(personMetaModel, secondPerson)
+        String addressId = inMemoryStorage.saveOrUpdate(addressMetaModel, address)
+        Integer firstJobId = inMemoryStorage.saveOrUpdate(jobMetaModel, firstJob)
+        Integer secondJobId = inMemoryStorage.saveOrUpdate(jobMetaModel, secondJob)
         def entitiesByName = inMemoryStorage.entitiesByName
 
         then:
@@ -63,6 +73,31 @@ class InMemoryDataStorageTest extends Specification {
         secondJobId == 1
         addressId == address.uuid
 
+        and: 'filter and sort person entities'
+        when:
+        def query1 = DataStorageQuery.builder()
+            .selectFrom(personMetaModel)
+            .where(RealExpression.isNotNull("name"))
+            .sortBy(Sort.by("name"))
+            .build()
+        def results1 = inMemoryStorage.findEntities(query1)
+
+        def query2 = DataStorageQuery.builder()
+            .selectFrom(personMetaModel)
+            .where(RealExpression.isEqualsTo("name", "John"))
+            .build()
+        def results2 = inMemoryStorage.findEntities(query2)
+
+        def query3 = DataStorageQuery.builder()
+            .selectFrom(personMetaModel)
+            .build()
+        def results3 = inMemoryStorage.findEntities(query3)
+
+        then:
+        results1 == [secondPerson, firstPerson]
+        results2 == [firstPerson]
+        results3 == [firstPerson, secondPerson]
+
         and: "get entity by id"
         when:
         def newFirstPerson = inMemoryStorage.getEntityById(personMetaModel, firstPersonId)
@@ -75,7 +110,7 @@ class InMemoryDataStorageTest extends Specification {
         def updatedFirstPerson = firstPerson
         updatedFirstPerson.name = firstPerson.name + DataFakerHelper.randomText()
 
-        Long updatedFirstPersonId = inMemoryStorage.saveEntity(personMetaModel, updatedFirstPerson)
+        Long updatedFirstPersonId = inMemoryStorage.saveOrUpdate(personMetaModel, updatedFirstPerson)
         def getUpdatedFirstPerson = inMemoryStorage.getEntityById(personMetaModel, firstPersonId)
 
         then:
@@ -98,19 +133,18 @@ class InMemoryDataStorageTest extends Specification {
     }
 
     private ClassMetaModel newClassMetaModel(String name, String idFieldName, Class<?> typeOfId) {
-        def fieldMetaModel = FieldMetaModel.builder()
+        FieldMetaModel fieldMetaModel = FieldMetaModel.builder()
             .fieldName(idFieldName)
             .fieldType(ClassMetaModel.builder()
                 .className(typeOfId.canonicalName)
                 .realClass(typeOfId)
                 .build())
+            .additionalProperties([
+                AdditionalPropertyDto.builder()
+                    .name(FieldMetaModel.IS_ID_FIELD)
+                    .build()
+            ])
             .build()
-
-        fieldMetaModel.setAdditionalProperties([
-            AdditionalPropertyDto.builder()
-                .name(FieldMetaModel.IS_ID_FIELD)
-                .build()
-        ])
 
         ClassMetaModel.builder()
             .name(name)

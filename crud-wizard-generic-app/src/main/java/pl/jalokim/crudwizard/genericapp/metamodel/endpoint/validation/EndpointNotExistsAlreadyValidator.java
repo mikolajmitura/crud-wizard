@@ -21,7 +21,6 @@ import pl.jalokim.crudwizard.core.translations.AppMessageSource;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils;
-import pl.jalokim.crudwizard.genericapp.metamodel.context.FoundEndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.utils.collection.CollectionUtils;
@@ -55,20 +54,19 @@ public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidato
     private void verifyInEndpointMetaModelContext(EndpointValidationContext validationContext) {
         var newUrl = validationContext.getNewUrlMetamodel().getRawUrl();
         var newHttpMethod = validationContext.getNewHttpMethod();
-        FoundEndpointMetaModel foundEndpointMetaModel = endpointMetaModelContextNodeUtils.findEndpointByUrl(newUrl, newHttpMethod);
+        var foundEndpointMetaModel = endpointMetaModelContextNodeUtils.findEndpointMetaModelByUrlDuringCreate(newUrl, newHttpMethod);
 
-        if (foundEndpointMetaModel.isFound()) {
-            var foundEndpoint = foundEndpointMetaModel.getEndpointMetaModel();
+        if (foundEndpointMetaModel != null) {
             customMessage(validationContext.getContext(), MessagePlaceholder.createMessagePlaceholder(
                 AppMessageSource.buildPropertyKey(EndpointNotExistsAlready.class, "crudWizardController"), Map.of(
                     "url", validationContext.getEndpointMetaModelDto().getBaseUrl(),
                     "httpMethod", validationContext.getNewHttpMethod().toString(),
-                    "foundUrl", foundEndpoint.getUrlMetamodel().getRawUrl(),
-                    "foundOperationName", foundEndpoint.getOperationName()
+                    "foundUrl", foundEndpointMetaModel.getUrlMetamodel().getRawUrl(),
+                    "foundOperationName", foundEndpointMetaModel.getOperationName()
                 )
             ));
         }
-        validationContext.getNotFound().set(foundEndpointMetaModel.isNotFound());
+        validationContext.getNotFound().set(foundEndpointMetaModel == null);
     }
 
     private void verifyInSpringRestControllers(EndpointValidationContext validationContext) {

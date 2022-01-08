@@ -3,6 +3,9 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
@@ -41,4 +45,6 @@ public class ServiceMetaModelDto extends AdditionalPropertyMetaModelDto {
     String methodName;
     String serviceScript;
 
+    @Builder.Default
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

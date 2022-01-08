@@ -53,6 +53,9 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
     @Setter(AccessLevel.NONE)
     ParentMetamodelCacheContext parentMetamodelCacheContext;
 
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
+
     /**
      * when true then does it mean that this meta model
      * is like generic enum metamodel
@@ -62,17 +65,16 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
     }
 
     public FieldMetaModel getFieldByName(String fieldName) {
-        Optional.ofNullable(parentMetamodelCacheContext)
-            .orElseGet(() -> {
-                getAllFields();
-                return parentMetamodelCacheContext;
-            });
+        if (parentMetamodelCacheContext == null || parentMetamodelCacheContext.getFieldMetaModels() == null
+            || parentMetamodelCacheContext.getFieldsByName() == null) {
+            fetchAllFields();
+        }
 
         return parentMetamodelCacheContext.getFieldsByName().get(fieldName);
     }
 
     public Set<String> getFieldNames() {
-        return elements(getAllFields())
+        return elements(fetchAllFields())
             .map(FieldMetaModel::getFieldName)
             .asSet();
     }
@@ -103,7 +105,7 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
         return parentMetamodelCacheContext.getAllValidators();
     }
 
-    public List<FieldMetaModel> getAllFields() {
+    public List<FieldMetaModel> fetchAllFields() {
         if (parentMetamodelCacheContext == null) {
             parentMetamodelCacheContext = new ParentMetamodelCacheContext();
         }

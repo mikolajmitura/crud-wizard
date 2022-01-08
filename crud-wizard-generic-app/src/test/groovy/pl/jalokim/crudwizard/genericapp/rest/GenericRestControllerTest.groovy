@@ -5,6 +5,7 @@ import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import com.fasterxml.jackson.databind.node.TextNode
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceDelegator
@@ -34,7 +35,8 @@ class GenericRestControllerTest extends Specification {
             httpQueryParams,
             headers,
             request,
-            response
+            response,
+            Pageable.unpaged()
         )
 
         then:

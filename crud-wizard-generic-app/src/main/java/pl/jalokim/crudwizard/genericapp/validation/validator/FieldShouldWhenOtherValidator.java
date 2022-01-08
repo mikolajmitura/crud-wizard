@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.validation.validator;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
-import static pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOtherCoreValidator.newValidator;
+import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator.newValidator;
 import static pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator.formatPlaceholderFor;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 import pl.jalokim.crudwizard.core.validation.javax.FieldMetadataExtractor;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
-import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOtherCoreValidator;
+import pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
 public class FieldShouldWhenOtherValidator extends BaseDataValidator<Map<String, Object>> {

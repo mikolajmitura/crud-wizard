@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +24,7 @@ public class DataStorageMetaModel extends AdditionalPropertyMetaModelDto {
     String name;
 
     DataStorage dataStorage;
+
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.metamodels.BeanMethodMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
@@ -18,6 +19,8 @@ public abstract class ServiceMetaModelMapper extends AdditionalPropertyMapper<Se
     private GenericBeansProvider genericBeansProvider;
 
     @Override
+    @Mapping(target = "serviceInstance", ignore = true)
+    @Mapping(target = "methodMetaModel", ignore = true)
     public abstract ServiceMetaModel toMetaModel(ServiceMetaModelEntity serviceMetaModelEntity);
 
     public ServiceMetaModel toFullMetaModel(ServiceMetaModelEntity serviceMetaModelEntity) {

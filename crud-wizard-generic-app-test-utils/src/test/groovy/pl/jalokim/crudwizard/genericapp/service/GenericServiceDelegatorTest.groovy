@@ -52,7 +52,7 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
                 ordersIdVar: 14,
             ]
             endpointMetaModel == endpointMetaModelContextNodeUtils
-                .findEndpointByUrl("/users/{userId}/orders/{orderId}", POST)
+                .findEndpointForInvokeByUrl("/users/{userId}/orders/{orderId}", POST)
                 .getEndpointMetaModel()
         }
     }
@@ -91,7 +91,7 @@ class GenericServiceDelegatorTest extends UnitTestSpec {
         GenericServiceArgument passedGenericServiceArgument = null
 
         def foundEndpointMetaModel = endpointMetaModelContextNodeUtils
-            .findEndpointByUrl("/users/{userId}/orders/{orderId}", POST)
+            .findEndpointForInvokeByUrl("/users/{userId}/orders/{orderId}", POST)
             .getEndpointMetaModel()
 
         def expectedRequestBodyTranslated = createRequestBodyTranslated()

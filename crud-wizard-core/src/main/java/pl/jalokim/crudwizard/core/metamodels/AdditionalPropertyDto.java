@@ -22,10 +22,8 @@ public class AdditionalPropertyDto {
     Long id;
     @NotNull
     String name;
-    @NotNull
     @ClassExists
     String valueRealClassName;
-    @NotNull
     String rawJson;
     @JsonIgnore
     Object valueAsObject;

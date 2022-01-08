@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
@@ -26,6 +27,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService;
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @MetamodelService
 @RequiredArgsConstructor
@@ -43,12 +45,7 @@ public class MetaModelContextService implements ApplicationRunner {
     private final ServiceMetaModelService serviceMetaModelService;
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
     private final EndpointMetaModelService endpointMetaModelService;
-
-    // TODO test it with few scenarios
-    // some endpoint with another data storage.
-    // some endpoint with another generic service
-    // some endpoint with another generic service with another mapper
-    // validators on some models, fields.
+    private final InstanceLoader instanceLoader;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -64,11 +61,17 @@ public class MetaModelContextService implements ApplicationRunner {
         loadClassMetaModels(metaModelContext);
         loadMapperMetaModels(metaModelContext);
         loadServiceMetaModels(metaModelContext);
+        loadDefaultQueryProvider(metaModelContext);
         loadDefaultDataStorageConnectorsMetaModel(metaModelContext);
         loadEndpointMetaModels(metaModelContext);
         loadEndpointNodes(metaModelContext);
         metaModelContextReference.set(metaModelContext);
         log.info("Reloaded meta model context");
+    }
+
+    private void loadDefaultQueryProvider(MetaModelContext metaModelContext) {
+        String queryProviderClassName = defaultBeansService.getDefaultQueryProviderClassName();
+        metaModelContext.setDefaultDataStorageQueryProvider(instanceLoader.createInstanceOrGetBean(queryProviderClassName));
     }
 
     private void loadDataStorages(MetaModelContext metaModelContext) {
@@ -171,5 +174,16 @@ public class MetaModelContextService implements ApplicationRunner {
 
     public MetaModelContext getMetaModelContext() {
         return metaModelContextReference.get();
+    }
+
+    public DataStorage getDataStorageByName(String dataStorageName) {
+        return getMetaModelContext().getDataStorages()
+            .findOneBy(dataStorageMetaModel -> dataStorageMetaModel.getName().equals(dataStorageName))
+            .getDataStorage();
+    }
+
+    public ClassMetaModel getClassMetaModelByName(String classMetaModelName) {
+        return getMetaModelContext().getClassMetaModels()
+            .findOneBy(classMetaModel -> classMetaModelName.equals(classMetaModel.getName()));
     }
 }

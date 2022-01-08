@@ -3,7 +3,9 @@ package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
-import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +13,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
-import pl.jalokim.crudwizard.core.metamodels.MappingDirection;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
 @EqualsAndHashCode(callSuper = true)
@@ -39,6 +41,7 @@ public class MapperMetaModelDto extends AdditionalPropertyMetaModelDto {
     String beanName;
     String methodName;
     String mapperScript;
-    @NotNull
-    MappingDirection mappingDirection;
+
+    @Builder.Default
+    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

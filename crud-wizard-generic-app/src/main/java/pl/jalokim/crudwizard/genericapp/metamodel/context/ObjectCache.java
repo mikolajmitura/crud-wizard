@@ -1,8 +1,12 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
+import static pl.jalokim.utils.collection.Elements.elements;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import lombok.Getter;
 
 @Getter
@@ -19,5 +23,15 @@ public class ObjectCache<K, V> {
 
     public void put(K id, V objectValue) {
         objectsById.put(id, objectValue);
+    }
+
+    public List<V> fetchAll() {
+        return elements(objectsById.values()).asList();
+    }
+
+    public V findOneBy(Predicate<V> findBy) {
+        return elements(objectsById.values())
+            .filter(findBy)
+            .getFirstOrNull();
     }
 }

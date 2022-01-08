@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Data;
+import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
 import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
@@ -34,6 +35,7 @@ public class MetaModelContext {
     private ServiceMetaModel defaultServiceMetaModel;
     private MapperMetaModel defaultMapperMetaModel;
     private DataStorageMetaModel defaultDataStorageMetaModel;
+    private DataStorageQueryProvider defaultDataStorageQueryProvider;
     private List<DataStorageConnectorMetaModel> defaultDataStorageConnectorMetaModels;
 
     public static <I, R> List<R> getListFromContext(List<I> inputList,

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.EndpointResponseMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
@@ -316,7 +317,8 @@ public class DelegatedServiceMethodInvoker {
 
     @SuppressWarnings("unchecked")
     private ResponseEntity<Object> resolveReturnObject(Object result, EndpointMetaModel endpointMetaModel) {
-        var successHttpCodeOptional = Optional.ofNullable(endpointMetaModel.getResponseMetaModel().getSuccessHttpCode());
+        var successHttpCodeOptional = Optional.ofNullable(endpointMetaModel.getResponseMetaModel())
+            .map(EndpointResponseMetaModel::getSuccessHttpCode);
         if (result == null) {
             return successHttpCodeOptional
                 .map(integer -> ResponseEntity.status(integer).build())

@@ -24,7 +24,14 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
+    @Mapping(target = "realClass", ignore = true)
+    @Mapping(target = "enumClassMetaModel", ignore = true)
+    @Mapping(target = "fieldNames", ignore = true)
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
+
+    @Mapping(target = "simpleRawClass", ignore = true)
+    @Override
+    public abstract ClassMetaModelEntity toEntity(ClassMetaModelDto classMetaModelDto);
 
     public ClassMetaModel toSwallowDto(MetaModelContext metaModelContext, ClassMetaModelEntity classMetaModelEntity) {
         ClassMetaModel classMetaModel = toMetaModel(classMetaModelEntity);

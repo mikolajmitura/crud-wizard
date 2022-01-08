@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +27,7 @@ public class MapperMetaModel extends AdditionalPropertyMetaModelDto {
 
     // TODO script will be loaded to mapperInstance in lazy way and cached then
     String mapperScript;
-    MappingDirection mappingDirection;
+
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

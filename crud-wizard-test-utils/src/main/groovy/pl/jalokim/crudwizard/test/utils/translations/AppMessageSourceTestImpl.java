@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.test.utils.translations;
 
+import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY;
 import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY;
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
@@ -33,6 +34,7 @@ import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource;
 import pl.jalokim.crudwizard.core.translations.TestAppMessageSourceHolder;
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
 import pl.jalokim.utils.constants.Constants;
 
 /**
@@ -131,8 +133,12 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
         return getAppMessageSource().getMessage(buildMessageForValidator(validatorAnnotation), placeholderArgs);
     }
 
-    public static String entityNotFoundMessage(Long id) {
+    public static String entityNotFoundMessage(Object id) {
         return getAppMessageSource().getMessage(EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY, id);
+    }
+
+    public static String entityNotFoundMessage(Object id, String entityName) {
+        return getAppMessageSource().getMessage(EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY, id, entityName);
     }
 
     public static String resourceAlreadyUpdatedMessage() {
@@ -151,6 +157,19 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
                 "otherFieldValues", otherFieldValues.isEmpty() ? Constants.EMPTY : joinValues(otherFieldValues)
             )
         );
+    }
+
+    public static String whenFieldIsInStateThenOthersShould(String whenField, ExpectedFieldState is, String nestedMessage) {
+        return whenFieldIsInStateThenOthersShould(whenField, is, List.of(), nestedMessage);
+    }
+
+    public static String whenFieldIsInStateThenOthersShould(String whenField, ExpectedFieldState is, List<String> fieldValues, String nestedMessage) {
+        return getAppMessageSource().getMessage(
+            buildMessageForValidator(WhenFieldIsInStateThenOthersShould.class),
+            Map.of("nestedMessage", nestedMessage,
+                "whenField", wrapAsExternalPlaceholder(whenField),
+                "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
+                "fieldValues", fieldValues.isEmpty() ? Constants.EMPTY : joinValues(fieldValues)));
     }
 
     private static String joinValues(List<String> list) {

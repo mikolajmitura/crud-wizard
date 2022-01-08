@@ -31,5 +31,6 @@ public class ApiTagDto extends ObjectWithVersion {
 
     Long id;
 
+    // TODO #44 verify that name is unique when create
     String name;
 }

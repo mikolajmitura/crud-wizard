@@ -3,34 +3,33 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 
-@RequiredArgsConstructor
 @MetamodelService
-public class ServiceMetaModelService {
+public class ServiceMetaModelService extends BaseService<ServiceMetaModelEntity, ServiceMetaModelRepository> {
 
-    private final ServiceMetaModelRepository serviceMetaModelRepository;
     private final ServiceMetaModelMapper serviceMetaModelMapper;
 
-    public ServiceMetaModelEntity saveServiceMetaModel(ServiceMetaModelEntity serviceMetaModel) {
-        return serviceMetaModelRepository.persist(serviceMetaModel);
+    public ServiceMetaModelService(ServiceMetaModelRepository repository,
+        ServiceMetaModelMapper serviceMetaModelMapper) {
+        super(repository);
+        this.serviceMetaModelMapper = serviceMetaModelMapper;
     }
 
     public List<ServiceMetaModel> findAllMetaModels() {
-        return elements(serviceMetaModelRepository.findAll())
+        return elements(repository.findAll())
             .map(serviceMetaModelMapper::toFullMetaModel)
             .asList();
     }
 
     public boolean exists(ServiceMetaModelDto serviceMetaModelDto) {
-        return serviceMetaModelRepository.existsByBeanNameAndClassNameAndMethodName(serviceMetaModelDto.getBeanName(),
+        return repository.existsByBeanNameAndClassNameAndMethodName(serviceMetaModelDto.getBeanName(),
             serviceMetaModelDto.getClassName(), serviceMetaModelDto.getMethodName());
     }
 
     public Long createNewAndGetId(ServiceMetaModelDto serviceMetaModelDto) {
-        return saveServiceMetaModel(serviceMetaModelMapper.toEntity(serviceMetaModelDto)).getId();
+        return save(serviceMetaModelMapper.toEntity(serviceMetaModelDto)).getId();
     }
-
 }

@@ -51,7 +51,7 @@ class ClassMetaModelTest extends Specification {
         ClassMetaModel classMetaModel = createClassMetaModelWithParents()
 
         when:
-        def foundFields = classMetaModel.getAllFields()
+        def foundFields = classMetaModel.fetchAllFields()
 
         then:
         foundFields.size() == 19
@@ -80,7 +80,7 @@ class ClassMetaModelTest extends Specification {
             .add(createValidFieldMetaModel("newField", Long))
 
         when:
-        foundFields = classMetaModel.getAllFields()
+        foundFields = classMetaModel.fetchAllFields()
 
         then:
         foundFields.size() == 19
@@ -89,7 +89,7 @@ class ClassMetaModelTest extends Specification {
         classMetaModel.refresh()
 
         when:
-        foundFields = classMetaModel.getAllFields()
+        foundFields = classMetaModel.fetchAllFields()
 
         then:
         foundFields.size() == 20

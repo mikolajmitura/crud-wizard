@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
 import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
+import pl.jalokim.crudwizard.core.metamodels.DataStorageResultsJoinerMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
@@ -18,9 +21,11 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.PropertyPathResolver;
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 // TODO try use uses to inject others mapper, now is problem with ambiguity from AdditionalPropertyMapper
@@ -33,13 +38,19 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
     @Autowired
     private DataStorageConnectorMetaModelMapper dataStorageConnectorMetaModelMapper;
 
+    @Autowired
+    private InstanceLoader instanceLoader;
+
     @Override
     @Mapping(target = "apiTag", ignore = true)
     @Mapping(target = "payloadMetamodel", ignore = true)
     @Mapping(target = "queryArguments", ignore = true)
+    @Mapping(target = "pathParams", ignore = true)
     @Mapping(target = "serviceMetaModel", ignore = true)
     @Mapping(target = "responseMetaModel", ignore = true)
     @Mapping(target = "payloadMetamodelAdditionalValidators", ignore = true)
+    @Mapping(target = "urlMetamodel", ignore = true)
+    @Mapping(target = "dataStorageConnectors", ignore = true)
     public abstract EndpointMetaModel toMetaModel(EndpointMetaModelEntity endpointMetaModelEntity);
 
     public EndpointMetaModel toFullMetaModel(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {
@@ -58,6 +69,15 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
             .payloadMetamodelAdditionalValidators(createAdditionalValidatorsMetaModel(metaModelContext,
                 endpointMetaModelEntity.getPayloadMetamodelAdditionalValidators()))
             .build();
+    }
+
+    @Mapping(target = "joinerVerifierInstance", source = "joinerVerifierClassName", qualifiedByName = "mapJoinerVerifierInstance")
+    abstract DataStorageResultsJoinerMetaModel mapJoinEntry(DataStorageResultsJoinerEntity dataStorageResultsJoinerEntity);
+
+    @Named("mapJoinerVerifierInstance")
+    @SuppressWarnings("unchecked")
+    protected ObjectsJoinerVerifier<Object, Object> mapJoinerVerifierInstance(String className) {
+        return instanceLoader.createInstanceOrGetBean(className);
     }
 
     private List<DataStorageConnectorMetaModel> getStorageConnectors(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {

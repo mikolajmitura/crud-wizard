@@ -1,6 +1,10 @@
-# README #
+# CRUD wizard #
+[![Build Status](https://github.com/mikolajmitura/crud-wizard/actions/workflows/maven.yml/badge.svg)](https://github.com/mikolajmitura/crud-wizard/actions/workflows/maven.yml)
+[![Coverage Status](https://coveralls.io/repos/github/mikolajmitura/crud-wizard/badge.svg?branch=develop)](https://coveralls.io/github/mikolajmitura/crud-wizard?branch=develop)
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Main goal of project is to simpler way of create application which are typically CRUD operations. 
+Models, endpoints can be created in runtime. New data storage can be created in runtime.   
+
 
 ### What is this repository for? ###
 

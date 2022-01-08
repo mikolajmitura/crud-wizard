@@ -5,7 +5,7 @@ import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLD
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService.createNewEndpointReason
@@ -25,9 +25,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.ContextRefreshStatus
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefreshRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorInstanceCache
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelRepository
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
@@ -44,17 +44,17 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     private MetaModelContextRefreshRepository metaModelContextRefreshRepository
 
     @Autowired
-    private ValidatorInstanceCache validatorInstanceCache
+    private InstanceLoader instanceLoader
 
     @Autowired
     private ValidatorMetaModelRepository validatorMetaModelRepository
 
     def "should save POST new endpoint with default mapper, service, data storage"() {
         given:
-        def validatorInstancesCache = validatorInstanceCache.dataValidatorsByKey
-        validatorInstancesCache.clear()
+        def instancesCache = instanceLoader.notSpringBeanInstancesByClass
+        instanceLoader.clearInstancesCache()
         def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto().toBuilder()
-            .payloadMetamodel(extendedPersonClassMetaModel())
+            .payloadMetamodel(extendedPersonClassMetaModel1())
             .payloadMetamodelAdditionalValidators(createAdditionalValidatorsForExtendedPerson())
             .build()
 
@@ -119,9 +119,8 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                 }
             assert foundRefreshEntity.contextRefreshStatus == ContextRefreshStatus.CORRECT
         }
-        validatorInstancesCache.size() == 2
-        validatorInstancesCache.get(NotNullValidator.canonicalName) != null
-        validatorInstancesCache.get(SizeValidator.canonicalName) != null
+        instancesCache.get(NotNullValidator) != null
+        instancesCache.get(SizeValidator) != null
     }
 
     private boolean assertClassMetaModels(ClassMetaModelEntity classMetaModelEntity, ClassMetaModelDto classMetaModelDto) {
@@ -212,7 +211,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     // TODO save all fields during create endpoint metamodels, queryArguments, responseMetaModel with not raw java class but with class metadata,
     //  classMetaModelInDataStorage other than payload
 
-    // TODO new endpoint with already existed metamodels
+    // TODO new endpoint with already existed metamodels, class, mapper, validator, service, datastorage - (all by id)
     // TODO save with new service
     // TODO save with new mapper
     // TODO save with not default data storage

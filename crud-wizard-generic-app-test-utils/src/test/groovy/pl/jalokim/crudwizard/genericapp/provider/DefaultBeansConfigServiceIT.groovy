@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.genericapp.provider
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppBaseIntegrationSpecification
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
-import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperBean
+import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntityRepository
@@ -44,11 +44,10 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
             }
 
             verifyAll(mapperMetaModelEntityRepository.getOne(defaultGenericMapperId)) {
-                className == GenericMapperBean.canonicalName
-                beanName == "genericMapperBean"
+                className == DefaultGenericMapper.canonicalName
+                beanName == "defaultGenericMapper"
                 methodName == "mapToTarget"
                 mapperScript == null
-                mappingDirection == null
             }
 
             verifyAll(serviceMetaModelRepository.getOne(genericServiceMetaModelId)) {
@@ -60,7 +59,8 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
 
             verifyAll(dataStorageConnectorMetaModelRepository.getOne(defaultDataStorageConnectorsId[0])) {
                 dataStorageMetaModel.id == defaultDataStorageId
-                mapperMetaModel.id == defaultGenericMapperId
+                mapperMetaModelForQuery.id == defaultGenericMapperId
+                mapperMetaModelForReturn.id == defaultGenericMapperId
                 classMetaModelInDataStorage == null
             }
         }

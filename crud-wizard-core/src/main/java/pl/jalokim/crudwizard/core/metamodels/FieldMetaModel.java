@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,10 +26,15 @@ public class FieldMetaModel extends AdditionalPropertyMetaModelDto {
     String fieldName;
 
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     ClassMetaModel fieldType;
 
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     ClassMetaModel ownerOfField;
 
     List<ValidatorMetaModel> validators;
+
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

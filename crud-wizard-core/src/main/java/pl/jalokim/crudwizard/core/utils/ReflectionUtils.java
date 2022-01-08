@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.core.utils;
 
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getAllNotStaticMethods;
 
 import java.lang.reflect.Method;
 import lombok.experimental.UtilityClass;
@@ -10,7 +11,7 @@ import pl.jalokim.crudwizard.core.exception.TechnicalException;
 public class ReflectionUtils {
 
     public static Method findMethodByName(Class<?> fromClass, String methodName) {
-        var foundMethods = elements(fromClass.getMethods())
+        var foundMethods = elements(getAllNotStaticMethods(fromClass))
             .filter(method -> method.getName().equals(methodName))
             .asList();
 

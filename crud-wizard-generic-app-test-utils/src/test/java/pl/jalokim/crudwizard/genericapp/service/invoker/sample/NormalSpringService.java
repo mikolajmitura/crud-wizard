@@ -60,7 +60,11 @@ public class NormalSpringService {
     }
 
     public SamplePersonDto createSamplePersonDtoWithValidated(@RequestBody @Validated SamplePersonDto samplePersonDto) {
-        return new SamplePersonDto(1L, samplePersonDto.getName(), samplePersonDto.getSurname());
+        return SamplePersonDto.builder()
+            .id(1L)
+            .name(samplePersonDto.getName())
+            .surname(samplePersonDto.getSurname())
+            .build();
     }
 
     public Map<String, Object> returnAllInputs(@RequestBody @NotNull JsonNode jsonNode,
@@ -137,6 +141,10 @@ public class NormalSpringService {
 
     public void missingReqPathVariable(@PathVariable String someRequiredVariable) {
 
+    }
+
+    public Map<String, Object> returnTranslatedHttpQuery(@RequestParam Map<String, Object> httpQueryTranslated) {
+        return httpQueryTranslated;
     }
 
     public static class InvalidJavaBean {

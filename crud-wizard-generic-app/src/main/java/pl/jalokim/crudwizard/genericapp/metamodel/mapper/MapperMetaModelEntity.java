@@ -1,8 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,7 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import pl.jalokim.crudwizard.core.metamodels.MappingDirection;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 
 @Entity
@@ -36,7 +33,4 @@ public class MapperMetaModelEntity  extends WithAdditionalPropertiesEntity {
     private String methodName;
 
     private String mapperScript;
-
-    @Enumerated(EnumType.STRING)
-    private MappingDirection mappingDirection;
 }

@@ -31,6 +31,7 @@ public class ValidatorMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     private String className;
     private String validatorName;
+    private String validatorScript;
 
     /**
      * Does it mean that this validator metamodel have overridden some parameters or have additional properties set.

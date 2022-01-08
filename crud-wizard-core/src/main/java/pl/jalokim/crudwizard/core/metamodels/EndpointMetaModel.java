@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -33,20 +34,24 @@ public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
     AdditionalValidatorsMetaModel payloadMetamodelAdditionalValidators;
 
     ClassMetaModel queryArguments;
+
     ClassMetaModel pathParams;
 
-    // TODO validation when added new service metamodel
+    // TODO #1 validation when added new service metamodel
     // verify that this bean, class, method exists
     // verify that can method arguments will be resolved correctly
     // verify that newly added serviceMetaModel does not exists already, then use existing id
     ServiceMetaModel serviceMetaModel;
 
-    // TODO add it to Dto, Entity as well
     Boolean invokeValidation;
 
     EndpointResponseMetaModel responseMetaModel;
 
+    List<DataStorageResultsJoinerMetaModel> dataStorageResultsJoiners;
     List<DataStorageConnectorMetaModel> dataStorageConnectors;
+
+    @Builder.Default
+    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     // TODO maybe here which headers distinct to this endpoint
     // TODO consume type and response type application/xml and application/json etc???

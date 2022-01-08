@@ -87,7 +87,7 @@ public class GenericValidator {
 
             if (objectToValidate instanceof Map) {
                 Map<?, ?> objectToValidateAsMap = (Map<?, ?>) objectToValidate;
-                List<FieldMetaModel> fields = classMetaModel.getAllFields();
+                List<FieldMetaModel> fields = classMetaModel.fetchAllFields();
                 // TODO how to get fields when has generic fields ???
                 for (FieldMetaModel field : fields) {
                     String fieldName = field.getFieldName();
