@@ -15,7 +15,6 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.constants.Constants.SPACE;
 import static pl.jalokim.utils.string.StringUtils.concat;
 
-import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +41,24 @@ public class FieldShouldWhenOtherCoreValidator {
 
     public static FieldShouldWhenOtherCoreValidator newValidator(FieldMetadataExtractor fieldMetadataExtractor, String field,
         ExpectedFieldState should, List<String> fieldValues, String whenField, ExpectedFieldState is, List<String> otherFieldValues) {
-        validateFieldConfiguration("field", field,
-            "should", should,
-            "fieldValues", fieldValues, FieldShouldWhenOther.class);
+        validateFieldConfiguration(ValidationFieldConfiguration.builder()
+            .fieldByPositionName("field")
+            .fieldByPositionValue(field)
+            .expectedFieldStateFieldName("should")
+            .expectedFieldState(should)
+            .otherFieldValueName("fieldValues")
+            .otherFieldValue(fieldValues)
+            .annotationType(FieldShouldWhenOther.class)
+            .build());
 
-        validateFieldConfiguration("whenField", whenField,
-            "is", is,
-            "otherFieldValues", otherFieldValues, FieldShouldWhenOther.class);
+        validateFieldConfiguration(ValidationFieldConfiguration.builder()
+            .fieldByPositionName("whenField")
+            .fieldByPositionValue(whenField)
+            .expectedFieldStateFieldName("is")
+            .expectedFieldState(is)
+            .otherFieldValueName("otherFieldValues")
+            .otherFieldValue(otherFieldValues)
+            .annotationType(FieldShouldWhenOther.class).build());
 
         var expectedFieldStatePredicates = new ExpectedFieldStatePredicates(fieldMetadataExtractor);
 
@@ -60,7 +70,7 @@ public class FieldShouldWhenOtherCoreValidator {
             "field", field, should, "fieldValues", fieldValues, value);
 
         boolean otherFieldResult = expectedFieldStatePredicates.testState(
-            "whenField", whenField, is,"otherFieldValues", otherFieldValues, value);
+            "whenField", whenField, is, "otherFieldValues", otherFieldValues, value);
 
         if (otherFieldResult) {
             return mainFieldResult;
@@ -78,25 +88,32 @@ public class FieldShouldWhenOtherCoreValidator {
         );
     }
 
-    public static void validateFieldConfiguration(String fieldByPositionName, String fieldByPositionValue,
-        String isOrShouldName, ExpectedFieldState expectedFieldState,
-        String otherFieldValueName, List<String> otherFieldValue, Class<? extends Annotation> annotationType) {
-        if (WITHOUT_OTHER_FIELD_VALUES.contains(expectedFieldState) && CollectionUtils.isNotEmpty(otherFieldValue)) {
+    public static void validateFieldConfiguration(ValidationFieldConfiguration validationFieldConfiguration) {
+        if (WITHOUT_OTHER_FIELD_VALUES.contains(validationFieldConfiguration.getExpectedFieldState()) && CollectionUtils.isNotEmpty(
+            validationFieldConfiguration.getOtherFieldValue())) {
             throw new IllegalArgumentException(String.format(
-                "invalid @" + annotationType.getSimpleName() + " for %s=%s for: %s=%s, field: %s should be empty",
-                fieldByPositionName, fieldByPositionValue, isOrShouldName, expectedFieldState, otherFieldValueName));
+                "invalid @" + validationFieldConfiguration.getAnnotationType().getSimpleName() + " for %s=%s for: %s=%s, field: %s should be empty",
+                validationFieldConfiguration.getFieldByPositionName(), validationFieldConfiguration.getFieldByPositionValue(),
+                validationFieldConfiguration.getExpectedFieldStateFieldName(), validationFieldConfiguration.getExpectedFieldState(),
+                validationFieldConfiguration.getOtherFieldValueName()));
         }
 
-        if (WITH_OTHER_FIELD_VALUES.contains(expectedFieldState) && CollectionUtils.isEmpty(otherFieldValue)) {
+        if (WITH_OTHER_FIELD_VALUES.contains(validationFieldConfiguration.getExpectedFieldState()) && CollectionUtils.isEmpty(
+            validationFieldConfiguration.getOtherFieldValue())) {
             throw new IllegalArgumentException(String.format(
-                "invalid @" + annotationType.getSimpleName() + " for %s=%s for: %s=%s, field: %s should not be empty",
-                fieldByPositionName, fieldByPositionValue, isOrShouldName, expectedFieldState, otherFieldValueName));
+                "invalid @" + validationFieldConfiguration.getAnnotationType().getSimpleName() + " for %s=%s for: %s=%s, field: %s should not be empty",
+                validationFieldConfiguration.getFieldByPositionName(), validationFieldConfiguration.getFieldByPositionValue(),
+                validationFieldConfiguration.getExpectedFieldStateFieldName(), validationFieldConfiguration.getExpectedFieldState(),
+                validationFieldConfiguration.getOtherFieldValueName()));
         }
 
-        if (FOR_STRING_AND_COLLECTION_AND_NUMBER.contains(expectedFieldState) && !canParseToNumber(otherFieldValue)) {
+        if (FOR_STRING_AND_COLLECTION_AND_NUMBER.contains(validationFieldConfiguration.getExpectedFieldState()) && !canParseToNumber(
+            validationFieldConfiguration.getOtherFieldValue())) {
             throw new IllegalArgumentException(String.format(
                 "invalid @FieldShouldWhenOther for %s=%s for: %s=%s, field: %s should have only one element with number value",
-                fieldByPositionName, fieldByPositionValue, isOrShouldName, expectedFieldState, otherFieldValueName));
+                validationFieldConfiguration.getFieldByPositionName(), validationFieldConfiguration.getFieldByPositionValue(),
+                validationFieldConfiguration.getExpectedFieldStateFieldName(), validationFieldConfiguration.getExpectedFieldState(),
+                validationFieldConfiguration.getOtherFieldValueName()));
         }
     }
 

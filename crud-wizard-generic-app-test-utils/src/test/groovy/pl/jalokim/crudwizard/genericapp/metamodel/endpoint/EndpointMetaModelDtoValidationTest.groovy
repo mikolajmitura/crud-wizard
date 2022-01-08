@@ -65,8 +65,8 @@ import spock.lang.Unroll
 
 class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
 
-    private static def DS_CONNECTOR_ID = 1L
-    private static def CLASS_METAMODEL = 2L
+    private static final DS_CONNECTOR_ID = 1L
+    private static final CLASS_METAMODEL = 2L
 
     private MetaModelContextService metaModelContextService = Mock()
     private ApplicationContext applicationContext = Mock()
@@ -413,7 +413,6 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 [leftType : Byte.canonicalName,
                  rightType: String.canonicalName]))
         ]                                                      | "invalid left path and invalid right path, and not the same types for join"
-
     }
 
     @Unroll

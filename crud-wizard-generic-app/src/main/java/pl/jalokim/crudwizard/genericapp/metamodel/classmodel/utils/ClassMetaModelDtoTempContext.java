@@ -23,7 +23,7 @@ public class ClassMetaModelDtoTempContext {
             });
     }
 
-    public void updateDto(Long ClassMetaModelId, GenericModelType genericModelType) {
-        classMetaModelById.put(ClassMetaModelId, genericModelType);
+    public void updateDto(Long classMetaModelId, GenericModelType genericModelType) {
+        classMetaModelById.put(classMetaModelId, genericModelType);
     }
 }

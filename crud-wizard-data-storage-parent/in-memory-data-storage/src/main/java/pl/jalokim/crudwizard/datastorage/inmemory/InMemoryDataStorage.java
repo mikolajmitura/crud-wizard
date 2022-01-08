@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import pl.jalokim.crudwizard.core.config.jackson.SimplePageImpl;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
 import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;

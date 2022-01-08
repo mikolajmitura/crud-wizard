@@ -18,6 +18,7 @@ public class InMemoryDsQueryRunner {
     private final InMemoryWhereExpressionTranslator inMemoryWhereExpressionTranslator;
     private final InMemoryOrderByTranslator inMemoryOrderByTranslator;
 
+    @SuppressWarnings("PMD.CloseResource")
     public List<Object> runQuery(Stream<Object> source, DataStorageQuery query) {
         Predicate<Object> objectPredicate = inMemoryWhereExpressionTranslator.translateWhereExpression(query.getWhere());
         Comparator<Object> objectComparator = inMemoryOrderByTranslator.translateSortBy(query);

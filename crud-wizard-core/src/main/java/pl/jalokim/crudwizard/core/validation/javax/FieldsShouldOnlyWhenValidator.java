@@ -16,6 +16,7 @@ import javax.validation.ConstraintValidatorContext;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.crudwizard.core.validation.javax.inner.ExpectedFieldStatePredicates;
 import pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator;
+import pl.jalokim.crudwizard.core.validation.javax.inner.ValidationFieldConfiguration;
 
 public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWithDynamicMessage<WhenFieldIsInStateThenOthersShould, Object> {
 
@@ -32,9 +33,15 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
         fieldValues = Arrays.asList(fieldsShouldOnlyWhen.fieldValues());
         thenOthersShould = Arrays.asList(fieldsShouldOnlyWhen.thenOthersShould());
 
-        validateFieldConfiguration("whenField", whenField,
-            "is", is,
-            "fieldValues", fieldValues, WhenFieldIsInStateThenOthersShould.class);
+        validateFieldConfiguration(ValidationFieldConfiguration.builder()
+            .fieldByPositionName("whenField")
+            .fieldByPositionValue(whenField)
+            .expectedFieldStateFieldName("is")
+            .expectedFieldState(is)
+            .otherFieldValueName("fieldValues")
+            .otherFieldValue(fieldValues)
+            .annotationType(WhenFieldIsInStateThenOthersShould.class)
+            .build());
     }
 
     @Override

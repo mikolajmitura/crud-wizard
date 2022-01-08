@@ -59,7 +59,6 @@ public class DefaultGenericService {
             .orElse(EndpointResponseMetaModel.EMPTY);
 
         ClassMetaModel responseClassMetaModel = responseMetaModel.getClassMetaModel();
-        Object responseBody = null;
 
         GenericMapperArgumentFactory genericMapperArgumentFactory = new GenericMapperArgumentFactory(genericServiceArgument, resultsByDataStorageName);
 
@@ -74,7 +73,10 @@ public class DefaultGenericService {
                 genericMapperArgumentFactory, dataStorageQueryArgumentsFactory);
         } else if (httpMethod.equals(HttpMethod.GET)) {
             Class<?> responseRealClass = responseClassMetaModel.getRealClass();
-            if (responseRealClass != null) {
+            if (responseRealClass == null) {
+                getResultById(genericServiceArgument, endpointMetaModel, resultsByDataStorageName, responseClassMetaModel,
+                    genericMapperArgumentFactory, dataStorageQueryArgumentsFactory);
+            } else {
                 if (isTypeOf(responseRealClass, Page.class)) {
                     return returnPage(genericServiceArgument, endpointMetaModel, responseClassMetaModel,
                         dataStorageQueryArgumentsFactory, genericMapperArgumentFactory, responseMetaModel);
@@ -82,12 +84,10 @@ public class DefaultGenericService {
                     return returnCollection(endpointMetaModel, responseMetaModel, responseClassMetaModel,
                         genericMapperArgumentFactory, responseRealClass, dataStorageQueryArgumentsFactory);
                 }
-            } else {
-                getResultById(genericServiceArgument, endpointMetaModel, resultsByDataStorageName, responseClassMetaModel,
-                    genericMapperArgumentFactory, dataStorageQueryArgumentsFactory);
             }
         }
 
+        Object responseBody = null;
         if (responseClassMetaModel != null) {
             GenericMapperArgument finalResultMapperArgument = genericMapperArgumentFactory.create()
                 .sourceObject(resultsByDataStorageName)
@@ -153,7 +153,9 @@ public class DefaultGenericService {
             });
     }
 
-    private void getResultById(GenericServiceArgument genericServiceArgument, EndpointMetaModel endpointMetaModel, Map<String, Object> resultsByDataStorageName,
+    @SuppressWarnings("PMD.LinguisticNaming")
+    private void getResultById(GenericServiceArgument genericServiceArgument, EndpointMetaModel endpointMetaModel,
+        Map<String, Object> resultsByDataStorageName,
         ClassMetaModel responseClassMetaModel, GenericMapperArgumentFactory genericMapperArgumentFactory,
         DataStorageQueryArgumentsFactory dataStorageQueryArgumentsFactory) {
 
@@ -243,11 +245,11 @@ public class DefaultGenericService {
             var mappedIdForDataStorage = getResultFromDataStorageAndPutToContext(resultsByDataStorageName,
                 genericMapperArgumentFactory, idOfObject, dataStorageConnector, null, dataStorageQueryArgumentsFactory);
 
-            if (mappedIdForDataStorage.getMappedId() != null) {
+            if (mappedIdForDataStorage.getMappedId() == null) {
+                mappedIdForDataStorage.getDataStorage().delete(mappedIdForDataStorage.getQuery());
+            } else {
                 mappedIdForDataStorage.getDataStorage().deleteEntity(dataStorageConnector.getClassMetaModelInDataStorage(),
                     mappedIdForDataStorage.getMappedId());
-            } else {
-                mappedIdForDataStorage.getDataStorage().delete(mappedIdForDataStorage.getQuery());
             }
         }
     }
@@ -286,10 +288,6 @@ public class DefaultGenericService {
         DataStorageConnectorMetaModel dataStorageConnector, ClassMetaModel otherReturnClassModel,
         DataStorageQueryArgumentsFactory dataStorageQueryArgumentsFactory) {
 
-        GenericMapperArgument mapperArgument = genericMapperArgumentFactory.create()
-            .sourceObject(idOfObject)
-            .build();
-
         ClassMetaModel classMetaModelInDataStorage = Optional.ofNullable(dataStorageConnector.getClassMetaModelInDataStorage())
             .orElse(otherReturnClassModel);
 
@@ -309,6 +307,11 @@ public class DefaultGenericService {
             resultsByDataStorageName.put(dataStorage.getName(), found.get(0));
             return ResultInDataStorageFoundBy.of(dataStorage, null, query);
         }
+
+        GenericMapperArgument mapperArgument = genericMapperArgumentFactory.create()
+            .sourceObject(idOfObject)
+            .build();
+
         Object mappedId = mapperDelegatorService.mapToTarget(dataStorageConnector.getMapperMetaModelForQuery(), mapperArgument);
 
         resultsByDataStorageName.put(dataStorage.getName(), dataStorage.getEntityById(classMetaModelInDataStorage, mappedId));

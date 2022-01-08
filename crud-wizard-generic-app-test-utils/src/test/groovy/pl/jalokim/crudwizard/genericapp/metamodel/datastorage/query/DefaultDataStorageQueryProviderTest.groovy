@@ -19,6 +19,7 @@ class DefaultDataStorageQueryProviderTest extends Specification {
     def dataStorageQueryProvider = new DefaultDataStorageQueryProvider()
 
     @Unroll
+    @SuppressWarnings("ExplicitCallToAndMethod")
     def "return expected ds query"() {
         when:
         def result = dataStorageQueryProvider.createQuery(dsQueryArgument)

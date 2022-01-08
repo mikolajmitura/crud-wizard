@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Value;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 
 @AllArgsConstructor

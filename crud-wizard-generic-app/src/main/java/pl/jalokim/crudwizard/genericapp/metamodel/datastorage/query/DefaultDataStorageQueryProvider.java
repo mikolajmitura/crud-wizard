@@ -34,7 +34,7 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
     public static final String EXPRESSION_LEFT_PATH = "#expression_left_path";
     public static final String IGNORE_IN_QUERY_PARAM = "#ignore_in_query_as_param";
 
-    private final static Map<ExpressionType, BiFunction<ExpressionArgument, ExpressionArgument, AbstractExpression>> EXPRESSION_BY_TYPE = Map.of(
+    private static final Map<ExpressionType, BiFunction<ExpressionArgument, ExpressionArgument, AbstractExpression>> EXPRESSION_BY_TYPE = Map.of(
         LIKE_IGNORE_CASE, RealExpression::likeIgnoreCase,
         LIKE, RealExpression::like,
         EQUALS, RealExpression::isEqualsTo,

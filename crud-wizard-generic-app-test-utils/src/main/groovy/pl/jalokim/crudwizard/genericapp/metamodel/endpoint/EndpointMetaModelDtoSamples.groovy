@@ -12,7 +12,6 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
-import org.springframework.data.domain.Page
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto

@@ -2,6 +2,9 @@ package pl.jalokim.crudwizard.core.utils;
 
 import static pl.jalokim.utils.collection.Elements.bySplitText;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class ValueExtractorFromPath {
 
     @SuppressWarnings("unchecked")

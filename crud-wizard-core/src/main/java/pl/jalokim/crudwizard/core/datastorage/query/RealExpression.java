@@ -10,6 +10,7 @@ import lombok.Value;
 
 @EqualsAndHashCode(callSuper = false)
 @Value
+@SuppressWarnings("PMD.LinguisticNaming")
 public class RealExpression extends AbstractExpression {
 
     ExpressionArgument leftArg;

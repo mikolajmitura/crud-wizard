@@ -12,10 +12,10 @@ public abstract class BaseService<E extends BaseEntity, R extends JpaRepository<
         if (entity == null) {
             return null;
         }
-        if (entity.getId() != null) {
-            return getOne(entity.getId());
-        } else {
+        if (entity.getId() == null) {
             return save(entity);
+        } else {
+            return getOne(entity.getId());
         }
     }
 

@@ -7,7 +7,7 @@
     <parent>
         <groupId>pl.jalokim.parentpom</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
     </parent>
 
     <groupId>pl.jalokim.crudwizard</groupId>
@@ -32,13 +32,13 @@
         <commons-csv.version>1.8</commons-csv.version>
 
         <mapstruct.version>1.4.1.Final</mapstruct.version>
-        <java-utils.version>4.0.0-SNAPSHOT</java-utils.version> <!-- TODO release this lib -->
+        <java-utils.version>4.0.0</java-utils.version>
         <swagger.version>2.9.2</swagger.version>
 
         <!-- spring-boot-starter-test does not support new version of junit so is set to 4.13-->
         <junit.version>4.13</junit.version>
 
-        <code-style-rules.version>1.0.6-SNAPSHOT</code-style-rules.version> <!-- TODO release this lib -->
+        <coveralls.repo.token>SykbTJDEWWJbqjPCI0oaOD3bHmITaNdxu</coveralls.repo.token>
     </properties>
 
     <dependencies>

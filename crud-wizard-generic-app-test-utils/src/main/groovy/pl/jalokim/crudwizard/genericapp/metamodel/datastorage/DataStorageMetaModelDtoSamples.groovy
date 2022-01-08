@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorage
 
-import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage;
+import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
 
 class DataStorageMetaModelDtoSamples {
 

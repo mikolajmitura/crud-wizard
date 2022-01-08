@@ -3,7 +3,6 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeCreator.loadEndpointNodes;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContext;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getListFromContext;
-import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;

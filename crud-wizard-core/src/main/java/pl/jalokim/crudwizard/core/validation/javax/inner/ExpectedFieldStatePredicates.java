@@ -39,6 +39,7 @@ import pl.jalokim.utils.string.StringUtils;
 import pl.jalokim.utils.template.TemplateAsText;
 
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.GodClass", "PMD.NPathComplexity"})
 public class ExpectedFieldStatePredicates {
 
     private static final String FIELD_SHOULD_BE_EXPECTED_TYPE =

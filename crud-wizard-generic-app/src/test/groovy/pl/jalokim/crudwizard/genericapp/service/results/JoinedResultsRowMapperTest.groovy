@@ -45,7 +45,6 @@ class JoinedResultsRowMapperTest extends Specification {
         result.additionalFields == ["ad1", "ad2"]
     }
 
-
     static class Person extends MetaData {
         String person = "personValue"
         String otherPersonField = "otherPersonField1"

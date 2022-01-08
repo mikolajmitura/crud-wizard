@@ -13,6 +13,11 @@ import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageResultsJoinerMetaModel;
 
 @Component
+@SuppressWarnings({
+    "PMD.ConfusingTernary",
+    "PMD.CollapsibleIfStatements",
+    "PMD.CognitiveComplexity"
+})
 public class DataStorageResultJoiner {
 
     public List<JoinedResultsRow> getJoinedNodes(List<DataStorageResultsJoinerMetaModel> dataStorageResultsJoiners, Map<String, List<Object>> queriesResults) {

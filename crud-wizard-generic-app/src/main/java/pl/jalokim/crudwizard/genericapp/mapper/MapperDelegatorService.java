@@ -12,6 +12,7 @@ import pl.jalokim.crudwizard.core.metamodels.MethodSignatureMetaModel;
 @Service
 public class MapperDelegatorService {
 
+    @SuppressWarnings({"PMD.ConfusingTernary"})
     public Object mapToTarget(MapperMetaModel mapperMetaModel, GenericMapperArgument mapperArgument) {
         if (mapperMetaModel.getMapperScript() != null) {
             // TODO call mapper script somehow...

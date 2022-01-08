@@ -30,6 +30,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
     @Mapping(target = "simpleRawClass", ignore = true)
+    @Override
     public abstract ClassMetaModelEntity toEntity(ClassMetaModelDto classMetaModelDto);
 
     public ClassMetaModel toSwallowDto(MetaModelContext metaModelContext, ClassMetaModelEntity classMetaModelEntity) {

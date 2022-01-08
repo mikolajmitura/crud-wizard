@@ -2,7 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.querypro
 
 class QueryProviderDtoSamples {
 
-    static QueryProviderDto createQueryProviderDto(Class<?> className){
+    static QueryProviderDto createQueryProviderDto(Class<?> className) {
         QueryProviderDto.builder()
             .className(className.canonicalName)
             .build()

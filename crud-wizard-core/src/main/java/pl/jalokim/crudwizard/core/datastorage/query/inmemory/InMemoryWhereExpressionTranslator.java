@@ -78,23 +78,26 @@ public class InMemoryWhereExpressionTranslator {
             TriPredicate triPredicate = PREDICATE_BY_EXPRESSION_TYPE.get(realExpression.getOperationType());
             return object -> triPredicate.test(object, leftArg, rightArg);
         } else if (expression instanceof LinkedExpression) {
-            LinkedExpression linkedExpression = (LinkedExpression) expression;
-            Predicate<Object> currentPredicate = translateWhereExpression(linkedExpression.getInitExpression());
-            List<AbstractExpression> expressions = linkedExpression.getExpressions();
-            for (int i = 1; i < expressions.size(); i++) {
-                AbstractExpression abstractExpression = expressions.get(i);
-                LogicalOperator logicalOperator = linkedExpression.getLogicalOperatorsForExpressions().get(i - 1);
-                if (AND.equals(logicalOperator)) {
-                    currentPredicate = currentPredicate.and(translateWhereExpression(abstractExpression));
-                } else {
-                    currentPredicate = currentPredicate.or(translateWhereExpression(abstractExpression));
-                }
-            }
-            return currentPredicate;
+            return getPredicateFromLinkedExpression((LinkedExpression) expression);
         } else if (expression instanceof EmptyExpression) {
             return object -> true;
         }
         throw new IllegalArgumentException("Unsupported expression class: " + expression.getClass().getCanonicalName());
+    }
+
+    private Predicate<Object> getPredicateFromLinkedExpression(LinkedExpression expression) {
+        Predicate<Object> currentPredicate = translateWhereExpression(expression.getInitExpression());
+        List<AbstractExpression> expressions = expression.getExpressions();
+        for (int i = 1; i < expressions.size(); i++) {
+            AbstractExpression abstractExpression = expressions.get(i);
+            LogicalOperator logicalOperator = expression.getLogicalOperatorsForExpressions().get(i - 1);
+            if (AND.equals(logicalOperator)) {
+                currentPredicate = currentPredicate.and(translateWhereExpression(abstractExpression));
+            } else {
+                currentPredicate = currentPredicate.or(translateWhereExpression(abstractExpression));
+            }
+        }
+        return currentPredicate;
     }
 
     private static BigDecimal expressionArgumentToNumber(Object realObject, ExpressionArgument argument) {

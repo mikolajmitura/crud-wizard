@@ -25,8 +25,8 @@ import spock.lang.Unroll
 
 class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
 
-    static final def PERSON_CLASS_ID = 1L
-    static final def EMP_PERSON_CLASS_ID = 2L
+    static final PERSON_CLASS_ID = 1L
+    static final EMP_PERSON_CLASS_ID = 2L
 
     MetaModelContextService metaModelContextService = Mock()
     GenericModelTypeFactory genericModelTypeFactory = new GenericModelTypeFactory(metaModelContextService)
@@ -122,7 +122,6 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
 
         //get field from dto not from class meta model from context, because some dto have fields with some class metamodels, and some metamodel
         //have field with first dto.
-
     }
 
     @Unroll

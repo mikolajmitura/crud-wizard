@@ -45,6 +45,7 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 public class DataStorageResultsJoinCorrectnessValidator
     implements BaseConstraintValidator<DataStorageResultsJoinCorrectness, EndpointMetaModelDto> {
 
+    public static final String DATA_STORAGE_RESULTS_JOINERS = "dataStorageResultsJoiners";
     private final DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository;
     private final MetaModelContextService metaModelContextService;
     private final ClassMetaModelTypeExtractor classMetaModelTypeExtractor;
@@ -52,7 +53,7 @@ public class DataStorageResultsJoinCorrectnessValidator
     @Override
     public boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context) {
         var httpMethod = endpointMetaModelDto.getHttpMethod();
-        Class<?> endpointResponseClass = Optional.ofNullable(endpointMetaModelDto.getResponseMetaModel())
+        Class<?> endpointResponseClass = ofNullable(endpointMetaModelDto.getResponseMetaModel())
             .map(EndpointResponseMetaModelDto::getClassMetaModel)
             .map(ClassMetaModelDto::getClassName)
             .map(ClassUtils::loadRealClass)
@@ -71,7 +72,7 @@ public class DataStorageResultsJoinCorrectnessValidator
 
             Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName = new HashMap<>();
 
-            return expectedNumberOfJoinersDueToDSConnectors(context, numberOfConnectors, numberOfJoiners)
+            return expectedNumberOfJoinersDueToDsConnectors(context, numberOfConnectors, numberOfJoiners)
                 && namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto)
                 && allJoinerCorrectlyConnected(dataStorageResultsJoiners, context)
                 && allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
@@ -79,13 +80,13 @@ public class DataStorageResultsJoinCorrectnessValidator
         return true;
     }
 
-    private boolean expectedNumberOfJoinersDueToDSConnectors(ConstraintValidatorContext context, int numberOfConnectors, int numberOfJoiners) {
+    private boolean expectedNumberOfJoinersDueToDsConnectors(ConstraintValidatorContext context, int numberOfConnectors, int numberOfJoiners) {
         var isValid = numberOfConnectors - 1 == numberOfJoiners;
         if (!isValid) {
             customMessage(context,
                 wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "invalidJoinersNumber"),
                 PropertyPath.builder()
-                    .addNextProperty("dataStorageResultsJoiners")
+                    .addNextProperty(DATA_STORAGE_RESULTS_JOINERS)
                     .build());
         }
         return isValid;
@@ -101,16 +102,16 @@ public class DataStorageResultsJoinCorrectnessValidator
 
             Pair<String, ClassMetaModelDto> queryOrDsNameWithReturnType = findQueryOrDsName(dsConnector, endpointMetaModelDto);
 
-            if (!classMetaModelDtoByDsQueryName.containsKey(queryOrDsNameWithReturnType.getKey())) {
-                classMetaModelDtoByDsQueryName.put(queryOrDsNameWithReturnType.getKey(),
-                    queryOrDsNameWithReturnType.getValue());
-            } else {
+            if (classMetaModelDtoByDsQueryName.containsKey(queryOrDsNameWithReturnType.getKey())) {
                 customMessage(context,
                     wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "nonUniqueDsOrQueryName"),
                     PropertyPath.builder()
                         .addNextPropertyAndIndex("dataStorageConnectors", index)
                         .build());
                 namesAreCorrect.set(false);
+            } else {
+                classMetaModelDtoByDsQueryName.put(queryOrDsNameWithReturnType.getKey(),
+                    queryOrDsNameWithReturnType.getValue());
             }
         });
 
@@ -120,7 +121,7 @@ public class DataStorageResultsJoinCorrectnessValidator
                 customMessage(context,
                     wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "notFound"),
                     PropertyPath.builder()
-                        .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
+                        .addNextPropertyAndIndex(DATA_STORAGE_RESULTS_JOINERS, index)
                         .addNextProperty("leftNameOfQueryResult")
                         .build());
                 namesAreCorrect.set(false);
@@ -130,7 +131,7 @@ public class DataStorageResultsJoinCorrectnessValidator
                 customMessage(context,
                     wrapAsPlaceholder(DataStorageResultsJoinCorrectness.class, "notFound"),
                     PropertyPath.builder()
-                        .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
+                        .addNextPropertyAndIndex(DATA_STORAGE_RESULTS_JOINERS, index)
                         .addNextProperty("rightNameOfQueryResult")
                         .build());
                 namesAreCorrect.set(false);
@@ -168,6 +169,7 @@ public class DataStorageResultsJoinCorrectnessValidator
             .orElseGet(() -> Pair.of(getNameOfDefaultDataStorage(), responseClassMetaModel));
     }
 
+    @SuppressWarnings("PMD.ConfusingTernary")
     private boolean allJoinerCorrectlyConnected(List<DataStorageResultsJoinerDto> dataStorageResultsJoiners, ConstraintValidatorContext context) {
         List<List<String>> groupsOfDsResults = new ArrayList<>();
         AtomicBoolean correctlyConnected = new AtomicBoolean(true);
@@ -183,13 +185,13 @@ public class DataStorageResultsJoinCorrectnessValidator
             if (leftGroup == null && rightGroup == null) {
                 groupForAdd = new ArrayList<>();
                 groupsOfDsResults.add(groupForAdd);
-            } else if (leftGroup == rightGroup) {
+            } else if (Objects.equals(rightGroup, leftGroup)) {
                 groupForAdd = leftGroup;
                 correctlyConnected.set(false);
                 customMessage(context,
                     createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "existsInTheSameGroupAlready", joinWithComma(groupForAdd)),
                     PropertyPath.builder()
-                        .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
+                        .addNextPropertyAndIndex(DATA_STORAGE_RESULTS_JOINERS, index)
                         .build());
             } else {
                 if (leftGroup != null && rightGroup != null) {
@@ -211,7 +213,7 @@ public class DataStorageResultsJoinCorrectnessValidator
                 createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "notOneGroupResults",
                     elements(groupsOfDsResults).asConcatText(", ")),
                 PropertyPath.builder()
-                    .addNextProperty("dataStorageResultsJoiners")
+                    .addNextProperty(DATA_STORAGE_RESULTS_JOINERS)
                     .build());
         }
 
@@ -229,16 +231,14 @@ public class DataStorageResultsJoinCorrectnessValidator
             Optional<TypeMetadata> rightJoinType = getTypeByPath(context, classMetaModelDtoByDsQueryName, allPathsCorrect,
                 joinEntry.getRightNameOfQueryResult(), joinEntry.getRightPath(), index, "rightPath");
 
-            if (leftJoinType.isPresent() && rightJoinType.isPresent()) {
-                if (!leftJoinType.get().equals(rightJoinType.get())) {
-                    customMessage(context, createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "notTheSameTypesForJoin",
-                        Map.of("leftType", leftJoinType.get().getCanonicalName(),
-                            "rightType", rightJoinType.get().getCanonicalName())),
-                        PropertyPath.builder()
-                            .addNextPropertyAndIndex("dataStorageResultsJoiners", index)
-                            .build());
-                    allPathsCorrect.set(false);
-                }
+            if (leftJoinType.isPresent() && rightJoinType.isPresent() && !leftJoinType.get().equals(rightJoinType.get())) {
+                customMessage(context, createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "notTheSameTypesForJoin",
+                    Map.of("leftType", leftJoinType.get().getCanonicalName(),
+                        "rightType", rightJoinType.get().getCanonicalName())),
+                    PropertyPath.builder()
+                        .addNextPropertyAndIndex(DATA_STORAGE_RESULTS_JOINERS, index)
+                        .build());
+                allPathsCorrect.set(false);
             }
         });
         return allPathsCorrect.get();
@@ -253,7 +253,7 @@ public class DataStorageResultsJoinCorrectnessValidator
         } catch (TechnicalException ex) {
             customMessage(context, ex.getMessage(),
                 PropertyPath.builder()
-                    .addNextPropertyAndIndex("dataStorageResultsJoiners", joinerIndex)
+                    .addNextPropertyAndIndex(DATA_STORAGE_RESULTS_JOINERS, joinerIndex)
                     .addNextProperty(pathFieldName)
                     .build());
             allPathsCorrect.set(false);

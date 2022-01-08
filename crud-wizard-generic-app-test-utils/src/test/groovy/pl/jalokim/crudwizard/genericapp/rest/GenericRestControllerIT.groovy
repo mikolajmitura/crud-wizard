@@ -280,11 +280,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def peopleList5 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person?surname=do&sort=name&sort=surname,desc")
 
         then:
-        peopleList1.collect{ it.id } == [person1Id, person2Id, person3Id, person4Id]
-        peopleList2.collect{ it.id } == [person1Id, person2Id]
-        peopleList3.collect{ it.id } == [person1Id]
-        peopleList4.collect{ it.id } == [person4Id, person2Id, person1Id]
-        peopleList5.collect{ it.id } == [person2Id, person1Id, person4Id]
+        peopleList1*.id == [person1Id, person2Id, person3Id, person4Id]
+        peopleList2*.id == [person1Id, person2Id]
+        peopleList3*.id == [person1Id]
+        peopleList4*.id == [person4Id, person2Id, person1Id]
+        peopleList5*.id == [person2Id, person1Id, person4Id]
 
         verifyAll(peopleList3[0]) {
             id == person1Id
@@ -310,8 +310,8 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def peopleListWithFinalQuery2 = rawOperationsOnEndpoints.getAndReturnArrayJson("/domain/person/final_query", [surname: "kow"])
 
         then:
-        peopleListWithFinalQuery1.collect{ it.id } == [person1Id, person2Id]
-        peopleListWithFinalQuery2.collect{ it.id } == [person2Id]
+        peopleListWithFinalQuery1*.id == [person1Id, person2Id]
+        peopleListWithFinalQuery2*.id == [person2Id]
 
         and: 'return second page of objects'
         def getPageOfPersonEndpoint = createValidGetPageOfPerson(createClassMetaModelDtoWithId(personMetaModel.id))
@@ -322,7 +322,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def person5Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson5)
 
         def payloadPerson6 = createPostValidPersonPayload("Diana", "Bond")
-        def person6Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson6)
+        rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson6)
 
         def payloadPerson7 = createPostValidPersonPayload("Adam", "Adams")
         def person7Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson7)
@@ -780,6 +780,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             personSecondDbClassModel, thirdDataStorage, personDocumentDbClassModel)
     }
 
+    @SuppressWarnings("ExplicitCallToAndMethod")
     private boolean assertExistenceJonNovDoe(List<Map> getResultOfFewDsResult1, nameOnlyIn2Db, surnameOnlyIn2Db,
         secondDataStorage, personSecondDbClassModel) {
         def foundEntry = getResultOfFewDsResult1.find {
@@ -799,6 +800,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         return true
     }
 
+    @SuppressWarnings("ExplicitCallToAndMethod")
     private assertPayloadExistenceInResponseList(ArrayList<ExtendedPerson> inputPersonPayload, getResultOfFewDsResult1, defaultDataStorage, personClassModel,
         secondDataStorage, personSecondDbClassModel, thirdDataStorage, personDocumentDbClassModel) {
         inputPersonPayload.forEach({inputPayload ->
