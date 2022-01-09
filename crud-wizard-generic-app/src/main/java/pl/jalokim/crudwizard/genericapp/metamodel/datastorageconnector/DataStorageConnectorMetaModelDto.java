@@ -10,8 +10,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDto;
@@ -23,7 +23,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class DataStorageConnectorMetaModelDto extends AdditionalPropertyMetaModelDto {
+public class DataStorageConnectorMetaModelDto extends WithAdditionalPropertiesDto {
 
     Long id;
     @Valid

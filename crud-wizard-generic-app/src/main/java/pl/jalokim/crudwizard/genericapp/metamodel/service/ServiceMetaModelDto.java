@@ -13,8 +13,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
@@ -30,7 +30,7 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 @FieldShouldWhenOther(field = ServiceMetaModelDto.SERVICE_SCRIPT, should = NULL, whenField = ServiceMetaModelDto.BEAN_NAME, is = NOT_NULL)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ServiceMetaModelDto extends AdditionalPropertyMetaModelDto {
+public class ServiceMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String CLASS_NAME = "className";
     public static final String SERVICE_SCRIPT = "serviceScript";

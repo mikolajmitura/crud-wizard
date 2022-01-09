@@ -1,16 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.provider;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson;
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.rawJsonToObject;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.configuration.DefaultConfigurationEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.configuration.DefaultConfigurationRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
@@ -37,7 +39,7 @@ public class DefaultBeansConfigService {
     private final DataStorageMetaModelService dataStorageMetaModelService;
     private final DataStorageMetaModelRepository dataStorageMetaModelRepository;
     private final RawAdditionalPropertyMapper rawAdditionalPropertyMapper;
-    private final AdditionalPropertyRepository additionalPropertyRepository;
+    private final DefaultConfigurationRepository defaultConfigurationRepository;
     private final MapperMetaModelService mapperMetaModelService;
     private final MapperMetaModelEntityRepository mapperMetaModelEntityRepository;
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
@@ -147,15 +149,11 @@ public class DefaultBeansConfigService {
     }
 
     private void saveNewConfiguration(String propertyName, Object configValue, Class<?> valueRealClass) {
-        additionalPropertyRepository.save(
-            rawAdditionalPropertyMapper.additionalPropertyToEntity(
-                AdditionalPropertyDto.builder()
-                    .name(propertyName)
-                    .valueRealClassName(valueRealClass.getCanonicalName())
-                    .valueAsObject(configValue)
-                    .build()
-            )
-        );
+        defaultConfigurationRepository.save(DefaultConfigurationEntity.builder()
+            .propertyName(propertyName)
+            .valueRealClassName(valueRealClass.getCanonicalName())
+            .rawJson(objectToRawJson(configValue))
+            .build());
     }
 
     public Long getDefaultDataStorageId() {
@@ -182,9 +180,10 @@ public class DefaultBeansConfigService {
 
     @SuppressWarnings("unchecked")
     private <T> T getConfigForDefault(String configKey, Class<T> propertyClass) {
-        return additionalPropertyRepository.findByNameAndValueRealClassName(configKey, propertyClass.getCanonicalName())
-            .map(rawAdditionalPropertyMapper::additionalPropertyToDto)
-            .map(additionalPropertyToDto -> (T) additionalPropertyToDto.getRealValue())
+        return defaultConfigurationRepository.findByPropertyNameAndValueRealClassName(configKey, propertyClass.getCanonicalName())
+            .map(defaultConfigurationEntity -> (T) rawJsonToObject(
+                defaultConfigurationEntity.getRawJson(),
+                defaultConfigurationEntity.getValueRealClassName()))
             .orElse(null);
     }
 }

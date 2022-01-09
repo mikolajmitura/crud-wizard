@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels
 
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson
 import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX
 
 import java.time.LocalDate
@@ -36,9 +37,10 @@ class ClassMetaModelSamples {
             .fieldName(fieldName)
             .fieldType(fieldType)
             .additionalProperties(additionalProperties.collect {
-                AdditionalPropertyDto.builder()
+                AdditionalPropertyMetaModel.builder()
                     .name(it.key)
                     .valueAsObject(it.value)
+                    .rawJson(objectToRawJson(it.value))
                     .build()
             })
             .build()
@@ -49,9 +51,10 @@ class ClassMetaModelSamples {
             .fieldName(fieldName)
             .fieldType(createClassMetaModelFromClass(fieldType))
             .additionalProperties(additionalProperties.collect {
-                AdditionalPropertyDto.builder()
+                AdditionalPropertyMetaModel.builder()
                     .name(it.key)
                     .valueAsObject(it.value)
+                    .rawJson(objectToRawJson(it.value))
                     .build()
             })
             .build()

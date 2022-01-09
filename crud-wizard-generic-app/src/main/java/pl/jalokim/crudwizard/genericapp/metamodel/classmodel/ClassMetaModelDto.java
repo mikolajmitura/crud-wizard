@@ -15,8 +15,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
@@ -49,7 +49,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
 @FieldShouldWhenOther(field = ClassMetaModelDto.GENERIC_TYPES, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
 @FieldShouldWhenOther(field = ClassMetaModelDto.EXTENDS_FROM_MODELS, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL)
 @EnumValuesInAdditionalProperties
-public class ClassMetaModelDto extends AdditionalPropertyMetaModelDto {
+public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String NAME = "name";
     public static final String CLASS_NAME = "className";

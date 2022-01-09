@@ -19,8 +19,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpMethod;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
@@ -53,7 +53,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidators
 @PathParamsAndUrlVariablesTheSame
 @EndpointNotExistsAlready
 @DataStorageResultsJoinCorrectness
-public class EndpointMetaModelDto extends AdditionalPropertyMetaModelDto {
+public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String HTTP_METHOD = "httpMethod";
 

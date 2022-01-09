@@ -1,13 +1,14 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson
 import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
 import org.springframework.data.domain.Page
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto
@@ -194,7 +195,7 @@ class ClassMetaModelDtoSamples {
             .additionalProperties(additionalProperties.collect {
                 AdditionalPropertyDto.builder()
                     .name(it.key)
-                    .valueAsObject(it.value)
+                    .rawJson(objectToRawJson(it.value))
                     .build()
             })
             .build()
@@ -209,7 +210,7 @@ class ClassMetaModelDtoSamples {
     static AdditionalPropertyDto additionalProperty(String name, Object value) {
         AdditionalPropertyDto.builder()
             .name(name)
-            .valueAsObject(value)
+            .rawJson(objectToRawJson(value))
             .build()
     }
 

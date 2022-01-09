@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.ObjectWithVersion;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.genericapp.metamodel.ObjectWithVersionDto;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
@@ -27,7 +28,7 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 )
 @Builder
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class ApiTagDto extends ObjectWithVersion {
+public class ApiTagDto extends ObjectWithVersionDto {
 
     Long id;
 

@@ -13,8 +13,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
 @EqualsAndHashCode(callSuper = true)
@@ -29,7 +29,7 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MapperMetaModelDto.CLASS_NAME, is = NOT_NULL)
 @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MapperMetaModelDto.METHOD_NAME, is = NOT_NULL)
 @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MapperMetaModelDto.BEAN_NAME, is = NOT_NULL)
-public class MapperMetaModelDto extends AdditionalPropertyMetaModelDto {
+public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String MAPPER_SCRIPT = "mapperScript";
     public static final String CLASS_NAME = "className";

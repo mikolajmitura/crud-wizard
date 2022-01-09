@@ -14,8 +14,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 
@@ -27,7 +27,7 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldShouldWhenOther(field = "name", should = NOT_NULL, whenField = "id", is = NULL)
 @FieldShouldWhenOther(field = "className", should = NOT_NULL, whenField = "id", is = NULL)
-public class DataStorageMetaModelDto extends AdditionalPropertyMetaModelDto {
+public class DataStorageMetaModelDto extends WithAdditionalPropertiesDto {
 
     Long id;
 

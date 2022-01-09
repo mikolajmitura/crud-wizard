@@ -26,7 +26,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "extendsFromModels", ignore = true)
     @Mapping(target = "realClass", ignore = true)
     @Mapping(target = "enumClassMetaModel", ignore = true)
-    @Mapping(target = "fieldNames", ignore = true)
+    @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
     @Mapping(target = "simpleRawClass", ignore = true)
@@ -54,7 +54,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
         ));
         classMetaModel.setRealClass(loadRealClass(classMetaModelEntity.getClassName()));
 
-        Object propertyValue = classMetaModel.getPropertyValue(ENUM_VALUES_PREFIX);
+        Object propertyValue = classMetaModel.getPropertyRealValue(ENUM_VALUES_PREFIX);
         if (propertyValue != null) {
             classMetaModel.setEnumClassMetaModel(new EnumClassMetaModel(classMetaModel));
         }

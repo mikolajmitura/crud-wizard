@@ -6,7 +6,7 @@ import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
 import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner
 import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryOrderByTranslator
 import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryWhereExpressionTranslator
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators
@@ -140,7 +140,7 @@ class InMemoryDataStorageTest extends Specification {
                 .realClass(typeOfId)
                 .build())
             .additionalProperties([
-                AdditionalPropertyDto.builder()
+                AdditionalPropertyMetaModel.builder()
                     .name(FieldMetaModel.IS_ID_FIELD)
                     .build()
             ])

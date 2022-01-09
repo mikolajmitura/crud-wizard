@@ -3,27 +3,22 @@ package pl.jalokim.crudwizard.core.metamodels;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getFullClassName;
 
 import java.util.List;
-import javax.validation.Valid;
+import java.util.concurrent.CopyOnWriteArrayList;
+import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 import pl.jalokim.utils.collection.Elements;
 
 @EqualsAndHashCode(callSuper = true)
-// TODO validator for check property name uniqueness
-@SuppressWarnings("unchecked")
-public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
+@SuperBuilder(toBuilder = true)
+@Data
+public class WithAdditionalPropertiesMetaModel extends ObjectWithVersion {
 
-    public abstract List<AdditionalPropertyDto> getAdditionalProperties();
+    @Builder.Default
+    private final List<AdditionalPropertyMetaModel> additionalProperties = new CopyOnWriteArrayList<>();
 
-    public abstract void setAdditionalProperties(List<@Valid AdditionalPropertyDto> additionalProperties);
-
-    public Object getPropertyValue(String propertyName) {
-        return Elements.elements(getAdditionalProperties())
-            .filter(property -> property.getName().equals(propertyName))
-            .map(AdditionalPropertyDto::getRealValue)
-            .findFirst()
-            .orElse(null);
-    }
-
+    @SuppressWarnings("unchecked")
     public <T> T getPropertyRealValue(String propertyName) {
         return Elements.elements(getAdditionalProperties())
             .filter(property -> property.getName().equals(propertyName))
@@ -32,7 +27,7 @@ public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
             .orElse(null);
     }
 
-    public AdditionalPropertyDto getProperty(String propertyName) {
+    public AdditionalPropertyMetaModel getProperty(String propertyName) {
         return Elements.elements(getAdditionalProperties())
             .filter(property -> property.getName().equals(propertyName))
             .findFirst()
@@ -40,7 +35,7 @@ public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
     }
 
     public <T> T addProperty(String propertyName, Object value) {
-        getAdditionalProperties().add(AdditionalPropertyDto.builder()
+        getAdditionalProperties().add(AdditionalPropertyMetaModel.builder()
             .name(propertyName)
             .valueAsObject(value)
             .valueRealClassName(getFullClassName(value))
@@ -49,14 +44,14 @@ public abstract class AdditionalPropertyMetaModelDto extends ObjectWithVersion {
         return (T) this;
     }
 
-    public <T> T addAllAdditionalProperties(List<AdditionalPropertyDto> additionalProperties) {
+    public <T> T addAllAdditionalProperties(List<AdditionalPropertyMetaModel> additionalProperties) {
         this.getAdditionalProperties().addAll(additionalProperties);
         return (T) this;
     }
 
     public <T> T updateProperty(String propertyName, Object value) {
         for (int index = 0; index < getAdditionalProperties().size(); index++) {
-            AdditionalPropertyDto additionalPropertyDto = getAdditionalProperties().get(index);
+            AdditionalPropertyMetaModel additionalPropertyDto = getAdditionalProperties().get(index);
             if (additionalPropertyDto.getName().equals(propertyName)) {
                 getAdditionalProperties().remove(index);
                 break;

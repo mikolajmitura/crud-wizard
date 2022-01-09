@@ -10,22 +10,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
+@SuperBuilder(toBuilder = true)
+public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
 
@@ -52,9 +49,6 @@ public class ClassMetaModel extends AdditionalPropertyMetaModelDto {
      */
     @Setter(AccessLevel.NONE)
     ParentMetamodelCacheContext parentMetamodelCacheContext;
-
-    @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     /**
      * when true then does it mean that this meta model

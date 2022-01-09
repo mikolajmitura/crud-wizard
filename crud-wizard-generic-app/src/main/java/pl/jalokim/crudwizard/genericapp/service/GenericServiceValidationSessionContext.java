@@ -8,7 +8,8 @@ import pl.jalokim.crudwizard.genericapp.validation.ValidatorModelContext;
 public class GenericServiceValidationSessionContext extends ValidationSessionContext {
 
     public GenericServiceValidationSessionContext() {
-        setCurrentValidatorContext(new ValidatorModelContext(new ValidatorMetaModel(), null, PropertyPath.createRoot()));
+        setCurrentValidatorContext(new ValidatorModelContext(ValidatorMetaModel.builder().build(),
+            null, PropertyPath.createRoot()));
     }
 
     @Override

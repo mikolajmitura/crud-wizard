@@ -1,9 +1,16 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.validator;
 
+import java.util.List;
+import javax.persistence.AttributeOverride;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,6 +19,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 
@@ -50,4 +58,13 @@ public class ValidatorMetaModelEntity extends WithAdditionalPropertiesEntity {
      * @see DataValidator#messagePlaceholder() ()
      */
     private String messagePlaceholder;
+
+    @ElementCollection
+    @CollectionTable(name = "validator_additional_props",
+        joinColumns = @JoinColumn(name = "validator_model_id"),
+        foreignKey = @ForeignKey(name = "validator_models_properties_fk"))
+    @AttributeOverride(name = "name", column = @Column(name = "name"))
+    @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
+    @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
+    private List<AdditionalPropertyEntity> additionalProperties;
 }

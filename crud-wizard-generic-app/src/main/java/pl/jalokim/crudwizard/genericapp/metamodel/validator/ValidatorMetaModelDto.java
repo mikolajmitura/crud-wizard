@@ -10,8 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 
@@ -20,7 +20,7 @@ import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class ValidatorMetaModelDto extends AdditionalPropertyMetaModelDto {
+public class ValidatorMetaModelDto extends WithAdditionalPropertiesDto {
 
     Long id;
 

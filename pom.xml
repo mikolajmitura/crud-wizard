@@ -37,6 +37,7 @@
 
         <!-- spring-boot-starter-test does not support new version of junit so is set to 4.13-->
         <junit.version>4.13</junit.version>
+        <lombok.version>1.18.12</lombok.version>
 
         <coveralls.repo.token>SykbTJDEWWJbqjPCI0oaOD3bHmITaNdxu</coveralls.repo.token>
     </properties>
