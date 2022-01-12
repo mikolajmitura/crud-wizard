@@ -5,8 +5,8 @@ import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALU
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 
 import javax.validation.ConstraintValidatorContext;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.utils.string.StringUtils;
 

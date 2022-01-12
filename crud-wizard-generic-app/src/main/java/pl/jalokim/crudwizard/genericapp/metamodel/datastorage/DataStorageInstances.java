@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.datastorage.DataStorageFactory;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalProperty;
 
 @Component
 public class DataStorageInstances {
@@ -35,9 +35,9 @@ public class DataStorageInstances {
                 && dataStorage.getName().equals(dataStorageMetaModelEntity.getName()))
             .findFirst()
             .orElseGet(() -> {
-                List<AdditionalPropertyEntity> additionalProperties = dataStorageMetaModelEntity.getAdditionalProperties();
+                List<AdditionalProperty> additionalProperties = dataStorageMetaModelEntity.getAdditionalProperties();
                 Map<String, String> configuration = elements(additionalProperties)
-                    .asMap(AdditionalPropertyEntity::getName, AdditionalPropertyEntity::getRawJson);
+                    .asMap(AdditionalProperty::getName, AdditionalProperty::getRawJson);
 
                 Class<?> realClassOdDs = ClassUtils.loadRealClass(dataStorageMetaModelEntity.getClassName());
                 DataStorage dataStorage = factoryByType.get(realClassOdDs)

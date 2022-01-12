@@ -1,25 +1,21 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.validator;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@Jacksonized
+@SuperBuilder(toBuilder = true)
 public class ValidatorMetaModelDto extends WithAdditionalPropertiesDto {
 
     Long id;
@@ -34,7 +30,4 @@ public class ValidatorMetaModelDto extends WithAdditionalPropertiesDto {
     Boolean parametrized;
     String namePlaceholder;
     String messagePlaceholder;
-
-    @Builder.Default
-    List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 }

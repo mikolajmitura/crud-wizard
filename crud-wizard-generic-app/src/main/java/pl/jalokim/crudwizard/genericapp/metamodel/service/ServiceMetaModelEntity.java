@@ -18,7 +18,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalProperty;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 
 @Entity
@@ -49,5 +49,5 @@ public class ServiceMetaModelEntity extends WithAdditionalPropertiesEntity {
     @AttributeOverride(name = "name", column = @Column(name = "name"))
     @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
     @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
-    private List<AdditionalPropertyEntity> additionalProperties;
+    private List<AdditionalProperty> additionalProperties;
 }

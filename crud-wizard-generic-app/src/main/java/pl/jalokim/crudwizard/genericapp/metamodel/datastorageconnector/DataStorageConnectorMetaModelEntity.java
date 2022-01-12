@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalProperty;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelEntity;
@@ -69,5 +69,5 @@ public class DataStorageConnectorMetaModelEntity extends WithAdditionalPropertie
     @AttributeOverride(name = "name", column = @Column(name = "name"))
     @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
     @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
-    private List<AdditionalPropertyEntity> additionalProperties;
+    private List<AdditionalProperty> additionalProperties;
 }

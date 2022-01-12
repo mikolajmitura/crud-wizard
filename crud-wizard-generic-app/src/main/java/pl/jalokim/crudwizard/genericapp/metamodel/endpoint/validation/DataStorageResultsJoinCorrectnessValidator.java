@@ -153,9 +153,7 @@ public class DataStorageResultsJoinCorrectnessValidator
                     .or(() -> ofNullable(connectorEntity.getDataStorageMetaModel())
                         .map(DataStorageMetaModelEntity::getName))
                     .map(dsOrQueryName -> Pair.of(dsOrQueryName, ofNullable(connectorEntity.getClassMetaModelInDataStorage())
-                        .map(classMetaModelEntity -> ClassMetaModelDto.builder()
-                            .id(classMetaModelEntity.getId())
-                            .build())
+                        .map(classMetaModelEntity -> createClassMetaModelDtoWithId(classMetaModelEntity.getId()))
                         .orElse(responseClassMetaModel))))
             .or(() -> ofNullable(dsConnector.getNameOfQuery())
                 .or(() -> ofNullable(dsConnector.getDataStorageMetaModel())
@@ -271,4 +269,9 @@ public class DataStorageResultsJoinCorrectnessValidator
         return metaModelContextService.getMetaModelContext().getDefaultDataStorageMetaModel().getName();
     }
 
+    private ClassMetaModelDto createClassMetaModelDtoWithId(Long id) {
+        return ClassMetaModelDto.builder()
+            .id(id)
+            .build();
+    }
 }

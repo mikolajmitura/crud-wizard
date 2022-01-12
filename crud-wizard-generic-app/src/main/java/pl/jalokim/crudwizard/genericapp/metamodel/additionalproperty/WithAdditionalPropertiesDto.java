@@ -2,9 +2,14 @@ package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getFullClassName;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.ObjectWithVersionDto;
 import pl.jalokim.utils.collection.Elements;
@@ -12,11 +17,13 @@ import pl.jalokim.utils.collection.Elements;
 @EqualsAndHashCode(callSuper = true)
 // TODO validator for check property name uniqueness
 @SuppressWarnings("unchecked")
+@SuperBuilder(toBuilder = true)
+@Getter
+@Setter
 public abstract class WithAdditionalPropertiesDto extends ObjectWithVersionDto {
 
-    public abstract List<AdditionalPropertyDto> getAdditionalProperties();
-
-    public abstract void setAdditionalProperties(List<@Valid AdditionalPropertyDto> additionalProperties);
+    @Builder.Default
+    private List<@Valid AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     public AdditionalPropertyDto getProperty(String propertyName) {
         return Elements.elements(getAdditionalProperties())

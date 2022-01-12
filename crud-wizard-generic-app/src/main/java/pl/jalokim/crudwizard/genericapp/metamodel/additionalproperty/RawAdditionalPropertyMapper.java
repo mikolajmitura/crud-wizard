@@ -9,7 +9,7 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 @Mapper(config = MapperAsSpringBeanConfig.class)
 public abstract class RawAdditionalPropertyMapper {
 
-    public AdditionalPropertyDto additionalPropertyToDto(AdditionalPropertyEntity additionalPropertyEntity) {
+    public AdditionalPropertyDto additionalPropertyToDto(AdditionalProperty additionalPropertyEntity) {
         String valueRealClassName = additionalPropertyEntity.getValueRealClassName();
         return AdditionalPropertyDto.builder()
             .name(additionalPropertyEntity.getName())
@@ -18,16 +18,16 @@ public abstract class RawAdditionalPropertyMapper {
             .build();
     }
 
-    public AdditionalPropertyEntity additionalPropertyToEntity(AdditionalPropertyDto additionalPropertyDto) {
+    public AdditionalProperty additionalPropertyToEntity(AdditionalPropertyDto additionalPropertyDto) {
         String valueRealClassName = additionalPropertyDto.getValueRealClassName();
-        return AdditionalPropertyEntity.builder()
+        return AdditionalProperty.builder()
             .name(additionalPropertyDto.getName())
             .valueRealClassName(valueRealClassName)
             .rawJson(additionalPropertyDto.getRawJson())
             .build();
     }
 
-    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyEntity additionalPropertyEntity) {
+    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalProperty additionalPropertyEntity) {
         String valueRealClassName = additionalPropertyEntity.getValueRealClassName();
         return AdditionalPropertyMetaModel.builder()
             .name(additionalPropertyEntity.getName())

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
@@ -35,7 +34,6 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     Class<?> realClass;
     EnumClassMetaModel enumClassMetaModel;
 
-    // TODO how to deal with generic types in fields???
     List<ClassMetaModel> genericTypes;
     List<FieldMetaModel> fields;
     List<ValidatorMetaModel> validators;
