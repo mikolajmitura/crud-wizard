@@ -1,24 +1,18 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class DataStorageConnectorMetaModel extends AdditionalPropertyMetaModelDto {
+@SuperBuilder(toBuilder = true)
+public class DataStorageConnectorMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
     DataStorageMetaModel dataStorageMetaModel;
@@ -35,9 +29,6 @@ public class DataStorageConnectorMetaModel extends AdditionalPropertyMetaModelDt
      */
     String nameOfQuery;
     DataStorageQueryProvider queryProvider;
-
-    @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     public String getDataStorageName() {
         return dataStorageMetaModel.getName();

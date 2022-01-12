@@ -1,6 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
-
-import static pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity.TABLE_NAME;
+package pl.jalokim.crudwizard.genericapp.metamodel.configuration;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,26 +9,24 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
 
 @Entity
 @Builder
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
-@Table(name = TABLE_NAME)
-public class AdditionalPropertyEntity {
-
-    public static final String TABLE_NAME = "additional_properties";
+@EqualsAndHashCode(callSuper = true)
+@Table
+public class DefaultConfigurationEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String ownerClass;
-    private Long ownerId;
-
-    private String name;
+    private String propertyName;
     private String valueRealClassName;
     private String rawJson;
 }

@@ -5,7 +5,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaMo
 
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppBaseIntegrationSpecification
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyDto
+import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel
 import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
@@ -245,9 +245,9 @@ class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
         }
     }
 
-    private static boolean foundValidatorPlaceholder(List<AdditionalPropertyDto> additionalProperties, String name, Long value) {
+    private static boolean foundValidatorPlaceholder(List<AdditionalPropertyMetaModel> additionalProperties, String name, Long value) {
         additionalProperties.find {
-            it.name == PLACEHOLDER_PREFIX + name && it.realValue == value
+            it.name == PLACEHOLDER_PREFIX + name && it.valueAsObject == value
         } != null
     }
 

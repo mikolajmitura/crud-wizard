@@ -17,7 +17,7 @@ import javax.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalProperty
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
@@ -161,7 +161,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         foundAdditionalValidatorsEntry.getValidators() as Set == expectedValidators as Set
     }
 
-    private static boolean foundValidatorPlaceholder(List<AdditionalPropertyEntity> additionalProperties, String name, Long value) {
+    private static boolean foundValidatorPlaceholder(List<AdditionalProperty> additionalProperties, String name, Long value) {
         additionalProperties.find {
             it.name == PLACEHOLDER_PREFIX + name && it.rawJson == value.toString()
         } != null

@@ -3,13 +3,12 @@ package pl.jalokim.crudwizard.genericapp.metamodel.apitag;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.ObjectWithVersion;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.genericapp.metamodel.ObjectWithVersionDto;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
@@ -25,9 +24,9 @@ import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
     whenField = "id",
     is = NULL
 )
-@Builder
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class ApiTagDto extends ObjectWithVersion {
+@Jacksonized
+@SuperBuilder(toBuilder = true)
+public class ApiTagDto extends ObjectWithVersionDto {
 
     Long id;
 

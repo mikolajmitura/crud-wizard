@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
@@ -52,18 +53,33 @@ public class ObjectMapperConfig {
         return OBJECT_MAPPER_INSTANCE_REF.get();
     }
 
-    @SneakyThrows
-    public static Object rawJsonToObject(String rawJson, String realClassName) {
-        return rawJsonToObject(rawJson, getClassForName(realClassName));
+    @SuppressWarnings("unchecked")
+    public static <T> T rawJsonToObject(String rawJson, String realClassName) {
+        return (T) Optional.ofNullable(realClassName)
+            .map(className -> rawJsonToObject(rawJson, getClassForName(className)))
+            .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T rawJsonToObject(String nullableRawJson, Class<?> realClass) {
+        return (T) Optional.ofNullable(nullableRawJson)
+            .map(rawJson -> mapRawJsonToObject(rawJson, realClass))
+            .orElse(null);
     }
 
     @SneakyThrows
-    public static Object rawJsonToObject(String rawJson, Class<?> realClass) {
+    private static Object mapRawJsonToObject(String rawJson, Class<?> realClass) {
         return ObjectMapperConfig.getInstance().readValue(rawJson, realClass);
     }
 
+    public static String objectToRawJson(Object rawObject) {
+        return Optional.ofNullable(rawObject)
+            .map(ObjectMapperConfig::writeValueAsString)
+            .orElse(null);
+    }
+
     @SneakyThrows
-    public static String objectToRawJson(Object valueAsObject) {
-        return ObjectMapperConfig.getInstance().writeValueAsString(valueAsObject);
+    private static String writeValueAsString(Object object) {
+        return ObjectMapperConfig.getInstance().writeValueAsString(object);
     }
 }

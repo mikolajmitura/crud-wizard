@@ -1,24 +1,19 @@
 package pl.jalokim.crudwizard.core.metamodels;
 
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
 import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.core.metamodels.url.UrlMetamodel;
 
 @Data
-@NoArgsConstructor
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
+public class EndpointMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
 
@@ -49,9 +44,6 @@ public class EndpointMetaModel extends AdditionalPropertyMetaModelDto {
 
     List<DataStorageResultsJoinerMetaModel> dataStorageResultsJoiners;
     List<DataStorageConnectorMetaModel> dataStorageConnectors;
-
-    @Builder.Default
-    List<AdditionalPropertyDto> additionalProperties = new ArrayList<>();
 
     // TODO maybe here which headers distinct to this endpoint
     // TODO consume type and response type application/xml and application/json etc???

@@ -1,10 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
 import java.util.List;
+import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,6 +24,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpMethod;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalProperty;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
@@ -84,4 +90,13 @@ public class EndpointMetaModelEntity extends WithAdditionalPropertiesEntity {
     @OneToMany(cascade = {CascadeType.ALL})
     @JoinColumn(name = "endpoint_id")
     private List<DataStorageResultsJoinerEntity> dataStorageResultsJoiners;
+
+    @ElementCollection
+    @CollectionTable(name = "endpoint_additional_props",
+        joinColumns = @JoinColumn(name = "endpoint_model_id"),
+        foreignKey = @ForeignKey(name = "endpoint_models_properties_fk"))
+    @AttributeOverride(name = "name", column = @Column(name = "name"))
+    @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
+    @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
+    private List<AdditionalProperty> additionalProperties;
 }

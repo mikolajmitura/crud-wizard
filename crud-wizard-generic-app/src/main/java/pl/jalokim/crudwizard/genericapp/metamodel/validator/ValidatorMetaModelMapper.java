@@ -1,7 +1,5 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.validator;
 
-import static pl.jalokim.utils.collection.Elements.elements;
-
 import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,23 +26,13 @@ public abstract class ValidatorMetaModelMapper
     public ValidatorMetaModel toFullMetaModel(ValidatorMetaModelEntity entity) {
         DataValidator<?> dataValidatorInstance = instanceLoader.createInstanceOrGetBean(entity.getClassName());
 
-        var validatorMetaModel = toMetaModel(entity).toBuilder()
+        return toMetaModel(entity).toBuilder()
             .realClass(ClassUtils.loadRealClass(entity.getClassName()))
             .validatorInstance(dataValidatorInstance)
             .messagePlaceholder(getValueOrOther(entity.getMessagePlaceholder(), dataValidatorInstance.messagePlaceholder()))
             .namePlaceholder(getValueOrOther(entity.getNamePlaceholder(), dataValidatorInstance.namePlaceholder()))
             .validatorName(getValueOrOther(entity.getValidatorName(), dataValidatorInstance.validatorName()))
             .build();
-
-
-        // TODO remove all mapping in other mappers like below should be that work out of the box
-        validatorMetaModel.getAdditionalProperties().addAll(
-            elements(entity.getAdditionalProperties())
-                .map(this::additionalPropertyToDto)
-            .asList()
-        );
-
-        return validatorMetaModel;
     }
 
     private String getValueOrOther(String nullableValue, String otherValue) {

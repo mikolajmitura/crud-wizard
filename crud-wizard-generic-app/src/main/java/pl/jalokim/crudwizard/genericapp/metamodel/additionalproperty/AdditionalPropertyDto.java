@@ -1,8 +1,5 @@
-package pl.jalokim.crudwizard.core.metamodels;
+package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
-import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.rawJsonToObject;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,20 +17,12 @@ import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 public class AdditionalPropertyDto {
 
     Long id;
+
     @NotNull
     String name;
+
     @ClassExists
     String valueRealClassName;
-    String rawJson;
-    @JsonIgnore
-    Object valueAsObject;
 
-    @SuppressWarnings("unchecked")
-    @JsonIgnore
-    public <T> T getRealValue() {
-        if (valueAsObject == null && rawJson != null) {
-            valueAsObject = rawJsonToObject(rawJson, valueRealClassName);
-        }
-        return (T) valueAsObject;
-    }
+    String rawJson;
 }

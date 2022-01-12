@@ -5,8 +5,13 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.string.StringUtils.isNotBlank;
 
 import java.util.List;
+import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +26,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalProperty;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity;
 
@@ -34,7 +40,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEn
 public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     public static final String CLASS_META_MODEL_ID = "class_meta_model_id";
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -44,8 +50,7 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     private String className;
 
     /**
-     * when true then does it mean that this meta model
-     * is like generic enum metamodel
+     * when true then does it mean that this meta model is like generic enum metamodel
      */
     private Boolean isGenericEnumType;
 
@@ -57,8 +62,8 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     @ManyToMany
     @JoinTable(
         name = "class_meta_models_generic_types",
-        joinColumns = { @JoinColumn(name = CLASS_META_MODEL_ID) },
-        inverseJoinColumns = { @JoinColumn(name = "generic_model_id") }
+        joinColumns = {@JoinColumn(name = CLASS_META_MODEL_ID)},
+        inverseJoinColumns = {@JoinColumn(name = "generic_model_id")}
     )
     private List<ClassMetaModelEntity> genericTypes;
 
@@ -69,18 +74,27 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     @ManyToMany
     @JoinTable(
         name = "class_validators",
-        joinColumns = { @JoinColumn(name = CLASS_META_MODEL_ID) },
-        inverseJoinColumns = { @JoinColumn(name = "validator_meta_model_id") }
+        joinColumns = {@JoinColumn(name = CLASS_META_MODEL_ID)},
+        inverseJoinColumns = {@JoinColumn(name = "validator_meta_model_id")}
     )
     private List<ValidatorMetaModelEntity> validators;
 
     @ManyToMany
     @JoinTable(
         name = "class_meta_extends_from_models",
-        joinColumns = { @JoinColumn(name = CLASS_META_MODEL_ID) },
-        inverseJoinColumns = { @JoinColumn(name = "extends_from_model_id") }
+        joinColumns = {@JoinColumn(name = CLASS_META_MODEL_ID)},
+        inverseJoinColumns = {@JoinColumn(name = "extends_from_model_id")}
     )
     private List<ClassMetaModelEntity> extendsFromModels;
+
+    @ElementCollection
+    @CollectionTable(name = "class_model_additional_props",
+        joinColumns = @JoinColumn(name = "class_model_id"),
+        foreignKey = @ForeignKey(name = "class_models_properties_fk"))
+    @AttributeOverride(name = "name", column = @Column(name = "name"))
+    @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
+    @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
+    private List<AdditionalProperty> additionalProperties;
 
     public boolean shouldBeSimpleRawClass() {
         return isNotBlank(getClassName())
