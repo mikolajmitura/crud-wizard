@@ -9,15 +9,15 @@ public abstract class AdditionalPropertyMapper<D, E, M> implements BaseMapper<D,
     @Autowired
     private RawAdditionalPropertyMapper rawAdditionalPropertyMapper;
 
-    public AdditionalPropertyDto additionalPropertyToDto(AdditionalProperty additionalPropertyEntity) {
+    public AdditionalPropertyDto additionalPropertyToDto(AdditionalPropertyEntity additionalPropertyEntity) {
         return rawAdditionalPropertyMapper.additionalPropertyToDto(additionalPropertyEntity);
     }
 
-    public AdditionalProperty additionalPropertyToEntity(AdditionalPropertyDto additionalPropertyDto) {
+    public AdditionalPropertyEntity additionalPropertyToEntity(AdditionalPropertyDto additionalPropertyDto) {
         return rawAdditionalPropertyMapper.additionalPropertyToEntity(additionalPropertyDto);
     }
 
-    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalProperty additionalPropertyEntity) {
+    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyEntity additionalPropertyEntity) {
         return rawAdditionalPropertyMapper.additionalPropertyToModel(additionalPropertyEntity);
     }
 

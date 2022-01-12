@@ -13,5 +13,5 @@ import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
 @Setter
 public abstract class WithAdditionalPropertiesEntity extends BaseEntity {
 
-    public abstract List<AdditionalProperty> getAdditionalProperties();
+    public abstract List<AdditionalPropertyEntity> getAdditionalProperties();
 }
