@@ -42,9 +42,7 @@ class ClassMetaModelDtoSamples {
         def personMetaModel = simplePersonClassMetaModel().toBuilder().build()
         personMetaModel.getFields().addAll([
             createValidFieldMetaModelDto("documents", createListWithMetaModel(createDocumentClassMetaDto())),
-            createValidFieldMetaModelDto("document", createDocumentClassMetaDto().toBuilder()
-                .validators([])
-                .build())
+            createValidFieldMetaModelDto("document", createDocumentClassMetaDto())
         ])
         personMetaModel
     }

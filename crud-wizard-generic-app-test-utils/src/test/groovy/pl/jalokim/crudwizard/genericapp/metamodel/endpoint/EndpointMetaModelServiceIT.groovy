@@ -3,30 +3,46 @@ package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty
 import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLDER_PREFIX
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators2
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService.createNewEndpointReason
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
+import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import java.time.LocalDate
+import java.util.function.Predicate
 import javax.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
+import pl.jalokim.crudwizard.core.exception.TechnicalException
+import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
+import pl.jalokim.crudwizard.core.validation.javax.UniqueValue
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ContextRefreshStatus
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefreshRepository
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDtoSamples
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.validation.VerifyThatCanCreateDataStorage
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelRepository
+import pl.jalokim.crudwizard.genericapp.rest.samples.datastorage.DataStorageWithoutFactory
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
@@ -48,6 +64,9 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
     @Autowired
     private ValidatorMetaModelRepository validatorMetaModelRepository
+
+    @Autowired
+    private MetaModelContextService metaModelContextService
 
     def "should save POST new endpoint with default mapper, service, data storage"() {
         given:
@@ -208,11 +227,112 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         ])
     }
 
-    // TODO save all fields during create endpoint metamodels, queryArguments, responseMetaModel with not raw java class but with class metadata,
-    //  classMetaModelInDataStorage other than payload
+    def "return exception when class meta model DTOs are not the same with the same name"() {
+        given:
+        def person1 = simplePersonClassMetaModel().toBuilder()
+            .validators([createValidValidatorMetaModelDto()])
+            .build()
+        def person2 = simplePersonClassMetaModel()
+        def someObject = ClassMetaModelDto.builder()
+            .name("someObject")
+            .isGenericEnumType(false)
+            .fields([
+                createValidFieldMetaModelDto("person1", person1),
+                createValidFieldMetaModelDto("person2", person2),
+            ])
+            .build()
 
-    // TODO new endpoint with already existed metamodels, class, mapper, validator, service, datastorage - (all by id)
-    // TODO save with new service
-    // TODO save with new mapper
-    // TODO save with not default data storage
+        def createPostPersonEndpoint = createValidPostExtendedUserWithValidators2().toBuilder()
+            .payloadMetamodel(someObject)
+            .build()
+
+        when:
+        endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint)
+
+        then:
+        TechnicalException ex = thrown()
+        ex.message == getMessage("class.metamodel.the.same.name.but.other.content", "person")
+    }
+
+    def "should return expected number of class metamodels when contains the same name and contents"() {
+        given:
+        def createPostPersonEndpoint = createValidPostExtendedUserWithValidators2()
+
+        when:
+        endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint)
+
+        then:
+        inTransaction {
+            def classMetaModels = metaModelContextService.getMetaModelContext().getClassMetaModels().fetchAll()
+            assert classMetaModels.size() == 8
+
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.name == "person"})
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.name == "document"})
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.realClass == List &&
+                    classMetaModel.genericTypes.size() == 1 &&
+                    classMetaModel.genericTypes.find { it.name == "document"} != null
+            })
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.name == "exampleEnum" && classMetaModel.isGenericEnumType()})
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.realClass == Long && classMetaModel.simpleRawClass})
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.realClass == Byte && classMetaModel.simpleRawClass})
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.realClass == String && classMetaModel.simpleRawClass})
+            assertFoundOneClassMetaModel(classMetaModels, {
+                classMetaModel -> classMetaModel.realClass == LocalDate && classMetaModel.simpleRawClass})
+        }
+    }
+
+    def "should return validation messages about unique names and cannot find data storage factory"() {
+        given:
+        def createPostPersonEndpoint = createValidPostExtendedUserWithValidators2().toBuilder()
+            .dataStorageConnectors([
+                createSampleDataStorageConnectorDto(
+                    ClassMetaModelDtoSamples.createDocumentClassMetaDto(),
+                    DataStorageMetaModelDtoSamples.createDataStorageMetaModelDto("second-database")
+                )]
+            )
+        .build()
+
+        endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint)
+
+        createPostPersonEndpoint = createPostPersonEndpoint.toBuilder()
+            .baseUrl(createPostPersonEndpoint.getBaseUrl() + "/next")
+            .build()
+
+        when:
+        endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint.toBuilder()
+            .dataStorageConnectors([
+                createSampleDataStorageConnectorDto(
+                    ClassMetaModelDtoSamples.createDocumentClassMetaDto(),
+                    DataStorageMetaModelDtoSamples.createDataStorageMetaModelDto("second-database", DataStorageWithoutFactory.canonicalName)
+                )]
+            )
+            .build())
+
+        then:
+        ConstraintViolationException tx = thrown()
+        def foundErrors = ValidatorWithConverter.errorsFromViolationException(tx)
+
+        assertValidationResults(foundErrors, [
+            errorEntry("payloadMetamodel.name", messageForValidator(UniqueValue)),
+            errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name", messageForValidator(UniqueValue)),
+            errorEntry("apiTag.name", messageForValidator(UniqueValue)),
+            errorEntry("operationName", messageForValidator(UniqueValue)),
+            errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name", messageForValidator(UniqueValue)),
+            errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className", messageForValidator(VerifyThatCanCreateDataStorage)),
+        ])
+    }
+
+    private static void assertFoundOneClassMetaModel(List<ClassMetaModel> classMetaModels, Predicate<ClassMetaModel> predicate) {
+        def found = classMetaModels.findAll {
+            predicate.test(it)
+        }
+        assert found.size() == 1
+    }
 }

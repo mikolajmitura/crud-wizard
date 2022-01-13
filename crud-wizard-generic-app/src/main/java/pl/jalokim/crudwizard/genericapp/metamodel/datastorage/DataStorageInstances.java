@@ -29,6 +29,10 @@ public class DataStorageInstances {
         this.applicationContext = applicationContext;
     }
 
+    public DataStorageFactory<?> getDataStorageFactoryForClass(Class<?> dataStorageClass) {
+        return factoryByType.get(dataStorageClass);
+    }
+
     public DataStorage findDataStorageOrCreate(DataStorageMetaModelEntity dataStorageMetaModelEntity) {
         return elements(dataStorages)
             .filter(dataStorage -> dataStorage.getClassName().equals(dataStorageMetaModelEntity.getClassName())
@@ -36,8 +40,8 @@ public class DataStorageInstances {
             .findFirst()
             .orElseGet(() -> {
                 List<AdditionalPropertyEntity> additionalProperties = dataStorageMetaModelEntity.getAdditionalProperties();
-                Map<String, String> configuration = elements(additionalProperties)
-                    .asMap(AdditionalPropertyEntity::getName, AdditionalPropertyEntity::getRawJson);
+                Map<String, Object> configuration = elements(additionalProperties)
+                    .asMap(AdditionalPropertyEntity::getName, AdditionalPropertyEntity::getValueRealClassName);
 
                 Class<?> realClassOdDs = ClassUtils.loadRealClass(dataStorageMetaModelEntity.getClassName());
                 DataStorage dataStorage = factoryByType.get(realClassOdDs)

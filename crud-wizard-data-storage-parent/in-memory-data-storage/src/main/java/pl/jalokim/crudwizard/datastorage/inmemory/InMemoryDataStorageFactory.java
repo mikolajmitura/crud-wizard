@@ -11,7 +11,7 @@ import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
 public class InMemoryDataStorageFactory implements DataStorageFactory<InMemoryDataStorage> {
 
     @Override
-    public InMemoryDataStorage createInstance(String name, Map<String, String> configuration, ApplicationContext applicationContext) {
+    public InMemoryDataStorage createInstance(String name, Map<String, Object> configuration, ApplicationContext applicationContext) {
         return new InMemoryDataStorage(name,
             applicationContext.getBean(IdGenerators.class),
             applicationContext.getBean(InMemoryDsQueryRunner.class));

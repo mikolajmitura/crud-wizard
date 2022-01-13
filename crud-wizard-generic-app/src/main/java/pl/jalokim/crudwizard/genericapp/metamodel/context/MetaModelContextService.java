@@ -182,6 +182,11 @@ public class MetaModelContextService implements ApplicationRunner {
             .getDataStorage();
     }
 
+    public DataStorageMetaModel getDataStorageMetaModelByName(String dataStorageName) {
+        return getMetaModelContext().getDataStorages()
+            .findOneBy(dataStorageMetaModel -> dataStorageMetaModel.getName().equals(dataStorageName));
+    }
+
     public ClassMetaModel getClassMetaModelByName(String classMetaModelName) {
         return getMetaModelContext().getClassMetaModels()
             .findOneBy(classMetaModel -> classMetaModelName.equals(classMetaModel.getName()));

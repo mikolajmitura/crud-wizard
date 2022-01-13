@@ -164,13 +164,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .httpMethod(HttpMethod.GET)
             .pathParams(ClassMetaModelDto.builder()
-                .name("pathParams")
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .classMetaModel(ClassMetaModelDto.builder()
                     .id(personMetaModel.id)
-                    .name(personMetaModel.name)
                     .build())
                 .build())
             .build()
@@ -190,7 +188,6 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .operationName("updateUser")
             .payloadMetamodel(ClassMetaModelDto.builder()
                 .id(personMetaModel.id)
-                .name(personMetaModel.name)
                 .build())
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .httpMethod(HttpMethod.PUT)
@@ -201,7 +198,6 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                     .build()
             ])
             .pathParams(ClassMetaModelDto.builder()
-                .name("pathParams")
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .build()
@@ -228,7 +224,6 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .httpMethod(HttpMethod.DELETE)
             .pathParams(ClassMetaModelDto.builder()
-                .name("pathParams")
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .dataStorageConnectors([
@@ -295,6 +290,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         and: 'return people list with default query provider and with final query provider'
         def getListOfPersonEndpointWithFinalQuery = createValidGetListOfPerson().toBuilder()
             .baseUrl("domain/person/final_query")
+            .operationName("getListOfPersonWithFinalQuery")
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .queryProvider(createQueryProviderDto(FinalQueryProvider1))
@@ -423,6 +419,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def secondDataStorage = metaModelContextService.getDataStorageByName(secondDbName)
         def thirdDataStorage = metaModelContextService.getDataStorageByName(thirdDbName)
 
+        def secondDataStorageModelDto = createDataStorageMetaModelDtoWithId(metaModelContextService.getDataStorageMetaModelByName(secondDbName).getId())
+        def thirdDataStorageModelDto = createDataStorageMetaModelDtoWithId(metaModelContextService.getDataStorageMetaModelByName(thirdDbName).getId())
+
         def personClassModel = metaModelContextService.getClassMetaModelByName("person")
         def personSecondDbClassModel = metaModelContextService.getClassMetaModelByName("personSecondDb")
         def personDocumentDbClassModel = metaModelContextService.getClassMetaModelByName("personDocumentDb")
@@ -464,12 +463,12 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
-                    createDataStorageMetaModelDto(secondDbName),
+                    secondDataStorageModelDto,
                     null, null,
                     createQueryProviderDto(SecondDbPersonGetOneQuery)
                 ),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
-                    createDataStorageMetaModelDto(thirdDbName),
+                    thirdDataStorageModelDto,
                     null,
                     createMapperMetaModelDto(PersonDocumentInThirdDbIdMapper, "mapToUuid"))
             ])
@@ -520,10 +519,10 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
-                    createDataStorageMetaModelDto(secondDbName),
+                    secondDataStorageModelDto,
                     createMapperMetaModelDto(PersonToSecondDbMapper.class, "personToSecondDbMapperCreate")),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
-                    createDataStorageMetaModelDto(thirdDbName),
+                    thirdDataStorageModelDto,
                     createMapperMetaModelDto(PersonToThirdDbMapper.class, "personToThirdDbMapperCreate"))
             ])
             .queryArguments(
@@ -588,12 +587,12 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
-                    createDataStorageMetaModelDto(secondDbName),
+                    secondDataStorageModelDto,
                     null, null,
                     createQueryProviderDto(SecondDbPersonGetOneQuery)
                 ),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
-                    createDataStorageMetaModelDto(thirdDbName),
+                    thirdDataStorageModelDto,
                     null,
                     createMapperMetaModelDto(PersonDocumentInThirdDbIdMapper, "mapToUuid"))
             ])
@@ -644,10 +643,10 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personClassModel.id), defaultDataStorageDto),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personSecondDbClassModel.id),
-                    createDataStorageMetaModelDto(secondDbName), null, null, null, "second-query"
+                    secondDataStorageModelDto, null, null, null, "second-query"
                 ),
                 createSampleDataStorageConnectorDto(createClassMetaModelDtoWithId(personDocumentDbClassModel.id),
-                    createDataStorageMetaModelDto(thirdDbName),
+                    thirdDataStorageModelDto,
                     null,
                     null, createQueryProviderDto(ThirdQueryFindByIdFromFirstQueryResult))
             ])
@@ -704,6 +703,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def personResultEntriesClassId = metaModelContextService.getClassMetaModelByName("personResultEntry").id
 
         def createGetListWithFinalQueryPersonEndpoint = createGetListWithoutFinalQueryPersonEndpoint.toBuilder()
+            .operationName("getNormalListOfPeopleWithFinaQuery")
             .baseUrl("users/with-final-query")
             .responseMetaModel(
                 EndpointResponseMetaModelDto.builder()
@@ -856,6 +856,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         assertValidationResults(errorResponse.getErrors(), [
             errorEntry("surname", notNullMessage(), NOT_NULL_MESSAGE_PROPERTY),
             errorEntry("name", invalidSizeMessage(2, 20), SIZE_MESSAGE_PROPERTY),
+            errorEntry("document", notNullMessage(), NOT_NULL_MESSAGE_PROPERTY),
             errorEntry("documents", invalidSizeMessage(1, null), SIZE_MESSAGE_PROPERTY)
         ])
     }
