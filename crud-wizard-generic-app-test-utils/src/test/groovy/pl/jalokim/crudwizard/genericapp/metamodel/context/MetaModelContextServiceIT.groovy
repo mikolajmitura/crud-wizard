@@ -4,7 +4,7 @@ import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLD
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
 
 import org.springframework.beans.factory.annotation.Autowired
-import pl.jalokim.crudwizard.GenericAppBaseIntegrationSpecification
+import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel
 import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
@@ -26,7 +26,7 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 
-class MetaModelContextServiceIT extends GenericAppBaseIntegrationSpecification {
+class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecification {
 
     @Autowired
     private ApiTagSamples apiTagSamples
