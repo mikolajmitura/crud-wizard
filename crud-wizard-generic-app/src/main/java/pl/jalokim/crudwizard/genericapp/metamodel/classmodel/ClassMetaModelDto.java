@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
@@ -60,7 +61,7 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     @NotNull(groups = UpdateContext.class)
     Long id;
 
-    // TODO #44 verify that name is unique when create
+    @UniqueValue(entityClass = ClassMetaModelEntity.class)
     String name;
 
     @ClassExists(canBeAbstractOrInterface = true)

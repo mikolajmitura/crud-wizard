@@ -14,16 +14,24 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
 
     private final ValidatorMetaModelService validatorMetaModelService;
     private final ClassMetaModelMapper classMetaModelMapper;
+    private final ClassMetaModelEntitySaveContext classMetaModelEntitySaveContext;
 
     public ClassMetaModelService(ClassMetaModelRepository classMetaModelRepository, ValidatorMetaModelService validatorMetaModelService,
-        ClassMetaModelMapper classMetaModelMapper) {
+        ClassMetaModelMapper classMetaModelMapper, ClassMetaModelEntitySaveContext classMetaModelEntitySaveContext) {
         super(classMetaModelRepository);
         this.validatorMetaModelService = validatorMetaModelService;
         this.classMetaModelMapper = classMetaModelMapper;
+        this.classMetaModelEntitySaveContext = classMetaModelEntitySaveContext;
     }
 
     @Override
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public ClassMetaModelEntity save(ClassMetaModelEntity classMetaModelEntity) {
+
+        ClassMetaModelEntity alreadySaveEntityWithThatName = classMetaModelEntitySaveContext.findEntityWhenNameTheSame(classMetaModelEntity);
+        if (classMetaModelEntity != alreadySaveEntityWithThatName) {
+            return alreadySaveEntityWithThatName;
+        }
 
         if (classMetaModelEntity.shouldBeSimpleRawClass()) {
             return repository.findByRawClassName(classMetaModelEntity.getClassName())
@@ -53,7 +61,10 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
                 classMetaModelEntity.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
             });
 
-        return repository.save(classMetaModelEntity);
+        ClassMetaModelEntity savedClassMetaModelEntity = repository.save(classMetaModelEntity);
+        classMetaModelEntitySaveContext.putToContext(savedClassMetaModelEntity);
+
+        return savedClassMetaModelEntity;
     }
 
     public List<ClassMetaModel> findAllSwallowModels(MetaModelContext metaModelContext) {

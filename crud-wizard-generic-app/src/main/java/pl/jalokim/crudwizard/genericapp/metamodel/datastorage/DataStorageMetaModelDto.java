@@ -12,7 +12,9 @@ import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.validation.VerifyThatCanCreateDataStorage;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -25,9 +27,10 @@ public class DataStorageMetaModelDto extends WithAdditionalPropertiesDto {
 
     Long id;
 
-    // TODO #44 verify that name of ds exists
+    @UniqueValue(entityClass = DataStorageMetaModelEntity.class)
     String name;
 
     @ClassExists(expectedOfType = DataStorage.class)
+    @VerifyThatCanCreateDataStorage
     String className;
 }

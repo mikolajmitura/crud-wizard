@@ -4,6 +4,7 @@ import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
@@ -31,7 +32,7 @@ public class ValidatorMetaModelService {
     }
 
     private ValidatorMetaModelEntity findOrSaveNew(ValidatorMetaModelEntity validatorMetaModelEntity) {
-        if (validatorMetaModelEntity.getParametrized()) {
+        if (Optional.ofNullable(validatorMetaModelEntity.getParametrized()).orElse(false)) {
             return validatorMetaModelRepository.save(validatorMetaModelEntity);
         }
 

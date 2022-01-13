@@ -18,6 +18,7 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
@@ -57,6 +58,7 @@ public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @NotNull
+    @Valid
     ApiTagDto apiTag;
 
     @NotNull
@@ -66,7 +68,7 @@ public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
     HttpMethod httpMethod;
 
     @NotNull
-    // TODO #44 verify that operationName is unique globally when create
+    @UniqueValue(entityClass = EndpointMetaModelEntity.class)
     String operationName;
 
     @Valid

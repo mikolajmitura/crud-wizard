@@ -8,6 +8,7 @@ import lombok.Value;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.genericapp.metamodel.ObjectWithVersionDto;
 
 @EqualsAndHashCode(callSuper = true)
@@ -30,6 +31,6 @@ public class ApiTagDto extends ObjectWithVersionDto {
 
     Long id;
 
-    // TODO #44 verify that name is unique when create
+    @UniqueValue(entityClass = ApiTagEntity.class)
     String name;
 }

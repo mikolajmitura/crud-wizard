@@ -38,7 +38,9 @@ import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import pl.jalokim.crudwizard.core.datastorage.DataStorageFactory
 import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
@@ -51,6 +53,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelConte
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageInstances
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity
@@ -70,18 +73,24 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
 
     private MetaModelContextService metaModelContextService = Mock()
     private ApplicationContext applicationContext = Mock()
+    private JdbcTemplate jdbcTemplate = Mock()
     private DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository = Mock()
+    private DataStorageInstances dataStorageInstances = Mock()
     private GenericModelTypeFactory genericModelTypeFactory = new GenericModelTypeFactory(metaModelContextService)
     private ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(genericModelTypeFactory)
     private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
     private endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
     private validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
-        dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService)
+        dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
+        jdbcTemplate, dataStorageInstances)
+    private BeforeEndpointValidatorUpdater beforeEndpointValidatorUpdater = new BeforeEndpointValidatorUpdater()
 
     def setup() {
         RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
         applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class) >> abstractHandlerMethodMapping
         abstractHandlerMethodMapping.getHandlerMethods() >> [:]
+        jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
+        dataStorageInstances.getDataStorageFactoryForClass(_) >> Mock(DataStorageFactory)
 
         dataStorageConnectorMetaModelRepository.findExactlyOneById(DS_CONNECTOR_ID) >> DataStorageConnectorMetaModelEntity.builder()
             .nameOfQuery("some-query-name2")
@@ -98,6 +107,8 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         metaModelContext.setClassMetaModels(classMetaModels)
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
+
+        beforeEndpointValidatorUpdater.beforeValidation(endpointMetaModelDto)
 
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(endpointMetaModelDto)
@@ -173,8 +184,6 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 NOT_NULL, [], "httpMethod", EQUAL_TO_ANY, ["GET", "POST"]
             )),
             errorEntry("payloadMetamodel.name",
-                whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
-            errorEntry("queryArguments.name",
                 whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])))
         ]                                                      | "invalid GET endpoint"
 

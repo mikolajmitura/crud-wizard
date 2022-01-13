@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
-public class AdditionalProperty {
+public class AdditionalPropertyEntity {
 
     private String name;
     private String valueRealClassName;

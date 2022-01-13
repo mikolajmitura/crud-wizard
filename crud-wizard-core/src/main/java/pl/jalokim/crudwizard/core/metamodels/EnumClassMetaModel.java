@@ -16,4 +16,9 @@ public class EnumClassMetaModel {
         String[] enumValuesArray = declaredIn.getPropertyRealValue(ENUM_VALUES_PREFIX);
         return elements(enumValuesArray).asList();
     }
+
+    @Override
+    public String toString() {
+        return "EnumClassMetaModel{" + "declaredIn=" + declaredIn.getName() + '}';
+    }
 }

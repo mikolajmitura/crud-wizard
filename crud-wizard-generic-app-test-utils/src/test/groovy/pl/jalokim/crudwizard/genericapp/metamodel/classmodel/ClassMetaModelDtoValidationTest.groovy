@@ -21,6 +21,7 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
+import org.springframework.jdbc.core.JdbcTemplate
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
@@ -29,7 +30,13 @@ import spock.lang.Unroll
 
 class ClassMetaModelDtoValidationTest extends UnitTestSpec {
 
-    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter()
+    private JdbcTemplate jdbcTemplate = Mock()
+
+    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(jdbcTemplate)
+
+    def setup() {
+        jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
+    }
 
     @Unroll
     def "should return expected messages for default context of ClassMetaModelDto"() {

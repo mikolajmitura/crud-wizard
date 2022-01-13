@@ -85,7 +85,6 @@ class EndpointMetaModelDtoSamples {
             .httpMethod(HttpMethod.GET)
             .operationName("getListOfPerson")
             .queryArguments(ClassMetaModelDto.builder()
-                .name("")
                 .fields([
                     createValidFieldMetaModelDto("surname", String),
                     createValidFieldMetaModelDto("sort", String, [], [

@@ -24,7 +24,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpMethod;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalProperty;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
@@ -98,5 +98,5 @@ public class EndpointMetaModelEntity extends WithAdditionalPropertiesEntity {
     @AttributeOverride(name = "name", column = @Column(name = "name"))
     @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
     @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
-    private List<AdditionalProperty> additionalProperties;
+    private List<AdditionalPropertyEntity> additionalProperties;
 }
