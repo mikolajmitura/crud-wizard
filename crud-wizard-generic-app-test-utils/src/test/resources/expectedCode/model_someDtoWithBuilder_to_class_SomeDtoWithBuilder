@@ -1,0 +1,42 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+
+
+class Model_someDtoWithBuilder_To_RawClass_SomeDtoWithBuilder_Mapper {
+
+    Model_someDtoWithBuilder_To_RawClass_SomeDtoWithBuilder_Mapper() {
+
+    }
+
+    public pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		return pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder.builder()
+
+		.localDateTime1(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("localDateTime1"))
+			.orElse(null)))
+
+		.test1(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("test1"))
+			.orElse(null)))
+
+		.testLong1(((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("testLong1"))
+			.orElse(null)))
+        .build();
+    }
+
+}

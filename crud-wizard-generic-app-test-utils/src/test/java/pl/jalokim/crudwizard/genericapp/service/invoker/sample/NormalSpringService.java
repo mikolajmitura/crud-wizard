@@ -147,6 +147,14 @@ public class NormalSpringService {
         return httpQueryTranslated;
     }
 
+    public Long someMethodName(String stringArg, Long longArg) {
+        return 1L;
+    }
+
+    public String someMethodName(String stringArg1, String stringArg2) {
+        return stringArg2;
+    }
+
     public static class InvalidJavaBean {
 
         public String field1;

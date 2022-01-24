@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -23,8 +25,19 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 @SuppressWarnings("unchecked")
 public class InstanceLoader {
 
+    private static final AtomicReference<InstanceLoader> INSTANCE_LOADER = new AtomicReference<>();
+
     private final ApplicationContext applicationContext;
     private final Map<Class<?>, Object> notSpringBeanInstancesByClass = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void init() {
+        INSTANCE_LOADER.set(this);
+    }
+
+    public static InstanceLoader getInstance() {
+        return INSTANCE_LOADER.get();
+    }
 
     public <T> T createInstanceOrGetBean(String className) {
         Class<?> realClass = ClassUtils.loadRealClass(className);

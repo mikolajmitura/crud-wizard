@@ -25,5 +25,4 @@ public class SamplePersonDto {
     private LocalDate birthDay;
 
     private LocalDateTime lastLogin;
-
 }

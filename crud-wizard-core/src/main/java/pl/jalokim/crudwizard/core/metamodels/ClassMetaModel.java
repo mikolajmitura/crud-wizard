@@ -15,7 +15,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import pl.jalokim.utils.collection.CollectionUtils;
+import pl.jalokim.utils.reflection.MetadataReflectionUtils;
+import pl.jalokim.utils.string.StringUtils;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -41,16 +44,13 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     List<ClassMetaModel> extendsFromModels;
 
     /**
-     * for cache purposes
-     * parent fields metamodel
-     * parent validators
+     * for cache purposes parent fields metamodel parent validators
      */
     @Setter(AccessLevel.NONE)
     ParentMetamodelCacheContext parentMetamodelCacheContext;
 
     /**
-     * when true then does it mean that this meta model
-     * is like generic enum metamodel
+     * when true then does it mean that this meta model is like generic enum metamodel
      */
     public boolean isGenericEnumType() {
         return enumClassMetaModel != null;
@@ -131,5 +131,62 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     public void refresh() {
         parentMetamodelCacheContext = null;
+    }
+
+    public boolean isGenericClassModel() {
+        return realClass == null;
+    }
+
+    public boolean isSimpleType() {
+        return realClass != null && MetadataReflectionUtils.isSimpleType(realClass);
+    }
+
+    public boolean isOnlyRawClassModel() {
+        return name == null && realClass != null;
+    }
+
+    public String getCanonicalNameOfRealClass() {
+        return realClass.getCanonicalName();
+    }
+
+    public String getTypeDescription() {
+        if (isGenericClassModel()) {
+            return getName(); // TODO #4 get translation of class meta model
+        }
+        return getJavaGenericTypeInfo();
+    }
+
+    public String getNameOrSimpleClassName() {
+        if (isGenericClassModel()) {
+            return getName();
+        }
+        return realClass.getCanonicalName();
+    }
+
+    public String getJavaGenericTypeInfo() {
+        if (isGenericClassModel()) {
+            return "Map<String, Object>";
+        }
+        if (getRealClass() != null) {
+            String realClass = getCanonicalNameOfRealClass();
+            String genericParts = CollectionUtils.isEmpty(getGenericTypes()) ? "" :
+                StringUtils.concatElements("<",
+                    getGenericTypes(),
+                    ClassMetaModel::getJavaGenericTypeInfo,
+                    ", ",
+                    ">");
+            return realClass + genericParts;
+        }
+        throw new IllegalStateException("Cannot generate java generic type for class metamodel: " + this);
+    }
+
+    @Override
+    public String toString() {
+        return elements(Pair.of("id", id),
+            Pair.of("name", name),
+            Pair.of("realClass", realClass))
+            .filter(pair -> pair.getLeft() != null)
+            .map(pair -> pair.getLeft() + "=" + pair.getRight())
+            .concatWithNewLines();
     }
 }
