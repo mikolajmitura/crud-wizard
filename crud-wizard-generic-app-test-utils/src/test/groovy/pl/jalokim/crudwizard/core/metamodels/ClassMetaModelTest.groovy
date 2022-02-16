@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels
 
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelWithParents
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime
 import java.time.Period
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class ClassMetaModelTest extends Specification {
 
@@ -119,6 +121,98 @@ class ClassMetaModelTest extends Specification {
 
         then:
         validators as Set == [ValidatorMetaModelSamples.CUSTOM_TEST_VALIDATOR_METAMODEL, ValidatorMetaModelSamples.NOT_NULL_VALIDATOR_METAMODEL] as Set
+    }
+
+    @Unroll
+    def "is subType of or not"() {
+        when:
+        def result = subType.isSubTypeOf(someParent)
+
+        then:
+        result == isSubType
+
+        where:
+        subType                               | someParent                                                      | isSubType
+        createClassMetaModelFromClass(Double) | createClassMetaModelFromClass(Number)                           | true
+        createClassMetaModelFromClass(Number) | createClassMetaModelFromClass(Double)                           | false
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        createClassMetaModelFromClass(String),
+                    ])
+                    .build()
+            ])
+            .build()                          | createClassMetaModelFromClass(String)                           | true
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        createClassMetaModelFromClass(String),
+                    ])
+                    .build()
+            ])
+            .build()                          | createClassMetaModelFromClass(Number)                           | false
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        createClassMetaModelFromClass(String),
+                    ])
+                    .build()
+            ])
+            .build()                          | createClassMetaModelFromClass(Double)                           | true
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        createClassMetaModelFromClass(String),
+                    ])
+                    .build()
+            ])
+            .build()                          | ClassMetaModel.builder().name("someString").build()             | true
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        createClassMetaModelFromClass(String),
+                    ])
+                    .build()
+            ])
+            .build()                          | ClassMetaModel.builder().name("childOfDoubleAndString").build() | true
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        createClassMetaModelFromClass(String),
+                    ])
+                    .build()
+            ])
+            .build()                          | ClassMetaModel.builder().name("otherName").build()              | false
     }
 
     private boolean assertFieldNameAndType(List<FieldMetaModel> foundFields, String fieldName, Class<?> expectedFieldType) {

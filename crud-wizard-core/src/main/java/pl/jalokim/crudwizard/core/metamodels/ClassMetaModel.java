@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.core.metamodels;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isTypeOf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,8 +134,12 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         parentMetamodelCacheContext = null;
     }
 
-    public boolean isGenericClassModel() {
-        return realClass == null;
+    public boolean hasRealClass() {
+        return realClass != null;
+    }
+
+    public boolean isGenericModel() {
+        return name != null && realClass == null;
     }
 
     public boolean isSimpleType() {
@@ -145,26 +150,35 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return name == null && realClass != null;
     }
 
+    public boolean isListType() {
+        return realClass != null && MetadataReflectionUtils.isListType(realClass);
+    }
+
+    public boolean isSetType() {
+        return realClass != null && MetadataReflectionUtils.isSetType(realClass);
+    }
+
+    public boolean isArrayType() {
+        return realClass != null && MetadataReflectionUtils.isArrayType(realClass);
+    }
+
+    public boolean isMapType() {
+        return realClass != null && MetadataReflectionUtils.isMapType(realClass);
+    }
+
     public String getCanonicalNameOfRealClass() {
         return realClass.getCanonicalName();
     }
 
     public String getTypeDescription() {
-        if (isGenericClassModel()) {
+        if (isGenericModel()) {
             return getName(); // TODO #4 get translation of class meta model
         }
         return getJavaGenericTypeInfo();
     }
 
-    public String getNameOrSimpleClassName() {
-        if (isGenericClassModel()) {
-            return getName();
-        }
-        return realClass.getCanonicalName();
-    }
-
     public String getJavaGenericTypeInfo() {
-        if (isGenericClassModel()) {
+        if (isGenericModel()) {
             return "Map<String, Object>";
         }
         if (getRealClass() != null) {
@@ -180,6 +194,26 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         throw new IllegalStateException("Cannot generate java generic type for class metamodel: " + this);
     }
 
+    public boolean isSubTypeOf(ClassMetaModel expectedParent) {
+        if (hasRealClass() && expectedParent.hasRealClass()) {
+            return isTypeOf(getRealClass(), expectedParent.getRealClass());
+        }
+
+        List<ClassMetaModel> allExtendsOf = getAllExtendsOf();
+        allExtendsOf.add(this);
+
+        for (ClassMetaModel classMetaModel : allExtendsOf) {
+            if (expectedParent.hasRealClass() && classMetaModel.hasRealClass()
+                && expectedParent.getRealClass().equals(classMetaModel.getRealClass())) {
+                return true;
+            } else if (expectedParent.isGenericModel() && classMetaModel.isGenericModel()
+                && expectedParent.getName().equals(classMetaModel.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return elements(Pair.of("id", id),
@@ -188,5 +222,19 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             .filter(pair -> pair.getLeft() != null)
             .map(pair -> pair.getLeft() + "=" + pair.getRight())
             .concatWithNewLines();
+    }
+
+    private List<ClassMetaModel> getAllExtendsOf() {
+        List<ClassMetaModel> extendsFromAll = new ArrayList<>();
+        populateExtendsAll(extendsFromAll);
+        return extendsFromAll;
+    }
+
+    private void populateExtendsAll(List<ClassMetaModel> extendsFromAll) {
+        List<ClassMetaModel> classMetaModels = elements(getExtendsFromModels()).asList();
+        extendsFromAll.addAll(classMetaModels);
+        for (ClassMetaModel extendsFrom : classMetaModels) {
+            extendsFrom.populateExtendsAll(extendsFromAll);
+        }
     }
 }

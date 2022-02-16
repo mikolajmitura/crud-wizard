@@ -10,7 +10,7 @@ import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SampleDtoWithoutGetter
 import pl.jalokim.utils.reflection.InvokableReflectionUtils
 import spock.lang.Specification
 
-class FromFieldsChainStrategyTest extends Specification {
+class FieldsChainToAssignExpressionTest extends Specification {
 
     def "return expected method mapping chain"() {
         given:
@@ -30,7 +30,7 @@ class FromFieldsChainStrategyTest extends Specification {
             .fields([insuranceFieldModel])
             .build()
 
-        FromFieldsChainStrategy fieldsChainStrategy = new FromFieldsChainStrategy(rootObject,
+        FieldsChainToAssignExpression fieldsChainStrategy = new FieldsChainToAssignExpression(rootObject,
             "argument.getSource()", [insuranceFieldModel, personWrapperField, samplePersonFieldModel, birthDatFieldModel])
 
         String expectedCode = "Optional.ofNullable(argument.getSource())" +
@@ -41,7 +41,7 @@ class FromFieldsChainStrategyTest extends Specification {
             wrapWithNextLineWith3Tabs('.orElse(null)')
 
         when:
-        def result = fieldsChainStrategy.generateReturnCodeMetadata()
+        def result = fieldsChainStrategy.generateCodeMetadata()
 
         then:
         verifyAll(result) {

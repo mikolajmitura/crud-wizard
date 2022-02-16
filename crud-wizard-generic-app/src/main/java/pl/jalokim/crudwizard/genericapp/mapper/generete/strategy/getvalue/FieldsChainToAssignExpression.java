@@ -14,21 +14,21 @@ import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.ReflectionOperationException;
 
 @Value
-public class FromFieldsChainStrategy implements PropertyValueMappingStrategy {
+public class FieldsChainToAssignExpression implements ValueToAssignExpression {
 
     ClassMetaModel sourceMetaModel;
-    String rootObjectVariableName;
+    String valueExpression;
     List<FieldMetaModel> fieldChains;
 
     @Override
-    public GetPropertyCodeMetadata generateReturnCodeMetadata() {
-        GetPropertyCodeMetadata returnCodeMetadata = new GetPropertyCodeMetadata();
-        StringBuilder invokeChain = new StringBuilder(String.format("Optional.ofNullable(%s)", rootObjectVariableName));
+    public ValueToAssignCodeMetadata generateCodeMetadata() {
+        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
+        StringBuilder invokeChain = new StringBuilder(String.format("Optional.ofNullable(%s)", valueExpression));
 
         ClassMetaModel currentClassMetaModel = sourceMetaModel;
         for (FieldMetaModel fieldMeta : fieldChains) {
             String fieldName = fieldMeta.getFieldName();
-            if (currentClassMetaModel.isGenericClassModel()) {
+            if (currentClassMetaModel.isGenericModel()) {
                 FieldMetaModel fieldByName = currentClassMetaModel.getFieldByName(fieldName);
                 if (fieldByName == null) {
                     throw new TechnicalException("cannot find field" + fieldName + " in meta model named: " + currentClassMetaModel.getName());

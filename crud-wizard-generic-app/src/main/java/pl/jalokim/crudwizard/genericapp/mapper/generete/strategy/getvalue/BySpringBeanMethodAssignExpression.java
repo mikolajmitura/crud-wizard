@@ -9,23 +9,23 @@ import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @Value
-public class BySpringBeanMethodStrategy implements PropertyValueMappingStrategy {
+public class BySpringBeanMethodAssignExpression implements ValueToAssignExpression {
 
     Class<?> beanType;
     String beanName;
     String methodName;
-    List<PropertyValueMappingStrategy> methodArguments;
+    List<ValueToAssignExpression> methodArguments;
 
     @Override
-    public GetPropertyCodeMetadata generateReturnCodeMetadata() {
-        GetPropertyCodeMetadata returnCodeMetadata = new GetPropertyCodeMetadata();
+    public ValueToAssignCodeMetadata generateCodeMetadata() {
+        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
 
-        List<GetPropertyCodeMetadata> returnArgumentCodesMeta = Elements.elements(methodArguments)
-            .map(PropertyValueMappingStrategy::generateReturnCodeMetadata)
+        List<ValueToAssignCodeMetadata> returnArgumentCodesMeta = Elements.elements(methodArguments)
+            .map(ValueToAssignExpression::generateCodeMetadata)
             .asList();
 
         List<? extends Class<?>> classes = Elements.elements(returnArgumentCodesMeta)
-            .map(GetPropertyCodeMetadata::getReturnClassModel)
+            .map(ValueToAssignCodeMetadata::getReturnClassModel)
             .map(ClassMetaModel::getRealClass)
             .asList();
 
@@ -38,7 +38,7 @@ public class BySpringBeanMethodStrategy implements PropertyValueMappingStrategy 
         returnCodeMetadata.addConstructorArgument(beanType, beanName, "@" + Qualifier.class.getCanonicalName() + "(\"" + beanName + "\")");
 
         String arguments = Elements.elements(returnArgumentCodesMeta)
-            .map(GetPropertyCodeMetadata::getFullValueExpression)
+            .map(ValueToAssignCodeMetadata::getFullValueExpression)
             .asConcatText(", ");
 
         returnCodeMetadata.setValueGettingCode(String.format("%s.%s(%s);", beanName, methodName, arguments));

@@ -15,7 +15,7 @@ import pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSimpleSuperBuilder
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator
-import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperConfiguration
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.utils.file.FileUtils
 import pl.jalokim.utils.template.TemplateAsText
 import spock.lang.Unroll
@@ -30,7 +30,11 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
     @Unroll
     def "return expected code for #expectedFileName"() {
         when:
-        def result = mapperGenerator.generateMapperCodeMetadata(sourceMetaModel, targetMetaModel, mapperConfiguration)
+        def mergedMapperConfiguration = mapperConfiguration.toBuilder()
+            .sourceMetaModel(sourceMetaModel)
+            .targetMetaModel(targetMetaModel)
+            .build()
+        def result = mapperGenerator.generateMapperCodeMetadata(mergedMapperConfiguration)
 
         then:
         def folderPath = "target/generated-test-sources/mappers/pl/jalokim/crudwizard/generated/mapper"
@@ -68,6 +72,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         // mapping from map to simple Dto via setters
         getSomeDtoWithSettersModel() | modelFromClass(SomeDtoWithSetters) | EMPTY_CONFIG | "model_SomeDtoWithSettersModel_to_class_SomeDtoWithSetters"
 
+        // TODO #1 test for create line with genericObjectsConversionService and conversionService
         // TODO #1 mapping from map to Dto with nested methods and should use method when inner conversion is from document to DocumentDto in few fields
         //  DocumentDto idDocument -> document idDocument
         //  DocumentDto passportDocument -> document passportDocument

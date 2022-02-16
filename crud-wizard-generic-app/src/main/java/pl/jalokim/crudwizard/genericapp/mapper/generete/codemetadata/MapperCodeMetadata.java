@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.Data;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.GetPropertyCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.utils.template.TemplateAsText;
 
 @Data
@@ -37,7 +37,11 @@ public class MapperCodeMetadata {
         constructorArguments.add(constructorArgument);
     }
 
-    public void fetchMetaDataFrom(GetPropertyCodeMetadata getPropertyCodeMetadata) {
+    public void addOtherMethod(MethodCodeMetadata otherMethod) {
+        otherMethods.add(otherMethod);
+    }
+
+    public void fetchMetaDataFrom(ValueToAssignCodeMetadata getPropertyCodeMetadata) {
         imports.addAll(getPropertyCodeMetadata.getImports());
         staticImports.addAll(getPropertyCodeMetadata.getStaticImports());
         constructorArguments.addAll(getPropertyCodeMetadata.getConstructorArguments());

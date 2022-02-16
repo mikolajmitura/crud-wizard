@@ -15,7 +15,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.Constructor
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetPropertyCodeMetadata {
+public class ValueToAssignCodeMetadata {
 
     private final Set<ConstructorArgument> constructorArguments = new HashSet<>();
     private final Set<String> staticImports = new HashSet<>();
@@ -41,6 +41,9 @@ public class GetPropertyCodeMetadata {
     }
 
     public String getFullValueExpression() {
-        return String.format("((%s) %s)", returnClassModel.getJavaGenericTypeInfo(), valueGettingCode);
+        if (returnClassModel != null) {
+            return String.format("((%s) %s)", returnClassModel.getJavaGenericTypeInfo(), valueGettingCode);
+        }
+        return valueGettingCode;
     }
 }

@@ -6,24 +6,24 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.Constructor
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import spock.lang.Specification
 
-class BySpringBeanMethodStrategyTest extends Specification {
+class BySpringBeanMethodAssignExpressionTest extends Specification {
 
-    private PropertyValueMappingStrategy arg1 = Mock()
-    private PropertyValueMappingStrategy arg2 = Mock()
+    private ValueToAssignExpression arg1 = Mock()
+    private ValueToAssignExpression arg2 = Mock()
 
     def "return expected code and metadata for given spring bean"() {
         given:
-        arg1.generateReturnCodeMetadata() >> GetPropertyCodeMetadata.builder()
+        arg1.generateCodeMetadata() >> ValueToAssignCodeMetadata.builder()
             .valueGettingCode("someCode1")
             .returnClassModel(createClassMetaModelFromClass(String))
             .build()
 
-        arg2.generateReturnCodeMetadata() >> GetPropertyCodeMetadata.builder()
+        arg2.generateCodeMetadata() >> ValueToAssignCodeMetadata.builder()
             .valueGettingCode("someCode2")
             .returnClassModel(createClassMetaModelFromClass(Long))
             .build()
 
-        BySpringBeanMethodStrategy testCase = new BySpringBeanMethodStrategy(
+        BySpringBeanMethodAssignExpression testCase = new BySpringBeanMethodAssignExpression(
             NormalSpringService,
             "normalSpringService",
             "someMethodName",
@@ -31,7 +31,7 @@ class BySpringBeanMethodStrategyTest extends Specification {
         )
 
         when:
-        def result = testCase.generateReturnCodeMetadata()
+        def result = testCase.generateCodeMetadata()
 
         then:
         verifyAll(result) {
