@@ -22,6 +22,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalP
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.PropertyPathResolver;
@@ -52,6 +54,10 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
     @Mapping(target = "urlMetamodel", ignore = true)
     @Mapping(target = "dataStorageConnectors", ignore = true)
     public abstract EndpointMetaModel toMetaModel(EndpointMetaModelEntity endpointMetaModelEntity);
+
+    // TODO #53 remove this after impl
+    @Mapping(target = "mapperScript", ignore = true)
+    public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
 
     public EndpointMetaModel toFullMetaModel(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {
         EndpointMetaModel endpointMetaModel = toMetaModel(endpointMetaModelEntity);

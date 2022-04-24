@@ -32,10 +32,6 @@ public class EndpointMetaModel extends WithAdditionalPropertiesMetaModel {
 
     ClassMetaModel pathParams;
 
-    // TODO #1 validation when added new service metamodel
-    // verify that this bean, class, method exists
-    // verify that can method arguments will be resolved correctly
-    // verify that newly added serviceMetaModel does not exists already, then use existing id
     ServiceMetaModel serviceMetaModel;
 
     Boolean invokeValidation;
@@ -46,5 +42,5 @@ public class EndpointMetaModel extends WithAdditionalPropertiesMetaModel {
     List<DataStorageConnectorMetaModel> dataStorageConnectors;
 
     // TODO maybe here which headers distinct to this endpoint
-    // TODO consume type and response type application/xml and application/json etc???
+    // TODO #3 consume type and response type application/xml and application/json etc???
 }

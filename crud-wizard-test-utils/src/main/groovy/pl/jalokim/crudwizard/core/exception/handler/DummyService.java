@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.exception.handler;
 
+import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -16,6 +17,7 @@ import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.exception.ErrorWithPlaceholders;
 import pl.jalokim.crudwizard.core.exception.ResourceChangedException;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
+import pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 
@@ -83,5 +85,13 @@ public class DummyService {
 
     public void update(@NotNull Long someId, @NotNull @Validated(UpdateContext.class) SimpleDummyDto dto) {
 
+    }
+
+    public SamplePersonDtoWitOtherObject mapPersonPart1(Map<String, Object> object, String exampleString) {
+        return null;
+    }
+
+    public Map<String, Object> fetchSomeMap(String someId) {
+        return null;
     }
 }

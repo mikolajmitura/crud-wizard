@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.validator;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,10 +25,17 @@ public class ValidatorMetaModelDto extends WithAdditionalPropertiesDto {
     @ClassExists(expectedOfType = DataValidator.class)
     String className;
 
+    @Size(min = 3, max = 100)
     String validatorName;
+
+    // TODO #53 implement this as well
     String validatorScript;
 
     Boolean parametrized;
+
+    @Size(min = 3, max = 100)
     String namePlaceholder;
+
+    @Size(min = 3, max = 250)
     String messagePlaceholder;
 }

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
 public abstract class DataStorageMetaModelMapper
@@ -17,6 +19,9 @@ public abstract class DataStorageMetaModelMapper
     @Override
     @Mapping(target = "dataStorage", ignore = true)
     public abstract DataStorageMetaModel toMetaModel(DataStorageMetaModelEntity entity);
+
+    @Mapping(target = "mapperScript", ignore = true) // TODO #53 remove this after impl
+    public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
 
     public DataStorageMetaModel toFullMetaModel(DataStorageMetaModelEntity entity) {
         return toMetaModel(entity)

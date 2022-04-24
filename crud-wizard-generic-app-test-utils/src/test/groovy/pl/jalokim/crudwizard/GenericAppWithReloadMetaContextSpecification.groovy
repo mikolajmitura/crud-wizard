@@ -33,6 +33,10 @@ class GenericAppWithReloadMetaContextSpecification extends GenericAppBaseIntegra
         dataStorageInstances.dataStorages.clear()
         dataStorageInstances.dataStorages.addAll(defaultDataStorages)
 
+        reloadMetaModelsContext()
+    }
+
+    protected reloadMetaModelsContext() {
         applicationEventPublisher.publishEvent(new MetaModelContextRefreshEvent("reload for test", timeProvider.getCurrentOffsetDateTime()))
     }
 }

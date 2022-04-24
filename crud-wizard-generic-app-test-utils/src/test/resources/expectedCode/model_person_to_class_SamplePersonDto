@@ -3,14 +3,17 @@ package pl.jalokim.crudwizard.generated.mapper;
 import java.util.Optional;
 import java.util.Map;
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class Model_person_To_RawClass_SamplePersonDto_Mapper {
+class MpersonToCSamplePersonDtoMapper implements GeneratedMapper {
 
-    Model_person_To_RawClass_SamplePersonDto_Mapper() {
+    MpersonToCSamplePersonDtoMapper() {
 
     }
 
+    @Override
     public pl.jalokim.crudwizard.core.sample.SamplePersonDto mainMap(GenericMapperArgument genericMapperArgument) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
         Object sourceObject = genericMapperArgument.getSourceObject();

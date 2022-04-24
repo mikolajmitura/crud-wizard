@@ -21,7 +21,7 @@ public class DefaultGenericMapper {
     @SuppressWarnings("unchecked")
     public Object mapToTarget(GenericMapperArgument mapperArgument) {
         if (mapperArgument.getTargetMetaModel() != null) {
-            if (mapperArgument.getTargetMetaModel().equals(mapperArgument.getSourceMetaModel())) {
+            if (mapperArgument.getTargetMetaModel().isTheSameMetaModel(mapperArgument.getSourceMetaModel())) {
                 // TODO should be deep copy.
                 return mapperArgument.getSourceObject();
             }
@@ -41,7 +41,7 @@ public class DefaultGenericMapper {
             return mapperArgument.getSourceObject();
         }
 
-        // TODO should map from one meta model to another meta model.
+        // TODO #1 should map from one meta model to another meta model.
         // another is auto mapping the same fields with names and the same types or with auto conversion from one to another.
         throw new UnsupportedOperationException("Not supported mapping yet!");
     }

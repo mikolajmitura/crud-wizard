@@ -215,6 +215,22 @@ class ClassMetaModelTest extends Specification {
             .build()                          | ClassMetaModel.builder().name("otherName").build()              | false
     }
 
+    @Unroll
+    def "return expected toString on ClassMetaModel"() {
+        when:
+        def result = classMetaModel.toString()
+
+        then:
+        result == expectedText
+
+        where:
+        expectedText                                        | classMetaModel
+        "ClassMetaModel(name=givenName)"                    | ClassMetaModel.builder().name("givenName").build()
+        "ClassMetaModel(id=12)"                             | ClassMetaModel.builder().id(12).build()
+        "ClassMetaModel(id=12, name=givenName)"             | ClassMetaModel.builder().id(12).name("givenName").build()
+        "ClassMetaModel(id=12, realClass=java.lang.String)" | ClassMetaModel.builder().id(12).realClass(String).build()
+    }
+
     private boolean assertFieldNameAndType(List<FieldMetaModel> foundFields, String fieldName, Class<?> expectedFieldType) {
         verifyAll(foundFields.find {
             it.fieldName == fieldName

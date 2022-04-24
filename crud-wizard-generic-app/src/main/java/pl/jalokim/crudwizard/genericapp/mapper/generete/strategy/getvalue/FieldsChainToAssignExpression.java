@@ -1,38 +1,60 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getRequiredFieldFromClassModel;
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedLineUtils;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.ReflectionOperationException;
 
 @Value
+@AllArgsConstructor
 public class FieldsChainToAssignExpression implements ValueToAssignExpression {
 
     ClassMetaModel sourceMetaModel;
     String valueExpression;
+    @EqualsAndHashCode.Exclude
+    ValueToAssignExpression parentValueExpression;
     List<FieldMetaModel> fieldChains;
+
+    public static FieldsChainToAssignExpression createFieldsChainToAssignExpression(ValueToAssignExpression parentValueExpression,
+        List<FieldMetaModel> fieldChains) {
+
+        ValueToAssignCodeMetadata valueToAssignCodeMetadata = parentValueExpression.generateCodeMetadata();
+        String fullValueExpression = valueToAssignCodeMetadata.getFullValueExpression();
+        ClassMetaModel returnClassModel = valueToAssignCodeMetadata.getReturnClassModel();
+        return new FieldsChainToAssignExpression(returnClassModel, fullValueExpression, parentValueExpression, fieldChains);
+    }
+
+    public FieldsChainToAssignExpression(ClassMetaModel sourceMetaModel, String valueExpression, List<FieldMetaModel> fieldChains) {
+        this(sourceMetaModel, valueExpression, null, fieldChains);
+    }
+
+    public FieldsChainToAssignExpression(ClassMetaModel sourceMetaModel, String valueExpression, FieldMetaModel firstField) {
+        this(sourceMetaModel, valueExpression, null, List.of(firstField));
+    }
 
     @Override
     public ValueToAssignCodeMetadata generateCodeMetadata() {
         ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
-        StringBuilder invokeChain = new StringBuilder(String.format("Optional.ofNullable(%s)", valueExpression));
+        String valueExpressionAsText = valueExpression != null ? valueExpression : parentValueExpression.generateCodeMetadata().getFullValueExpression();
+        StringBuilder invokeChain = new StringBuilder(String.format("Optional.ofNullable(%s)", valueExpressionAsText));
 
         ClassMetaModel currentClassMetaModel = sourceMetaModel;
         for (FieldMetaModel fieldMeta : fieldChains) {
             String fieldName = fieldMeta.getFieldName();
             if (currentClassMetaModel.isGenericModel()) {
-                FieldMetaModel fieldByName = currentClassMetaModel.getFieldByName(fieldName);
-                if (fieldByName == null) {
-                    throw new TechnicalException("cannot find field" + fieldName + " in meta model named: " + currentClassMetaModel.getName());
-                }
+                currentClassMetaModel.getRequiredFieldByName(fieldName);
                 invokeChain.append(GeneratedLineUtils.wrapWithNextLineWith3Tabs(
                     ".map(genericMap -> ((Map<String, Object>) genericMap).get(\"%s\"))",
                     fieldName));
@@ -61,5 +83,12 @@ public class FieldsChainToAssignExpression implements ValueToAssignExpression {
         returnCodeMetadata.setReturnClassModel(elements(fieldChains).getLast().getFieldType());
 
         return returnCodeMetadata;
+    }
+
+    public FieldsChainToAssignExpression createExpressionWithNextField(String fieldName, FieldMetaResolverConfiguration fieldMetaResolverForRawSource) {
+        List<FieldMetaModel> newFieldChains = new ArrayList<>(fieldChains);
+        newFieldChains.add(getRequiredFieldFromClassModel(elements(fieldChains).getLast().getFieldType(),
+            fieldName, fieldMetaResolverForRawSource));
+        return new FieldsChainToAssignExpression(this.sourceMetaModel, this.valueExpression, this.parentValueExpression, newFieldChains);
     }
 }

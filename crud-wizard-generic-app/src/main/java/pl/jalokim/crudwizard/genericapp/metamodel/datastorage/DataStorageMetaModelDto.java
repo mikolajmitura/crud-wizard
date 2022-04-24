@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,9 +29,11 @@ public class DataStorageMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @UniqueValue(entityClass = DataStorageMetaModelEntity.class)
+    @Size(min = 3, max = 100)
     String name;
 
     @ClassExists(expectedOfType = DataStorage.class)
     @VerifyThatCanCreateDataStorage
+    @Size(min = 3, max = 250)
     String className;
 }

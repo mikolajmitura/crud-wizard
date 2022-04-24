@@ -14,10 +14,11 @@ public class MapperDelegatorService {
 
     @SuppressWarnings({"PMD.ConfusingTernary"})
     public Object mapToTarget(MapperMetaModel mapperMetaModel, GenericMapperArgument mapperArgument) {
-        if (mapperMetaModel.getMapperScript() != null) {
-            // TODO call mapper script somehow...
-            throw new UnsupportedOperationException("Mapper script has not supported yet!");
-        } else if (itIsGenericMapperMethod(mapperMetaModel)) {
+//        if (mapperMetaModel.getMapperScript() != null) {
+//            // TODO #53 call mapper script somehow...
+//            throw new UnsupportedOperationException("Mapper script has not supported yet!");
+//        } else
+            if (itIsGenericMapperMethod(mapperMetaModel)) {
             return invokeMethod(mapperMetaModel.getMapperInstance(), mapperMetaModel.getMethodMetaModel().getOriginalMethod(), mapperArgument);
         } else {
             throw new UnsupportedOperationException("Other mapper than generic with generic method has not supported yet!");

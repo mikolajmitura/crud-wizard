@@ -19,6 +19,8 @@ public class MapperMetaModel extends WithAdditionalPropertiesMetaModel {
     String methodName;
     BeanMethodMetaModel methodMetaModel;
 
-    // TODO script will be loaded to mapperInstance in lazy way and cached then
-    String mapperScript;
+    MapperType mapperType;
+    String mapperName;
+    ClassMetaModel sourceClassMetaModel;
+    ClassMetaModel targetClassMetaModel;
 }

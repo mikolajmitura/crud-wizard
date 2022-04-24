@@ -34,4 +34,13 @@ public class ErrorDto {
             .errorCode(translationKey)
             .build();
     }
+
+    @Override
+    public String toString() {
+        return "ErrorDto{" +
+            "property='" + property + '\'' +
+            ", message='" + message + '\'' +
+            ", errorCode='" + errorCode + '\'' +
+            "}\n";
+    }
 }

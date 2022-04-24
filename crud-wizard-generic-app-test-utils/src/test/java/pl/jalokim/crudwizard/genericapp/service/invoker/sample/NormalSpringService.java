@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto;
+import pl.jalokim.crudwizard.core.sample.SomeDocumentDto;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
@@ -153,6 +154,22 @@ public class NormalSpringService {
 
     public String someMethodName(String stringArg1, String stringArg2) {
         return stringArg2;
+    }
+
+    public String getSomeString() {
+        return "someString";
+    }
+
+    public SomeDocumentDto getSomeDocumentDto() {
+        return new SomeDocumentDto(null, 1L);
+    }
+
+    public SomeDocumentDto getSomeDocumentDtoById(Long id) {
+        return new SomeDocumentDto(null, id);
+    }
+
+    public SomeDocumentDto getSomeDocumentDtoById(Long id, String someText, String someText2) {
+        return new SomeDocumentDto(null, id);
     }
 
     public static class InvalidJavaBean {

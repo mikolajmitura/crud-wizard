@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver;
 
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findOneConstructorMaxArgNumbers;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelFor;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.reflect.Constructor;
@@ -27,7 +27,7 @@ public class ByAllArgsFieldsResolver implements FieldMetaResolver {
                     String fieldName = parameter.getName();
                     return (FieldMetaModel) FieldMetaModel.builder()
                         .fieldName(fieldName)
-                        .fieldType(createClassMetaModelFor(parameter.getTypeOfParameter(),
+                        .fieldType(createNotGenericClassMetaModel(parameter.getTypeOfParameter(),
                             fieldMetaResolverConfiguration, fieldName, typeMetadata))
                         .build();
                 })

@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,15 +20,24 @@ public class DataStorageResultsJoinerDto {
 
     Long id;
 
-    @NotNull
+    @NotEmpty
+    @Size(min = 3, max = 100)
     String leftNameOfQueryResult;
-    @NotNull
+
+    @NotEmpty
+    @Size(min = 1, max = 250)
     String leftPath;
-    @NotNull
+
+    @NotEmpty
     @ClassExists(expectedOfType = ObjectsJoinerVerifier.class)
+    @Size(min = 3, max = 250)
     String joinerVerifierClassName;
-    @NotNull
+
+    @NotEmpty
+    @Size(min = 3, max = 100)
     String rightNameOfQueryResult;
-    @NotNull
+
+    @NotEmpty
+    @Size(min = 1, max = 250)
     String rightPath;
 }

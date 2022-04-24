@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContext;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getListFromContext;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +15,10 @@ import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
@@ -135,13 +136,15 @@ public class MetaModelContextService implements ApplicationRunner {
     }
 
     private void loadMapperMetaModels(MetaModelContext metaModelContext) {
-        var mapperMetaModels = new ModelsCache<MapperMetaModel>();
+        var mapperMetaModels = new MappersModelsCache();
         var defaultGenericMapperId = defaultBeansService.getDefaultGenericMapperId();
         for (var mapperMetaModel : mapperMetaModelService.findAllMetaModels()) {
             mapperMetaModels.put(mapperMetaModel.getId(), mapperMetaModel);
             if (mapperMetaModel.getId().equals(defaultGenericMapperId)) {
                 metaModelContext.setDefaultMapperMetaModel(mapperMetaModel);
             }
+            Optional.ofNullable(mapperMetaModel.getMapperName())
+                .ifPresent(mapperName -> mapperMetaModels.setMapperModelWithName(mapperName, mapperMetaModel));
         }
         metaModelContext.setMapperMetaModels(mapperMetaModels);
     }

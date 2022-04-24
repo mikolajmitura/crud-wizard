@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver;
 
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.methodReturnsNonVoidAndHasArgumentsSize;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelFor;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
@@ -27,7 +27,8 @@ public class ByGettersFieldsResolver implements FieldMetaResolver {
                 String fieldName = StringCaseUtils.firstLetterToLowerCase(methodMetadata.getName().substring(3));
                 return (FieldMetaModel) FieldMetaModel.builder()
                     .fieldName(fieldName)
-                    .fieldType(createClassMetaModelFor(methodMetadata.getReturnType(), fieldMetaResolverConfiguration, fieldName, typeMetadata))
+                    .fieldType(createNotGenericClassMetaModel(methodMetadata.getReturnType(),
+                        fieldMetaResolverConfiguration, fieldName, typeMetadata))
                     .build();
             })
             .asList();

@@ -1,10 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.READ
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration
 import pl.jalokim.utils.reflection.TypeMetadata
 import spock.lang.Specification
 
@@ -17,14 +16,13 @@ class ByGettersFieldsResolverTest extends Specification {
         TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
 
         when:
-        def results = testCase.findDeclaredFields(someDtoTypeMetadata, new FieldMetaResolverConfiguration(READ))
+        def results = testCase.findDeclaredFields(someDtoTypeMetadata, READ_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 1
         verifyAll(results[0]) {
             fieldName == "someId"
             fieldType.realClass == Long
-            fieldType.name == null
         }
     }
 
@@ -34,7 +32,7 @@ class ByGettersFieldsResolverTest extends Specification {
         def someMiddleGenericDtoMetadata = someDtoTypeMetadata.getParentTypeMetadata()
 
         when:
-        def results = testCase.findDeclaredFields(someMiddleGenericDtoMetadata, new FieldMetaResolverConfiguration(READ))
+        def results = testCase.findDeclaredFields(someMiddleGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 3
@@ -43,21 +41,18 @@ class ByGettersFieldsResolverTest extends Specification {
         }) {
             fieldName == "someString"
             fieldType.realClass == String
-            fieldType.name == null
         }
         verifyAll(results.find {
             it.fieldName == "someLong"
         }) {
             fieldName == "someLong"
             fieldType.realClass == Long
-            fieldType.name == null
         }
         verifyAll(results.find {
             it.fieldName == "objectOfMiddle"
         }) {
             fieldName == "objectOfMiddle"
             fieldType.realClass == SomeDto
-            fieldType.name == "someDto"
         }
     }
 
@@ -68,7 +63,7 @@ class ByGettersFieldsResolverTest extends Specification {
         def superGenericDtoMetadata = someMiddleGenericDtoMetadata.getParentTypeMetadata()
 
         when:
-        def results = testCase.findDeclaredFields(superGenericDtoMetadata, new FieldMetaResolverConfiguration(READ))
+        def results = testCase.findDeclaredFields(superGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 4
@@ -77,7 +72,6 @@ class ByGettersFieldsResolverTest extends Specification {
         }) {
             fieldName == "someListOfT"
             fieldType.realClass == List
-            fieldType.name == "list_SomeDto_someListOfT_SuperGenericDto"
             fieldType.genericTypes*.realClass == [SomeDto]
         }
         verifyAll(results.find {
@@ -85,7 +79,6 @@ class ByGettersFieldsResolverTest extends Specification {
         }) {
             fieldName == "objectOfIType"
             fieldType.realClass == Set
-            fieldType.name == "set_Long_objectOfIType_SuperGenericDto"
             fieldType.genericTypes*.realClass == [Long]
         }
         verifyAll(results.find {
@@ -93,7 +86,6 @@ class ByGettersFieldsResolverTest extends Specification {
         }) {
             fieldName == "copyOfObjectOfTType"
             fieldType.realClass == Set
-            fieldType.name == "set_Long_copyOfObjectOfTType_SuperGenericDto"
             fieldType.genericTypes*.realClass == [Long]
         }
         verifyAll(results.find {
@@ -101,7 +93,6 @@ class ByGettersFieldsResolverTest extends Specification {
         }) {
             fieldName == "results2"
             fieldType.realClass == Long
-            fieldType.name == null
         }
     }
 }

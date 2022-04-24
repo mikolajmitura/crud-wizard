@@ -10,7 +10,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.configuration.DefaultConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.configuration.DefaultConfigurationRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
@@ -38,7 +37,6 @@ public class DefaultBeansConfigService {
     private final List<DataStorage> dataStorages;
     private final DataStorageMetaModelService dataStorageMetaModelService;
     private final DataStorageMetaModelRepository dataStorageMetaModelRepository;
-    private final RawAdditionalPropertyMapper rawAdditionalPropertyMapper;
     private final DefaultConfigurationRepository defaultConfigurationRepository;
     private final MapperMetaModelService mapperMetaModelService;
     private final MapperMetaModelEntityRepository mapperMetaModelEntityRepository;

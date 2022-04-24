@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +23,7 @@ public class FieldMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @NotNull
+    @Size(min = 1, max = 100)
     String fieldName;
 
     @NotNull

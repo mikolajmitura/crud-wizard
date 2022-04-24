@@ -49,6 +49,8 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     private String className;
 
+    private String basedOnClass;
+
     /**
      * when true then does it mean that this meta model is like generic enum metamodel
      */

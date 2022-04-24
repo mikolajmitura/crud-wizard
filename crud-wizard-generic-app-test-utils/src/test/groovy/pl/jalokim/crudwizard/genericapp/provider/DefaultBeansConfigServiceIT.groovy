@@ -47,7 +47,6 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
                 className == DefaultGenericMapper.canonicalName
                 beanName == "defaultGenericMapper"
                 methodName == "mapToTarget"
-                mapperScript == null
             }
 
             verifyAll(serviceMetaModelRepository.getOne(genericServiceMetaModelId)) {

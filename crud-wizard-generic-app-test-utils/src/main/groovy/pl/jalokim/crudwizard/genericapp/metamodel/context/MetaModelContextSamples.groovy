@@ -3,12 +3,11 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context
 import static org.springframework.http.HttpMethod.GET
 import static org.springframework.http.HttpMethod.POST
 import static org.springframework.http.HttpMethod.PUT
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createHttpQueryParamsMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createPathParamsClassMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createQueryArgumentsMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 
 import org.springframework.http.HttpMethod
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
 import pl.jalokim.crudwizard.core.metamodels.url.UrlPart
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver
@@ -26,14 +25,8 @@ class MetaModelContextSamples {
                 .urlMetamodel(UrlModelResolver.resolveUrl("users/{usersIdVar}/orders/{ordersIdVar}"))
                 .httpMethod(POST)
                 .payloadMetamodel(createSomePersonClassMetaModel())
-                .queryArguments(createHttpQueryParamsMetaModel())
-                .pathParams(ClassMetaModel.builder()
-                    .name("pathParamsMeta")
-                    .fields([
-                        createValidFieldMetaModel("usersIdVar", String),
-                        createValidFieldMetaModel("ordersIdVar", Long)
-                    ])
-                    .build())
+                .queryArguments(createQueryArgumentsMetaModel())
+                .pathParams(createPathParamsClassMetaModel())
                 .operationName("existOperationName")
                 .build())
         metaModelContext

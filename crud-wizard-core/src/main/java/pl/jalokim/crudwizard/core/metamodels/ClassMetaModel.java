@@ -2,21 +2,25 @@ package pl.jalokim.crudwizard.core.metamodels;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isTypeOf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.string.StringUtils;
@@ -36,13 +40,22 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     Boolean simpleRawClass;
 
     Class<?> realClass;
+
+    /**
+     * It means that this metamodel was generated upon this class.
+     */
+    Class<?> basedOnClass;
     EnumClassMetaModel enumClassMetaModel;
 
-    List<ClassMetaModel> genericTypes;
-    List<FieldMetaModel> fields;
-    List<ValidatorMetaModel> validators;
+    @Builder.Default
+    List<ClassMetaModel> genericTypes = new ArrayList<>();
+    @Builder.Default
+    List<FieldMetaModel> fields = new ArrayList<>();
+    @Builder.Default
+    List<ValidatorMetaModel> validators = new ArrayList<>();
 
-    List<ClassMetaModel> extendsFromModels;
+    @Builder.Default
+    List<ClassMetaModel> extendsFromModels = new ArrayList<>();
 
     /**
      * for cache purposes parent fields metamodel parent validators
@@ -64,6 +77,14 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         }
 
         return parentMetamodelCacheContext.getFieldsByName().get(fieldName);
+    }
+
+    public FieldMetaModel getRequiredFieldByName(String fieldName) {
+        return Optional.ofNullable(getFieldByName(fieldName))
+            .orElseThrow(() ->
+                new TechnicalException(createMessagePlaceholder("cannot.find.field.name",
+                    fieldName, getTypeDescription()))
+            );
     }
 
     public Set<String> getFieldNames() {
@@ -216,12 +237,14 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     @Override
     public String toString() {
-        return elements(Pair.of("id", id),
+        return "ClassMetaModel(" + elements(Pair.of("id", id),
             Pair.of("name", name),
-            Pair.of("realClass", realClass))
-            .filter(pair -> pair.getLeft() != null)
+            Pair.of("realClass", Optional.ofNullable(realClass
+            ).map(Class::getCanonicalName)
+                .orElse(null)))
+            .filter(pair -> pair.getRight() != null)
             .map(pair -> pair.getLeft() + "=" + pair.getRight())
-            .concatWithNewLines();
+            .asConcatText(", ") + ")";
     }
 
     private List<ClassMetaModel> getAllExtendsOf() {
@@ -236,5 +259,30 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         for (ClassMetaModel extendsFrom : classMetaModels) {
             extendsFrom.populateExtendsAll(extendsFromAll);
         }
+    }
+
+    public boolean isTheSameMetaModel(ClassMetaModel otherClassMetaModel) {
+        if (otherClassMetaModel == null) {
+            return false;
+        }
+
+        if (id != null) {
+            if (Objects.equals(id, otherClassMetaModel.getId())) {
+                return true;
+            }
+        }
+
+        if (realClass != null) {
+            if (Objects.equals(realClass, otherClassMetaModel.getRealClass())
+                && Objects.equals(genericTypes, otherClassMetaModel.genericTypes)) {
+                return true;
+            }
+        }
+
+        return Objects.equals(name, otherClassMetaModel.getName());
+    }
+
+    public Class<?> getRealClassOrBasedOn() {
+        return realClass == null ? basedOnClass : realClass;
     }
 }

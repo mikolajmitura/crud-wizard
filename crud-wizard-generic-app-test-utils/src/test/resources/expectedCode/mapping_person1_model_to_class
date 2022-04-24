@@ -1,0 +1,151 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class MsomePerson1ToCSomePerson1Mapper implements GeneratedMapper {
+
+    MsomePerson1ToCSomePerson1Mapper() {
+
+    }
+
+    @Override
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1 mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1(
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("id"))
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("name"))
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("surname"))
+			.orElse(null)),
+
+		((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1) mapPassport(genericMapperArgument, ((Map<String, Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("passport"))
+			.orElse(null)))),
+
+		((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1) mapIdCard(genericMapperArgument, ((Map<String, Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("idCard"))
+			.orElse(null)))),
+
+		((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1) mapContact(genericMapperArgument, ((Map<String, Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("phoneContact"))
+			.orElse(null)))),
+
+		((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1) mapContact(genericMapperArgument, ((Map<String, Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("emailContact"))
+			.orElse(null))))
+        );
+    }
+
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1 mapContact(GenericMapperArgument genericMapperArgument, Map<String, Object> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1(
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("type"))
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("value"))
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("name"))
+			.orElse(null))
+        );
+    }
+
+
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1 mapIdCard(GenericMapperArgument genericMapperArgument, Map<String, Object> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1(
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("id"))
+			.orElse(null)),
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("number"))
+			.orElse(null)),
+
+		((java.time.LocalDate) null),
+
+		((java.lang.String) "mappedByIdCard" + "Method")
+        );
+    }
+
+
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1 mapPassport(GenericMapperArgument genericMapperArgument, Map<String, Object> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1(
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("id"))
+			.orElse(null)),
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("number"))
+			.orElse(null)),
+
+		((java.time.LocalDate) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("validTo"))
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("name"))
+			.orElse(null))
+        );
+    }
+
+}

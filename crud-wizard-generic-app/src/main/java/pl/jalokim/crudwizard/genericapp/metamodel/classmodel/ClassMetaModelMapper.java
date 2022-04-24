@@ -9,11 +9,12 @@ import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel;
+import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 
-@Mapper(config = MapperAsSpringBeanConfig.class)
+@Mapper(config = MapperAsSpringBeanConfig.class, imports = ClassUtils.class)
 public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
     @Autowired
@@ -25,6 +26,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
     @Mapping(target = "realClass", ignore = true)
+    @Mapping(target = "basedOnClass", ignore = true)
     @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
@@ -53,11 +55,9 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
             extendsFromModel -> newClassMetaModel(extendsFromModel.getId())
         ));
         classMetaModel.setRealClass(loadRealClass(classMetaModelEntity.getClassName()));
+        classMetaModel.setBasedOnClass(loadRealClass(classMetaModelEntity.getBasedOnClass()));
 
-        Object propertyValue = classMetaModel.getPropertyRealValue(ENUM_VALUES_PREFIX);
-        if (propertyValue != null) {
-            classMetaModel.setEnumClassMetaModel(new EnumClassMetaModel(classMetaModel));
-        }
+        setupEnumMetaModelIfShould(classMetaModel);
 
         return classMetaModel;
     }
@@ -67,4 +67,32 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
             .id(id)
             .build();
     }
+
+    public ClassMetaModel toModelFromDto(ClassMetaModelDto classMetaModelDto, MetaModelContext temporaryMetaModelContext) {
+        var classMetaModel = innerToModelFromDto(classMetaModelDto);
+
+        setupEnumMetaModelIfShould(classMetaModel);
+        // TODO #1 setup other fields, how to resolve inner class metamodels from
+        //  temporary context and other dto which should be mapped to classMetaModel...
+        //  other fields to map
+        //  - fields
+        //  - genericTypes
+        //  - extendsFromModels
+        return classMetaModel;
+    }
+
+    private void setupEnumMetaModelIfShould(ClassMetaModel classMetaModel) {
+        Object propertyValue = classMetaModel.getPropertyRealValue(ENUM_VALUES_PREFIX);
+        if (propertyValue != null) {
+            classMetaModel.setEnumClassMetaModel(new EnumClassMetaModel(classMetaModel));
+        }
+    }
+
+    @Mapping(target = "basedOnClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getBasedOnClass()))")
+    @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
+    @Mapping(target = "enumClassMetaModel", ignore = true)
+    @Mapping(target = "parentMetamodelCacheContext", ignore = true)
+    @Mapping(target = "fields", ignore = true)
+    @Mapping(target = "validators", ignore = true)
+    protected abstract ClassMetaModel innerToModelFromDto(ClassMetaModelDto classMetaModelDto);
 }

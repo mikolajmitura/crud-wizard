@@ -17,6 +17,7 @@ import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
 
 @Data
@@ -26,7 +27,7 @@ public class MetaModelContext {
     private ModelsCache<ApiTagMetamodel> apiTags;
     private ModelsCache<ValidatorMetaModel> validatorMetaModels;
     private ModelsCache<ClassMetaModel> classMetaModels;
-    private ModelsCache<MapperMetaModel> mapperMetaModels;
+    private MappersModelsCache mapperMetaModels;
     private ModelsCache<ServiceMetaModel> serviceMetaModels;
     private ModelsCache<EndpointMetaModel> endpointMetaModels;
 

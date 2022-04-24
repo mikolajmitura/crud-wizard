@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +23,7 @@ public class QueryProviderDto extends WithAdditionalPropertiesDto {
 
     @NotNull
     @ClassExists(expectedOfType = DataStorageQueryProvider.class)
+    @Size(min = 3, max = 250)
     String className;
 
     String rawQueryCode;

@@ -32,6 +32,10 @@ public class MessagePlaceholder {
     String errorCode;
     Map<String, Object> rawArgumentsByName;
 
+    public String toString() {
+     return translateMessage();
+    }
+
     /**
      * Will create MessagePlaceholder for message key which as prefix has canonical class name + propertySuffix and all given placeholderArgs will try wrap as
      * placeholder or try translate:
@@ -87,6 +91,10 @@ public class MessagePlaceholder {
 
     public static MessagePlaceholder createMessagePlaceholderWithKey(String propertyKey, String placeholderKey, Object placeholderValue) {
         return createMessagePlaceholder(propertyKey, Map.of(placeholderKey, placeholderValue));
+    }
+
+    public static String translatePlaceholder(String propertyKey, Object... placeholderArgs) {
+        return createMessagePlaceholder(propertyKey, placeholderArgs).translateMessage();
     }
 
     /**

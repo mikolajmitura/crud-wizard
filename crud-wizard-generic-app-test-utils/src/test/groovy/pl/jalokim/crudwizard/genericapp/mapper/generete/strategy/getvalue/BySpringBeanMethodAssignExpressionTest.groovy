@@ -38,7 +38,7 @@ class BySpringBeanMethodAssignExpressionTest extends Specification {
             staticImports.isEmpty()
             imports.isEmpty()
             returnClassModel.realClass == Long
-            valueGettingCode == "normalSpringService.someMethodName(((java.lang.String) someCode1), ((java.lang.Long) someCode2));"
+            valueGettingCode == "normalSpringService.someMethodName(((java.lang.String) someCode1), ((java.lang.Long) someCode2))"
             constructorArguments == [ConstructorArgument.builder()
                                          .argumentName("normalSpringService")
                                          .annotations(["@org.springframework.beans.factory.annotation.Qualifier(\"normalSpringService\")"])

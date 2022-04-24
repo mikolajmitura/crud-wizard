@@ -126,13 +126,23 @@ class ClassMetaModelSamples {
             .build()
     }
 
-    static ClassMetaModel createHttpQueryParamsMetaModel() {
+    static ClassMetaModel createQueryArgumentsMetaModel() {
         ClassMetaModel.builder()
             .name("somePersonApplication-queryParams")
             .fields([
                 createValidFieldMetaModel("lastContact", LocalDate),
                 createValidFieldMetaModel("lastText", String),
                 createValidFieldMetaModel("numberAsText", String)])
+            .build()
+    }
+
+    static ClassMetaModel createPathParamsClassMetaModel() {
+        ClassMetaModel.builder()
+            .name("pathParamsMeta")
+            .fields([
+                createValidFieldMetaModel("usersIdVar", String),
+                createValidFieldMetaModel("ordersIdVar", Long)
+            ])
             .build()
     }
 
@@ -192,7 +202,7 @@ class ClassMetaModelSamples {
                             .build()
                     ])
                     .build(),
-                createSomePersonClassMetaModel(), createHttpQueryParamsMetaModel()])
+                createSomePersonClassMetaModel(), createQueryArgumentsMetaModel()])
             .validators([ValidatorMetaModelSamples.CUSTOM_TEST_VALIDATOR_METAMODEL])
             .build()
     }

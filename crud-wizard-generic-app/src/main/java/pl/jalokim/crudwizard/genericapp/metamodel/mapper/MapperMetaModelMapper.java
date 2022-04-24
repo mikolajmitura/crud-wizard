@@ -32,9 +32,22 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
     @Override
     @Mapping(target = "mapperInstance", ignore = true)
     @Mapping(target = "methodMetaModel", ignore = true)
+    @Mapping(target = "targetClassMetaModel", ignore = true)
+    @Mapping(target = "sourceClassMetaModel", ignore = true)
     public abstract MapperMetaModel toMetaModel(MapperMetaModelEntity entity);
 
+    // TODO #53 remove this after impl
+    @Override
+    @Mapping(target = "mapperScript", ignore = true)
+    public abstract MapperMetaModelDto toDto(MapperMetaModelEntity entity);
+
     public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity) {
+
+        if (mapperMetaModelEntity.getMapperName() != null) {
+            // TODO #1 generate new mapper when hash is the same and load new instance when should or load old.
+            //  when new mapper was generated then update className in mapperMetaModelEntity
+        }
+
         BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeanProvider.getAllGenericMapperBeans())
             .filter(serviceBean -> serviceBean.getBeanName().equals(mapperMetaModelEntity.getBeanName())
                 && serviceBean.getClassName().equals(mapperMetaModelEntity.getClassName()))

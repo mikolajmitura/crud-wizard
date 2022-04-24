@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,6 +31,7 @@ public class DataStorageConnectorMetaModelDto extends WithAdditionalPropertiesDt
     @Valid
     ClassMetaModelDto classMetaModelInDataStorage;
 
+    @Size(min = 3, max = 100)
     String nameOfQuery;
 
     @Valid

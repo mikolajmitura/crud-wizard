@@ -37,7 +37,7 @@ public class RawEntityObjectTranslator {
      * To add some custom deserializers and serializers inject ObjectMapper and add custom configuration to it.
      */
     private final JsonObjectMapper jsonObjectMapper;
-    private final DefaultClassesConfig defaultClassesConfig;
+    private final DefaultSubClassesForAbstractClassesConfig defaultClassesConfig;
 
     public <T> T translateToRealObjects(@Nullable JsonNode jsonNode, @Nullable ClassMetaModel nullableClassMetaModel) {
         if (jsonNode == null) {

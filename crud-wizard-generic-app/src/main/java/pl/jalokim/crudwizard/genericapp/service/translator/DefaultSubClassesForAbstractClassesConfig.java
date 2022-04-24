@@ -9,7 +9,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DefaultClassesConfig {
+public class DefaultSubClassesForAbstractClassesConfig {
 
     @SuppressWarnings("PMD.LooseCoupling")
     private static final Map<Class<?>, Class<?>> DEFAULT_CONFIG = Map.of(

@@ -35,7 +35,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument.GenericMapp
 import pl.jalokim.crudwizard.genericapp.mapper.MapperDelegatorService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
 import pl.jalokim.crudwizard.genericapp.service.results.DataStorageResultJoiner;
-import pl.jalokim.crudwizard.genericapp.service.translator.DefaultClassesConfig;
+import pl.jalokim.crudwizard.genericapp.service.translator.DefaultSubClassesForAbstractClassesConfig;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 
 @Service
@@ -45,7 +45,7 @@ public class DefaultGenericService {
 
     private final MapperDelegatorService mapperDelegatorService;
     private final DataStorageResultJoiner dataStorageResultJoiner;
-    private final DefaultClassesConfig defaultClassesConfig;
+    private final DefaultSubClassesForAbstractClassesConfig defaultClassesConfig;
     private final InMemoryDsQueryRunner inMemoryDsQueryRunner;
     private final MetaModelContextService metaModelContextService;
 

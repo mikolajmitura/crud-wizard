@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,8 +35,18 @@ public class ServiceMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @ClassExists
+    @Size(min = 3, max = 250)
     String className;
+
+    // TODO #1 validation when added new service metamodel
+    // verify that this bean, class, method exists
+    // verify that can method arguments will be resolved correctly, expected annotations etc and types (see in DelegatedServiceMethodInvoker)
+    // verify that newly added serviceMetaModel does not exists already, then use existing id
+    @Size(min = 3, max = 100)
     String beanName;
+
+    @Size(min = 3, max = 100)
     String methodName;
+
     String serviceScript;
 }

@@ -26,7 +26,7 @@ class RawEntityObjectTranslatorTest extends Specification {
 
     private ObjectMapper objectMapper = createObjectMapper()
     private JsonObjectMapper jsonObjectMapper = new JsonObjectMapper(objectMapper)
-    private RawEntityObjectTranslator testCase = new RawEntityObjectTranslator(jsonObjectMapper, new DefaultClassesConfig())
+    private RawEntityObjectTranslator testCase = new RawEntityObjectTranslator(jsonObjectMapper, new DefaultSubClassesForAbstractClassesConfig())
 
     def "should translate to expected raw object entity"() {
         given:

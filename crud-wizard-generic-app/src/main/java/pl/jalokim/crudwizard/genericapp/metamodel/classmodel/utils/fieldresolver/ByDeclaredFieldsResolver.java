@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelFor;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.reflect.Field;
@@ -31,7 +31,7 @@ public class ByDeclaredFieldsResolver implements FieldMetaResolver {
     public FieldMetaModel resolveFieldMetaModelByField(Field field, TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         return FieldMetaModel.builder()
             .fieldName(field.getName())
-            .fieldType(createClassMetaModelFor(typeMetadata.getMetaForField(field), fieldMetaResolverConfiguration, field.getName(), typeMetadata))
+            .fieldType(createNotGenericClassMetaModel(typeMetadata.getMetaForField(field), fieldMetaResolverConfiguration, field.getName(), typeMetadata))
             .build();
     }
 

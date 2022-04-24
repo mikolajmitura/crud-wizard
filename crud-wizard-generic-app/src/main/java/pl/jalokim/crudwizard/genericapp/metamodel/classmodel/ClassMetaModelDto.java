@@ -7,6 +7,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -62,10 +63,18 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @UniqueValue(entityClass = ClassMetaModelEntity.class)
+    @Size(min = 3, max = 100)
     String name;
 
     @ClassExists(canBeAbstractOrInterface = true)
+    @Size(min = 3, max = 250)
     String className;
+
+    /**
+     * From this class is created metamodel, with fields and then it became generic meta model.
+     */
+    @Size(min = 3, max = 250)
+    String basedOnClass;
 
     @NotNull
     @Builder.Default

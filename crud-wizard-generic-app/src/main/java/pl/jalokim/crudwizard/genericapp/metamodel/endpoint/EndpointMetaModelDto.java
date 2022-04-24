@@ -10,6 +10,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -62,6 +63,7 @@ public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
     ApiTagDto apiTag;
 
     @NotNull
+    @Size(min = 3, max = 250)
     String baseUrl;
 
     @NotNull
@@ -69,6 +71,7 @@ public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
 
     @NotNull
     @UniqueValue(entityClass = EndpointMetaModelEntity.class)
+    @Size(min = 3, max = 100)
     String operationName;
 
     @Valid

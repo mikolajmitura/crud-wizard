@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.rest
 
 import static org.springframework.http.HttpMethod.PUT
+import static org.springframework.http.HttpMethod.PUT
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.isEqualsTo
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
@@ -190,7 +191,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                 .id(personMetaModel.id)
                 .build())
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
-            .httpMethod(HttpMethod.PUT)
+            .httpMethod(PUT)
             .payloadMetamodelAdditionalValidators([
                 AdditionalValidatorsMetaModelDto.builder()
                     .fullPropertyPath("id")

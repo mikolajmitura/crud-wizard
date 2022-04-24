@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.validation.javax;
 
+import static pl.jalokim.crudwizard.core.translations.AppMessageSource.buildPropertyKey;
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
@@ -8,15 +9,18 @@ import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldMetadataExt
 import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator.getValuesWhenCan;
 import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator.newValidator;
 import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator.validateFieldConfiguration;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.validation.ConstraintValidatorContext;
+import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.crudwizard.core.validation.javax.inner.ExpectedFieldStatePredicates;
 import pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator;
 import pl.jalokim.crudwizard.core.validation.javax.inner.ValidationFieldConfiguration;
+import pl.jalokim.utils.collection.Elements;
 
 public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWithDynamicMessage<WhenFieldIsInStateThenOthersShould, Object> {
 
@@ -25,6 +29,7 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
     private ExpectedFieldState is;
     private List<String> fieldValues;
     private List<FieldShouldWhenOther> thenOthersShould;
+    private WhenFieldIsInStateThenOthersShould fieldsShouldOnlyWhenAnnotation;
 
     @Override
     public void initialize(WhenFieldIsInStateThenOthersShould fieldsShouldOnlyWhen) {
@@ -32,6 +37,7 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
         is = fieldsShouldOnlyWhen.is();
         fieldValues = Arrays.asList(fieldsShouldOnlyWhen.fieldValues());
         thenOthersShould = Arrays.asList(fieldsShouldOnlyWhen.thenOthersShould());
+        fieldsShouldOnlyWhenAnnotation = fieldsShouldOnlyWhen;
 
         validateFieldConfiguration(ValidationFieldConfiguration.builder()
             .fieldByPositionName("whenField")
@@ -65,10 +71,19 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
                     fieldShouldWhenOther.whenField(),
                     fieldShouldWhenOther.is(),
                     Arrays.asList(fieldShouldWhenOther.otherFieldValues()));
+
                 boolean nestedIsInExpectedState = fieldShouldWhenOtherValidator.isValidValue(value);
                 if (!nestedIsInExpectedState) {
-                    String nestedMessage = createMessagePlaceholder(buildMessageForValidator(FieldShouldWhenOther.class),
-                        fieldShouldWhenOtherValidator.getMessagePlaceholderArgs()).translateMessage();
+                    boolean shouldCreateMessageWithoutWhen = parentWhenAreTheSameLikeInChildWhen(fieldsShouldOnlyWhenAnnotation, fieldShouldWhenOther);
+
+                    String nestedMessage;
+                    if (shouldCreateMessageWithoutWhen) {
+                        nestedMessage = createMessagePlaceholder(buildPropertyKey(FieldShouldWhenOther.class, "messageWithoutWhen"),
+                            fieldShouldWhenOtherValidator.getMessagePlaceholderArgs()).translateMessage();
+                    } else {
+                        nestedMessage = createMessagePlaceholder(buildMessageForValidator(FieldShouldWhenOther.class),
+                            fieldShouldWhenOtherValidator.getMessagePlaceholderArgs()).translateMessage();
+                    }
 
                     String rootMessage = createMessagePlaceholder(
                         messagePlaceholder(context), Map.of(
@@ -86,5 +101,11 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
         }
 
         return isValid;
+    }
+
+    private boolean parentWhenAreTheSameLikeInChildWhen(WhenFieldIsInStateThenOthersShould parent, FieldShouldWhenOther child) {
+        return parent.whenField().equals(child.whenField())
+            && parent.is().equals(child.is())
+            && elements(parent.fieldValues()).asSet().equals(elements(child.otherFieldValues()).asSet());
     }
 }

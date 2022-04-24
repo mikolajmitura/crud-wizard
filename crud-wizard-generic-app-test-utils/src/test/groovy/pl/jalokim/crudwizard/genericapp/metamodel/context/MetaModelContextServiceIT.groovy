@@ -159,7 +159,6 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
                 beanName == "defaultGenericMapper"
                 methodName == "mapToTarget"
                 methodMetaModel.name == "mapToTarget"
-                mapperScript == null
             }
 
             serviceMetaModels.objectsById.values()*.className as Set == serviceMetaModelService.findAllMetaModels()*.className as Set
@@ -271,5 +270,5 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
         foundClassMetaModel
     }
 
-    // TODO #3 to implement load context with custom service, mapper, data storage connectors, should verify only them not all objectsById fields.ApiTagSamples
+    // TODO  to implement load context with custom service, mapper, data storage connectors, should verify only them not all objectsById fields.ApiTagSamples
 }

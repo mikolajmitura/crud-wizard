@@ -11,6 +11,8 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
 public abstract class DataStorageConnectorMetaModelMapper
@@ -56,4 +58,8 @@ public abstract class DataStorageConnectorMetaModelMapper
             .queryProvider(queryProviderMapper.mapInstance(dataStorageConnectorEntity.getQueryProvider()))
             .build();
     }
+
+    // TODO #53 remove this after impl
+    @Mapping(target = "mapperScript", ignore = true)
+    public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
 }

@@ -41,7 +41,7 @@ public class BySpringBeanMethodAssignExpression implements ValueToAssignExpressi
             .map(ValueToAssignCodeMetadata::getFullValueExpression)
             .asConcatText(", ");
 
-        returnCodeMetadata.setValueGettingCode(String.format("%s.%s(%s);", beanName, methodName, arguments));
+        returnCodeMetadata.setValueGettingCode(String.format("%s.%s(%s)", beanName, methodName, arguments));
 
         return returnCodeMetadata;
     }

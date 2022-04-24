@@ -12,6 +12,8 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
 public abstract class EndpointResponseMetaModelMapper
@@ -41,4 +43,8 @@ public abstract class EndpointResponseMetaModelMapper
     @Mapping(target = "mapperMetaModel", ignore = true)
     @Mapping(target = "queryProvider", ignore = true)
     public abstract EndpointResponseMetaModel toMetaModel(EndpointResponseMetaModelEntity endpointResponseMetaModelEntity);
+
+    // TODO #53 remove this after impl
+    @Mapping(target = "mapperScript", ignore = true)
+    public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
 }

@@ -14,6 +14,10 @@ public class ClassUtils {
             .orElse(null);
     }
 
+    public static Class<?> loadRealClass(Class<?> classProxiedByCglib) {
+        return loadRealClass(clearCglibClassName(classProxiedByCglib.getCanonicalName()));
+    }
+
     public static String clearCglibClassName(String className) {
         String clearClassName = className;
         if (className.contains("$$EnhancerBySpringCGLIB")) {

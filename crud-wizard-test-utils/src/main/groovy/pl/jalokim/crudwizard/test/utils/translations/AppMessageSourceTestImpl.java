@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.test.utils.translations;
 
 import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY;
 import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY;
+import static pl.jalokim.crudwizard.core.translations.AppMessageSource.buildPropertyKey;
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.APPLICATION_TRANSLATIONS_PATH;
@@ -155,6 +156,20 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
                 "whenField", wrapAsExternalPlaceholder(whenField),
                 "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
                 "otherFieldValues", otherFieldValues.isEmpty() ? Constants.EMPTY : joinValues(otherFieldValues)
+            )
+        );
+    }
+
+    public static String fieldShouldWithoutWhenMessage(ExpectedFieldState should) {
+        return fieldShouldWithoutWhenMessage(should, List.of());
+    }
+
+    public static String fieldShouldWithoutWhenMessage(ExpectedFieldState should, List<String> fieldValues) {
+        return getAppMessageSource().getMessage(
+            buildPropertyKey(FieldShouldWhenOther.class, "messageWithoutWhen"),
+            Map.of(
+                "should", getAppMessageSource().getMessageByEnumWithPrefix("shouldBe", should),
+                "fieldValues", fieldValues.isEmpty() ? Constants.EMPTY : joinValues(fieldValues)
             )
         );
     }

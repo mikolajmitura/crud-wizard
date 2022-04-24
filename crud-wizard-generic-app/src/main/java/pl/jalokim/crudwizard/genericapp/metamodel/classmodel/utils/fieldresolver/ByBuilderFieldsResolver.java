@@ -2,7 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolve
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.methodReturnsNonVoidAndHasArgumentsSize;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelFor;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getAllDeclaredNotStaticMethods;
@@ -51,7 +51,7 @@ public class ByBuilderFieldsResolver implements FieldMetaResolver {
                     String fieldName = methodMetadata.getName();
                     return (FieldMetaModel) FieldMetaModel.builder()
                         .fieldName(fieldName)
-                        .fieldType(createClassMetaModelFor(methodMetadata.getParameters()
+                        .fieldType(createNotGenericClassMetaModel(methodMetadata.getParameters()
                                 .get(0).getTypeOfParameter(),
                             fieldMetaResolverConfiguration, fieldName, typeMetadata))
                         .build();
@@ -66,14 +66,14 @@ public class ByBuilderFieldsResolver implements FieldMetaResolver {
 
     @Override
     public List<FieldMetaModel> getAllAvailableFieldsForWrite(ClassMetaModel classMetaModel) {
-        Class<?> rawClass = classMetaModel.getRealClass();
+        Class<?> rawClass = classMetaModel.getRealClassOrBasedOn();
 
             if (hasSuperBuilderType(rawClass)) {
                 List<FieldMetaModel> fieldMetaModels = new ArrayList<>(classMetaModel.getFields());
                 ClassMetaModel currentModel = classMetaModel;
                 while (isNotEmpty(currentModel.getExtendsFromModels())) {
                     ClassMetaModel superMetaModel = currentModel.getExtendsFromModels().get(0);
-                    if (hasSuperBuilderType(superMetaModel.getRealClass())) {
+                    if (hasSuperBuilderType(superMetaModel.getRealClassOrBasedOn())) {
                         currentModel = superMetaModel;
                         fieldMetaModels.addAll(currentModel.getFields());
                     } else {

@@ -28,6 +28,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.Da
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWithoutWhenMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidMinMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
@@ -43,6 +44,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import pl.jalokim.crudwizard.core.datastorage.DataStorageFactory
 import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
+import pl.jalokim.crudwizard.core.metamodels.MapperType
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
@@ -236,31 +238,23 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 DataStorageConnectorMetaModelDto.builder()
                     .dataStorageMetaModel(DataStorageMetaModelDto.builder().build())
                     .mapperMetaModelForReturn(MapperMetaModelDto.builder()
-                        .className(randomText())
                         .beanName(randomText())
-                        .methodName(randomText())
-                        .mapperScript(randomText())
+                        .mapperType(MapperType.BEAN_OR_CLASS_NAME)
                         .build())
                     .classMetaModelInDataStorage(createEmptyClassMetaModelDto())
                     .build()
             ])
             .build()                          | [
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.methodName",
+                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
+                    ["BEAN_OR_CLASS_NAME"], fieldShouldWithoutWhenMessage(NOT_NULL))),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.className",
+                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
+                    ["BEAN_OR_CLASS_NAME"], fieldShouldWithoutWhenMessage(NOT_NULL))),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name",
                 fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className",
                 fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.className",
-                fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.beanName",
-                fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.methodName",
-                fieldShouldWhenOtherMessage(NULL, [], "mapperScript", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript",
-                fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript",
-                fieldShouldWhenOtherMessage(NULL, [], "beanName", NOT_NULL, [])),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperScript",
-                fieldShouldWhenOtherMessage(NULL, [], "methodName", NOT_NULL, [])),
             errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name",
                 whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
         ]                                                      | "invalid dataStorageConnectors fields for some POST"

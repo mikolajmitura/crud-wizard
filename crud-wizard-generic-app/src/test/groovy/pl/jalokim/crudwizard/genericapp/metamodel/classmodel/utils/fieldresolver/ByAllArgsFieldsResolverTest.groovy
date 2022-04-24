@@ -1,13 +1,12 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.WRITE
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import java.time.LocalDateTime
 import pl.jalokim.crudwizard.core.sample.SomeAllArgConstructor
-import pl.jalokim.crudwizard.core.sample.SomeSuperAllArgConstructor
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration
+import pl.jalokim.crudwizard.core.sample.SomeSuperAllArgConstructor
 import pl.jalokim.utils.reflection.TypeMetadata
 import spock.lang.Specification
 
@@ -20,7 +19,7 @@ class ByAllArgsFieldsResolverTest extends Specification {
         TypeMetadata someValueDtoTypeMetadata = getTypeMetadataFromType(SomeSimpleValueDto)
 
         when:
-        def results = testCase.findDeclaredFields(someValueDtoTypeMetadata, new FieldMetaResolverConfiguration(WRITE))
+        def results = testCase.findDeclaredFields(someValueDtoTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 3
@@ -48,7 +47,7 @@ class ByAllArgsFieldsResolverTest extends Specification {
         TypeMetadata someValueDtoTypeMetadata = getTypeMetadataFromType(SomeAllArgConstructor)
 
         when:
-        def results = testCase.findDeclaredFields(someValueDtoTypeMetadata, new FieldMetaResolverConfiguration(WRITE))
+        def results = testCase.findDeclaredFields(someValueDtoTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 4
@@ -82,7 +81,7 @@ class ByAllArgsFieldsResolverTest extends Specification {
         TypeMetadata typeMetadata = getTypeMetadataFromType(SomeSuperAllArgConstructor)
 
         when:
-        testCase.findDeclaredFields(typeMetadata, new FieldMetaResolverConfiguration(WRITE))
+        testCase.findDeclaredFields(typeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         IllegalArgumentException ex = thrown()
