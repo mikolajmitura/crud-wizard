@@ -112,6 +112,10 @@ public class MapperCodeMetadata {
         mapperValidationContext.addError(messagePlaceholder);
     }
 
+    public void throwMappingError(MessagePlaceholder messagePlaceholder) {
+        throw new MappingException(messagePlaceholder);
+    }
+
     public void checkValidationResults() {
         mapperValidationContext.checkValidationResults();
     }

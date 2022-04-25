@@ -30,35 +30,15 @@ public class MapperMethodGeneratorArgument {
     MethodCodeMetadata parentMethodCodeMetadata;
 
     MapperMethodGeneratorArgument createForNextMethod(List<MapperArgumentMethodModel> mapperMethodArguments,
-        TargetFieldMetaData targetFieldMetaData,
-        MethodCodeMetadata parentMethodCodeMetadata) {
+        TargetFieldMetaData targetFieldMetaData) {
 
         return toBuilder()
             .methodName(createMethodName(mapperMethodArguments, targetFieldMetaData.getTargetFieldClassMetaModel()))
             .generated(true)
             .mapperMethodArguments(mapperMethodArguments)
-            .targetMetaModel(targetMetaModel)
+            .targetMetaModel(targetFieldMetaData.getTargetFieldClassMetaModel())
             .propertiesOverriddenMapping(targetFieldMetaData.getPropertiesOverriddenMappingForField())
             .currentPath(targetFieldMetaData.getFieldNameNodePath())
-            .parentMethodCodeMetadata(parentMethodCodeMetadata)
-            .build();
-    }
-
-    // TODO #1 remove this one
-    MapperMethodGeneratorArgument createForNextMethod(List<MapperArgumentMethodModel> mapperMethodArguments,
-        ClassMetaModel targetMetaModel,
-        PropertiesOverriddenMapping propertiesOverriddenMapping,
-        ObjectNodePath currentPath,
-        MethodCodeMetadata parentMethodCodeMetadata) {
-
-        return toBuilder()
-            .methodName(createMethodName(mapperMethodArguments, targetMetaModel))
-            .generated(true)
-            .mapperMethodArguments(mapperMethodArguments)
-            .targetMetaModel(targetMetaModel)
-            .propertiesOverriddenMapping(propertiesOverriddenMapping)
-            .currentPath(currentPath)
-            .parentMethodCodeMetadata(parentMethodCodeMetadata)
             .build();
     }
 }
