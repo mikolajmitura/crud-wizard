@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 
@@ -43,11 +44,13 @@ public class FieldChainSourceExpressionParser extends SourceExpressionParser {
                 mapperConfigurationParserContext.getFieldMetaResolverForRawSource());
 
         } else {
-            ClassMetaModel returnClassModel = earlierExpression.generateCodeMetadata().getReturnClassModel();
+            ClassMetaModel returnClassModel = earlierExpression.generateCodeMetadata(new MapperCodeMetadata())
+                .getReturnClassModel();
 
             nextChainInvokeExpression = createFieldsChainToAssignExpression(earlierExpression,
                 List.of(getRequiredFieldFromClassModel(returnClassModel, nextVariableName,
-                    mapperConfigurationParserContext.getFieldMetaResolverForRawSource())));
+                    mapperConfigurationParserContext.getFieldMetaResolverForRawSource())),
+                new MapperCodeMetadata());
         }
 
         moveToPreviousWhenShould(sourceExpressionParserContext);

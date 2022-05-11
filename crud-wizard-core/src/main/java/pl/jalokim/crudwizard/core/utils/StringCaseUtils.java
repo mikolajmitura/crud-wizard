@@ -41,4 +41,8 @@ public class StringCaseUtils {
         }
         return text;
     }
+
+    public static String makeLineEndingAsUnix(String text) {
+        return text.replaceAll("\r\n", "\n");
+    }
 }

@@ -175,6 +175,10 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return realClass != null && MetadataReflectionUtils.isListType(realClass);
     }
 
+    public boolean isCollectionType() {
+        return realClass != null && MetadataReflectionUtils.isCollectionType(realClass);
+    }
+
     public boolean isSetType() {
         return realClass != null && MetadataReflectionUtils.isSetType(realClass);
     }
@@ -204,7 +208,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         }
         if (getRealClass() != null) {
             String realClass = getCanonicalNameOfRealClass();
-            String genericParts = CollectionUtils.isEmpty(getGenericTypes()) ? "" :
+            String genericParts = CollectionUtils.isEmpty(getGenericTypes()) || this.realClass.isArray() ? "" :
                 StringUtils.concatElements("<",
                     getGenericTypes(),
                     ClassMetaModel::getJavaGenericTypeInfo,

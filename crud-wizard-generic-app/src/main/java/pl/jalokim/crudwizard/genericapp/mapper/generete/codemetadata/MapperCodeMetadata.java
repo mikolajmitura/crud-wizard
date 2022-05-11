@@ -6,13 +6,13 @@ import static pl.jalokim.utils.template.TemplateAsText.fromText;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import lombok.Data;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperValidationContext;
 
 @Data
@@ -21,7 +21,7 @@ public class MapperCodeMetadata {
     String mapperClassName;
     Set<String> imports = new HashSet<>();
     Set<String> staticImports = new HashSet<>();
-    Set<ConstructorArgument> constructorArguments = new HashSet<>();
+    Set<ConstructorArgument> constructorArguments = new LinkedHashSet<>();
     MethodCodeMetadata mainMethodCodeMetadata;
     List<MethodCodeMetadata> otherMethods = new ArrayList<>();
     Set<String> methodNames = new HashSet<>();
@@ -43,15 +43,17 @@ public class MapperCodeMetadata {
         constructorArguments.add(constructorArgument);
     }
 
+    public void addConstructorArgument(Class<?> argumentType, String argumentName, String... annotations) {
+        constructorArguments.add(ConstructorArgument.builder()
+            .argumentType(argumentType)
+            .argumentName(argumentName)
+            .annotations(elements(annotations).asList())
+            .build());
+    }
+
     public void addOtherMethod(MethodCodeMetadata otherMethod) {
         methodNames.add(otherMethod.getMethodName());
         otherMethods.add(otherMethod);
-    }
-
-    public void fetchMetaDataFrom(ValueToAssignCodeMetadata getPropertyCodeMetadata) {
-        imports.addAll(getPropertyCodeMetadata.getImports());
-        staticImports.addAll(getPropertyCodeMetadata.getStaticImports());
-        constructorArguments.addAll(getPropertyCodeMetadata.getConstructorArguments());
     }
 
     public String getImportsAsText() {

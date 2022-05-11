@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ByMapperNameAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
@@ -77,7 +78,7 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
                     mapperConfigurationParserContext, sourceExpressionParserContext);
                 methodArguments.add(methodArgument);
 
-                ClassMetaModel returnClassModel = methodArgument.generateCodeMetadata().getReturnClassModel();
+                ClassMetaModel returnClassModel = methodArgument.generateCodeMetadata(new MapperCodeMetadata()).getReturnClassModel();
 
                 if (returnClassModel.hasRealClass()) {
                     methodArgumentsClasses.add(returnClassModel.getRealClass());
@@ -136,7 +137,8 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
 
 
         ClassMetaModel sourceClassMetaModelOfMapper = mapperMetaModelByName.getSourceClassMetaModel();
-        ClassMetaModel returnClassModelOfExpression = valueExpression.generateCodeMetadata().getReturnClassModel();
+        ClassMetaModel returnClassModelOfExpression = valueExpression.generateCodeMetadata(new MapperCodeMetadata())
+            .getReturnClassModel();
         boolean methodArgumentIsOk = false;
         if (sourceClassMetaModelOfMapper.equals(returnClassModelOfExpression)) {
             methodArgumentIsOk = true;

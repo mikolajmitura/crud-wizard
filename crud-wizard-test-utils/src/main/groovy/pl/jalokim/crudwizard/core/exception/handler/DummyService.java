@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.exception.handler;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
@@ -93,5 +94,13 @@ public class DummyService {
 
     public Map<String, Object> fetchSomeMap(String someId) {
         return null;
+    }
+
+    public String getSomeRandomText() {
+        return "randomText";
+    }
+
+    public LocalDate getSomeRandomLocalDate() {
+        return LocalDate.of(2022, 5, 11);
     }
 }

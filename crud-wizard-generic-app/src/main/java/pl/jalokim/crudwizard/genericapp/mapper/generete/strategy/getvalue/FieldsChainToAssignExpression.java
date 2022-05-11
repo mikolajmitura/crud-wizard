@@ -13,6 +13,7 @@ import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedLineUtils;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.ReflectionOperationException;
@@ -28,9 +29,9 @@ public class FieldsChainToAssignExpression implements ValueToAssignExpression {
     List<FieldMetaModel> fieldChains;
 
     public static FieldsChainToAssignExpression createFieldsChainToAssignExpression(ValueToAssignExpression parentValueExpression,
-        List<FieldMetaModel> fieldChains) {
+        List<FieldMetaModel> fieldChains, MapperCodeMetadata mapperGeneratedCodeMetadata) {
 
-        ValueToAssignCodeMetadata valueToAssignCodeMetadata = parentValueExpression.generateCodeMetadata();
+        ValueToAssignCodeMetadata valueToAssignCodeMetadata = parentValueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata);
         String fullValueExpression = valueToAssignCodeMetadata.getFullValueExpression();
         ClassMetaModel returnClassModel = valueToAssignCodeMetadata.getReturnClassModel();
         return new FieldsChainToAssignExpression(returnClassModel, fullValueExpression, parentValueExpression, fieldChains);
@@ -45,9 +46,12 @@ public class FieldsChainToAssignExpression implements ValueToAssignExpression {
     }
 
     @Override
-    public ValueToAssignCodeMetadata generateCodeMetadata() {
+    public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
         ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
-        String valueExpressionAsText = valueExpression != null ? valueExpression : parentValueExpression.generateCodeMetadata().getFullValueExpression();
+
+        String valueExpressionAsText = valueExpression != null ? valueExpression :
+            parentValueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata).getFullValueExpression();
+
         StringBuilder invokeChain = new StringBuilder(String.format("Optional.ofNullable(%s)", valueExpressionAsText));
 
         ClassMetaModel currentClassMetaModel = sourceMetaModel;
@@ -71,7 +75,7 @@ public class FieldsChainToAssignExpression implements ValueToAssignExpression {
 
                     invokeChain.append(GeneratedLineUtils.wrapWithNextLineWith3Tabs(
                         ".map(value -> InvokableReflectionUtils.getValueOfField(value, \"%s\"))", fieldName));
-                    returnCodeMetadata.addImport(InvokableReflectionUtils.class);
+                    mapperGeneratedCodeMetadata.addImport(InvokableReflectionUtils.class);
                 }
             }
             currentClassMetaModel = fieldMeta.getFieldType();

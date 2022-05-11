@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto;
 import pl.jalokim.crudwizard.core.sample.SomeDocumentDto;
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
@@ -142,6 +143,10 @@ public class NormalSpringService {
 
     public void missingReqPathVariable(@PathVariable String someRequiredVariable) {
 
+    }
+
+    public CollectionElement[] getCollectionElementArray(String someString, String otherString) {
+        return new CollectionElement[0];
     }
 
     public Map<String, Object> returnTranslatedHttpQuery(@RequestParam Map<String, Object> httpQueryTranslated) {

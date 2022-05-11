@@ -1,10 +1,14 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.generateGenericClassMetaModel;
+
 import java.lang.reflect.Method;
 import java.util.List;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
@@ -17,11 +21,11 @@ public class BySpringBeanMethodAssignExpression implements ValueToAssignExpressi
     List<ValueToAssignExpression> methodArguments;
 
     @Override
-    public ValueToAssignCodeMetadata generateCodeMetadata() {
+    public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
         ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
 
         List<ValueToAssignCodeMetadata> returnArgumentCodesMeta = Elements.elements(methodArguments)
-            .map(ValueToAssignExpression::generateCodeMetadata)
+            .map(argument -> argument.generateCodeMetadata(mapperGeneratedCodeMetadata))
             .asList();
 
         List<? extends Class<?>> classes = Elements.elements(returnArgumentCodesMeta)
@@ -31,11 +35,9 @@ public class BySpringBeanMethodAssignExpression implements ValueToAssignExpressi
 
         Method method = MetadataReflectionUtils.getMethod(beanType, methodName, classes.toArray(new Class[0]));
 
-        returnCodeMetadata.setReturnClassModel(ClassMetaModel.builder()
-            .realClass(method.getReturnType())
-            .build());
+        returnCodeMetadata.setReturnClassModel(generateGenericClassMetaModel(method.getReturnType(), WRITE_FIELD_RESOLVER_CONFIG));
 
-        returnCodeMetadata.addConstructorArgument(beanType, beanName, "@" + Qualifier.class.getCanonicalName() + "(\"" + beanName + "\")");
+        mapperGeneratedCodeMetadata.addConstructorArgument(beanType, beanName, "@" + Qualifier.class.getCanonicalName() + "(\"" + beanName + "\")");
 
         String arguments = Elements.elements(returnArgumentCodesMeta)
             .map(ValueToAssignCodeMetadata::getFullValueExpression)

@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -229,6 +230,25 @@ class ClassMetaModelTest extends Specification {
         "ClassMetaModel(id=12)"                             | ClassMetaModel.builder().id(12).build()
         "ClassMetaModel(id=12, name=givenName)"             | ClassMetaModel.builder().id(12).name("givenName").build()
         "ClassMetaModel(id=12, realClass=java.lang.String)" | ClassMetaModel.builder().id(12).realClass(String).build()
+    }
+
+    @Unroll
+    def "return of expected value of getJavaGenericTypeInfo"() {
+        given:
+
+        when:
+        def result = classMetaModel.getJavaGenericTypeInfo()
+
+        then:
+        result == expectedJavaGenericTypeInfo
+
+        where:
+        classMetaModel                                     | expectedJavaGenericTypeInfo
+        createClassMetaModelFromClass(String)              | "java.lang.String"
+        createClassMetaModelFromClass(CollectionElement[]) | "pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement[]"
+        ClassMetaModel.builder()
+            .name("someModel")
+            .build()                                       | "Map<String, Object>"
     }
 
     private boolean assertFieldNameAndType(List<FieldMetaModel> foundFields, String fieldName, Class<?> expectedFieldType) {

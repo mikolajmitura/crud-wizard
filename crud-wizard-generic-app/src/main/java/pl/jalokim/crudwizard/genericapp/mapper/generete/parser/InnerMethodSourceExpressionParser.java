@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
@@ -36,7 +37,8 @@ class InnerMethodSourceExpressionParser extends SourceExpressionParser {
         if (mapperConfigurationByMethodName == null) {
             mapperConfigurationParserContext.throwParseException(createMessagePlaceholder("cannot.find.method.with.arguments",
                 Map.of("methodName", innerMethodName,
-                    "classesTypes", methodArgumentExpression.generateCodeMetadata().getReturnClassModel().getTypeDescription(),
+                    "classesTypes", methodArgumentExpression.generateCodeMetadata(new MapperCodeMetadata())
+                        .getReturnClassModel().getTypeDescription(),
                     "givenClass", wrapAsPlaceholder("current.mapper.name"))));
         }
         ClassMetaModel returnClassMetaModelOfMethod = mapperConfigurationByMethodName.getTargetMetaModel();

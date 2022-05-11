@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Value;
@@ -15,6 +16,10 @@ public class TargetFieldMetaData {
     String fieldName;
     ObjectNodePath fieldNameNodePath;
     ClassMetaModel targetFieldClassMetaModel;
-    List<ValueToAssignExpression> overriddenPropertyStrategiesByForField;
-    PropertiesOverriddenMapping propertiesOverriddenMappingForField;
+
+    @Builder.Default
+    List<ValueToAssignExpression> overriddenPropertyStrategiesByForField = new ArrayList<>();
+
+    @Builder.Default
+    PropertiesOverriddenMapping propertiesOverriddenMappingForField = PropertiesOverriddenMapping.builder().build();
 }

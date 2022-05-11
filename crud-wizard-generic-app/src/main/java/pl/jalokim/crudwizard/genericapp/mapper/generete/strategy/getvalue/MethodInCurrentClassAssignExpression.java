@@ -7,6 +7,7 @@ import java.util.List;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 
 @Value
 public class MethodInCurrentClassAssignExpression implements ValueToAssignExpression {
@@ -16,12 +17,12 @@ public class MethodInCurrentClassAssignExpression implements ValueToAssignExpres
     ClassMetaModel methodReturnType;
 
     @Override
-    public ValueToAssignCodeMetadata generateCodeMetadata() {
+    public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
 
         String methodArgumentsAsText = StringUtils.EMPTY;
         if (isNotEmpty(methodArgumentsExpressions)) {
             methodArgumentsAsText = ", " + elements(methodArgumentsExpressions)
-                .map(ValueToAssignExpression::generateCodeMetadata)
+                .map(argument -> argument.generateCodeMetadata(mapperGeneratedCodeMetadata))
                 .map(ValueToAssignCodeMetadata::getFullValueExpression)
                 .asConcatText(", ");
         }

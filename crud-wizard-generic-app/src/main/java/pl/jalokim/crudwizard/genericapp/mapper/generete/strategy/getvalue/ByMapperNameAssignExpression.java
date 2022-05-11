@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 
 @Value
 public class ByMapperNameAssignExpression implements ValueToAssignExpression {
@@ -14,13 +15,14 @@ public class ByMapperNameAssignExpression implements ValueToAssignExpression {
     String mapperName;
 
     @Override
-    public ValueToAssignCodeMetadata generateCodeMetadata() {
+    public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
         ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
 
-        returnCodeMetadata.addConstructorArgument(GeneratedMapperInvoker.class, GENERATED_MAPPER_INVOKER_BEAN_NAME);
+        mapperGeneratedCodeMetadata.addConstructorArgument(GeneratedMapperInvoker.class, GENERATED_MAPPER_INVOKER_BEAN_NAME);
         returnCodeMetadata.setReturnClassModel(mapperReturnClassMetaModel);
         returnCodeMetadata.setValueGettingCode(String.format("%s.%s(\"%s\", %s, %s)", GENERATED_MAPPER_INVOKER_BEAN_NAME,
-            "mapWithMapper", mapperName, "genericMapperArgument", valueExpression.generateCodeMetadata().getFullValueExpression()));
+            "mapWithMapper", mapperName, "genericMapperArgument", valueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata)
+                .getFullValueExpression()));
 
         return returnCodeMetadata;
     }
