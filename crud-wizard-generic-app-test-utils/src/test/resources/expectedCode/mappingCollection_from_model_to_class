@@ -194,7 +194,7 @@ class CMappingCollectionsToMmappingCollectionsModelMapper implements GeneratedMa
         int index = 0;
         java.lang.String[] elements = new java.lang.String[initSize];
         for (java.lang.Long element : sourceObject) {
-            elements[index++] = conversionService.convert(element, java.lang.String.class);
+            elements[index++] = conversionService.convert(((java.lang.Long) element), java.lang.String.class);
         }
 
 
@@ -238,7 +238,7 @@ class CMappingCollectionsToMmappingCollectionsModelMapper implements GeneratedMa
         int initSize = sourceObject.size();
         Set<java.lang.String> elements = new HashSet<>(initSize);
         for (java.lang.String element : sourceObject) {
-            elements.add(element);
+            elements.add(((java.lang.String) element));
         }
 
 
@@ -260,7 +260,7 @@ class CMappingCollectionsToMmappingCollectionsModelMapper implements GeneratedMa
         int initSize = sourceObject.size();
         Map<java.lang.Long, Map<String, Object>> elements = new HashMap<>(initSize);
         for (Entry<java.lang.String, pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> element : sourceObject.entrySet()) {
-            elements.put(conversionService.convert(element.getKey(), java.lang.Long.class), ((Map<String, Object>) mapCCollectionElementToMcollectionElementModel(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) element.getValue()))));
+            elements.put(conversionService.convert(((java.lang.String) element.getKey()), java.lang.Long.class), ((Map<String, Object>) mapCCollectionElementToMcollectionElementModel(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) element.getValue()))));
         }
 
 

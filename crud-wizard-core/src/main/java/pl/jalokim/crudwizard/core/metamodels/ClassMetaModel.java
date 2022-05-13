@@ -277,10 +277,8 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         }
 
         if (realClass != null) {
-            if (Objects.equals(realClass, otherClassMetaModel.getRealClass())
-                && Objects.equals(genericTypes, otherClassMetaModel.genericTypes)) {
-                return true;
-            }
+            return Objects.equals(realClass, otherClassMetaModel.getRealClass())
+                && Objects.equals(genericTypes, otherClassMetaModel.genericTypes);
         }
 
         return Objects.equals(name, otherClassMetaModel.getName());

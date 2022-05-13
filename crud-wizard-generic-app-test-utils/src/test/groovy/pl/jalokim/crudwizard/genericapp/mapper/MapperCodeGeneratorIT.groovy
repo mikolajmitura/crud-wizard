@@ -16,6 +16,7 @@ import pl.jalokim.crudwizard.core.exception.handler.DummyService
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.ClassHasSamplePersonDto
 import pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto
+import pl.jalokim.crudwizard.core.sample.FromStringToObject
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
@@ -91,6 +92,27 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
 
         modelFromClass(Long)               | modelFromClass(String)                        | EMPTY_CONFIG                                                   |
             "simple_Long_to_String"
+
+        modelFromClass(String)             | modelFromClass(FromStringToObject)            | withMapperConfigurations(
+            MapperConfiguration.builder()
+                .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                    .valueMappingStrategy([
+                        new RawJavaCodeAssignExpression(modelFromClass(FromStringToObject),
+                            "new " + FromStringToObject.canonicalName + "((String) sourceObject)")
+                    ])
+                    .build())
+                .build())                                                                                                                                   |
+            "text_to_FromStringToObject"
+
+        modelFromClass(FromStringToObject) | modelFromClass(String)                        | withMapperConfigurations(
+            MapperConfiguration.builder()
+                .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                    .valueMappingStrategy([
+                        createFieldsChainExpression(modelFromClass(FromStringToObject), "sourceText")
+                    ])
+                    .build())
+                .build())                                                                                                                                   |
+            "FromStringToObject_to_text"
 
         modelFromClass(SamplePersonDto)    | getPersonMetaModel()                          | EMPTY_CONFIG                                                   |
             "class_SamplePersonDto_to_model_person"
@@ -603,6 +625,13 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                             ])
                             .build()),
                     ])
+                    .build()),
+                createValidFieldMetaModel("testCurrentNodeObjectWrapper", ClassMetaModel.builder()
+                    .name("testCurrentNodeObjectWrapperModel")
+                    .fields([
+                        createValidFieldMetaModel("testCurrentNodeObject", ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel),
+                        createValidFieldMetaModel("simpleCurrentNodeTest", String)
+                    ])
                     .build())
             ])
             .build()
@@ -621,6 +650,10 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
 
         MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .valueMappingStrategy([
+                    new RawJavaCodeAssignExpression(multiSourceExampleModel, "sourceObject"),
+                    createFieldsChainExpression(multiSourceExampleModel, "testCurrentNodeObjectWrapper")
+                ])
                 .mappingsByPropertyName([
                     firstPerson             : PropertiesOverriddenMapping.builder()
                         .valueMappingStrategy([

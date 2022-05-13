@@ -49,9 +49,42 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
 
 		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto) mapToCDocumentHolderDto(genericMapperArgument)),
 
-		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto) mapToCDocumentHolderDto_1(genericMapperArgument))
+		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto) mapToCDocumentHolderDto_1(genericMapperArgument)),
+
+		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject) mapCTestCurrentNodeObjectInModelToCTestCurrentNodeObject(genericMapperArgument, ((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel) Optional.ofNullable(((Map<String, Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("testCurrentNodeObjectWrapper"))
+			.orElse(null)))
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("testCurrentNodeObject"))
+			.orElse(null)))),
+
+		((java.lang.String) Optional.ofNullable(((Map<String, Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("testCurrentNodeObjectWrapper"))
+			.orElse(null)))
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("simpleCurrentNodeTest"))
+			.orElse(null))
         );
     }
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject mapCTestCurrentNodeObjectInModelToCTestCurrentNodeObject(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject newObject = new pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject();
+
+		newObject.setUuid(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel) value).getUuid())
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject) newObject;
+    }
+
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.InnerDocumentDto mapMdocumentDataP1ModelAndMdocumentDataP1ModelToCInnerDocumentDto(GenericMapperArgument genericMapperArgument, Map<String, Object> argument0, Map<String, Object> argument1) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -144,9 +177,7 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
 			.map(genericMap -> ((Map<String, Object>) genericMap).get("someOtherDto"))
 			.orElse(null)))),
 
-		((java.lang.String) Optional.ofNullable(Optional.ofNullable(rootSourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("otherPersonPart3"))
-			.orElse(null))
+		((java.lang.String) Optional.ofNullable(argument2)
 			.map(genericMap -> ((Map<String, Object>) genericMap).get("someString"))
 			.orElse(null))
         );
@@ -168,10 +199,7 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
 			.map(genericMap -> ((Map<String, Object>) genericMap).get("someOtherDto"))
 			.orElse(null)))),
 
-		((java.lang.String) Optional.ofNullable(Optional.ofNullable(rootSourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someObject"))
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("personPart1"))
-			.orElse(null))
+		((java.lang.String) Optional.ofNullable(argument0)
 			.map(genericMap -> ((Map<String, Object>) genericMap).get("someString"))
 			.orElse(null))
         );

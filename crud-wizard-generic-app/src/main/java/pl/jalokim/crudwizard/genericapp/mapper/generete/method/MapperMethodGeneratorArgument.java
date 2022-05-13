@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.createMethodName;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.Builder;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
@@ -12,6 +13,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 
 @Value
@@ -40,5 +42,11 @@ public class MapperMethodGeneratorArgument {
             .propertiesOverriddenMapping(targetFieldMetaData.getPropertiesOverriddenMappingForField())
             .currentPath(targetFieldMetaData.getFieldNameNodePath())
             .build();
+    }
+
+    public List<ValueToAssignExpression> findOverriddenMappingStrategiesForCurrentNode() {
+        return Optional.ofNullable(propertiesOverriddenMapping)
+            .map(PropertiesOverriddenMapping::getValueMappingStrategy)
+            .orElse(List.of());
     }
 }

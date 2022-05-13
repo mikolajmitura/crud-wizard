@@ -105,7 +105,7 @@ class MmappingCollectionsModelToCMappingCollectionsMapper implements GeneratedMa
         int index = 0;
         pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement[] elements = new pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement[initSize];
         for (pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement element : sourceObject) {
-            elements[index++] = element;
+            elements[index++] = ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) element);
         }
 
 
@@ -149,7 +149,7 @@ class MmappingCollectionsModelToCMappingCollectionsMapper implements GeneratedMa
         int initSize = sourceObject.size();
         Map<java.lang.String, pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> elements = new HashMap<>(initSize);
         for (Entry<java.lang.Long, Map<String, Object>> element : sourceObject.entrySet()) {
-            elements.put(conversionService.convert(element.getKey(), java.lang.String.class), ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) mapCollectionElement(genericMapperArgument, ((Map<String, Object>) element.getValue()))));
+            elements.put(conversionService.convert(((java.lang.Long) element.getKey()), java.lang.String.class), ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) mapCollectionElement(genericMapperArgument, ((Map<String, Object>) element.getValue()))));
         }
 
 
@@ -171,7 +171,7 @@ class MmappingCollectionsModelToCMappingCollectionsMapper implements GeneratedMa
         int initSize = sourceObject.size();
         List<java.lang.String> elements = new ArrayList<>(initSize);
         for (java.lang.String element : sourceObject) {
-            elements.add(element);
+            elements.add(((java.lang.String) element));
         }
 
 
@@ -193,7 +193,7 @@ class MmappingCollectionsModelToCMappingCollectionsMapper implements GeneratedMa
         int initSize = sourceObject.length;
         List<java.lang.Long> elements = new ArrayList<>(initSize);
         for (java.lang.String element : sourceObject) {
-            elements.add(conversionService.convert(element, java.lang.Long.class));
+            elements.add(conversionService.convert(((java.lang.String) element), java.lang.Long.class));
         }
 
 

@@ -42,8 +42,8 @@ public class PropertiesOverriddenMapping {
             || !propertyOverriddenMapping.getMappingsByPropertyName().isEmpty();
     }
 
-    public static List<ValueToAssignExpression> findOverriddenMappingStrategiesForCurrentNode(PropertiesOverriddenMapping propertyOverriddenMapping) {
-        return Optional.ofNullable(propertyOverriddenMapping)
+    public static List<ValueToAssignExpression> findOverriddenMappingStrategiesForCurrentNode(PropertiesOverriddenMapping propertiesOverriddenMapping) {
+        return Optional.ofNullable(propertiesOverriddenMapping)
             .map(PropertiesOverriddenMapping::getValueMappingStrategy)
             .orElse(List.of());
     }

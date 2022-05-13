@@ -46,4 +46,8 @@ public class ObjectNodePath {
         return Elements.elements(nodes)
             .asConcatText(EMPTY);
     }
+
+    public String toString() {
+        return getFullPath();
+    }
 }
