@@ -26,7 +26,7 @@ class CFromStringToObjectToCStringMapper implements GeneratedMapper {
             return null;
         }
 
-        return (java.lang.String) ((java.lang.String) Optional.ofNullable(sourceObject)
+        return ((java.lang.String) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.core.sample.FromStringToObject) value).getSourceText())
 			.orElse(null));
     }

@@ -11,7 +11,7 @@ import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 
 @Value
 @Builder
-public class TargetFieldMetaData {
+class TargetFieldMetaData {
 
     String fieldName;
     ObjectNodePath fieldNameNodePath;

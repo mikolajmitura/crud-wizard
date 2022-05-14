@@ -1,8 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder;
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedLineUtils.wrapValueWithReturnStatement;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedLineUtils.wrapWithNextLineWith2Tabs;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.createMethodName;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.regenerateMethodName;
@@ -10,10 +8,13 @@ import static pl.jalokim.crudwizard.genericapp.mapper.generete.config.Properties
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping.findOverriddenMappingStrategies;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping.getPropertiesOverriddenMapping;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping.givenFieldIsIgnored;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.ExpressionSourcesUtils.convertAssignExpressionsToMethodArguments;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.ExpressionSourcesUtils.getOverriddenExpressionsOrFindByFieldName;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.TargetClassMetaModelUtils.extractAllTargetFields;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.TargetClassMetaModelUtils.isElementsType;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements.IterableTemplateForMappingResolver.findIterableTemplateForMappingFor;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategyFactory.createWritePropertyStrategy;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverFactory.findFieldMetaResolver;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.string.StringUtils.tabsNTimes;
@@ -22,10 +23,8 @@ import static pl.jalokim.utils.template.TemplateAsText.fromText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
@@ -38,19 +37,15 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MappingException;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.MethodCodeMetadataBuilder;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements.IterableTemplateForMapping;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategy;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WriteToMapStrategy;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.utils.template.TemplateAsText;
@@ -62,8 +57,6 @@ public class MapperMethodGenerator {
 
     public static final String ITERABLE_ELEMENT_NODE_NAME = "*";
 
-    // TODO #1 split this class for few smaller
-
     // TODO #1 mapper task orders
     //  - implement mapping enums and test that
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (not IT)
@@ -74,6 +67,8 @@ public class MapperMethodGenerator {
     //      - invoke that endpoint and verify that mapping was correct
 
     private final GenericObjectsConversionService genericObjectsConversionService;
+    private final AssignExpressionAsTextResolver assignExpressionAsTextResolver;
+    private final SimpleTargetAssignResolver simpleTargetAssignResolver;
     private final ConversionService conversionService;
     private final InstanceLoader instanceLoader;
 
@@ -82,7 +77,6 @@ public class MapperMethodGenerator {
         String methodName = methodGeneratorArgument.getMethodName();
         List<MapperArgumentMethodModel> originalMapperMethodArguments = methodGeneratorArgument.getMapperMethodArguments();
         ClassMetaModel targetMetaModel = methodGeneratorArgument.getTargetMetaModel();
-        MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
         MapperGenerateConfiguration mapperGenerateConfiguration = methodGeneratorArgument.getMapperGenerateConfiguration();
         ObjectNodePath currentPath = methodGeneratorArgument.getCurrentPath();
         MethodCodeMetadata parentMethodCodeMetadata = methodGeneratorArgument.getParentMethodCodeMetadata();
@@ -111,10 +105,18 @@ public class MapperMethodGenerator {
             targetMetaModel = createNotGenericClassMetaModel(targetMetaModel, mapperGenerateConfiguration.getFieldMetaResolverForRawTarget());
         }
 
+        TargetFieldMetaData returnMethodMetaData = TargetFieldMetaData.builder()
+            .fieldName("")
+            .fieldNameNodePath(currentPath)
+            .targetFieldClassMetaModel(targetMetaModel)
+            .overriddenPropertyStrategiesByForField(methodGeneratorArgument.findOverriddenMappingStrategiesForCurrentNode())
+            .propertiesOverriddenMappingForField(methodGeneratorArgument.getPropertiesOverriddenMapping())
+            .build();
+
         if (targetMetaModel.isSimpleType()) {
 
-            generateMapperMethodWhenMapToSimpleType(mapperMethodArguments, targetMetaModel,
-                mapperGeneratedCodeMetadata, currentPath, methodGeneratorArgument, methodBuilder);
+            simpleTargetAssignResolver.generateMapperMethodWhenMapToSimpleType(mapperMethodArguments, methodGeneratorArgument,
+                methodBuilder, returnMethodMetaData);
 
         } else {
             generateMapperMethodLinesForNotSimpleType(methodGeneratorArgument.toBuilder()
@@ -122,22 +124,21 @@ public class MapperMethodGenerator {
                     .mapperMethodArguments(mapperMethodArguments)
                     .build(),
                 methodBuilder,
-                writePropertyStrategy);
+                writePropertyStrategy, returnMethodMetaData);
         }
 
         return methodBuilder.build();
     }
 
     private void generateMapperMethodLinesForNotSimpleType(MapperMethodGeneratorArgument methodGeneratorArgument,
-        MethodCodeMetadataBuilder methodBuilder, WritePropertyStrategy writePropertyStrategy) {
+        MethodCodeMetadataBuilder methodBuilder, WritePropertyStrategy writePropertyStrategy, TargetFieldMetaData returnMethodMetaData) {
 
         ClassMetaModel targetMetaModel = methodGeneratorArgument.getTargetMetaModel();
         PropertiesOverriddenMapping propertiesOverriddenMapping = methodGeneratorArgument.getPropertiesOverriddenMapping();
         MapperGenerateConfiguration mapperGenerateConfiguration = methodGeneratorArgument.getMapperGenerateConfiguration();
         ObjectNodePath currentPath = methodGeneratorArgument.getCurrentPath();
 
-        if (tryAssignToObjectWhenExistsOneCurrentNodeMapping(methodGeneratorArgument, methodBuilder,
-            targetMetaModel, propertiesOverriddenMapping, currentPath)) {
+        if (tryAssignToObjectWhenExistsOneCurrentNodeMapping(methodGeneratorArgument, methodBuilder, returnMethodMetaData)) {
             return;
         }
 
@@ -174,15 +175,8 @@ public class MapperMethodGenerator {
         methodBuilder.lastLine(writePropertyStrategy.generateLastLine(targetMetaModel.getJavaGenericTypeInfo()));
     }
 
-    private boolean tryAssignToObjectWhenExistsOneCurrentNodeMapping(MapperMethodGeneratorArgument methodGeneratorArgument, MethodCodeMetadataBuilder methodBuilder, ClassMetaModel targetMetaModel,
-        PropertiesOverriddenMapping propertiesOverriddenMapping, ObjectNodePath currentPath) {
-        TargetFieldMetaData returnMethodMetaData = TargetFieldMetaData.builder()
-            .fieldName("")
-            .fieldNameNodePath(currentPath)
-            .targetFieldClassMetaModel(targetMetaModel)
-            .overriddenPropertyStrategiesByForField(methodGeneratorArgument.findOverriddenMappingStrategiesForCurrentNode())
-            .propertiesOverriddenMappingForField(propertiesOverriddenMapping)
-            .build();
+    private boolean tryAssignToObjectWhenExistsOneCurrentNodeMapping(MapperMethodGeneratorArgument methodGeneratorArgument,
+        MethodCodeMetadataBuilder methodBuilder, TargetFieldMetaData returnMethodMetaData) {
 
         List<ValueToAssignExpression> overriddenMappingStrategiesForCurrentNode = methodGeneratorArgument
             .findOverriddenMappingStrategiesForCurrentNode();
@@ -191,7 +185,7 @@ public class MapperMethodGenerator {
 
         if (overriddenMappingStrategiesForCurrentNode.size() == 1) {
             assignExpressionForFieldReference.set(overriddenMappingStrategiesForCurrentNode.get(0));
-            String expressionForReturnLine = getExpressionForAssignWhenExists(methodGeneratorArgument,
+            String expressionForReturnLine = assignExpressionAsTextResolver.getExpressionForAssignWhenExists(methodGeneratorArgument,
                 assignExpressionForFieldReference,
                 returnMethodMetaData,
                 null);
@@ -218,10 +212,11 @@ public class MapperMethodGenerator {
             if (givenFieldIsIgnored(methodGeneratorArgument.getPropertiesOverriddenMapping(), fieldName)) {
                 assignExpressionForFieldReference.set(new NullAssignExpression(targetFieldClassMetaModel));
             } else {
-               if (targetFieldClassMetaModel.isSimpleType()) {
-                    assignValueForSimpleField(methodGeneratorArgument,
+                if (targetFieldClassMetaModel.isSimpleType()) {
+                    simpleTargetAssignResolver.assignValueForSimpleField(methodGeneratorArgument,
                         assignExpressionForFieldReference,
-                        targetFieldMetaData);
+                        targetFieldMetaData,
+                        getOverriddenExpressionsOrFindByFieldName(methodGeneratorArgument, targetFieldMetaData));
 
                 } else {
                     if (isElementsType(targetFieldClassMetaModel)) {
@@ -246,54 +241,10 @@ public class MapperMethodGenerator {
             mappingProblemReason = ex.getMessage();
         }
 
-        return getExpressionForAssignWhenExists(methodGeneratorArgument,
+        return assignExpressionAsTextResolver.getExpressionForAssignWhenExists(methodGeneratorArgument,
             assignExpressionForFieldReference,
             targetFieldMetaData,
             mappingProblemReason);
-    }
-
-    private boolean isElementsType(ClassMetaModel targetFieldClassMetaModel) {
-        return targetFieldClassMetaModel.isMapType() || targetFieldClassMetaModel.isListType()
-            || targetFieldClassMetaModel.isSetType() || targetFieldClassMetaModel.isArrayType();
-    }
-
-    private List<FieldMetaModel> extractAllTargetFields(WritePropertyStrategy writePropertyStrategy, ClassMetaModel targetMetaModel,
-        MapperGenerateConfiguration mapperGenerateConfiguration) {
-        return Optional.of(targetMetaModel)
-            .map(classMetaModel -> {
-                if (classMetaModel.isGenericModel()) {
-                    return classMetaModel.fetchAllFields();
-                }
-                FieldMetaResolver fieldMetaResolver = findFieldMetaResolver(classMetaModel.getRealClass(),
-                    mapperGenerateConfiguration.getFieldMetaResolverForRawTarget());
-                return fieldMetaResolver.getAllAvailableFieldsForWrite(classMetaModel);
-            })
-            .orElse(List.of()).stream()
-            .sorted(writePropertyStrategy.getFieldSorter())
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-    private void assignValueForSimpleField(MapperMethodGeneratorArgument methodGeneratorArgument,
-        AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference,
-        TargetFieldMetaData targetFieldMetaData) {
-
-        String fieldName = targetFieldMetaData.getFieldName();
-        MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
-        ObjectNodePath currentPath = methodGeneratorArgument.getCurrentPath();
-
-        List<ValueToAssignExpression> foundAssignExpressionsForField = getOverriddenExpressionsOrFindByFieldName(methodGeneratorArgument,
-            targetFieldMetaData);
-
-        if (assignExpressionForFieldReference.get() == null) {
-            if (foundAssignExpressionsForField.size() > 1) {
-                mapperGeneratedCodeMetadata.throwMappingError(
-                    createMessagePlaceholder("mapper.found.to.many.mappings.for.simple.type",
-                        currentPath.nextNode(fieldName).getFullPath())
-                );
-            } else if (foundAssignExpressionsForField.size() == 1) {
-                assignExpressionForFieldReference.set(foundAssignExpressionsForField.get(0));
-            }
-        }
     }
 
     private void assignValueToFieldWithElements(MapperMethodGeneratorArgument methodGeneratorArgument,
@@ -416,10 +367,6 @@ public class MapperMethodGenerator {
         }
     }
 
-    private boolean isTheSameTypeOrSubType(ClassMetaModel targetMetaModel, ClassMetaModel sourceMetaModel) {
-        return sourceMetaModel.getTypeDescription().equals(targetMetaModel.getTypeDescription()) || sourceMetaModel.isSubTypeOf(targetMetaModel);
-    }
-
     private String getInitSizeCalculateExpression(List<MapperArgumentMethodModel> mapperElementsMethodArguments) {
         return elements(mapperElementsMethodArguments)
             .map(methodArgument -> {
@@ -491,124 +438,6 @@ public class MapperMethodGenerator {
         }
     }
 
-    private List<ValueToAssignExpression> getOverriddenExpressionsOrFindByFieldName(MapperMethodGeneratorArgument methodGeneratorArgument,
-        TargetFieldMetaData targetFieldMetaData) {
-
-        MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
-        String fieldName = targetFieldMetaData.getFieldName();
-        List<ValueToAssignExpression> overriddenPropertyStrategiesByFieldName = targetFieldMetaData.getOverriddenPropertyStrategiesByForField();
-        ObjectNodePath currentPath = methodGeneratorArgument.getCurrentPath();
-
-        List<ValueToAssignExpression> methodArgumentsExpressions = new ArrayList<>();
-        if (isNotEmpty(overriddenPropertyStrategiesByFieldName)) {
-            methodArgumentsExpressions.addAll(overriddenPropertyStrategiesByFieldName);
-        } else {
-            methodArgumentsExpressions.addAll(findValueExpressionsInMethodArgumentsByFieldName(methodGeneratorArgument,
-                mapperGeneratedCodeMetadata, fieldName, currentPath));
-
-            if (methodArgumentsExpressions.isEmpty()) {
-                methodArgumentsExpressions.addAll(findValueExpressionsByFieldName(
-                    methodGeneratorArgument.findOverriddenMappingStrategiesForCurrentNode(),
-                    mapperGeneratedCodeMetadata, fieldName, currentPath));
-            }
-        }
-        return methodArgumentsExpressions;
-    }
-
-    private List<ValueToAssignExpression> findValueExpressionsInMethodArgumentsByFieldName(MapperMethodGeneratorArgument methodGeneratorArgument,
-        MapperCodeMetadata mapperGeneratedCodeMetadata,
-        String fieldName, ObjectNodePath currentPath) {
-
-        List<ValueToAssignExpression> foundExpressions = new ArrayList<>();
-        for (MapperArgumentMethodModel mapperMethodArgument : methodGeneratorArgument.getMapperMethodArguments()) {
-            var sourceMetaModel = mapperMethodArgument.getArgumentType();
-            if (sourceMetaModel.isSimpleType()) {
-                mapperGeneratedCodeMetadata.throwMappingError(createMessagePlaceholder("cannot.get.field.from.simple.field",
-                    fieldName, sourceMetaModel.getCanonicalNameOfRealClass(), currentPath));
-            } else {
-                FieldMetaModel fieldFromSource = sourceMetaModel.getFieldByName(fieldName);
-                if (fieldFromSource != null) {
-                    foundExpressions.add(new FieldsChainToAssignExpression(
-                        sourceMetaModel, mapperMethodArgument.getArgumentName(), List.of(fieldFromSource)));
-                }
-            }
-        }
-        return foundExpressions;
-    }
-
-    private List<ValueToAssignExpression> findValueExpressionsByFieldName(List<ValueToAssignExpression> givenExpressions,
-        MapperCodeMetadata mapperGeneratedCodeMetadata,
-        String fieldName, ObjectNodePath currentPath) {
-
-        List<ValueToAssignExpression> foundExpressions = new ArrayList<>();
-        for (ValueToAssignExpression expression : givenExpressions) {
-            ValueToAssignCodeMetadata valueToAssignCodeMetadata = expression.generateCodeMetadata(mapperGeneratedCodeMetadata);
-            var sourceMetaModel = valueToAssignCodeMetadata.getReturnClassModel();
-            if (sourceMetaModel.isSimpleType()) {
-                mapperGeneratedCodeMetadata.throwMappingError(createMessagePlaceholder("cannot.get.field.from.simple.field",
-                    fieldName, sourceMetaModel.getCanonicalNameOfRealClass(), currentPath));
-            } else {
-                FieldMetaModel fieldFromSource = sourceMetaModel.getFieldByName(fieldName);
-                if (fieldFromSource != null) {
-                    foundExpressions.add(new FieldsChainToAssignExpression(
-                        sourceMetaModel, valueToAssignCodeMetadata.getFullValueExpression(), List.of(fieldFromSource)));
-                }
-            }
-        }
-        return foundExpressions;
-    }
-
-    private List<MapperArgumentMethodModel> convertAssignExpressionsToMethodArguments(MapperCodeMetadata mapperGeneratedCodeMetadata,
-        List<ValueToAssignExpression> methodArgumentsExpressions) {
-
-        return elements(methodArgumentsExpressions)
-            .mapWithIndex((index, expression) -> new MapperArgumentMethodModel(
-                methodArgumentsExpressions.size() == 1 ? "sourceObject" : "argument" + index,
-                expression.generateCodeMetadata(mapperGeneratedCodeMetadata).getReturnClassModel()))
-            .asList();
-    }
-
-    private String getExpressionForAssignWhenExists(MapperMethodGeneratorArgument methodGeneratorArgument,
-        AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference,
-        TargetFieldMetaData targetFieldMetaData,
-        String mappingProblemReason) {
-
-        String methodName = methodGeneratorArgument.getMethodName();
-        boolean generated = methodGeneratorArgument.isGenerated();
-        ClassMetaModel targetMetaModel = methodGeneratorArgument.getTargetMetaModel();
-        MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
-        MapperConfiguration mapperConfiguration = methodGeneratorArgument.getMapperConfiguration();
-        MapperGenerateConfiguration mapperGenerateConfiguration = methodGeneratorArgument.getMapperGenerateConfiguration();
-
-        String fieldName = targetFieldMetaData.getFieldName();
-        ObjectNodePath fieldNameNodePath = targetFieldMetaData.getFieldNameNodePath();
-        ClassMetaModel targetFieldClassMetaModel = targetFieldMetaData.getTargetFieldClassMetaModel();
-
-        if (assignExpressionForFieldReference.get() == null) {
-            if (mapperGenerateConfiguration.isGlobalIgnoreMappingProblems()
-                || mapperConfiguration.isIgnoreMappingProblems()
-                || targetFieldMetaData.getPropertiesOverriddenMappingForField().isIgnoreMappingProblem()) {
-                assignExpressionForFieldReference.set(new NullAssignExpression(targetFieldClassMetaModel));
-            } else {
-                String inMethodPartMessage = generated ? "" : translatePlaceholder("mapper.not.found.assign.for.method", methodName);
-                String reasonPart = mappingProblemReason == null ? "" : translatePlaceholder("mapper.mapping.problem.reason", mappingProblemReason);
-
-                mapperGeneratedCodeMetadata.addError(createMessagePlaceholder("mapper.not.found.assign.strategy",
-                    fieldName, targetMetaModel.getTypeDescription(), fieldNameNodePath.getFullPath(), inMethodPartMessage + reasonPart));
-            }
-        }
-
-        if (assignExpressionForFieldReference.get() != null) {
-            ValueToAssignCodeMetadata valueToAssignCodeMetadata = assignExpressionForFieldReference.get()
-                .generateCodeMetadata(mapperGeneratedCodeMetadata);
-
-            return generateFetchValueForAssign(valueToAssignCodeMetadata.getReturnClassModel(),
-                targetFieldClassMetaModel, valueToAssignCodeMetadata.getFullValueExpression(),
-                mapperGeneratedCodeMetadata, fieldNameNodePath);
-        }
-        return null;
-    }
-
     private MethodCodeMetadata createMethodCodeMetadata(MapperMethodGeneratorArgument mapperMethodGeneratorArgument) {
         MapperCodeMetadata mapperGeneratedCodeMetadata = mapperMethodGeneratorArgument.getMapperGeneratedCodeMetadata();
         MethodCodeMetadata parentMethodCodeMetadata = mapperMethodGeneratorArgument.getParentMethodCodeMetadata();
@@ -618,7 +447,7 @@ public class MapperMethodGenerator {
         return getGeneratedNewMethodOrGetCreatedEarlier(mapperGeneratedCodeMetadata, parentMethodCodeMetadata, generatedNewMethodMeta);
     }
 
-    private MethodCodeMetadata getGeneratedNewMethodOrGetCreatedEarlier(MapperCodeMetadata mapperGeneratedCodeMetadata,
+    private static MethodCodeMetadata getGeneratedNewMethodOrGetCreatedEarlier(MapperCodeMetadata mapperGeneratedCodeMetadata,
         MethodCodeMetadata parentMethodCodeMetadata,
         MethodCodeMetadata generatedNewMethodMeta) {
 
@@ -646,68 +475,6 @@ public class MapperMethodGenerator {
         }
 
         return generatedNewMethodMeta;
-    }
-
-    // TODO #1 try to use assignValueForSimpleField
-    private void generateMapperMethodWhenMapToSimpleType(List<MapperArgumentMethodModel> methodArguments,
-        ClassMetaModel targetMetaModel, MapperCodeMetadata mapperGeneratedCodeMetadata,
-        ObjectNodePath currentPath, MapperMethodGeneratorArgument methodGeneratorArgument,
-        MethodCodeMetadataBuilder methodBuilder) {
-
-        var currentNodeOverriddenMappings = methodGeneratorArgument.findOverriddenMappingStrategiesForCurrentNode();
-
-        String expressionForAssign = null;
-        if (currentNodeOverriddenMappings.size() == 1) {
-            ValueToAssignExpression propertyValueMappingStrategy = currentNodeOverriddenMappings.get(0);
-            ValueToAssignCodeMetadata getPropertyCodeMetadata = propertyValueMappingStrategy.generateCodeMetadata(mapperGeneratedCodeMetadata);
-
-            expressionForAssign = generateFetchValueForAssign(getPropertyCodeMetadata.getReturnClassModel(),
-                targetMetaModel, getPropertyCodeMetadata.getFullValueExpression(), mapperGeneratedCodeMetadata, currentPath);
-
-        } else if (currentNodeOverriddenMappings.isEmpty()) {
-            if (methodArguments.size() == 1) {
-                expressionForAssign = generateFetchValueForAssign(methodArguments.get(0).getArgumentType(), targetMetaModel,
-                    "sourceObject", mapperGeneratedCodeMetadata, currentPath);
-            } else {
-                mapperGeneratedCodeMetadata.throwMappingError(createMessagePlaceholder(
-                    "mapper.found.to.many.mappings.for.simple.type", currentPath.getFullPath()));
-            }
-        } else {
-            mapperGeneratedCodeMetadata.throwMappingError(createMessagePlaceholder(
-                "mapper.found.to.many.mappings.for.simple.type", currentPath.getFullPath()));
-        }
-
-        if (expressionForAssign != null) {
-            methodBuilder.lastLine(wrapValueWithReturnStatement(targetMetaModel.getJavaGenericTypeInfo(), expressionForAssign));
-        }
-    }
-
-    private String generateFetchValueForAssign(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel,
-        String fetchValueExpression, MapperCodeMetadata mapperGeneratedCodeMetadata, ObjectNodePath currentPath) {
-
-        if (isTheSameTypeOrSubType(targetMetaModel, sourceMetaModel)) {
-            return fetchValueExpression;
-        } else {
-            var converterDefinition = genericObjectsConversionService.findConverterDefinition(sourceMetaModel, targetMetaModel);
-            if (converterDefinition != null) {
-                mapperGeneratedCodeMetadata.addConstructorArgument(GenericObjectsConversionService.class);
-                String converterName = converterDefinition.getBeanName();
-                return String.format("((%s) genericObjectsConversionService.convert(\"%s\", %s))",
-                    targetMetaModel.getJavaGenericTypeInfo(), converterName, fetchValueExpression);
-            } else if (sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass()
-                && conversionService.canConvert(sourceMetaModel.getRealClass(), targetMetaModel.getRealClass())) {
-                mapperGeneratedCodeMetadata.addConstructorArgument(ConversionService.class);
-                return String.format("conversionService.convert(%s, %s.class)",
-                    fetchValueExpression, targetMetaModel.getCanonicalNameOfRealClass());
-            } else {
-                mapperGeneratedCodeMetadata.throwMappingError(createMessagePlaceholder(
-                    "mapper.converter.not.found.between.metamodels",
-                    sourceMetaModel.getTypeDescription(),
-                    targetMetaModel.getTypeDescription(),
-                    currentPath.getFullPath()));
-                return null;
-            }
-        }
     }
 
     private boolean canConvertByConversionService(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel) {
