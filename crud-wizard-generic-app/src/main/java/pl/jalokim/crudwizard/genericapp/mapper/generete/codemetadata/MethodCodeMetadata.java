@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategy;
-import pl.jalokim.utils.template.TemplateAsText;
 
 @Data
 @Builder(toBuilder = true)
@@ -27,7 +26,7 @@ public class MethodCodeMetadata {
     String methodReturnType;
     ClassMetaModel returnClassMetaModel;
 
-    List<String> mappingsCode;
+    List<String> methodCodeLines;
     String lastLine;
     WritePropertyStrategy writePropertyStrategy;
 
@@ -39,6 +38,9 @@ public class MethodCodeMetadata {
     AtomicReference<String> generatedCode = new AtomicReference<>();
 
     MethodCodeMetadata parentMethodMetadata;
+
+    @Builder.Default
+    MethodTemplateResolver methodTemplateResolver = new InnerGenericMappingMethodResolver();
 
     boolean generated;
 
@@ -52,10 +54,10 @@ public class MethodCodeMetadata {
 
     public static class MethodCodeMetadataBuilder {
 
-        List<String> mappingsCode = new ArrayList<>();
+        List<String> methodCodeLines = new ArrayList<>();
 
         public MethodCodeMetadataBuilder nextMappingCodeLine(String mappingCodeLine) {
-            mappingsCode.add(mappingCodeLine);
+            methodCodeLines.add(mappingCodeLine);
             return this;
         }
     }
@@ -94,7 +96,7 @@ public class MethodCodeMetadata {
     }
 
     public String getMappingsCodeAsText() {
-        return elements(mappingsCode)
+        return elements(methodCodeLines)
             .mapWithIndexed(indexedElement -> {
                 if (writePropertyStrategy != null && indexedElement.isLast()) {
                     return writePropertyStrategy.lastWritePropertyLineChanger(indexedElement.getValue());
@@ -105,16 +107,7 @@ public class MethodCodeMetadata {
 
     public String generateCodeForMethod() {
         if (generatedCode.get() == null) {
-            generatedCode.set(TemplateAsText.fromClassPath("templates/mapper/mapper-method-template", true)
-                .overrideVariable("isGenerated", getGeneratedLine())
-                .overrideVariable("methodReturnType", getMethodReturnType())
-                .overrideVariable("methodName", getMethodName())
-                .overrideVariable("methodArguments", buildMethodArguments())
-                .overrideVariable("mappingsCode", getMappingsCodeAsText())
-                .overrideVariable("lastLine", getLastLine())
-                .overrideVariable("earlierNullReturnExpression", getMethodArguments().size() == 1 ?
-                    TemplateAsText.fromClassPath("templates/mapper/earlier-null-return").getCurrentTemplateText() : "")
-                .getCurrentTemplateText());
+            generatedCode.set(methodTemplateResolver.generateMethodCode(this));
             return generatedCode.get();
         }
 
@@ -129,7 +122,7 @@ public class MethodCodeMetadata {
         childMethodsByGeneratedCode.putIfAbsent(otherMethodCodeMetadata.generateCodeForMethod(), otherMethodCodeMetadata);
     }
 
-    private String buildMethodArguments() {
+    String buildMethodArguments() {
         if (CollectionUtils.isEmpty(getMethodArguments())) {
             return StringUtils.EMPTY;
         }

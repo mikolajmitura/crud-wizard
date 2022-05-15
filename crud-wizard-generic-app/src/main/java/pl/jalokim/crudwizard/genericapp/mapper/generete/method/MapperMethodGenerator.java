@@ -13,6 +13,7 @@ import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.Expression
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.TargetClassMetaModelUtils.extractAllTargetFields;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.TargetClassMetaModelUtils.isElementsType;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements.IterableTemplateForMappingResolver.findIterableTemplateForMappingFor;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression.NULL_ASSIGN;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategyFactory.createWritePropertyStrategy;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
@@ -361,7 +362,7 @@ public class MapperMethodGenerator {
             targetFieldMetaData, methodArgumentsForMappingNotSimpleTypes);
 
         if (expressionForAssignWhenExists == null) {
-            populateIterableTemplate.overrideVariable("expression" + index, "null");
+            populateIterableTemplate.overrideVariable("expression" + index, NULL_ASSIGN);
         } else {
             populateIterableTemplate.overrideVariable("expression" + index, expressionForAssignWhenExists);
         }
@@ -447,7 +448,7 @@ public class MapperMethodGenerator {
         return getGeneratedNewMethodOrGetCreatedEarlier(mapperGeneratedCodeMetadata, parentMethodCodeMetadata, generatedNewMethodMeta);
     }
 
-    private static MethodCodeMetadata getGeneratedNewMethodOrGetCreatedEarlier(MapperCodeMetadata mapperGeneratedCodeMetadata,
+    static MethodCodeMetadata getGeneratedNewMethodOrGetCreatedEarlier(MapperCodeMetadata mapperGeneratedCodeMetadata,
         MethodCodeMetadata parentMethodCodeMetadata,
         MethodCodeMetadata generatedNewMethodMeta) {
 

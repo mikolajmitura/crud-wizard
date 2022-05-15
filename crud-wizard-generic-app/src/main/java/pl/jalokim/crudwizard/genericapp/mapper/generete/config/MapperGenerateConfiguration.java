@@ -2,7 +2,9 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
 
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG;
+import static pl.jalokim.utils.collection.Elements.elements;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Builder;
@@ -56,5 +58,13 @@ public class MapperGenerateConfiguration {
 
     public MapperConfiguration getMapperConfigurationByMethodName(String methodName) {
         return mapperConfigurationByMethodName.get(methodName);
+    }
+
+    public List<MapperConfiguration> findMapperConfigurationBy(ClassMetaModel sourceClassMetaModel, ClassMetaModel targetClassMetaModel) {
+        return elements(rootConfiguration)
+            .concat(mapperConfigurationByMethodName.values())
+            .filter(mapperConfigEntry -> mapperConfigEntry.getSourceMetaModel().isTheSameMetaModel(sourceClassMetaModel)
+            && mapperConfigEntry.getTargetMetaModel().isTheSameMetaModel(targetClassMetaModel))
+            .asList();
     }
 }

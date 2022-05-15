@@ -4,7 +4,9 @@ import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 
 public class NullAssignExpression extends RawJavaCodeAssignExpression {
 
+    public static final String NULL_ASSIGN = "null";
+
     public NullAssignExpression(ClassMetaModel returnClassMetaModel) {
-        super(returnClassMetaModel, "null");
+        super(returnClassMetaModel, NULL_ASSIGN);
     }
 }

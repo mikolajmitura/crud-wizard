@@ -34,23 +34,27 @@ public class MapperCodeGenerator {
             ));
 
         mapperGenerateConfiguration.getMapperConfigurationByMethodName()
-            .forEach((methodName, subMethodConfiguration) ->
-                mapperGeneratedCodeMetadata.addOtherMethod(mapperMethodGenerator.generateMapperMethod(MapperMethodGeneratorArgument.builder()
-                        .methodName(subMethodConfiguration.getName())
-                        .generated(false)
-                        .mapperMethodArguments(List.of(new MapperArgumentMethodModel("sourceObject",
-                            subMethodConfiguration.getSourceMetaModel())))
-                        .targetMetaModel(subMethodConfiguration.getTargetMetaModel())
-                        .mapperGeneratedCodeMetadata(mapperGeneratedCodeMetadata)
-                        .mapperConfiguration(subMethodConfiguration)
-                        .propertiesOverriddenMapping(subMethodConfiguration.getPropertyOverriddenMapping())
-                        .mapperGenerateConfiguration(mapperGenerateConfiguration)
-                        .currentPath(ObjectNodePath.rootNode())
-                        .parentMethodCodeMetadata(null)
+            .forEach((methodName, subMethodConfiguration) -> {
+                    if (!subMethodConfiguration.isForMappingEnums()) {
+                        mapperGeneratedCodeMetadata.addOtherMethod(mapperMethodGenerator.generateMapperMethod(MapperMethodGeneratorArgument.builder()
+                                .methodName(subMethodConfiguration.getName())
+                                .generated(false)
+                                .mapperMethodArguments(List.of(new MapperArgumentMethodModel("sourceObject",
+                                    subMethodConfiguration.getSourceMetaModel())))
+                                .targetMetaModel(subMethodConfiguration.getTargetMetaModel())
+                                .mapperGeneratedCodeMetadata(mapperGeneratedCodeMetadata)
+                                .mapperConfiguration(subMethodConfiguration)
+                                .propertiesOverriddenMapping(subMethodConfiguration.getPropertyOverriddenMapping())
+                                .mapperGenerateConfiguration(mapperGenerateConfiguration)
+                                .currentPath(ObjectNodePath.rootNode())
+                                .parentMethodCodeMetadata(null)
 
-                        .build()
-                    )
-                ));
+                                .build()
+                            )
+                        );
+                    }
+                }
+            );
 
         mapperGeneratedCodeMetadata.setMainMethodCodeMetadata(
             mapperMethodGenerator.generateMapperMethod(MapperMethodGeneratorArgument.builder()
@@ -89,5 +93,4 @@ public class MapperCodeGenerator {
             .overrideVariable("otherMapperMethods", mapperGeneratedCodeMetadata.getOtherMapperMethodsAsText())
             .getCurrentTemplateText();
     }
-
 }

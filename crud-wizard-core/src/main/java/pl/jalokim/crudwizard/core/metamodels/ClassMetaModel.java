@@ -70,6 +70,10 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return enumClassMetaModel != null;
     }
 
+    public boolean isEnumTypeOrJavaEnum() {
+        return isGenericEnumType() || isRealClassEnum();
+    }
+
     public FieldMetaModel getFieldByName(String fieldName) {
         if (parentMetamodelCacheContext == null || parentMetamodelCacheContext.getFieldMetaModels() == null
             || parentMetamodelCacheContext.getFieldsByName() == null) {
@@ -164,7 +168,11 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     public boolean isSimpleType() {
-        return realClass != null && MetadataReflectionUtils.isSimpleType(realClass);
+        return realClass != null && MetadataReflectionUtils.isSimpleType(realClass) || isGenericEnumType();
+    }
+
+    public boolean isRealClassEnum() {
+        return realClass != null && MetadataReflectionUtils.isEnumType(realClass);
     }
 
     public boolean isOnlyRawClassModel() {
@@ -203,6 +211,9 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     public String getJavaGenericTypeInfo() {
+        if (isGenericEnumType()) {
+            return "String";
+        }
         if (isGenericModel()) {
             return "Map<String, Object>";
         }

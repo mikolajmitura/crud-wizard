@@ -1,0 +1,6 @@
+    private ${methodReturnType} ${methodName}(GenericMapperArgument genericMapperArgument, ${sourceObjectType} sourceObject) {
+        switch(sourceObject) {
+${cases}
+          default: ${whenNotMappedEnum};
+        }
+    }

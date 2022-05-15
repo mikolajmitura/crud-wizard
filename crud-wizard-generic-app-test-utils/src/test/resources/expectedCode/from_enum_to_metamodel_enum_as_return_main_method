@@ -1,0 +1,42 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class CSomeEnum1ToMsomeEnum1ModelMapper implements GeneratedMapper {
+
+    CSomeEnum1ToMsomeEnum1ModelMapper() {
+
+    }
+
+    @Override
+    public String mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        return ((String) mapCSomeEnum1ToMsomeEnum1Model(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1) sourceObject)));
+    }
+    private String mapCSomeEnum1ToMsomeEnum1Model(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1 sourceObject) {
+        switch(sourceObject) {
+			case OTH: return "OTH";
+			case VAL1: return "VAL1";
+			case VAL2: return "VAL2";
+			case VAL3: return "VAL3";
+			case UNKNOWN: return "UNKNOWN";
+          default: return null;
+        }
+    }
+
+}

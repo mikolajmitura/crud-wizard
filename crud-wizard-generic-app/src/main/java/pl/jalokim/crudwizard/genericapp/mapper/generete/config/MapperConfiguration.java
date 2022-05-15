@@ -30,8 +30,13 @@ public class MapperConfiguration {
     @Builder.Default
     private boolean ignoreMappingProblems = false;
 
-
     @Builder.Default
     private PropertiesOverriddenMapping propertyOverriddenMapping = PropertiesOverriddenMapping.builder().build();
 
+    @Builder.Default
+    private EnumEntriesMapping enumEntriesMapping = EnumEntriesMapping.builder().build();
+
+    public boolean isForMappingEnums() {
+        return sourceMetaModel.isEnumTypeOrJavaEnum() && targetMetaModel.isEnumTypeOrJavaEnum();
+    }
 }

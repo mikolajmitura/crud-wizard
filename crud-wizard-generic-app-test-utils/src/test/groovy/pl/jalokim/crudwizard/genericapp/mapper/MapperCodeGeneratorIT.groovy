@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.makeLineEndingAsUnix
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.ClassMetaModelForMapperHelper.getClassModelInfoForGeneratedCode
@@ -27,9 +28,12 @@ import pl.jalokim.crudwizard.genericapp.mapper.conversion.MappingCollections
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1Entity
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.EnumEntriesMapping
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping
@@ -310,15 +314,98 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             .build())                                                                                                                                       |
             "convert_java_class_to_some_java_class"
 
-        // TODO #1 test for mapping from enum to metamodel of enum (should looks for matched enums and inform when cannot find)
-        // TODO #1 test for mapping from enum to enum (should looks for matched enums and inform when cannot find)
-        // TODO #1 test for mapping from metamodel of enum to enum (should looks for matched enums and inform when cannot find)
+        // mapping from enum to metamodel of enum (as return in main method)
+        modelFromClass(SomeEnum1)          | SOME_ENUM1_METAMODEL                          | EMPTY_CONFIG                                                   |
+            "from_enum_to_metamodel_enum_as_return_main_method"
+
+        // mapping from enum to enum (as return in main method) and ignore some source enum entries
+        modelFromClass(SomeEnum1)          | modelFromClass(SomeEnum2)                     | withMapperConfigurations(MapperConfiguration.builder()
+            .enumEntriesMapping(EnumEntriesMapping.builder()
+                .ignoredSourceEnum(["OTH", "VAL3"])
+                .build())
+            .build())                                                                                                                                       |
+            "from_enum_to_enum_as_return_main_method"
+
+        // mapping from metamodel of enum to enum (as return in main method)
+        SOME_ENUM1_METAMODEL               | modelFromClass(SomeEnum1)                     | EMPTY_CONFIG                                                   |
+            "from_metamodel_enum_to_enum_as_return_main_method"
+
+        // mapping from enum to metamodel of enum + overridden enums
+        // default enum mapping (throw exception expression) for metamodel generic enum target
+
+        // mapping from enum to enum + overridden enums
+        // default enum mapping (other enum entry) for real enum target
+
+        // mapping from metamodel of enum to enum + overridden enums
+        // default enum mapping (other enum entry) for metamodel generic enum target
+
+        // mapping from metamodel of enum to metamodel of enum  + overridden enums
+        // default enum mapping (throw exception expression) for real enum target
+        METAMODEL_WITH_ENUMS1 | METAMODEL_WITH_ENUMS2 | withMapperConfigurations(
+            MapperConfiguration.builder().build(),
+
+            MapperConfiguration.builder()
+            .name("mapFromEnumToEnumMetaModel")
+            .sourceMetaModel(modelFromClass(SomeEnum1))
+            .targetMetaModel(SOME_ENUM1_METAMODEL)
+            .enumEntriesMapping(EnumEntriesMapping.builder()
+                .targetEnumBySourceEnum([
+                    "UNKNOWN": "VAL1",
+                ])
+                .whenNotMappedEnum("throw new IllegalArgumentException(\"cannot map enum with value: \" + sourceObject)")
+                .build())
+            .build(),
+
+            MapperConfiguration.builder()
+                .name("mapFromEnumToEnum")
+                .sourceMetaModel(modelFromClass(SomeEnum1))
+                .targetMetaModel(modelFromClass(SomeEnum2))
+                .enumEntriesMapping(EnumEntriesMapping.builder()
+                    .targetEnumBySourceEnum([
+                        "VAL3": "OTH2",
+                        "OTH": "OTH1",
+                    ])
+                    .whenNotMappedEnum("UNKNOWN")
+                    .build())
+                .build(),
+
+            MapperConfiguration.builder()
+                .name("mapFromEnumMetaModelToEnum")
+                .sourceMetaModel(SOME_ENUM2_METAMODEL)
+                .targetMetaModel(modelFromClass(SomeEnum2))
+                .enumEntriesMapping(EnumEntriesMapping.builder()
+                    .targetEnumBySourceEnum([
+                        "VAL2": "OTH2",
+                    ])
+                    .ignoredSourceEnum(["OTH1", "UNKNOWN"])
+                    .whenNotMappedEnum("UNKNOWN")
+                    .build())
+                .build(),
+
+            MapperConfiguration.builder()
+                .name("mapFromEnumMetaModelToEnumMetaModel")
+                .sourceMetaModel(SOME_ENUM1_METAMODEL)
+                .targetMetaModel(SOME_ENUM2_METAMODEL)
+                .enumEntriesMapping(EnumEntriesMapping.builder()
+                    .targetEnumBySourceEnum([
+                        "OTH": "OTH1",
+                    ])
+                    .ignoredSourceEnum(["VAL3"])
+                    .whenNotMappedEnum("throw new IllegalArgumentException(sourceObject)")
+                    .build())
+                .build()
+        ) | "mapping_metamodel_with_enums_to_metamodel_with_enums"
+
+
         // TODO #1 test for mapping from string to metamodel of enum
         // TODO #1 test for mapping from metamodel of enum to string
+        // TODO #1 test for mapping to enum by native spring conversions
+        // TODO #1 test for mapping to enum by crud wizard service conversion
         // TODO #1 test for mapping from some metamodel to some Dto with map inside (SomeDtoWithSuperBuilder has in hierarchy)
     }
 
     // TODO #1 test for not found mapping way
+    // TODO #1 test for not found mapping way for enum mappings
     // TODO #1 test for found to many mappers for simple field
     // TODO #1 test for cannot find conversion way
     // TODO #1 test for marked few ignoreMappingProblem during map to target, in some classes, but finally will return exception
@@ -943,4 +1030,32 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             sourceMetaModel.getRequiredFieldByName(fieldName)
         ])
     }
+
+    private static SOME_ENUM1_METAMODEL = createValidEnumMetaModel("someEnum1Model",
+        "VAL1", "VAL2", "VAL3", "OTH", "UNKNOWN"
+    )
+
+    private static SOME_ENUM2_METAMODEL = createValidEnumMetaModel("someEnum2Model",
+        "VAL1", "VAL2", "OTH1", "UNKNOWN"
+    )
+
+    private static METAMODEL_WITH_ENUMS1 = ClassMetaModel.builder()
+        .name("metamodelWithEnums1")
+        .fields([
+            createValidFieldMetaModel("enum1", modelFromClass(SomeEnum1)),
+            createValidFieldMetaModel("enum2", modelFromClass(SomeEnum1)),
+            createValidFieldMetaModel("enum3", SOME_ENUM2_METAMODEL),
+            createValidFieldMetaModel("enum4", SOME_ENUM1_METAMODEL),
+        ])
+        .build()
+
+    private static METAMODEL_WITH_ENUMS2 = ClassMetaModel.builder()
+        .name("metamodelWithEnums2")
+        .fields([
+            createValidFieldMetaModel("enum1", SOME_ENUM1_METAMODEL),
+            createValidFieldMetaModel("enum2", modelFromClass(SomeEnum2)),
+            createValidFieldMetaModel("enum3", modelFromClass(SomeEnum2)),
+            createValidFieldMetaModel("enum4", SOME_ENUM2_METAMODEL),
+        ])
+        .build()
 }
