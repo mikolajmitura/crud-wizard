@@ -82,7 +82,10 @@ class AssignExpressionAsTextResolver {
                 mapperGeneratedCodeMetadata.addConstructorArgument(ConversionService.class);
                 return String.format("conversionService.convert(%s, %s.class)",
                     fetchValueExpression, targetMetaModel.getCanonicalNameOfRealClass());
-            } else {
+            } else if (whenConversionBetweenStringAndEnumMetaModel(sourceMetaModel, targetMetaModel)) {
+                return fetchValueExpression;
+            }
+            else {
                 mapperGeneratedCodeMetadata.throwMappingError(createMessagePlaceholder(
                     "mapper.converter.not.found.between.metamodels",
                     sourceMetaModel.getTypeDescription(),
@@ -93,7 +96,13 @@ class AssignExpressionAsTextResolver {
         }
     }
 
+    private boolean whenConversionBetweenStringAndEnumMetaModel(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel) {
+        return (targetMetaModel.isGenericMetamodelEnum() && String.class.equals(sourceMetaModel.getRealClass()))
+            || (sourceMetaModel.isGenericMetamodelEnum() && String.class.equals(targetMetaModel.getRealClass()));
+    }
+
     private boolean isTheSameTypeOrSubType(ClassMetaModel targetMetaModel, ClassMetaModel sourceMetaModel) {
-        return sourceMetaModel.getTypeDescription().equals(targetMetaModel.getTypeDescription()) || sourceMetaModel.isSubTypeOf(targetMetaModel);
+        return sourceMetaModel.getTypeDescription().equals(targetMetaModel.getTypeDescription())
+            || sourceMetaModel.isSubTypeOf(targetMetaModel);
     }
 }

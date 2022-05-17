@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -25,6 +24,7 @@ import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 
@@ -38,6 +38,7 @@ public class RawEntityObjectTranslator {
      */
     private final JsonObjectMapper jsonObjectMapper;
     private final DefaultSubClassesForAbstractClassesConfig defaultClassesConfig;
+    private final EnumClassMetaModelValidator enumClassMetaModelValidator;
 
     public <T> T translateToRealObjects(@Nullable JsonNode jsonNode, @Nullable ClassMetaModel nullableClassMetaModel) {
         if (jsonNode == null) {
@@ -67,17 +68,11 @@ public class RawEntityObjectTranslator {
     }
 
     private Object convertObjectBasedOnMetaData(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {
-        if (classMetaModel.isGenericEnumType()) {
+        if (classMetaModel.isGenericMetamodelEnum()) {
             TextNode textNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, TextNode.class);
-            String textValue = textNode.textValue();
-            List<String> enumValues = classMetaModel.getEnumClassMetaModel().getEnumValues();
-            if (enumValues.contains(textValue)) {
-                return textNode.textValue();
-            }  else  {
-                throw new TechnicalException("invalid enum value : '" +  textValue + "' in path: " + objectNodePath.getFullPath()
-                    + " available enum values: " + elements(enumValues).asConcatText(", "));
-            }
-
+            return enumClassMetaModelValidator.getEnumValueWhenIsValid(classMetaModel.getName(),
+                textNode.textValue(),
+                objectNodePath.getFullPath());
         } else {
             if (jsonNode instanceof NullNode) {
                 return null;

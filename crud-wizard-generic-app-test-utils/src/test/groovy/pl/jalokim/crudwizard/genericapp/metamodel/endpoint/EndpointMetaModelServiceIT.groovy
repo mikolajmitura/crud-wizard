@@ -276,7 +276,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                     classMetaModel.genericTypes.find { it.name == "document"} != null
             })
             assertFoundOneClassMetaModel(classMetaModels, {
-                classMetaModel -> classMetaModel.name == "exampleEnum" && classMetaModel.isGenericEnumType()})
+                classMetaModel -> classMetaModel.name == "exampleEnum" && classMetaModel.isGenericMetamodelEnum()})
             assertFoundOneClassMetaModel(classMetaModels, {
                 classMetaModel -> classMetaModel.realClass == Long && classMetaModel.simpleRawClass})
             assertFoundOneClassMetaModel(classMetaModels, {

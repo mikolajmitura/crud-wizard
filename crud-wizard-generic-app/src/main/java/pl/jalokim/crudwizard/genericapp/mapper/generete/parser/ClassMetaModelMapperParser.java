@@ -14,7 +14,6 @@ public class ClassMetaModelMapperParser {
 
     private final MetaModelContextService metaModelContextService;
 
-    // TODO #1 get ClassMetaModel or from dto during validation or from real context...
     public ClassMetaModel parseClassMetaModel(String text, MapperConfigurationParserContext parserContext) {
         text = text.trim();
         String[] textParts = text.split("_");

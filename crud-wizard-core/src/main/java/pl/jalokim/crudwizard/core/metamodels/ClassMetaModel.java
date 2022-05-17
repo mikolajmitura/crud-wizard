@@ -66,12 +66,12 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     /**
      * when true then does it mean that this meta model is like generic enum metamodel
      */
-    public boolean isGenericEnumType() {
+    public boolean isGenericMetamodelEnum() {
         return enumClassMetaModel != null;
     }
 
     public boolean isEnumTypeOrJavaEnum() {
-        return isGenericEnumType() || isRealClassEnum();
+        return isGenericMetamodelEnum() || isRealClassEnum();
     }
 
     public FieldMetaModel getFieldByName(String fieldName) {
@@ -168,7 +168,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     public boolean isSimpleType() {
-        return realClass != null && MetadataReflectionUtils.isSimpleType(realClass) || isGenericEnumType();
+        return realClass != null && MetadataReflectionUtils.isSimpleType(realClass) || isGenericMetamodelEnum();
     }
 
     public boolean isRealClassEnum() {
@@ -211,7 +211,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     public String getJavaGenericTypeInfo() {
-        if (isGenericEnumType()) {
+        if (isGenericMetamodelEnum()) {
             return "String";
         }
         if (isGenericModel()) {

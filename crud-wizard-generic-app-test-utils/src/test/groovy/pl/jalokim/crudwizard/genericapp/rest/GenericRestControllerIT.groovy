@@ -1,11 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.rest
 
 import static org.springframework.http.HttpMethod.PUT
-import static org.springframework.http.HttpMethod.PUT
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.isEqualsTo
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntryWithErrorCode
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createHttpQueryParamsClassMetaModelDto
@@ -840,7 +840,8 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         then:
         httpResponse.andExpect(status().isBadRequest())
         def errorResponse = extractErrorResponseDto(httpResponse)
-        errorResponse.message == "invalid enum value : 'invalid enum' in path: documents[0].enumField available enum values: ENUM1, ENUM2"
+        errorResponse.message == getMessage("mapping.invalid.enum.value",
+            'invalid enum', 'documents[0].enumField', "ENUM1, ENUM2", "exampleEnum")
     }
 
     def "invoke endpoint with default generic service, mappers, use default data storage with failure"() {

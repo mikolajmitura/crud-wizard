@@ -341,6 +341,12 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
 
         // mapping from metamodel of enum to metamodel of enum  + overridden enums
         // default enum mapping (throw exception expression) for real enum target
+
+        // mapping from string to metamodel of enum
+        // mapping from metamodel of enum to string
+        // mapping from string to enum by native spring conversions
+        // mapping from string to enum by crud wizard service conversion
+        // mapping from string to enum meta model by crud wizard service conversion
         METAMODEL_WITH_ENUMS1 | METAMODEL_WITH_ENUMS2 | withMapperConfigurations(
             MapperConfiguration.builder().build(),
 
@@ -396,18 +402,16 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build()
         ) | "mapping_metamodel_with_enums_to_metamodel_with_enums"
 
-
-        // TODO #1 test for mapping from string to metamodel of enum
-        // TODO #1 test for mapping from metamodel of enum to string
-        // TODO #1 test for mapping to enum by native spring conversions
-        // TODO #1 test for mapping to enum by crud wizard service conversion
+        // TODO #1 test for resolve conflict when are two inner method for mapping enums by override with name of mapping method
+        // TODO #1 test for resolve conflict when are two inner method for mapping list elements by override with name
+        //  of mapping method with path like 'elements1.*' and second one for 'elements2.*'
         // TODO #1 test for mapping from some metamodel to some Dto with map inside (SomeDtoWithSuperBuilder has in hierarchy)
     }
 
     // TODO #1 test for not found mapping way
     // TODO #1 test for not found mapping way for enum mappings
     // TODO #1 test for found to many mappers for simple field
-    // TODO #1 test for cannot find conversion way
+    // TODO #1 test for cannot find conversion way via crud wizard service conversion
     // TODO #1 test for marked few ignoreMappingProblem during map to target, in some classes, but finally will return exception
 
     static MapperGenerateConfiguration withMapperConfigurations(MapperConfiguration rootConfiguration, MapperConfiguration... subMappersConfiguration) {
@@ -1039,6 +1043,10 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         "VAL1", "VAL2", "OTH1", "UNKNOWN"
     )
 
+    private static SOME_ENUM3_METAMODEL = createValidEnumMetaModel("someEnum3Model",
+        "VAL1", "VAL2", "VAR3"
+    )
+
     private static METAMODEL_WITH_ENUMS1 = ClassMetaModel.builder()
         .name("metamodelWithEnums1")
         .fields([
@@ -1046,6 +1054,11 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             createValidFieldMetaModel("enum2", modelFromClass(SomeEnum1)),
             createValidFieldMetaModel("enum3", SOME_ENUM2_METAMODEL),
             createValidFieldMetaModel("enum4", SOME_ENUM1_METAMODEL),
+            createValidFieldMetaModel("stringToMetamodelOfEnum", modelFromClass(String)),
+            createValidFieldMetaModel("metamodelOfEnumToString", SOME_ENUM2_METAMODEL),
+            createValidFieldMetaModel("stringToEnumByNativeSpringConversions", modelFromClass(String)),
+            createValidFieldMetaModel("stringToEnumByCrudWizardServiceConversion", modelFromClass(String)),
+            createValidFieldMetaModel("stringToEnumMetaModelByCrudWizardServiceConversion", modelFromClass(String)),
         ])
         .build()
 
@@ -1056,6 +1069,11 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             createValidFieldMetaModel("enum2", modelFromClass(SomeEnum2)),
             createValidFieldMetaModel("enum3", modelFromClass(SomeEnum2)),
             createValidFieldMetaModel("enum4", SOME_ENUM2_METAMODEL),
+            createValidFieldMetaModel("stringToMetamodelOfEnum", SOME_ENUM2_METAMODEL),
+            createValidFieldMetaModel("metamodelOfEnumToString", modelFromClass(String)),
+            createValidFieldMetaModel("stringToEnumByNativeSpringConversions", modelFromClass(SomeEnum1)),
+            createValidFieldMetaModel("stringToEnumByCrudWizardServiceConversion", modelFromClass(SomeEnum2)),
+            createValidFieldMetaModel("stringToEnumMetaModelByCrudWizardServiceConversion", SOME_ENUM3_METAMODEL),
         ])
         .build()
 }

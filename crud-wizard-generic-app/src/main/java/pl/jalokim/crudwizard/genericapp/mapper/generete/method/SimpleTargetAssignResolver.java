@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelConstants.STRING_MODEL;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.createMethodName;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.ExpressionSourcesUtils.convertAssignExpressionsToMethodArguments;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.EnumsMappingMethodResolver;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
@@ -25,10 +27,12 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.MethodCodeMetadataBuilder;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.EnumEntriesMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 import pl.jalokim.utils.template.TemplateAsText;
 
@@ -38,6 +42,7 @@ class SimpleTargetAssignResolver {
 
     private static final String CASE_TEMPLATE = "\t\t\tcase ${from}: return ${to};";
 
+    private final GenericObjectsConversionService genericObjectsConversionService;
     private final AssignExpressionAsTextResolver assignExpressionAsTextResolver;
 
     void generateMapperMethodWhenMapToSimpleType(List<MapperArgumentMethodModel> methodArguments,
@@ -98,6 +103,16 @@ class SimpleTargetAssignResolver {
                         targetFieldClassMetaModel, sourceClassModel, valueToAssignExpression, targetFieldMetaData));
                 } else {
                     assignExpressionForFieldReference.set(valueToAssignExpression);
+                    if (!canConvert(sourceClassModel, targetFieldClassMetaModel)) {
+                        if (String.class.equals(sourceClassModel.getRealClass()) && targetFieldClassMetaModel.isGenericMetamodelEnum()) {
+                            assignExpressionForFieldReference.set(new BySpringBeanMethodAssignExpression(EnumClassMetaModelValidator.class,
+                                "enumClassMetaModelValidator", "getEnumValueWhenIsValid",
+                                List.of(new RawJavaCodeAssignExpression(STRING_MODEL, wrapTextWith(targetFieldClassMetaModel.getName(), "\"")),
+                                    valueToAssignExpression,
+                                    new RawJavaCodeAssignExpression(STRING_MODEL, wrapTextWith(currentPath.nextNode(fieldName).getFullPath(), "\"")))
+                            ));
+                        }
+                    }
                 }
             }
         }
@@ -185,7 +200,7 @@ class SimpleTargetAssignResolver {
     }
 
     private Map<String, EnumTypeMetaData> getEnumValues(ClassMetaModel classMetaModel) {
-        if (classMetaModel.isGenericEnumType()) {
+        if (classMetaModel.isGenericMetamodelEnum()) {
             EnumClassMetaModel enumClassMetaModel = classMetaModel.getEnumClassMetaModel();
             return elements(enumClassMetaModel.getEnumValues())
                 .asMap(Function.identity(),
@@ -226,5 +241,13 @@ class SimpleTargetAssignResolver {
 
         String asMappingFrom;
         String asMappingTo;
+    }
+
+    private boolean canConvert(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel) {
+        return genericObjectsConversionService.findConverterDefinition(sourceMetaModel, targetMetaModel) != null;
+    }
+
+    private static String wrapTextWith(String text, String wrapWith) {
+        return wrapWith + text + wrapWith;
     }
 }
