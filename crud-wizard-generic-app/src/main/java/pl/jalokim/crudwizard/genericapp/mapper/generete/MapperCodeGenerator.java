@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete;
 
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.ClassMetaModelForMapperHelper.getClassModelInfoForGeneratedCode;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel.createOnlyOneMapperArguments;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.EnumsMapperMethodGenerator;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGeneratorArgument;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
@@ -19,6 +21,7 @@ import pl.jalokim.utils.template.TemplateAsText;
 public class MapperCodeGenerator {
 
     private final MapperMethodGenerator mapperMethodGenerator;
+    private final EnumsMapperMethodGenerator enumsMapperMethodGenerator;
 
     public String generateMapperCodeMetadata(MapperGenerateConfiguration mapperGenerateConfiguration) {
         MapperConfiguration mapperConfiguration = mapperGenerateConfiguration.getRootConfiguration();
@@ -35,23 +38,24 @@ public class MapperCodeGenerator {
 
         mapperGenerateConfiguration.getMapperConfigurationByMethodName()
             .forEach((methodName, subMethodConfiguration) -> {
-                    if (!subMethodConfiguration.isForMappingEnums()) {
-                        mapperGeneratedCodeMetadata.addOtherMethod(mapperMethodGenerator.generateMapperMethod(MapperMethodGeneratorArgument.builder()
-                                .methodName(subMethodConfiguration.getName())
-                                .generated(false)
-                                .mapperMethodArguments(List.of(new MapperArgumentMethodModel("sourceObject",
-                                    subMethodConfiguration.getSourceMetaModel())))
-                                .targetMetaModel(subMethodConfiguration.getTargetMetaModel())
-                                .mapperGeneratedCodeMetadata(mapperGeneratedCodeMetadata)
-                                .mapperConfiguration(subMethodConfiguration)
-                                .propertiesOverriddenMapping(subMethodConfiguration.getPropertyOverriddenMapping())
-                                .mapperGenerateConfiguration(mapperGenerateConfiguration)
-                                .currentPath(ObjectNodePath.rootNode())
-                                .parentMethodCodeMetadata(null)
 
-                                .build()
-                            )
-                        );
+                    MapperMethodGeneratorArgument methodGeneratorArgument = MapperMethodGeneratorArgument.builder()
+                        .methodName(subMethodConfiguration.getName())
+                        .generated(false)
+                        .mapperMethodArguments(createOnlyOneMapperArguments(subMethodConfiguration.getSourceMetaModel()))
+                        .targetMetaModel(subMethodConfiguration.getTargetMetaModel())
+                        .mapperGeneratedCodeMetadata(mapperGeneratedCodeMetadata)
+                        .mapperConfiguration(subMethodConfiguration)
+                        .propertiesOverriddenMapping(subMethodConfiguration.getPropertyOverriddenMapping())
+                        .mapperGenerateConfiguration(mapperGenerateConfiguration)
+                        .currentPath(ObjectNodePath.rootNode().nextNode("#" + subMethodConfiguration.getName() + "()"))
+                        .parentMethodCodeMetadata(null)
+                        .build();
+
+                    if (subMethodConfiguration.isForMappingEnums()) {
+                        enumsMapperMethodGenerator.creteEnumsMappingMethod(methodGeneratorArgument);
+                    } else {
+                        mapperGeneratedCodeMetadata.addOtherMethod(mapperMethodGenerator.generateMapperMethod(methodGeneratorArgument));
                     }
                 }
             );

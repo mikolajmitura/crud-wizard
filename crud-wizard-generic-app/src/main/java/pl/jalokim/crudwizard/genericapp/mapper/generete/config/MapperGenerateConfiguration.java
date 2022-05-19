@@ -59,12 +59,4 @@ public class MapperGenerateConfiguration {
     public MapperConfiguration getMapperConfigurationByMethodName(String methodName) {
         return mapperConfigurationByMethodName.get(methodName);
     }
-
-    public List<MapperConfiguration> findMapperConfigurationBy(ClassMetaModel sourceClassMetaModel, ClassMetaModel targetClassMetaModel) {
-        return elements(rootConfiguration)
-            .concat(mapperConfigurationByMethodName.values())
-            .filter(mapperConfigEntry -> mapperConfigEntry.getSourceMetaModel().isTheSameMetaModel(sourceClassMetaModel)
-            && mapperConfigEntry.getTargetMetaModel().isTheSameMetaModel(targetClassMetaModel))
-            .asList();
-    }
 }

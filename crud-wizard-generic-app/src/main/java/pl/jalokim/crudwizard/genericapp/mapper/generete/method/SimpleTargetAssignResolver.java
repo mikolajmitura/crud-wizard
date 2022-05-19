@@ -5,27 +5,19 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createM
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.createMethodName;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.ExpressionSourcesUtils.convertAssignExpressionsToMethodArguments;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator.getGeneratedNewMethodOrGetCreatedEarlier;
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression.NULL_ASSIGN;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.EnumsMappingMethodResolver;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.MethodCodeMetadataBuilder;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.config.EnumEntriesMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
@@ -34,16 +26,14 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueT
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
-import pl.jalokim.utils.template.TemplateAsText;
 
 @Component
 @RequiredArgsConstructor
 class SimpleTargetAssignResolver {
 
-    private static final String CASE_TEMPLATE = "\t\t\tcase ${from}: return ${to};";
-
     private final GenericObjectsConversionService genericObjectsConversionService;
     private final AssignExpressionAsTextResolver assignExpressionAsTextResolver;
+    private final EnumsMapperMethodGenerator enumsMapperMethodGenerator;
 
     void generateMapperMethodWhenMapToSimpleType(List<MapperArgumentMethodModel> methodArguments,
         MapperMethodGeneratorArgument methodGeneratorArgument,
@@ -126,121 +116,38 @@ class SimpleTargetAssignResolver {
         List<MapperArgumentMethodModel> mapperArgumentMethodModels = convertAssignExpressionsToMethodArguments(mapperGeneratedCodeMetadata,
             List.of(valueToAssignExpression));
 
-        List<MapperConfiguration> foundMapperConfigurations = methodGeneratorArgument.getMapperGenerateConfiguration()
-            .findMapperConfigurationBy(sourceClassModel, targetFieldClassMetaModel);
+        List<MethodCodeMetadata> foundMatchedInnerNotGeneratedMethods = mapperGeneratedCodeMetadata
+            .findMatchNotGeneratedMethod(targetFieldClassMetaModel, sourceClassModel);
 
-        MapperConfiguration mapperConfigurationForEnums;
+        String methodName;
 
-        if (foundMapperConfigurations.isEmpty()) {
-            mapperConfigurationForEnums = methodGeneratorArgument.getMapperConfiguration();
-        } else if (foundMapperConfigurations.size() == 1) {
-            mapperConfigurationForEnums = foundMapperConfigurations.get(0);
+        if (foundMatchedInnerNotGeneratedMethods.isEmpty()) {
+            MethodCodeMetadata creteEnumsMappingMethod = enumsMapperMethodGenerator.creteEnumsMappingMethod(methodGeneratorArgument.toBuilder()
+                .targetMetaModel(targetFieldClassMetaModel)
+                .mapperMethodArguments(mapperArgumentMethodModels)
+                .methodName(createMethodName(mapperArgumentMethodModels, targetFieldClassMetaModel))
+                .build());
+
+            MethodCodeMetadata newMethodOrEarlier = getGeneratedNewMethodOrGetCreatedEarlier(mapperGeneratedCodeMetadata,
+                methodGeneratorArgument.getParentMethodCodeMetadata(),
+                creteEnumsMappingMethod);
+
+            methodName = newMethodOrEarlier.getMethodName();
+
+        } else if (foundMatchedInnerNotGeneratedMethods.size() == 1) {
+            methodName = foundMatchedInnerNotGeneratedMethods.get(0).getMethodName();
         } else {
             methodGeneratorArgument.getMapperGeneratedCodeMetadata()
                 .throwMappingError(createMessagePlaceholder("mapper.found.to.many.methods",
-                    elements(foundMapperConfigurations).asConcatText(", "),
+                    elements(foundMatchedInnerNotGeneratedMethods)
+                        .map(MethodCodeMetadata::getMethodName)
+                        .asConcatText(", "),
                     returnMethodMetaData.getFieldNameNodePath().getFullPath()));
             return null;
         }
 
-        String methodName;
-
-        if (mapperConfigurationForEnums.isForMappingEnums() && mapperConfigurationForEnums.getName() != null) {
-            methodName = mapperConfigurationForEnums.getName();
-        } else {
-            methodName = createMethodName(mapperArgumentMethodModels, targetFieldClassMetaModel);
-        }
-
-        MethodCodeMetadataBuilder methodBuilder = MethodCodeMetadata.builder()
-            .returnClassMetaModel(targetFieldClassMetaModel)
-            .methodReturnType(targetFieldClassMetaModel.getJavaGenericTypeInfo())
-            .methodArguments(mapperArgumentMethodModels)
-            .methodName(methodName)
-            .generated(methodGeneratorArgument.isGenerated())
-            .parentMethodMetadata(methodGeneratorArgument.getParentMethodCodeMetadata());
-
-        EnumEntriesMapping enumEntriesMapping = mapperConfigurationForEnums.getEnumEntriesMapping();
-        Map<String, String> overriddenEnumMappings = enumEntriesMapping.getTargetEnumBySourceEnum();
-        methodBuilder.methodTemplateResolver(new EnumsMappingMethodResolver(resolveDefaultEnumMapping(
-            targetFieldClassMetaModel, enumEntriesMapping.getWhenNotMappedEnum())));
-
-        var allTargetEnums = getEnumValues(targetFieldClassMetaModel);
-        var allSourceEnums = getEnumValues(sourceClassModel);
-
-        allSourceEnums.forEach((sourceEnumValue, sourceFullEnumValue) -> {
-
-            if (!enumEntriesMapping.getIgnoredSourceEnum().contains(sourceEnumValue)) {
-                EnumTypeMetaData targetEnumTypeMetaData;
-                String foundOverriddenTargetEnumValue = overriddenEnumMappings.get(sourceEnumValue);
-                if (foundOverriddenTargetEnumValue != null) {
-                    targetEnumTypeMetaData = allTargetEnums.get(foundOverriddenTargetEnumValue);
-                } else {
-                    targetEnumTypeMetaData = allTargetEnums.get(sourceEnumValue);
-                }
-                if (targetEnumTypeMetaData == null) {
-                    methodGeneratorArgument.getMapperGeneratedCodeMetadata().
-                        addError(createMessagePlaceholder("mapper.cannot.map.enum.value",
-                            sourceEnumValue, sourceClassModel.getTypeDescription(),
-                            targetFieldClassMetaModel.getTypeDescription(),
-                            returnMethodMetaData.getFieldNameNodePath().getFullPath()));
-                } else {
-                    TemplateAsText templateAsText = TemplateAsText.fromText(CASE_TEMPLATE)
-                        .overrideVariable("to", targetEnumTypeMetaData.getAsMappingTo())
-                        .overrideVariable("from", sourceFullEnumValue.getAsMappingFrom());
-                    methodBuilder.nextMappingCodeLine(templateAsText.getCurrentTemplateText());
-                }
-            }
-        });
-        MethodCodeMetadata newMethodOrEarlier = getGeneratedNewMethodOrGetCreatedEarlier(mapperGeneratedCodeMetadata,
-            methodGeneratorArgument.getParentMethodCodeMetadata(),
-            methodBuilder.build());
-
-        return new MethodInCurrentClassAssignExpression(newMethodOrEarlier.getMethodName(),
+        return new MethodInCurrentClassAssignExpression(methodName,
             List.of(valueToAssignExpression), targetFieldClassMetaModel);
-    }
-
-    private Map<String, EnumTypeMetaData> getEnumValues(ClassMetaModel classMetaModel) {
-        if (classMetaModel.isGenericMetamodelEnum()) {
-            EnumClassMetaModel enumClassMetaModel = classMetaModel.getEnumClassMetaModel();
-            return elements(enumClassMetaModel.getEnumValues())
-                .asMap(Function.identity(),
-                    enumValue -> {
-                        String wrapWithQuoteEnumValue = StringUtils.wrap(enumValue, '"');
-                        return new EnumTypeMetaData(wrapWithQuoteEnumValue, wrapWithQuoteEnumValue);
-                    });
-        }
-
-        return elements(classMetaModel.getRealClass().getEnumConstants())
-            .map(enumEntry -> (Enum<?>) enumEntry)
-            .asMap(Enum::name,
-                enumEntry ->
-                    new EnumTypeMetaData(enumEntry.name(),
-                        enumEntry.getClass().getCanonicalName() + "." + enumEntry.name())
-            );
-    }
-
-    private String resolveDefaultEnumMapping(ClassMetaModel targetMetaModel, String whenNotMappedEnumFromConfig) {
-        if (NULL_ASSIGN.equals(whenNotMappedEnumFromConfig)) {
-            return "return " + NULL_ASSIGN;
-        }
-        if (whenNotMappedEnumFromConfig.trim().contains("throw ")) {
-            return whenNotMappedEnumFromConfig;
-        }
-        return "return " + enumValueAsFullPath(targetMetaModel, whenNotMappedEnumFromConfig);
-    }
-
-    private String enumValueAsFullPath(ClassMetaModel classMetaModel, String shortEnumValue) {
-        if (classMetaModel.isRealClassEnum()) {
-            return classMetaModel.getRealClass().getCanonicalName() + "." + shortEnumValue;
-        }
-        return shortEnumValue;
-    }
-
-    @Value
-    private static class EnumTypeMetaData {
-
-        String asMappingFrom;
-        String asMappingTo;
     }
 
     private boolean canConvert(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel) {

@@ -30,6 +30,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1Entity
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator
@@ -402,14 +403,58 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build()
         ) | "mapping_metamodel_with_enums_to_metamodel_with_enums"
 
-        // TODO #1 test for resolve conflict when are two inner method for mapping enums by override with name of mapping method
+        METAMODEL_WITH_ENUMS3 | METAMODEL_WITH_ENUMS4 | withMapperConfigurations(MapperConfiguration.builder()
+            .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .mappingsByPropertyName([
+                    spec1enum: PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            new MethodInCurrentClassAssignExpression("spec1enumMap",
+                                [createFieldsChainExpression(METAMODEL_WITH_ENUMS3, "spec1enum")],
+                                modelFromClass(SomeEnum3))])
+                        .build(),
+                    spec2enum:  PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            new MethodInCurrentClassAssignExpression("spec2enumMap",
+                                [createFieldsChainExpression(METAMODEL_WITH_ENUMS3, "spec2enum")],
+                                modelFromClass(SomeEnum3))])
+                        .build(),
+                ])
+                .build())
+            .build(),
+            MapperConfiguration.builder()
+                .name("spec1enumMap")
+                .sourceMetaModel(SOME_ENUM1_METAMODEL)
+                .targetMetaModel(modelFromClass(SomeEnum3))
+                .enumEntriesMapping(EnumEntriesMapping.builder()
+                    .targetEnumBySourceEnum([
+                        "OTH": "SPEC1",
+                    ])
+                    .ignoredSourceEnum(["UNKNOWN"])
+                    .build())
+                .build(),
+            MapperConfiguration.builder()
+                .name("spec2enumMap")
+                .sourceMetaModel(SOME_ENUM1_METAMODEL)
+                .targetMetaModel(modelFromClass(SomeEnum3))
+                .enumEntriesMapping(EnumEntriesMapping.builder()
+                    .targetEnumBySourceEnum([
+                        "OTH": "SPEC2",
+                    ])
+                    .ignoredSourceEnum(["UNKNOWN"])
+                    .build())
+                .build(),
+        ) | "resolve_enums_map_method_conflict"
         // TODO #1 test for resolve conflict when are two inner method for mapping list elements by override with name
         //  of mapping method with path like 'elements1.*' and second one for 'elements2.*'
-        // TODO #1 test for mapping from some metamodel to some Dto with map inside (SomeDtoWithSuperBuilder has in hierarchy)
+        // TODO #1 test for mapping from some metamodel to some Dto map field
+        // TODO #1 test for mapping from some Dto map field to some metamodel
     }
 
     // TODO #1 test for not found mapping way
     // TODO #1 test for not found mapping way for enum mappings
+    // TODO #1 test for found to many mappers methods for enum field
+    // TODO #1 test for found to many mappers methods for object field
+    // TODO #1 test for found to many mappers methods for collection field
     // TODO #1 test for found to many mappers for simple field
     // TODO #1 test for cannot find conversion way via crud wizard service conversion
     // TODO #1 test for marked few ignoreMappingProblem during map to target, in some classes, but finally will return exception
@@ -1076,4 +1121,21 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             createValidFieldMetaModel("stringToEnumMetaModelByCrudWizardServiceConversion", SOME_ENUM3_METAMODEL),
         ])
         .build()
+
+    private static METAMODEL_WITH_ENUMS3 = ClassMetaModel.builder()
+        .name("metamodelWithEnums2")
+        .fields([
+            createValidFieldMetaModel("spec1enum", SOME_ENUM1_METAMODEL),
+            createValidFieldMetaModel("spec2enum", SOME_ENUM1_METAMODEL),
+        ])
+        .build()
+
+    private static METAMODEL_WITH_ENUMS4 = ClassMetaModel.builder()
+        .name("metamodelWithEnums2")
+        .fields([
+            createValidFieldMetaModel("spec1enum", modelFromClass(SomeEnum3)),
+            createValidFieldMetaModel("spec2enum", modelFromClass(SomeEnum3)),
+        ])
+        .build()
+
 }
