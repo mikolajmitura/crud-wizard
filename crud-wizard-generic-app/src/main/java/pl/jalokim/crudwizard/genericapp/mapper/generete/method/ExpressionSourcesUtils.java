@@ -22,7 +22,8 @@ class ExpressionSourcesUtils {
         return elements(methodArgumentsExpressions)
             .mapWithIndex((index, expression) -> new MapperArgumentMethodModel(
                 methodArgumentsExpressions.size() == 1 ? "sourceObject" : "argument" + index,
-                expression.generateCodeMetadata(mapperGeneratedCodeMetadata).getReturnClassModel()))
+                expression.generateCodeMetadata(mapperGeneratedCodeMetadata).getReturnClassModel(),
+                expression))
             .asList();
     }
 

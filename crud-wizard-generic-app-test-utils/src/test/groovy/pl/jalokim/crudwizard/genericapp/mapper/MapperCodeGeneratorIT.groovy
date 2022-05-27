@@ -43,6 +43,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverrid
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ByMapperNameAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.EachElementMapByMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression
@@ -516,6 +517,71 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .targetMetaModel(modelFromClass(CollectionElement))
                 .build()
         ) | "resolve_in_collection_mapping_conflict"
+
+        // test for resolve conflict when are two inner method for mapping list elements by override with name
+        //  of mapping method with path like
+        //  'elements1={(someOneElement).eachMapBy mapElements1}'
+        //  'elements1={(elements1).eachMapBy mapElements1}'
+        //  'elements1={(someOneElement2).eachMapBy mapElements1}'
+        //  and second one for 'elements2.*'
+        //  mapping like 'elements3.*.field1=null'
+        OTHER_WITH_ELEMENTS_MODEL | modelFromClass(OtherWithElements) | withMapperConfigurations(MapperConfiguration.builder()
+            .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .mappingsByPropertyName([
+                    elements1: PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            new EachElementMapByMethodAssignExpression("mapElements1",
+                                createFieldsChainExpression(OTHER_WITH_ELEMENTS_MODEL, "someOneElement")),
+                            new EachElementMapByMethodAssignExpression("mapElements1",
+                                createFieldsChainExpression(OTHER_WITH_ELEMENTS_MODEL, "elements1")),
+                            new MethodInCurrentClassAssignExpression("mapFromOtherElement",
+                                [createFieldsChainExpression(OTHER_WITH_ELEMENTS_MODEL, "someOneElement2")],
+                                modelFromClass(CollectionElement))
+                        ])
+                        .build(),
+                    elements2: PropertiesOverriddenMapping.builder()
+                        .mappingsByPropertyName([
+                            '*' : PropertiesOverriddenMapping.builder()
+                                .valueMappingStrategy([
+                                    new MethodInCurrentClassAssignExpression("mapElements2",
+                                        List.of(new RawJavaCodeAssignExpression(COLLECTION_ELEMENT_MODEL, "sourceObject")),
+                                        modelFromClass(CollectionElement))
+                                ])
+                                .build()
+                        ])
+                        .build(),
+                    elements3: PropertiesOverriddenMapping.builder()
+                        .mappingsByPropertyName([
+                            '*' : PropertiesOverriddenMapping.builder()
+                                .mappingsByPropertyName([
+                                    field1: PropertiesOverriddenMapping.builder()
+                                        .valueMappingStrategy([
+                                            new NullAssignExpression(modelFromClass(String))
+                                        ])
+                                        .build()
+                                ])
+                                .build()
+                        ])
+                        .build(),
+                ])
+                .build())
+            .build(),
+            MapperConfiguration.builder()
+                .name("mapElements1")
+                .sourceMetaModel(COLLECTION_ELEMENT_MODEL)
+                .targetMetaModel(modelFromClass(CollectionElement))
+                .build(),
+            MapperConfiguration.builder()
+                .name("mapElements2")
+                .sourceMetaModel(COLLECTION_ELEMENT_MODEL)
+                .targetMetaModel(modelFromClass(CollectionElement))
+                .build(),
+            MapperConfiguration.builder()
+                .name("mapFromOtherElement")
+                .sourceMetaModel(modelFromClass(CollectionElementOther))
+                .targetMetaModel(modelFromClass(CollectionElement))
+                .build()
+        ) | "resolve_in_collection_mapping_conflict2"
     }
 
     // TODO #1 test for not found mapping way

@@ -64,7 +64,7 @@ public class MapperCodeGenerator {
             mapperMethodGenerator.generateMapperMethod(MapperMethodGeneratorArgument.builder()
                 .methodName("mainMethod")
                 .generated(true)
-                .mapperMethodArguments(List.of(new MapperArgumentMethodModel("sourceObject", sourceMetaModel)))
+                .mapperMethodArguments(createOnlyOneMapperArguments(sourceMetaModel))
                 .targetMetaModel(targetMetaModel)
                 .mapperGeneratedCodeMetadata(mapperGeneratedCodeMetadata)
                 .mapperConfiguration(mapperConfiguration)
