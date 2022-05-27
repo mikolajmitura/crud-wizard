@@ -217,7 +217,7 @@ public class MapperMethodGenerator {
                     simpleTargetAssignResolver.assignValueForSimpleField(methodGeneratorArgument,
                         assignExpressionForFieldReference,
                         targetFieldMetaData,
-                        getOverriddenExpressionsOrFindByFieldName(methodGeneratorArgument, targetFieldMetaData));
+                        methodArgumentsForMappingNotSimpleTypes);
 
                 } else {
                     if (isElementsType(targetFieldClassMetaModel)) {
@@ -258,6 +258,8 @@ public class MapperMethodGenerator {
         List<MapperArgumentMethodModel> mapperElementsMethodArguments = convertAssignExpressionsToMethodArguments(mapperGeneratedCodeMetadata,
             methodArgumentsExpressions);
 
+        MapperMethodGeneratorArgument methodGeneratorArgumentForCollection = methodGeneratorArgument.createForNextMethod(mapperElementsMethodArguments, targetFieldMetaData);
+
         MethodCodeMetadataBuilder methodBuilder = MethodCodeMetadata.builder()
             .returnClassMetaModel(targetFieldClassMetaModel)
             .methodReturnType(targetFieldClassMetaModel.getJavaGenericTypeInfo())
@@ -265,7 +267,7 @@ public class MapperMethodGenerator {
             .methodName(createMethodName(mapperElementsMethodArguments, targetFieldClassMetaModel))
             .generated(true)
             .lastLine("return elements")
-            .parentMethodMetadata(methodGeneratorArgument.getParentMethodCodeMetadata());
+            .parentMethodMetadata(methodGeneratorArgumentForCollection.getParentMethodCodeMetadata());
 
         IterableTemplateForMapping iterableTemplateForTarget = findIterableTemplateForMappingFor(targetFieldClassMetaModel);
         Objects.requireNonNull(iterableTemplateForTarget, "iterableTemplateForTarget should not be null");
@@ -284,7 +286,7 @@ public class MapperMethodGenerator {
                 var populateIterableTemplate = fromText(iterableTemplateForTarget.getPopulateIterableTemplate(), true);
 
                 if (iterableTemplateForSource == null) {
-                    overrideExpressionArgumentInPopulateIterable(methodGeneratorArgument, targetFieldMetaData,
+                    overrideExpressionArgumentInPopulateIterable(methodGeneratorArgumentForCollection, targetFieldMetaData,
                         genericTypesOfTargetCollection.get(0), populateIterableTemplate, 0, methodArgument.getArgumentName(), methodArgument.getArgumentType());
                     addToElementsCode = tabsNTimes(2) + populateIterableTemplate.getCurrentTemplateText() + ";";
 
@@ -292,7 +294,7 @@ public class MapperMethodGenerator {
 
                     elements(iterableTemplateForSource.getVariablesExpressionsForAddToIterable())
                         .forEachWithIndex((index, expression) ->
-                            overrideExpressionArgumentInPopulateIterable(methodGeneratorArgument, targetFieldMetaData,
+                            overrideExpressionArgumentInPopulateIterable(methodGeneratorArgumentForCollection, targetFieldMetaData,
                                 genericTypesOfTargetCollection.get(index), populateIterableTemplate, index, expression, methodArgument.getArgumentType()
                                     .getGenericTypes().get(index))
                         );
@@ -349,14 +351,18 @@ public class MapperMethodGenerator {
         ClassMetaModel sourceMetaModel) {
 
         List<ValueToAssignExpression> methodArgumentsForMappingNotSimpleTypes = List.of(new RawJavaCodeAssignExpression(sourceMetaModel, expression));
+        PropertiesOverriddenMapping propertiesOverriddenMapping = methodGeneratorArgument.getPropertiesOverriddenMapping();
 
         TargetFieldMetaData targetFieldMetaData = TargetFieldMetaData.builder()
             .fieldName(ITERABLE_ELEMENT_NODE_NAME)
             .fieldNameNodePath(targetFieldMetaDataWithElements.getFieldNameNodePath()
                 .nextNode(ITERABLE_ELEMENT_NODE_NAME))
             .targetFieldClassMetaModel(targetFieldClassMetaModel)
-            .overriddenPropertyStrategiesByForField(methodArgumentsForMappingNotSimpleTypes)
+            .overriddenPropertyStrategiesByForField(findOverriddenMappingStrategies(propertiesOverriddenMapping, ITERABLE_ELEMENT_NODE_NAME))
+            .propertiesOverriddenMappingForField(getPropertiesOverriddenMapping(propertiesOverriddenMapping, ITERABLE_ELEMENT_NODE_NAME))
             .build();
+
+        methodGeneratorArgument = methodGeneratorArgument.createForNextMethod(List.of(), targetFieldMetaData);
 
         String expressionForAssignWhenExists = tryGetMappingAssignExpression(methodGeneratorArgument,
             targetFieldMetaData, methodArgumentsForMappingNotSimpleTypes);

@@ -24,7 +24,9 @@ import pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSimpleSuperBuilder
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElementOther
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.MappingCollections
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.OtherWithElements
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1Entity
@@ -403,6 +405,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build()
         ) | "mapping_metamodel_with_enums_to_metamodel_with_enums"
 
+        // resolving conflicts when exists the same inner method (but other name) for mapping enum
         METAMODEL_WITH_ENUMS3 | METAMODEL_WITH_ENUMS4 | withMapperConfigurations(MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
@@ -444,10 +447,75 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                     .build())
                 .build(),
         ) | "resolve_enums_map_method_conflict"
-        // TODO #1 test for resolve conflict when are two inner method for mapping list elements by override with name
-        //  of mapping method with path like 'elements1.*' and second one for 'elements2.*'
-        // TODO #1 test for mapping from some metamodel to some Dto map field
-        // TODO #1 test for mapping from some Dto map field to some metamodel
+
+        // test for resolve conflict when are two inner method for mapping list elements by override with name
+        //  of mapping method with path like 'elements1.*'
+        //  and second one for 'elements2.*'
+        //  mapping like 'elements3.*.field1=null'
+        OTHER_WITH_ELEMENTS_MODEL | modelFromClass(OtherWithElements) | withMapperConfigurations(MapperConfiguration.builder()
+            .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .mappingsByPropertyName([
+                    elements1: PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            createFieldsChainExpression(OTHER_WITH_ELEMENTS_MODEL, "someOneElement"),
+                            createFieldsChainExpression(OTHER_WITH_ELEMENTS_MODEL, "elements1"),
+                            new MethodInCurrentClassAssignExpression("mapFromOtherElement",
+                                [createFieldsChainExpression(OTHER_WITH_ELEMENTS_MODEL, "someOneElement2")],
+                                modelFromClass(CollectionElement))
+                        ])
+                        .mappingsByPropertyName([
+                            '*' : PropertiesOverriddenMapping.builder()
+                                .valueMappingStrategy([
+                                    new MethodInCurrentClassAssignExpression("mapElements1",
+                                        List.of(new RawJavaCodeAssignExpression(COLLECTION_ELEMENT_MODEL, "sourceObject")),
+                                        modelFromClass(CollectionElement))
+                                ])
+                                .build()
+                        ])
+                        .build(),
+                    elements2: PropertiesOverriddenMapping.builder()
+                        .mappingsByPropertyName([
+                            '*' : PropertiesOverriddenMapping.builder()
+                                .valueMappingStrategy([
+                                    new MethodInCurrentClassAssignExpression("mapElements2",
+                                        List.of(new RawJavaCodeAssignExpression(COLLECTION_ELEMENT_MODEL, "sourceObject")),
+                                        modelFromClass(CollectionElement))
+                                ])
+                                .build()
+                        ])
+                        .build(),
+                    elements3: PropertiesOverriddenMapping.builder()
+                        .mappingsByPropertyName([
+                            '*' : PropertiesOverriddenMapping.builder()
+                                .mappingsByPropertyName([
+                                    field1: PropertiesOverriddenMapping.builder()
+                                        .valueMappingStrategy([
+                                            new NullAssignExpression(modelFromClass(String))
+                                        ])
+                                        .build()
+                                ])
+                                .build()
+                        ])
+                        .build(),
+                ])
+                .build())
+            .build(),
+            MapperConfiguration.builder()
+                .name("mapElements1")
+                .sourceMetaModel(COLLECTION_ELEMENT_MODEL)
+                .targetMetaModel(modelFromClass(CollectionElement))
+                .build(),
+            MapperConfiguration.builder()
+                .name("mapElements2")
+                .sourceMetaModel(COLLECTION_ELEMENT_MODEL)
+                .targetMetaModel(modelFromClass(CollectionElement))
+                .build(),
+            MapperConfiguration.builder()
+                .name("mapFromOtherElement")
+                .sourceMetaModel(modelFromClass(CollectionElementOther))
+                .targetMetaModel(modelFromClass(CollectionElement))
+                .build()
+        ) | "resolve_in_collection_mapping_conflict"
     }
 
     // TODO #1 test for not found mapping way
@@ -1138,4 +1206,23 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         ])
         .build()
 
+    private static OTHER_WITH_ELEMENTS_MODEL = ClassMetaModel.builder()
+        .name("otherWithElementsModel")
+        .fields([
+            createValidFieldMetaModel("elements1", ClassMetaModel.builder()
+                .realClass(List)
+                .genericTypes([COLLECTION_ELEMENT_MODEL])
+                .build()),
+            createValidFieldMetaModel("elements2", ClassMetaModel.builder()
+                .realClass(Set)
+                .genericTypes([COLLECTION_ELEMENT_MODEL])
+                .build()),
+            createValidFieldMetaModel("elements3", ClassMetaModel.builder()
+                .realClass(Set)
+                .genericTypes([COLLECTION_ELEMENT_MODEL])
+                .build()),
+            createValidFieldMetaModel("someOneElement", COLLECTION_ELEMENT_MODEL),
+            createValidFieldMetaModel("someOneElement2", modelFromClass(CollectionElementOther)),
+        ])
+        .build()
 }
