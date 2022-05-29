@@ -40,8 +40,8 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.MethodCodeMetadataBuilder;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGeneratorArgument.FindMethodArgument;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements.IterableTemplateForMapping;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.EachElementMapByMethodAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
@@ -249,7 +249,7 @@ public class MapperMethodGenerator {
             mappingProblemReason);
     }
 
-    private void assignValueToFieldWithElements(MapperMethodGeneratorArgument methodGeneratorArgument,
+    public void assignValueToFieldWithElements(MapperMethodGeneratorArgument methodGeneratorArgument,
         TargetFieldMetaData targetFieldMetaData, AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference,
         List<ValueToAssignExpression> methodArgumentsExpressions) {
 
@@ -412,8 +412,12 @@ public class MapperMethodGenerator {
             var methodArgumentCodeMetaData = methodArgumentsExpressions.get(0).generateCodeMetadata(mapperGeneratedCodeMetadata);
             ClassMetaModel sourceClassMetaModel = methodArgumentCodeMetaData.getReturnClassModel();
 
-            List<MethodCodeMetadata> foundMatchedInnerNotGeneratedMethods = findInnerMappingMethod(
-                methodGeneratorArgument, mapperGeneratedCodeMetadata, targetFieldClassMetaModel, sourceClassMetaModel);
+            List<MethodCodeMetadata> foundMatchedInnerNotGeneratedMethods = methodGeneratorArgument
+                .findMethodsFor(new FindMethodArgument(
+                    methodGeneratorArgument.getMapperGeneratedCodeMetadata(),
+                    targetFieldClassMetaModel,
+                    sourceClassMetaModel
+                ));
 
             if (targetFieldClassMetaModel.isTheSameMetaModel(sourceClassMetaModel)) {
                 assignExpressionForFieldReference.set(methodArgumentsExpressions.get(0));
@@ -447,35 +451,6 @@ public class MapperMethodGenerator {
                 methodArgumentsExpressions,
                 targetFieldClassMetaModel));
         }
-    }
-
-    private List<MethodCodeMetadata> findInnerMappingMethod(MapperMethodGeneratorArgument methodGeneratorArgument,
-        MapperCodeMetadata mapperGeneratedCodeMetadata, ClassMetaModel targetFieldClassMetaModel, ClassMetaModel sourceClassMetaModel) {
-
-        List<MethodCodeMetadata> foundMatchedInnerNotGeneratedMethods;
-        List<MapperArgumentMethodModel> mapperMethodArguments = methodGeneratorArgument.getMapperMethodArguments();
-
-        if (targetIsElementInCollectionAndHasGivenMappingMethod(mapperMethodArguments)) {
-
-            // TODO #1 #1 generate mapping collection code should be in EachElementMapByMethodAssignExpression
-            //  when mapped each element by given method name
-            var elementMappingExpression = (EachElementMapByMethodAssignExpression) mapperMethodArguments.get(0)
-                .getDerivedFromExpression();
-
-            foundMatchedInnerNotGeneratedMethods = List.of(MethodCodeMetadata.builder()
-                .methodName(elementMappingExpression.getInnerMethodName())
-                .build()
-            );
-        } else {
-            foundMatchedInnerNotGeneratedMethods = mapperGeneratedCodeMetadata
-                .findMatchNotGeneratedMethod(targetFieldClassMetaModel, sourceClassMetaModel);
-        }
-        return foundMatchedInnerNotGeneratedMethods;
-    }
-
-    private boolean targetIsElementInCollectionAndHasGivenMappingMethod(List<MapperArgumentMethodModel> mapperMethodArguments) {
-        return mapperMethodArguments.size() == 1 &&
-            mapperMethodArguments.get(0).getDerivedFromExpression() instanceof EachElementMapByMethodAssignExpression;
     }
 
     private MethodCodeMetadata createMethodCodeMetadata(MapperMethodGeneratorArgument mapperMethodGeneratorArgument) {

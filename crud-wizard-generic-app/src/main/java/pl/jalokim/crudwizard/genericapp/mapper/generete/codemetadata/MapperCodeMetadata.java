@@ -11,21 +11,28 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperValidationContext;
 
 @Data
+@RequiredArgsConstructor
 public class MapperCodeMetadata {
 
-    String mapperClassName;
-    Set<String> imports = new HashSet<>();
-    Set<String> staticImports = new HashSet<>();
-    Set<ConstructorArgument> constructorArguments = new LinkedHashSet<>();
-    MethodCodeMetadata mainMethodCodeMetadata;
-    List<MethodCodeMetadata> otherMethods = new ArrayList<>();
-    Set<String> methodNames = new HashSet<>();
-    MapperValidationContext mapperValidationContext = new MapperValidationContext();
+    private final MapperMethodGenerator mapperMethodGenerator;
+    private final MapperGenerateConfiguration mapperGenerateConfiguration;
+
+    private String mapperClassName;
+    private Set<String> imports = new HashSet<>();
+    private Set<String> staticImports = new HashSet<>();
+    private Set<ConstructorArgument> constructorArguments = new LinkedHashSet<>();
+    private MethodCodeMetadata mainMethodCodeMetadata;
+    private List<MethodCodeMetadata> otherMethods = new ArrayList<>();
+    private Set<String> methodNames = new HashSet<>();
+    private MapperValidationContext mapperValidationContext = new MapperValidationContext();
 
     public void addImport(Class<?> classToImport) {
         imports.add("import " + classToImport.getCanonicalName() + ";");
@@ -131,5 +138,11 @@ public class MapperCodeMetadata {
                     && methodCodeMetadata.getReturnClassMetaModel().isTheSameMetaModel(targetClassMetaModel)
             )
             .asList();
+    }
+
+    public MethodCodeMetadata getMethodByName(String innerMethodName) {
+        return elements(otherMethods)
+            .filter(method -> method.getMethodName().equals(innerMethodName))
+            .getFirstOrNull();
     }
 }

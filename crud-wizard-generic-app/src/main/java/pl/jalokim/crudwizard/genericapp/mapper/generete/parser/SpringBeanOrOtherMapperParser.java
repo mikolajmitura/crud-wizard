@@ -78,7 +78,7 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
                     mapperConfigurationParserContext, sourceExpressionParserContext);
                 methodArguments.add(methodArgument);
 
-                ClassMetaModel returnClassModel = methodArgument.generateCodeMetadata(new MapperCodeMetadata()).getReturnClassModel();
+                ClassMetaModel returnClassModel = generateCodeMetadataFor(methodArgument, mapperConfigurationParserContext).getReturnClassModel();
 
                 if (returnClassModel.hasRealClass()) {
                     methodArgumentsClasses.add(returnClassModel.getRealClass());
@@ -137,8 +137,7 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
 
 
         ClassMetaModel sourceClassMetaModelOfMapper = mapperMetaModelByName.getSourceClassMetaModel();
-        ClassMetaModel returnClassModelOfExpression = valueExpression.generateCodeMetadata(new MapperCodeMetadata())
-            .getReturnClassModel();
+        ClassMetaModel returnClassModelOfExpression = generateCodeMetadataFor(valueExpression, mapperConfigurationParserContext).getReturnClassModel();
         boolean methodArgumentIsOk = false;
         if (sourceClassMetaModelOfMapper.equals(returnClassModelOfExpression)) {
             methodArgumentIsOk = true;

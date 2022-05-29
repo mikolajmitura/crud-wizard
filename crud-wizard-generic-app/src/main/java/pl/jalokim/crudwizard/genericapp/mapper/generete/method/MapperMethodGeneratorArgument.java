@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.Meth
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.Builder;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
@@ -31,6 +32,12 @@ public class MapperMethodGeneratorArgument {
     ObjectNodePath currentPath;
     MethodCodeMetadata parentMethodCodeMetadata;
 
+    @Builder.Default
+    Function<FindMethodArgument, List<MethodCodeMetadata>> matchedMethodFinder = findMethodArgument ->
+        findMethodArgument.getMapperGeneratedCodeMetadata().findMatchNotGeneratedMethod(
+            findMethodArgument.getTargetClassMetaModel(),
+            findMethodArgument.getSourceClassMetaModel());
+
     MapperMethodGeneratorArgument createForNextMethod(List<MapperArgumentMethodModel> mapperMethodArguments,
         TargetFieldMetaData targetFieldMetaData) {
 
@@ -48,5 +55,17 @@ public class MapperMethodGeneratorArgument {
         return Optional.ofNullable(propertiesOverriddenMapping)
             .map(PropertiesOverriddenMapping::getValueMappingStrategy)
             .orElse(List.of());
+    }
+
+    public List<MethodCodeMetadata> findMethodsFor(FindMethodArgument findMethodArgument) {
+        return matchedMethodFinder.apply(findMethodArgument);
+    }
+
+    @Value
+    public static class FindMethodArgument {
+
+        MapperCodeMetadata mapperGeneratedCodeMetadata;
+        ClassMetaModel targetClassMetaModel;
+        ClassMetaModel sourceClassMetaModel;
     }
 }

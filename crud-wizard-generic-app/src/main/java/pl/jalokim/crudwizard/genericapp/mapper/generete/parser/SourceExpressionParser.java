@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 
 @RequiredArgsConstructor
@@ -62,4 +65,16 @@ abstract class SourceExpressionParser {
             sourceExpressionParserContext.moveToPreviousChar();
         }
     }
+
+    protected MapperMethodGenerator getMapperMethodGenerator() {
+        return applicationContext.getBean(MapperMethodGenerator.class);
+    }
+
+    protected ValueToAssignCodeMetadata generateCodeMetadataFor(ValueToAssignExpression valueToAssignExpression,
+        MapperConfigurationParserContext mapperConfigurationParserContext) {
+
+        return valueToAssignExpression.generateCodeMetadata(new MapperCodeMetadata(
+            getMapperMethodGenerator(), mapperConfigurationParserContext.getMapperGenerateConfiguration()));
+    }
+
 }

@@ -7,15 +7,21 @@ import java.time.LocalDate
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator
 import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SampleDtoWithoutGetter
 import pl.jalokim.utils.reflection.InvokableReflectionUtils
 import spock.lang.Specification
 
 class FieldsChainToAssignExpressionTest extends Specification {
 
+    MapperMethodGenerator mapperMethodGenerator = Mock()
+
     def "return expected method mapping chain"() {
         given:
-        MapperCodeMetadata mapperGeneratedCodeMetadata = new MapperCodeMetadata()
+        MapperCodeMetadata mapperGeneratedCodeMetadata = new MapperCodeMetadata(mapperMethodGenerator,
+            MapperGenerateConfiguration.builder().build())
+
         def birthDatFieldModel = createValidFieldMetaModel("birthDay", LocalDate)
         def samplePersonFieldModel = createValidFieldMetaModel("samplePersonDto", SamplePersonDto)
         def personWrapperField = createValidFieldMetaModel("personWrapper", SampleDtoWithoutGetter)

@@ -28,7 +28,7 @@ public class MapperCodeGenerator {
         var sourceMetaModel = mapperConfiguration.getSourceMetaModel();
         var targetMetaModel = mapperConfiguration.getTargetMetaModel();
 
-        MapperCodeMetadata mapperGeneratedCodeMetadata = new MapperCodeMetadata();
+        MapperCodeMetadata mapperGeneratedCodeMetadata = new MapperCodeMetadata(mapperMethodGenerator, mapperGenerateConfiguration);
 
         mapperGeneratedCodeMetadata.setMapperClassName(
             String.format("%sTo%sMapper",

@@ -46,7 +46,6 @@ public class FieldChainOrEachMapByExpressionParser extends SourceExpressionParse
             String methodName = collectedPartForMethodName.getCollectedText().trim();
 
             // TODO #1 #1 validation that methodName already exists in mapper methods (does the same from InnerMethodSourceExpressionParser)
-
             return new EachElementMapByMethodAssignExpression(methodName, earlierExpression);
         }
 
@@ -57,13 +56,13 @@ public class FieldChainOrEachMapByExpressionParser extends SourceExpressionParse
                 mapperConfigurationParserContext.getFieldMetaResolverForRawSource());
 
         } else {
-            ClassMetaModel returnClassModel = earlierExpression.generateCodeMetadata(new MapperCodeMetadata())
-                .getReturnClassModel();
+            ClassMetaModel returnClassModel = generateCodeMetadataFor(earlierExpression,
+                mapperConfigurationParserContext).getReturnClassModel();
 
             nextChainInvokeExpression = createFieldsChainToAssignExpression(earlierExpression,
                 List.of(getRequiredFieldFromClassModel(returnClassModel, nextVariableName,
                     mapperConfigurationParserContext.getFieldMetaResolverForRawSource())),
-                new MapperCodeMetadata());
+                new MapperCodeMetadata(getMapperMethodGenerator(), mapperConfigurationParserContext.getMapperGenerateConfiguration()));
         }
 
         moveToPreviousWhenShould(sourceExpressionParserContext);
