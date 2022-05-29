@@ -457,6 +457,8 @@ public class MapperMethodGenerator {
 
         if (targetIsElementInCollectionAndHasGivenMappingMethod(mapperMethodArguments)) {
 
+            // TODO #1 #1 generate mapping collection code should be in EachElementMapByMethodAssignExpression
+            //  when mapped each element by given method name
             var elementMappingExpression = (EachElementMapByMethodAssignExpression) mapperMethodArguments.get(0)
                 .getDerivedFromExpression();
 

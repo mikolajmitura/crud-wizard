@@ -31,7 +31,7 @@ class BaseSourceExpressionParserTestSpec extends UnitTestSpec {
     def innerMethodSourceExpressionParser = new InnerMethodSourceExpressionParser(applicationContext)
     def castMetaModelSourceExpressionParser = new CastMetaModelSourceExpressionParser(applicationContext, classMetaModelMapperParser)
     def rawJavaCodeSourceExpressionParser = new RawJavaCodeSourceExpressionParser(applicationContext)
-    def fieldChainSourceExpressionParser = new FieldChainSourceExpressionParser(applicationContext)
+    def fieldChainSourceExpressionParser = new FieldChainOrEachMapByExpressionParser(applicationContext)
 
     protected MapperGenerateConfiguration createMapperGenerateConfiguration() {
         Mock(MapperGenerateConfiguration)
@@ -44,7 +44,7 @@ class BaseSourceExpressionParserTestSpec extends UnitTestSpec {
         applicationContext.getBean(InnerMethodSourceExpressionParser) >> innerMethodSourceExpressionParser
         applicationContext.getBean(CastMetaModelSourceExpressionParser) >> castMetaModelSourceExpressionParser
         applicationContext.getBean(RawJavaCodeSourceExpressionParser) >> rawJavaCodeSourceExpressionParser
-        applicationContext.getBean(FieldChainSourceExpressionParser) >> fieldChainSourceExpressionParser
+        applicationContext.getBean(FieldChainOrEachMapByExpressionParser) >> fieldChainSourceExpressionParser
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
         mapperGenerateConfiguration.getFieldMetaResolverForRawSource() >> READ_FIELD_RESOLVER_CONFIG

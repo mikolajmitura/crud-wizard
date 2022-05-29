@@ -16,6 +16,7 @@ public class EachElementMapByMethodAssignExpression implements ValueToAssignExpr
 
     @Override
     public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
+        // TODO #1 #1 return expression which return collection<metamodel from innerMethod return type> not collection<sourceMetaModel>
         return wrappedExpression.generateCodeMetadata(mapperGeneratedCodeMetadata);
     }
 }

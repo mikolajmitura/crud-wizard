@@ -520,9 +520,9 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
 
         // test for resolve conflict when are two inner method for mapping list elements by override with name
         //  of mapping method with path like
-        //  'elements1={(someOneElement).eachMapBy mapElements1}'
-        //  'elements1={(elements1).eachMapBy mapElements1}'
-        //  'elements1={(someOneElement2).eachMapBy mapElements1}'
+        //  'elements1=someOneElement.eachMapBy(mapElements1)'
+        //  'elements1=elements1.eachMapBy(mapElements1)'
+        //  'elements1=someOneElement2.eachMapBy(mapElements1)'
         //  and second one for 'elements2.*'
         //  mapping like 'elements3.*.field1=null'
         OTHER_WITH_ELEMENTS_MODEL | modelFromClass(OtherWithElements) | withMapperConfigurations(MapperConfiguration.builder()
@@ -583,6 +583,9 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build()
         ) | "resolve_in_collection_mapping_conflict2"
     }
+    // TODO mapping of List<Set<Person>
+    // TODO mapping with eachMapBy when mapped source is list and target is set...
+
 
     // TODO #1 test for not found mapping way
     // TODO #1 test for not found mapping way for enum mappings

@@ -9,13 +9,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.EachElementMapByMethodAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 
 @Component
-public class FieldChainSourceExpressionParser extends SourceExpressionParser {
+public class FieldChainOrEachMapByExpressionParser extends SourceExpressionParser {
 
-    public FieldChainSourceExpressionParser(ApplicationContext applicationContext) {
+    public static final String EACH_MAP_BY_METHOD = "eachMapBy";
+
+    public FieldChainOrEachMapByExpressionParser(ApplicationContext applicationContext) {
         super(applicationContext);
     }
 
@@ -33,9 +36,19 @@ public class FieldChainSourceExpressionParser extends SourceExpressionParser {
         }
 
         sourceExpressionParserContext.moveToNextChar();
-        CollectedExpressionPartResult collectedExpressionPartResult = sourceExpressionParserContext.collectTextUntilFieldExpressionIsFinished();
+        CollectedExpressionPartResult collectedExpressionPartResult = sourceExpressionParserContext.collectTextUntilFieldExpressionIsFinished('(');
         String nextVariableName = validateVariableAndGet(collectedExpressionPartResult.getCollectedText(),
             mapperConfigurationParserContext);
+
+        if (EACH_MAP_BY_METHOD.equals(nextVariableName) && collectedExpressionPartResult.getCutWithText() == '(') {
+            sourceExpressionParserContext.skipSpaces();
+            CollectedExpressionPartResult collectedPartForMethodName = sourceExpressionParserContext.collectTextUntilAnyChars(')');
+            String methodName = collectedPartForMethodName.getCollectedText().trim();
+
+            // TODO #1 #1 validation that methodName already exists in mapper methods (does the same from InnerMethodSourceExpressionParser)
+
+            return new EachElementMapByMethodAssignExpression(methodName, earlierExpression);
+        }
 
         ValueToAssignExpression nextChainInvokeExpression;
         if (earlierExpression instanceof FieldsChainToAssignExpression) {

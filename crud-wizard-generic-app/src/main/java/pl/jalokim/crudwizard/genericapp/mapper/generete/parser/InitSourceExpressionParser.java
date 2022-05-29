@@ -54,15 +54,8 @@ class InitSourceExpressionParser extends SourceExpressionParser {
                 mapperConfigurationParserContext, sourceExpressionParserContext);
         }
 
-        if (currentChar == '{') {
-            // TODO #1 create parser for EachElementMapByMethodAssignExpression
-            //  format will be '{(someExpression).eachMapBy innerMethodName}'
-            //  where innerMethodName must exists in config already...
-            //  where someExpression - can be every expression field, spring bean etc
-        }
-
         sourceExpressionParserContext.moveToPreviousChar();
-        var fieldNameCollectResult = sourceExpressionParserContext.collectTextUntilFieldExpressionIsFinished();
+        var fieldNameCollectResult = sourceExpressionParserContext.collectTextUntilFieldExpressionIsFinished('(');
         ClassMetaModel sourceMetaModel = sourceExpressionParserContext.getSourceMetaModel();
         String nextFieldName = validateVariableAndGet(fieldNameCollectResult.getCollectedText(), mapperConfigurationParserContext);
         moveToPreviousWhenShould(sourceExpressionParserContext);

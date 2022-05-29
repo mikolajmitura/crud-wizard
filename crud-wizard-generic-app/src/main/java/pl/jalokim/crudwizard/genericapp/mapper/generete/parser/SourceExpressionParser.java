@@ -31,7 +31,7 @@ abstract class SourceExpressionParser {
         char currentChar = sourceExpressionParserContext.getCurrentChar();
         if (currentChar == '.') {
             sourceExpressionParserContext.setEarlierValueToAssignExpression(valueToAssignExpression);
-            return parseWithOtherParser(FieldChainSourceExpressionParser.class,
+            return parseWithOtherParser(FieldChainOrEachMapByExpressionParser.class,
                 mapperConfigurationParserContext, sourceExpressionParserContext);
         }
 
