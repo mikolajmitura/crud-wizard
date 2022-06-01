@@ -18,7 +18,6 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodMode
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.MethodCodeMetadataBuilder;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
@@ -75,8 +74,7 @@ class SimpleTargetAssignResolver {
         if (assignExpressionForFieldReference.get() == null) {
             if (foundAssignExpressionsForField.size() > 1) {
                 mapperGeneratedCodeMetadata.throwMappingError(
-                    createMessagePlaceholder("mapper.found.to.many.mappings.for.simple.type",
-                        currentPath.nextNode(fieldName).getFullPath())
+                    createMessagePlaceholder("mapper.found.to.many.mappings.for.simple.type")
                 );
             } else if (foundAssignExpressionsForField.size() == 1) {
 
@@ -116,17 +114,20 @@ class SimpleTargetAssignResolver {
         List<MapperArgumentMethodModel> mapperArgumentMethodModels = convertAssignExpressionsToMethodArguments(mapperGeneratedCodeMetadata,
             List.of(valueToAssignExpression));
 
-        List<MethodCodeMetadata> foundMatchedInnerNotGeneratedMethods = mapperGeneratedCodeMetadata
+        List<MethodMetadataMapperConfig> foundMatchedInnerNotGeneratedMethods = mapperGeneratedCodeMetadata
             .findMatchNotGeneratedMethod(targetFieldClassMetaModel, sourceClassModel);
 
         String methodName;
 
         if (foundMatchedInnerNotGeneratedMethods.isEmpty()) {
-            MethodCodeMetadata creteEnumsMappingMethod = enumsMapperMethodGenerator.creteEnumsMappingMethod(methodGeneratorArgument.toBuilder()
-                .targetMetaModel(targetFieldClassMetaModel)
-                .mapperMethodArguments(mapperArgumentMethodModels)
-                .methodName(createMethodName(mapperArgumentMethodModels, targetFieldClassMetaModel))
-                .build());
+            MethodCodeMetadata creteEnumsMappingMethod = enumsMapperMethodGenerator
+                .creteEnumsMappingMethod(methodGeneratorArgument.toBuilder()
+                    .targetMetaModel(targetFieldClassMetaModel)
+                    .mapperMethodArguments(mapperArgumentMethodModels)
+                    .methodName(createMethodName(mapperArgumentMethodModels, targetFieldClassMetaModel))
+                    .currentPath(returnMethodMetaData.getFieldNameNodePath())
+                    .parentMapperMethodGeneratorArgument(methodGeneratorArgument)
+                    .build());
 
             MethodCodeMetadata newMethodOrEarlier = getGeneratedNewMethodOrGetCreatedEarlier(mapperGeneratedCodeMetadata,
                 methodGeneratorArgument.getParentMethodCodeMetadata(),
@@ -140,9 +141,8 @@ class SimpleTargetAssignResolver {
             methodGeneratorArgument.getMapperGeneratedCodeMetadata()
                 .throwMappingError(createMessagePlaceholder("mapper.found.to.many.methods",
                     elements(foundMatchedInnerNotGeneratedMethods)
-                        .map(MethodCodeMetadata::getMethodName)
-                        .asConcatText(", "),
-                    returnMethodMetaData.getFieldNameNodePath().getFullPath()));
+                        .map(MethodMetadataMapperConfig::getMethodName)
+                        .asConcatText(", ")));
             return null;
         }
 

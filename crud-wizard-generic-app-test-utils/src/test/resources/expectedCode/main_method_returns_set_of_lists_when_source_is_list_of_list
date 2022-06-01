@@ -1,0 +1,136 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper implements GeneratedMapper {
+
+    CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper() {
+
+    }
+
+    @Override
+    public java.util.Set<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>> mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        return mapCListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElement(genericMapperArgument, ((java.util.List<java.util.List<Map<String, Object>>>) sourceObject));
+    }
+    @GeneratedMethod
+    public java.util.Set<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>> mapCListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<java.util.List<Map<String, Object>>> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        int initSize = sourceObject.size();
+        Set<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>> elements = new HashSet<>(initSize);
+        for (java.util.List<Map<String, Object>> element : sourceObject) {
+            elements.add(((java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>) mapCListOfMcollectionElementModelToCListOfCCollectionElement(genericMapperArgument, ((java.util.List<Map<String, Object>>) element))));
+        }
+
+
+        return elements;
+    }
+
+    @GeneratedMethod
+    public java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> mapCListOfMcollectionElementModelToCListOfCCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<Map<String, Object>> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        int initSize = sourceObject.size();
+        List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> elements = new ArrayList<>(initSize);
+        for (Map<String, Object> element : sourceObject) {
+            elements.add(((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) mapMcollectionElementModelToCCollectionElement(genericMapperArgument, ((Map<String, Object>) element))));
+        }
+
+
+        return elements;
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement mapMcollectionElementModelToCCollectionElement(GenericMapperArgument genericMapperArgument, Map<String, Object> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement(
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("field1"))
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("field2"))
+			.orElse(null)),
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("field3"))
+			.orElse(null)),
+
+		((pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject) mapMnestedElementObjectModelToCNestedElementObject(genericMapperArgument, ((Map<String, Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("someObject"))
+			.orElse(null))))
+        );
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject mapMnestedElementObjectModelToCNestedElementObject(GenericMapperArgument genericMapperArgument, Map<String, Object> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject newObject = new pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject();
+
+		newObject.setName(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("name"))
+			.orElse(null)));
+
+		newObject.setSurname(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((Map<String, Object>) genericMap).get("surname"))
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject) newObject;
+    }
+
+}

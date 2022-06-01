@@ -2,9 +2,7 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
 
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG;
-import static pl.jalokim.utils.collection.Elements.elements;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Builder;
@@ -23,7 +21,6 @@ public class MapperGenerateConfiguration {
     /**
      * by default disabled, should inform when have problem with some field, when cannot find conversion strategy for given field types.
      */
-    // TODO #1 implements with usage that flag  in MapperCodeGenerator
     @Builder.Default
     private boolean globalIgnoreMappingProblems = false;
 
@@ -50,10 +47,6 @@ public class MapperGenerateConfiguration {
         Map<String, MapperConfiguration> mapForTarget = mapForSource.computeIfAbsent(targetTypeDescription,
             (key) -> new ConcurrentHashMap<>());
         mapForTarget.put(methodName, mapperConfiguration);
-    }
-
-    public boolean hasMethodName(String methodName) {
-        return mapperConfigurationByMethodName.containsKey(methodName);
     }
 
     public MapperConfiguration getMapperConfigurationByMethodName(String methodName) {

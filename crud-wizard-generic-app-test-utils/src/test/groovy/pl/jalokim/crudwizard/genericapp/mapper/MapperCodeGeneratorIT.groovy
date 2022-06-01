@@ -1,12 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.mapper
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassModelWithGenerics
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.makeLineEndingAsUnix
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.ClassMetaModelForMapperHelper.getClassModelInfoForGeneratedCode
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.AssignExpressionAsTextResolver.occurredInNotGeneratedMethod
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression.createRawJavaCodeExpression
 
 import java.time.LocalDate
@@ -25,7 +28,12 @@ import pl.jalokim.crudwizard.core.sample.SomeDtoWithSimpleSuperBuilder
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElementOther
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.ExampleEnum2
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType1
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.MappingCollections
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.ObjectForNotFondMappings
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.ObjectWithEnum
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.OtherWithElements
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1
@@ -42,11 +50,12 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateCon
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ByMapperNameAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.EachElementMapByMethodAssignExpression
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression
+import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperGenerationException
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.utils.file.FileUtils
@@ -79,29 +88,23 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         }
 
         when:
-        def result = mapperGenerator.generateMapperCodeMetadata(newMapperGenerateConfiguration)
+        def result = mapperGenerator.generateMapperCode(newMapperGenerateConfiguration)
 
         then:
-        def folderPath = "target/generated-test-sources/mappers/pl/jalokim/crudwizard/generated/mapper"
-        FileUtils.createDirectories(folderPath)
-        def mapperClassName = String.format("%sTo%sMapper",
-            getClassModelInfoForGeneratedCode(sourceMetaModel),
-            getClassModelInfoForGeneratedCode(targetMetaModel)
-        )
-        FileUtils.writeToFile(String.format("%s/%s.java", folderPath, mapperClassName), result)
+        saveMapperCodeToFile(result, sourceMetaModel, targetMetaModel)
         makeLineEndingAsUnix(result) == makeLineEndingAsUnix(TemplateAsText.fromClassPath("expectedCode/" + expectedFileName).currentTemplateText)
 
         where:
-        sourceMetaModel                    | targetMetaModel                               | mapperGenerateConfiguration                                    |
+        sourceMetaModel                        | targetMetaModel                               | mapperGenerateConfiguration                   |
             expectedFileName
 
-        modelFromClass(Long)               | modelFromClass(Long)                          | EMPTY_CONFIG                                                   |
+        modelFromClass(Long)                   | modelFromClass(Long)                          | EMPTY_CONFIG                                  |
             "simple_Long_to_Long"
 
-        modelFromClass(Long)               | modelFromClass(String)                        | EMPTY_CONFIG                                                   |
+        modelFromClass(Long)                   | modelFromClass(String)                        | EMPTY_CONFIG                                  |
             "simple_Long_to_String"
 
-        modelFromClass(String)             | modelFromClass(FromStringToObject)            | withMapperConfigurations(
+        modelFromClass(String)                 | modelFromClass(FromStringToObject)            | withMapperConfigurations(
             MapperConfiguration.builder()
                 .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                     .valueMappingStrategy([
@@ -109,49 +112,49 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                             "new " + FromStringToObject.canonicalName + "((String) sourceObject)")
                     ])
                     .build())
-                .build())                                                                                                                                   |
+                .build())                                                                                                                      |
             "text_to_FromStringToObject"
 
-        modelFromClass(FromStringToObject) | modelFromClass(String)                        | withMapperConfigurations(
+        modelFromClass(FromStringToObject)     | modelFromClass(String)                        | withMapperConfigurations(
             MapperConfiguration.builder()
                 .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                     .valueMappingStrategy([
                         createFieldsChainExpression(modelFromClass(FromStringToObject), "sourceText")
                     ])
                     .build())
-                .build())                                                                                                                                   |
+                .build())                                                                                                                      |
             "FromStringToObject_to_text"
 
-        modelFromClass(SamplePersonDto)    | getPersonMetaModel()                          | EMPTY_CONFIG                                                   |
+        modelFromClass(SamplePersonDto)        | getPersonMetaModel()                          | EMPTY_CONFIG                                  |
             "class_SamplePersonDto_to_model_person"
 
         // mapping from map to Dto via builder
-        getPersonMetaModel()               | modelFromClass(SamplePersonDto)               | EMPTY_CONFIG                                                   |
+        getPersonMetaModel()                   | modelFromClass(SamplePersonDto)               | EMPTY_CONFIG                                  |
             "model_person_to_class_SamplePersonDto"
 
         // mapping from map to Dto via builder, should get fields only from SomeDtoWithBuilder,
         // not from upper class due to @Builder only on SomeDtoWithBuilder classs
-        getSomeDtoWithBuilderModel()       | modelFromClass(SomeDtoWithBuilder)            | EMPTY_CONFIG                                                   |
+        getSomeDtoWithBuilderModel()           | modelFromClass(SomeDtoWithBuilder)            | EMPTY_CONFIG                                  |
             "model_someDtoWithBuilder_to_class_SomeDtoWithBuilder"
 
         // mapping from map to Dto via builder, should get fields from whole @SuperBuilder hierarchy
-        getSomeDtoWithSuperBuilderModel()  | modelFromClass(SomeDtoWithSimpleSuperBuilder) | EMPTY_CONFIG                                                   |
+        getSomeDtoWithSuperBuilderModel()      | modelFromClass(SomeDtoWithSimpleSuperBuilder) | EMPTY_CONFIG                                  |
             "model_someDtoWithSuperBuilderModel_to_class_SomeDtoWithSuperBuilder"
 
         // mapping from map to simple Dto via all args
-        getSomeSimpleValueDtoModel()       | modelFromClass(SomeSimpleValueDto)            | EMPTY_CONFIG                                                   |
+        getSomeSimpleValueDtoModel()           | modelFromClass(SomeSimpleValueDto)            | EMPTY_CONFIG                                  |
             "model_SomeSimpleValueDtoModel_to_class_SomeSimpleValueDto"
 
         // mapping from map to simple Dto via setters
-        getSomeDtoWithSettersModel()       | modelFromClass(SomeDtoWithSetters)            | EMPTY_CONFIG                                                   |
+        getSomeDtoWithSettersModel()           | modelFromClass(SomeDtoWithSetters)            | EMPTY_CONFIG                                  |
             "model_SomeDtoWithSettersModel_to_class_SomeDtoWithSetters"
 
         // mapping with usage of genericObjectsConversionService and conversionService
-        getClassHasSamplePersonModel1()    | modelFromClass(ClassHasSamplePersonDto)       |
+        getClassHasSamplePersonModel1()        | modelFromClass(ClassHasSamplePersonDto)       |
             withMapperConfigurations(MapperConfiguration.builder()
                 .propertyOverriddenMapping(PropertiesOverriddenMapping.builder().ignoredFields(["someObjectWithFewObjects"]).build())
                 .build()
-            )                                                                                                                                               |
+            )                                                                                                                                  |
             "model_ClassHasSamplePersonModel_to_class_ClassHasSamplePersonDto"
 
         //  mapping from map to Dto with nested methods and should use method when inner conversion is from person2 to SamplePersonDto in few fields
@@ -159,7 +162,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         //  person2 (metamodel) otherPersonDto -> SamplePersonDto otherPersonDto
         //  used ignoredFields
         //  override field by get properties and by spring bean
-        getClassHasSamplePersonModel2()    | modelFromClass(ClassHasSamplePersonDto)       | withMapperConfigurations(ignoredFieldsSamplePersonDtoConfig()) |
+        getClassHasSamplePersonModel2()        | modelFromClass(ClassHasSamplePersonDto)       |
+            withMapperConfigurations(ignoredFieldsSamplePersonDtoConfig())                                                                     |
             "model_ClassHasSamplePersonModel2_to_class_ClassHasSamplePersonDto"
 
         // mappings when exists few source:
@@ -182,27 +186,27 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         // otherMappingForDocHolder.document = documentDataPart2
         // otherMappingForDocHolder.document.id = @fromLocalDateToStringMapper documentDataPart1.localDateTime66
 
-        multiSourceExampleModel()          | modelFromClass(ForTestMappingMultiSourceDto)  | withMapperConfigurations(multiSourceConfig())                  |
+        multiSourceExampleModel()              | modelFromClass(ForTestMappingMultiSourceDto)  | withMapperConfigurations(multiSourceConfig()) |
             "model_multiSourceExampleModel_to_class_ForTestMappingMultiSourceDto"
 
         // usage of nested configured method for mappings
-        SOME_PERSON_MODEL1                 | modelFromClass(SomePerson1)                   | MAPPING_PERSON_1_CONFIG                                        |
+        SOME_PERSON_MODEL1                     | modelFromClass(SomePerson1)                   | MAPPING_PERSON_1_CONFIG                       |
             "mapping_person1_model_to_class"
 
         // usage of nested configured method for mappings (from class to model) and globalIgnoreMappingProblems during map to target
-        modelFromClass(SomePerson1)        | SOME_PERSON_MODEL1                            | EMPTY_CONFIG.toBuilder()
+        modelFromClass(SomePerson1)            | SOME_PERSON_MODEL1                            | EMPTY_CONFIG.toBuilder()
             .globalIgnoreMappingProblems(true)
-            .build()                                                                                                                                        |
+            .build()                                                                                                                           |
             "mapping_person1_class_to_model_globalIgnoreMappingProblems"
 
         // usage of nested configured method for mappings (from class to model)
         //  ignoreMappingProblem via mapper configuration
         //  ignoreMappingProblem via override property
-        modelFromClass(SomePerson1)        | SOME_PERSON_MODEL1                            | SOME_PERSON_MODEL1_FEW_IGNORED                                 |
+        modelFromClass(SomePerson1)            | SOME_PERSON_MODEL1                            | SOME_PERSON_MODEL1_FEW_IGNORED                |
             "mapping_person1_class_to_model_fewIgnored"
 
         // should generate method for map inner object instead of use provided nested mapper method.
-        modelFromClass(SomePerson1)        | SOME_PERSON_MODEL1                            | withMapperConfigurations(
+        modelFromClass(SomePerson1)            | SOME_PERSON_MODEL1                            | withMapperConfigurations(
             MapperConfiguration.builder()
                 .propertyOverriddenMapping(
                     PropertiesOverriddenMapping.builder()
@@ -236,15 +240,15 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .build()
                 )
                 .build()
-        )                                                                                                                                                   |
+        )                                                                                                                                      |
             "generate_method_instead_use_provided"
 
         // mapping collections elements
-        modelFromClass(MappingCollections) | MAPPING_COLLECTIONS_MODEL                     | EMPTY_CONFIG                                                   |
+        modelFromClass(MappingCollections)     | MAPPING_COLLECTIONS_MODEL                     | EMPTY_CONFIG                                  |
             "mappingCollection_from_model_to_class"
 
         // mapping collections elements in the opposite way
-        MAPPING_COLLECTIONS_MODEL          | modelFromClass(MappingCollections)            | EMPTY_CONFIG                                                   |
+        MAPPING_COLLECTIONS_MODEL              | modelFromClass(MappingCollections)            | EMPTY_CONFIG                                  |
             "mappingCollection_from_class_to_model"
 
         // mapping collections from one element to list via override properties
@@ -254,7 +258,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         // mapping collections from one element, from other list, from other set, from next one element to set via override properties
         // mapping collections elements by provided mapping method for each element in config
         // mapping collections elements by provided mapping method for whole elements (with the same value) in config
-        MAPPING_COLLECTIONS_MODEL          | modelFromClass(MappingCollections)            | withMapperConfigurations(MapperConfiguration.builder()
+        MAPPING_COLLECTIONS_MODEL              | modelFromClass(MappingCollections)            | withMapperConfigurations(MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
                     "listList"  :
@@ -303,11 +307,11 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .sourceMetaModel(COLLECTION_ELEMENT_MODEL)
                 .targetMetaModel(modelFromClass(CollectionElement))
                 .build(),
-        )                                                                                                                                                   |
+        )                                                                                                                                      |
             "custom_mappingCollection_from_model_to_class"
 
         // convert java class to some java class
-        modelFromClass(SomeDocument1)      | modelFromClass(SomeDocument1Entity)           | withMapperConfigurations(MapperConfiguration.builder()
+        modelFromClass(SomeDocument1)          | modelFromClass(SomeDocument1Entity)           | withMapperConfigurations(MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
                     someLocalDate: PropertiesOverriddenMapping.builder()
@@ -315,23 +319,23 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .build()
                 ])
                 .build())
-            .build())                                                                                                                                       |
+            .build())                                                                                                                          |
             "convert_java_class_to_some_java_class"
 
         // mapping from enum to metamodel of enum (as return in main method)
-        modelFromClass(SomeEnum1)          | SOME_ENUM1_METAMODEL                          | EMPTY_CONFIG                                                   |
+        modelFromClass(SomeEnum1)              | SOME_ENUM1_METAMODEL                          | EMPTY_CONFIG                                  |
             "from_enum_to_metamodel_enum_as_return_main_method"
 
         // mapping from enum to enum (as return in main method) and ignore some source enum entries
-        modelFromClass(SomeEnum1)          | modelFromClass(SomeEnum2)                     | withMapperConfigurations(MapperConfiguration.builder()
+        modelFromClass(SomeEnum1)              | modelFromClass(SomeEnum2)                     | withMapperConfigurations(MapperConfiguration.builder()
             .enumEntriesMapping(EnumEntriesMapping.builder()
                 .ignoredSourceEnum(["OTH", "VAL3"])
                 .build())
-            .build())                                                                                                                                       |
+            .build())                                                                                                                          |
             "from_enum_to_enum_as_return_main_method"
 
         // mapping from metamodel of enum to enum (as return in main method)
-        SOME_ENUM1_METAMODEL               | modelFromClass(SomeEnum1)                     | EMPTY_CONFIG                                                   |
+        SOME_ENUM1_METAMODEL                   | modelFromClass(SomeEnum1)                     | EMPTY_CONFIG                                  |
             "from_metamodel_enum_to_enum_as_return_main_method"
 
         // mapping from enum to metamodel of enum + overridden enums
@@ -351,20 +355,20 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         // mapping from string to enum by native spring conversions
         // mapping from string to enum by crud wizard service conversion
         // mapping from string to enum meta model by crud wizard service conversion
-        METAMODEL_WITH_ENUMS1 | METAMODEL_WITH_ENUMS2 | withMapperConfigurations(
+        METAMODEL_WITH_ENUMS1                  | METAMODEL_WITH_ENUMS2                         | withMapperConfigurations(
             MapperConfiguration.builder().build(),
 
             MapperConfiguration.builder()
-            .name("mapFromEnumToEnumMetaModel")
-            .sourceMetaModel(modelFromClass(SomeEnum1))
-            .targetMetaModel(SOME_ENUM1_METAMODEL)
-            .enumEntriesMapping(EnumEntriesMapping.builder()
-                .targetEnumBySourceEnum([
-                    "UNKNOWN": "VAL1",
-                ])
-                .whenNotMappedEnum("throw new IllegalArgumentException(\"cannot map enum with value: \" + sourceObject)")
-                .build())
-            .build(),
+                .name("mapFromEnumToEnumMetaModel")
+                .sourceMetaModel(modelFromClass(SomeEnum1))
+                .targetMetaModel(SOME_ENUM1_METAMODEL)
+                .enumEntriesMapping(EnumEntriesMapping.builder()
+                    .targetEnumBySourceEnum([
+                        "UNKNOWN": "VAL1",
+                    ])
+                    .whenNotMappedEnum("throw new IllegalArgumentException(\"cannot map enum with value: \" + sourceObject)")
+                    .build())
+                .build(),
 
             MapperConfiguration.builder()
                 .name("mapFromEnumToEnum")
@@ -373,7 +377,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .enumEntriesMapping(EnumEntriesMapping.builder()
                     .targetEnumBySourceEnum([
                         "VAL3": "OTH2",
-                        "OTH": "OTH1",
+                        "OTH" : "OTH1",
                     ])
                     .whenNotMappedEnum("UNKNOWN")
                     .build())
@@ -404,10 +408,11 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                     .whenNotMappedEnum("throw new IllegalArgumentException(sourceObject)")
                     .build())
                 .build()
-        ) | "mapping_metamodel_with_enums_to_metamodel_with_enums"
+        )                                                                                                                                      |
+            "mapping_metamodel_with_enums_to_metamodel_with_enums"
 
         // resolving conflicts when exists the same inner method (but other name) for mapping enum
-        METAMODEL_WITH_ENUMS3 | METAMODEL_WITH_ENUMS4 | withMapperConfigurations(MapperConfiguration.builder()
+        METAMODEL_WITH_ENUMS3                  | METAMODEL_WITH_ENUMS4                         | withMapperConfigurations(MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
                     spec1enum: PropertiesOverriddenMapping.builder()
@@ -416,7 +421,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                                 [createFieldsChainExpression(METAMODEL_WITH_ENUMS3, "spec1enum")],
                                 modelFromClass(SomeEnum3))])
                         .build(),
-                    spec2enum:  PropertiesOverriddenMapping.builder()
+                    spec2enum: PropertiesOverriddenMapping.builder()
                         .valueMappingStrategy([
                             new MethodInCurrentClassAssignExpression("spec2enumMap",
                                 [createFieldsChainExpression(METAMODEL_WITH_ENUMS3, "spec2enum")],
@@ -447,13 +452,14 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                     .ignoredSourceEnum(["UNKNOWN"])
                     .build())
                 .build(),
-        ) | "resolve_enums_map_method_conflict"
+        )                                                                                                                                      |
+            "resolve_enums_map_method_conflict"
 
         // test for resolve conflict when are two inner method for mapping list elements by override with name
         //  of mapping method with path like 'elements1.*'
         //  and second one for 'elements2.*'
         //  mapping like 'elements3.*.field1=null'
-        OTHER_WITH_ELEMENTS_MODEL | modelFromClass(OtherWithElements) | withMapperConfigurations(MapperConfiguration.builder()
+        OTHER_WITH_ELEMENTS_MODEL              | modelFromClass(OtherWithElements)             | withMapperConfigurations(MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
                     elements1: PropertiesOverriddenMapping.builder()
@@ -465,7 +471,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                                 modelFromClass(CollectionElement))
                         ])
                         .mappingsByPropertyName([
-                            '*' : PropertiesOverriddenMapping.builder()
+                            '*': PropertiesOverriddenMapping.builder()
                                 .valueMappingStrategy([
                                     new MethodInCurrentClassAssignExpression("mapElements1",
                                         List.of(new RawJavaCodeAssignExpression(COLLECTION_ELEMENT_MODEL, "sourceObject")),
@@ -476,7 +482,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .build(),
                     elements2: PropertiesOverriddenMapping.builder()
                         .mappingsByPropertyName([
-                            '*' : PropertiesOverriddenMapping.builder()
+                            '*': PropertiesOverriddenMapping.builder()
                                 .valueMappingStrategy([
                                     new MethodInCurrentClassAssignExpression("mapElements2",
                                         List.of(new RawJavaCodeAssignExpression(COLLECTION_ELEMENT_MODEL, "sourceObject")),
@@ -487,7 +493,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .build(),
                     elements3: PropertiesOverriddenMapping.builder()
                         .mappingsByPropertyName([
-                            '*' : PropertiesOverriddenMapping.builder()
+                            '*': PropertiesOverriddenMapping.builder()
                                 .mappingsByPropertyName([
                                     field1: PropertiesOverriddenMapping.builder()
                                         .valueMappingStrategy([
@@ -516,7 +522,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .sourceMetaModel(modelFromClass(CollectionElementOther))
                 .targetMetaModel(modelFromClass(CollectionElement))
                 .build()
-        ) | "resolve_in_collection_mapping_conflict"
+        )                                                                                                                                      |
+            "resolve_in_collection_mapping_conflict"
 
         // test for resolve conflict when are two inner method for mapping list elements by override with name
         //  of mapping method with path like
@@ -525,7 +532,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         //  'elements1=someOneElement2.eachMapBy(mapElements1)'
         //  and second one for 'elements2.*'
         //  mapping like 'elements3.*.field1=null'
-        OTHER_WITH_ELEMENTS_MODEL | modelFromClass(OtherWithElements) | withMapperConfigurations(MapperConfiguration.builder()
+        OTHER_WITH_ELEMENTS_MODEL              | modelFromClass(OtherWithElements)             | withMapperConfigurations(MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
                     elements1: PropertiesOverriddenMapping.builder()
@@ -541,7 +548,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .build(),
                     elements2: PropertiesOverriddenMapping.builder()
                         .mappingsByPropertyName([
-                            '*' : PropertiesOverriddenMapping.builder()
+                            '*': PropertiesOverriddenMapping.builder()
                                 .valueMappingStrategy([
                                     new MethodInCurrentClassAssignExpression("mapElements2",
                                         List.of(new RawJavaCodeAssignExpression(COLLECTION_ELEMENT_MODEL, "sourceObject")),
@@ -552,7 +559,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .build(),
                     elements3: PropertiesOverriddenMapping.builder()
                         .mappingsByPropertyName([
-                            '*' : PropertiesOverriddenMapping.builder()
+                            '*': PropertiesOverriddenMapping.builder()
                                 .mappingsByPropertyName([
                                     field1: PropertiesOverriddenMapping.builder()
                                         .valueMappingStrategy([
@@ -581,20 +588,575 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .sourceMetaModel(modelFromClass(CollectionElementOther))
                 .targetMetaModel(modelFromClass(CollectionElement))
                 .build()
-        ) | "resolve_in_collection_mapping_conflict2"
+        )                                                                                                                                      |
+            "resolve_in_collection_mapping_conflict2"
+
+        // mapping Set<elementModel> to List<CollectionElement> in main method
+        ClassMetaModel.builder()
+            .realClass(List)
+            .genericTypes([COLLECTION_ELEMENT_MODEL])
+            .build()                           |
+
+            ClassMetaModel.builder()
+                .realClass(Set)
+                .genericTypes([modelFromClass(CollectionElement)])
+                .build()                                                                       | EMPTY_CONFIG                                  |
+            "main_method_returns_set_when_source_is_list"
+
+        // mapping of List<List<elementModel> to List<Set<CollectionElement>> in main method
+        ClassMetaModel.builder()
+            .realClass(List)
+            .genericTypes([ClassMetaModel.builder()
+                               .realClass(List)
+                               .genericTypes([COLLECTION_ELEMENT_MODEL])
+                               .build()])
+            .build()                           |
+
+            ClassMetaModel.builder()
+                .realClass(Set)
+                .genericTypes([ClassMetaModel.builder()
+                                   .realClass(List)
+                                   .genericTypes([modelFromClass(CollectionElement)])
+                                   .build()])
+                .build()                                                                       | EMPTY_CONFIG                                  |
+            "main_method_returns_set_of_lists_when_source_is_list_of_list"
+
+        // mapping of List<List<CollectionElement>> to Set<NestedCollectionElement[]> inside of other object
+        modelFromClass(ListAsListGenericType1) | modelFromClass(ListAsListGenericType2)        | EMPTY_CONFIG                                  |
+            "mapping_collections_as_generic_type_in_object"
     }
-    // TODO mapping of List<Set<Person>
-    // TODO mapping with eachMapBy when mapped source is list and target is set...
 
+    def "not found mapping way for object fields via main method chain"() {
+        given:
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(OBJECT_FOR_NOT_FOND_MAPPINGS_MODEL)
+            .targetMetaModel(modelFromClass(ObjectForNotFondMappings))
+            .build()
 
-    // TODO #1 test for not found mapping way
-    // TODO #1 test for not found mapping way for enum mappings
-    // TODO #1 test for found to many mappers methods for enum field
-    // TODO #1 test for found to many mappers methods for object field
-    // TODO #1 test for found to many mappers methods for collection field
-    // TODO #1 test for found to many mappers for simple field
-    // TODO #1 test for cannot find conversion way via crud wizard service conversion
-    // TODO #1 test for marked few ignoreMappingProblem during map to target, in some classes, but finally will return exception
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        when:
+        mapperGenerator.generateMapperCode(mapperGenerateConf)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 4
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "name", ObjectForNotFondMappings.NestedNotFound.canonicalName, "someObject.name", "")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "someLong", ObjectForNotFondMappings.canonicalName, "someLong", "")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "uuid", ObjectForNotFondMappings.InsideCollectionElement.canonicalName, "list.*.uuid", "")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "uuid", ObjectForNotFondMappings.InsideCollectionElement.canonicalName, "listOfList.*.*.uuid", "")
+            .translateMessage()
+    }
+
+    def "not found mapping way for object fields via other method"() {
+        given:
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(OBJECT_FOR_NOT_FOND_MAPPINGS_MODEL)
+            .targetMetaModel(modelFromClass(ObjectForNotFondMappings))
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        mapperGenerateConf.addSubMapperConfiguration("mapInsideCollectionElement",
+            MapperConfiguration.builder()
+                .name("mapInsideCollectionElement")
+                .sourceMetaModel(INSIDE_COLLECTION_ELEMENT)
+                .targetMetaModel(modelFromClass(ObjectForNotFondMappings.InsideCollectionElement))
+                .build())
+
+        when:
+        mapperGenerator.generateMapperCode(mapperGenerateConf)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 3
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "name", ObjectForNotFondMappings.NestedNotFound.canonicalName, "someObject.name", "")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "someLong", ObjectForNotFondMappings.canonicalName, "someLong", "")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "uuid", ObjectForNotFondMappings.InsideCollectionElement.canonicalName, "uuid",
+            occurredInNotGeneratedMethod("mapInsideCollectionElement"))
+            .translateMessage()
+    }
+
+    def "for not found mapping way for enum mappings"() {
+        given:
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(MODEL_WITH_ENUM)
+            .targetMetaModel(modelFromClass(ObjectWithEnum))
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        when:
+        mapperGenerator.generateMapperCode(mapperGenerateConf)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 2
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.cannot.map.enum.value",
+            "UNKNOWN", "exampleEnum", ExampleEnum2.canonicalName, "otherObjectWithEnum.otherEnum")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.cannot.map.enum.value",
+            "UNKNOWN", "exampleEnum", ExampleEnum2.canonicalName, "someEnum")
+            .translateMessage()
+    }
+
+    def "not found mapping for enum in not generated method"() {
+        given:
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(MODEL_WITH_ENUM)
+            .targetMetaModel(modelFromClass(ObjectWithEnum))
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        mapperGenerateConf.addSubMapperConfiguration("mapEnum",
+            MapperConfiguration.builder()
+                .name("mapEnum")
+                .sourceMetaModel(EXAMPLE_ENUM_MODEL)
+                .targetMetaModel(modelFromClass(ExampleEnum2))
+                .build())
+
+        when:
+        mapperGenerator.generateMapperCode(mapperGenerateConf)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 1
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.cannot.map.enum.value",
+            "UNKNOWN", "exampleEnum", ExampleEnum2.canonicalName, "",
+            occurredInNotGeneratedMethod("mapEnum"))
+            .translateMessage()
+    }
+
+    def "found to many mappers methods for enum field"() {
+        given:
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(modelFromClass(ObjectWithEnum.OtherObjectWithEnum))
+            .targetMetaModel(OTHER_OBJECT_WITH_ENUM_MODEL)
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        mapperGenerateConf.addSubMapperConfiguration("mapEnum1",
+            MapperConfiguration.builder()
+                .name("mapEnum1")
+                .sourceMetaModel(modelFromClass(ExampleEnum2))
+                .targetMetaModel(EXAMPLE_ENUM_MODEL)
+                .build())
+
+        mapperGenerateConf.addSubMapperConfiguration("mapEnum2",
+            MapperConfiguration.builder()
+                .name("mapEnum2")
+                .sourceMetaModel(modelFromClass(ExampleEnum2))
+                .targetMetaModel(EXAMPLE_ENUM_MODEL)
+                .build())
+
+        when:
+        mapperGenerator.generateMapperCode(mapperGenerateConf)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 1
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "otherEnum", OTHER_OBJECT_WITH_ENUM_MODEL.name, "otherEnum",
+            errorReason(createMessagePlaceholder("mapper.found.to.many.methods", "mapEnum2, mapEnum1")))
+            .translateMessage()
+    }
+
+    def "found to many mappers methods for object field, collection element"() {
+        given:
+        def sourceCollectionElement = ClassMetaModel.builder()
+            .name("sourceCollectionElement")
+            .fields([
+                createValidFieldMetaModel("someField", Long),
+            ])
+            .build()
+
+        def sourceNestedObject = ClassMetaModel.builder()
+            .name("sourceNestedObject")
+            .fields([
+                createValidFieldMetaModel("someField1", Long),
+                createValidFieldMetaModel("list", createClassModelWithGenerics(List, sourceCollectionElement)),
+                createValidFieldMetaModel("someField2", Long),
+            ])
+            .build()
+
+        def sourceModel = ClassMetaModel.builder()
+            .name("sourceModel")
+            .fields([
+                createValidFieldMetaModel("someObject", sourceNestedObject),
+                createValidFieldMetaModel("someString", String),
+            ])
+            .build()
+
+        def targetCollectionElement = ClassMetaModel.builder()
+            .name("targetCollectionElement")
+            .fields([
+                createValidFieldMetaModel("someField", Long),
+            ])
+            .build()
+
+        def targetNestedObject = ClassMetaModel.builder()
+            .name("targetNestedObject")
+            .fields([
+                createValidFieldMetaModel("someField1", String),
+                createValidFieldMetaModel("someField2", Long),
+                createValidFieldMetaModel("list", createClassModelWithGenerics(List, targetCollectionElement)),
+            ])
+            .build()
+
+        def targetModel = ClassMetaModel.builder()
+            .name("targetModel")
+            .fields([
+                createValidFieldMetaModel("someObject", targetNestedObject),
+                createValidFieldMetaModel("someString", String)
+            ])
+            .build()
+
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(sourceModel)
+            .targetMetaModel(targetModel)
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        mapperGenerateConf.addSubMapperConfiguration("mapNestedObject1",
+            MapperConfiguration.builder()
+                .name("mapNestedObject1")
+                .sourceMetaModel(sourceNestedObject)
+                .targetMetaModel(targetNestedObject)
+                .build())
+
+        mapperGenerateConf.addSubMapperConfiguration("mapNestedObject2",
+            MapperConfiguration.builder()
+                .name("mapNestedObject2")
+                .sourceMetaModel(sourceNestedObject)
+                .targetMetaModel(targetNestedObject)
+                .build())
+
+        mapperGenerateConf.addSubMapperConfiguration("mapCollectionElement1",
+            MapperConfiguration.builder()
+                .name("mapCollectionElement1")
+                .sourceMetaModel(sourceCollectionElement)
+                .targetMetaModel(targetCollectionElement)
+                .build())
+
+        mapperGenerateConf.addSubMapperConfiguration("mapCollectionElement2",
+            MapperConfiguration.builder()
+                .name("mapCollectionElement2")
+                .sourceMetaModel(sourceCollectionElement)
+                .targetMetaModel(targetCollectionElement)
+                .build())
+
+        when:
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+            sourceModel, targetModel)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 3
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "*", "targetCollectionElement", "list.*",
+            occurredInNotGeneratedMethod("mapNestedObject1") +
+                errorReason(createMessagePlaceholder("mapper.found.to.many.methods",
+                    "mapCollectionElement2, mapCollectionElement1")))
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "*", "targetCollectionElement", "list.*",
+            occurredInNotGeneratedMethod("mapNestedObject2") +
+                errorReason(createMessagePlaceholder("mapper.found.to.many.methods",
+                    "mapCollectionElement2, mapCollectionElement1")))
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "someObject", "targetModel", "someObject",
+            errorReason(createMessagePlaceholder("mapper.found.to.many.methods",
+                "mapNestedObject1, mapNestedObject2")))
+            .translateMessage()
+    }
+
+    def "find to many mapping way for simple field via direct override and via parent override few sources and problem with find conversion way"() {
+        given:
+        def sourceNestedClassMetaModel1 = ClassMetaModel.builder()
+            .name("sourceNestedClassMetaModel1")
+            .fields([
+                createValidFieldMetaModel("toManyViaParent", Long),
+            ])
+            .build()
+
+        def sourceNestedClassMetaModel2 = ClassMetaModel.builder()
+            .name("sourceNestedClassMetaMode2")
+            .fields([
+                createValidFieldMetaModel("toManyViaParent", Long),
+                createValidFieldMetaModel("someLong", Long),
+            ])
+            .build()
+
+        def sourceClassMetaModel = ClassMetaModel.builder()
+            .name("sourceClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("someText", ClassMetaModel.builder()
+                    .name("otherModel")
+                    .fields([
+                        createValidFieldMetaModel("someText", String),
+                        createValidFieldMetaModel("cratedInDate", LocalDate),
+                    ])
+                    .build()),
+                createValidFieldMetaModel("toManyDirectly", Long),
+                createValidFieldMetaModel("nestedObject1", sourceNestedClassMetaModel1),
+                createValidFieldMetaModel("nestedObject2", sourceNestedClassMetaModel2),
+            ])
+            .build()
+
+        def targetNestedClassMetaModel = ClassMetaModel.builder()
+            .name("targetNestedClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("toManyViaParent", Long),
+                createValidFieldMetaModel("someLong", Long),
+            ])
+            .build()
+
+        def targetClassMetaModel = ClassMetaModel.builder()
+            .name("targetClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("toManyDirectly", Long),
+                createValidFieldMetaModel("nestedObject", targetNestedClassMetaModel),
+                createValidFieldMetaModel("someText", String),
+            ])
+            .build()
+
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(sourceClassMetaModel)
+            .targetMetaModel(targetClassMetaModel)
+            .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .mappingsByPropertyName([
+
+                    // via concrete assign to this field by two sources
+                    toManyDirectly: PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            createFieldsChainExpression(sourceClassMetaModel, "toManyDirectly"),
+                            createFieldsChainExpression(sourceClassMetaModel, "nestedObject2")
+                                .createExpressionWithNextField("someLong", READ_FIELD_RESOLVER_CONFIG)
+                        ])
+                        .build(),
+
+                    //  via assign to object which contains simple field,
+                    //  but for this assigned object given was two sources
+                    //  (every of that source have that the same name of simple field)
+                    nestedObject  : PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            createFieldsChainExpression(sourceClassMetaModel, "nestedObject1"),
+                            createFieldsChainExpression(sourceClassMetaModel, "nestedObject2")
+                        ])
+                        .build()
+                ])
+                .build())
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        when:
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+            sourceClassMetaModel, targetClassMetaModel)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 3
+
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.converter.not.found.between.metamodels",
+            "otherModel", "java.lang.String", "someText")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "toManyDirectly", "targetClassMetaModel", "toManyDirectly",
+            errorReason("{mapper.found.to.many.mappings.for.simple.type}"))
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "toManyViaParent", "targetNestedClassMetaModel", "nestedObject.toManyViaParent",
+            errorReason("{mapper.found.to.many.mappings.for.simple.type}"))
+            .translateMessage()
+    }
+
+    def "marked few ignoreMappingProblem during map to target, in some classes, but finally will return exception"() {
+        given:
+        def nextSourceObject = ClassMetaModel.builder()
+            .name("nextSourceObject")
+            .fields([
+                createValidFieldMetaModel("firstField", Long),
+            ])
+            .build()
+
+        def sourceNestedClassMetaModel1 = ClassMetaModel.builder()
+            .name("sourceNestedClassMetaModel1")
+            .fields([
+                createValidFieldMetaModel("toManyViaParent", Long),
+            ])
+            .build()
+
+        def sourceNestedClassMetaModel2 = ClassMetaModel.builder()
+            .name("sourceNestedClassMetaMode2")
+            .fields([
+                createValidFieldMetaModel("toManyViaParent", Long),
+                createValidFieldMetaModel("someLong", Long),
+            ])
+            .build()
+
+        def sourceClassMetaModel = ClassMetaModel.builder()
+            .name("sourceClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("someText", ClassMetaModel.builder()
+                    .name("otherModel")
+                    .fields([
+                        createValidFieldMetaModel("someText", String),
+                        createValidFieldMetaModel("cratedInDate", LocalDate),
+                    ])
+                    .build()),
+                createValidFieldMetaModel("toManyDirectly", Long),
+                createValidFieldMetaModel("nestedObject1", sourceNestedClassMetaModel1),
+                createValidFieldMetaModel("nestedObject2", sourceNestedClassMetaModel2),
+                createValidFieldMetaModel("nextObjectField", nextSourceObject),
+            ])
+            .build()
+
+        def targetNestedClassMetaModel = ClassMetaModel.builder()
+            .name("targetNestedClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("toManyViaParent", Long),
+                createValidFieldMetaModel("someLong", Long),
+            ])
+            .build()
+
+        def nextTargetObject = ClassMetaModel.builder()
+            .name("nextSourceObject")
+            .fields([
+                createValidFieldMetaModel("firstField", Long),
+                createValidFieldMetaModel("secondField", Long),
+                createValidFieldMetaModel("thirdField", String),
+            ])
+            .build()
+
+        def targetClassMetaModel = ClassMetaModel.builder()
+            .name("targetClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("toManyDirectly", Long),
+                createValidFieldMetaModel("nestedObject", targetNestedClassMetaModel),
+                createValidFieldMetaModel("nextObjectField", nextTargetObject),
+                createValidFieldMetaModel("someText", String),
+            ])
+            .build()
+
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(sourceClassMetaModel)
+            .targetMetaModel(targetClassMetaModel)
+            .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .mappingsByPropertyName([
+
+                    // via concrete assign to this field by two sources
+                    toManyDirectly: PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            createFieldsChainExpression(sourceClassMetaModel, "toManyDirectly"),
+                            createFieldsChainExpression(sourceClassMetaModel, "nestedObject2")
+                                .createExpressionWithNextField("someLong", READ_FIELD_RESOLVER_CONFIG)
+                        ])
+                        .build(),
+
+                    //  via assign to object which contains simple field,
+                    //  but for this assigned object given was two sources
+                    //  (every of that source have that the same name of simple field)
+                    nestedObject  : PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([
+                            createFieldsChainExpression(sourceClassMetaModel, "nestedObject1"),
+                            createFieldsChainExpression(sourceClassMetaModel, "nestedObject2")
+                        ])
+                        .build(),
+                    someText : PropertiesOverriddenMapping.builder()
+                        .ignoreMappingProblem(true)
+                    .build()
+                ])
+                .build())
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .build()
+
+        def otherMethod = MapperConfiguration.builder()
+            .name("mapNextObjectField")
+            .sourceMetaModel(nextSourceObject)
+            .targetMetaModel(nextTargetObject)
+            .ignoreMappingProblems(true)
+            .build()
+
+        mapperGenerateConf.addSubMapperConfiguration(otherMethod.getName(), otherMethod)
+
+        when:
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+            sourceClassMetaModel, targetClassMetaModel)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 2
+
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "toManyDirectly", "targetClassMetaModel", "toManyDirectly",
+            errorReason("{mapper.found.to.many.mappings.for.simple.type}"))
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
+            "toManyViaParent", "targetNestedClassMetaModel", "nestedObject.toManyViaParent",
+            errorReason("{mapper.found.to.many.mappings.for.simple.type}"))
+            .translateMessage()
+    }
 
     static MapperGenerateConfiguration withMapperConfigurations(MapperConfiguration rootConfiguration, MapperConfiguration... subMappersConfiguration) {
         def mapperGenerateConfiguration = EMPTY_CONFIG.toBuilder()
@@ -1294,4 +1856,83 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             createValidFieldMetaModel("someOneElement2", modelFromClass(CollectionElementOther)),
         ])
         .build()
+
+
+    private static INSIDE_COLLECTION_ELEMENT = ClassMetaModel.builder()
+        .name("INSIDE_COLLECTION_ELEMENT")
+        .fields([
+            createValidFieldMetaModel("id", Long),
+            createValidFieldMetaModel("textId", String),
+            createValidFieldMetaModel("modificationDateTime", LocalDateTime)
+        ])
+        .build()
+
+    private static NESTED_NOT_FOUND_MODEL = ClassMetaModel.builder()
+        .name("NESTED_NOT_FOUND_MODEL")
+        .fields([
+            createValidFieldMetaModel("surname", String),
+            createValidFieldMetaModel("localDateSome", LocalDate),
+        ])
+        .build()
+
+    private static OBJECT_FOR_NOT_FOND_MAPPINGS_MODEL = ClassMetaModel.builder()
+        .name("OBJECT_FOR_NOT_FOND_MAPPINGS_MODEL")
+        .fields([
+            createValidFieldMetaModel("someText", String),
+            createValidFieldMetaModel("otherLong", Long),
+            createValidFieldMetaModel("someObject", NESTED_NOT_FOUND_MODEL),
+            createValidFieldMetaModel("list", ClassMetaModel.builder()
+                .realClass(List)
+                .genericTypes([INSIDE_COLLECTION_ELEMENT])
+                .build()),
+            createValidFieldMetaModel("listOfList", ClassMetaModel.builder()
+                .realClass(List)
+                .genericTypes([INSIDE_COLLECTION_ELEMENT])
+                .build())
+        ])
+        .build()
+
+    private static EXAMPLE_ENUM_MODEL = createValidEnumMetaModel("exampleEnum",
+        "ONE", "TWO", "UNKNOWN")
+
+    private static OTHER_OBJECT_WITH_ENUM_MODEL = ClassMetaModel.builder()
+        .name("OTHER_OBJECT_WITH_ENUM")
+        .fields([
+            createValidFieldMetaModel("otherEnum", EXAMPLE_ENUM_MODEL)
+        ])
+        .build()
+
+    private static MODEL_WITH_ENUM = ClassMetaModel.builder()
+        .name("MODEL_WITH_ENUM")
+        .fields([
+            createValidFieldMetaModel("someEnum", EXAMPLE_ENUM_MODEL),
+            createValidFieldMetaModel("otherObjectWithEnum", OTHER_OBJECT_WITH_ENUM_MODEL),
+        ])
+        .build()
+
+    private static List<String> getSortedMessages(MapperGenerationException mapperGenerationException) {
+        mapperGenerationException.messagePlaceholders
+            .collect {
+                it.translateMessage()
+            }
+            .sort()
+    }
+
+    private static Iterator<String> getSortedMessagesIterator(MapperGenerationException mapperGenerationException) {
+        getSortedMessages(mapperGenerationException).iterator()
+    }
+
+    private static String errorReason(Object reasonArgument) {
+        " " + createMessagePlaceholder("mapper.mapping.problem.reason", reasonArgument)
+    }
+
+    private static void saveMapperCodeToFile(String code, ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel) {
+        def folderPath = "target/generated-test-sources/mappers/pl/jalokim/crudwizard/generated/mapper"
+        FileUtils.createDirectories(folderPath)
+        def mapperClassName = String.format("%sTo%sMapper",
+            getClassModelInfoForGeneratedCode(sourceMetaModel),
+            getClassModelInfoForGeneratedCode(targetMetaModel)
+        )
+        FileUtils.writeToFile(String.format("%s/%s.java", folderPath, mapperClassName), code)
+    }
 }

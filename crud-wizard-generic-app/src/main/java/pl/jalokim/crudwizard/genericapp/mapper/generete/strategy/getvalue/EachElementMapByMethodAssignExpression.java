@@ -9,10 +9,10 @@ import lombok.Value;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGeneratorArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MethodMetadataMapperConfig;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.TargetFieldMetaData;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 
@@ -26,7 +26,7 @@ public class EachElementMapByMethodAssignExpression implements ValueToAssignExpr
     @Override
     public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
 
-        MethodCodeMetadata foundMethod = mapperGeneratedCodeMetadata
+        var foundMethod = mapperGeneratedCodeMetadata
             .getMethodByName(innerMethodName);
 
         ClassMetaModel returnClassMetaModelForMappingElement = foundMethod.getReturnClassMetaModel();
@@ -35,7 +35,6 @@ public class EachElementMapByMethodAssignExpression implements ValueToAssignExpr
         ClassMetaModel resultClassModelForWrappedExpression = wrappedExpressionCodeMetaData.getReturnClassModel();
 
         if (resultClassModelForWrappedExpression.isCollectionType() || resultClassModelForWrappedExpression.isArrayType()) {
-            // TODO #1 #1 test for that generateCodeMetadata returns List<TargetMetaModel> not List<SourceMetaModel>
             return getMappingCodeMetaDataForElements(mapperGeneratedCodeMetadata,
                 resultClassModelForWrappedExpression, returnClassMetaModelForMappingElement);
         }
@@ -66,7 +65,7 @@ public class EachElementMapByMethodAssignExpression implements ValueToAssignExpr
             .currentPath(ObjectNodePath.rootNode())
             .parentMethodCodeMetadata(null)
             .matchedMethodFinder(findMethodArgument ->
-                List.of(MethodCodeMetadata.builder()
+                List.of(MethodMetadataMapperConfig.builder()
                     .methodName(innerMethodName)
                     .build()))
             .build();

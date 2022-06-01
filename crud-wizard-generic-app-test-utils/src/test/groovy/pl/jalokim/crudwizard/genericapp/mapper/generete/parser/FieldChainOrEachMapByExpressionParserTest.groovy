@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.EachElementMapByMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
 import spock.lang.Unroll
@@ -76,6 +77,7 @@ class FieldChainOrEachMapByExpressionParserTest extends BaseSourceExpressionPars
             ])
             .build()
         mapperConfiguration.getSourceMetaModel() >> documentMetaModel
+        mapperGenerateConfiguration.getMapperConfigurationByMethodName("someInnerMethod") >> MapperConfiguration.builder().build()
 
         when:
         EachElementMapByMethodAssignExpression result = parseExpression(expression)

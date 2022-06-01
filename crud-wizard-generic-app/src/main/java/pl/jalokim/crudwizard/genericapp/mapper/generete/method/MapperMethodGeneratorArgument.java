@@ -31,9 +31,10 @@ public class MapperMethodGeneratorArgument {
     MapperGenerateConfiguration mapperGenerateConfiguration;
     ObjectNodePath currentPath;
     MethodCodeMetadata parentMethodCodeMetadata;
+    MapperMethodGeneratorArgument parentMapperMethodGeneratorArgument;
 
     @Builder.Default
-    Function<FindMethodArgument, List<MethodCodeMetadata>> matchedMethodFinder = findMethodArgument ->
+    Function<FindMethodArgument, List<MethodMetadataMapperConfig>> matchedMethodFinder = findMethodArgument ->
         findMethodArgument.getMapperGeneratedCodeMetadata().findMatchNotGeneratedMethod(
             findMethodArgument.getTargetClassMetaModel(),
             findMethodArgument.getSourceClassMetaModel());
@@ -57,7 +58,7 @@ public class MapperMethodGeneratorArgument {
             .orElse(List.of());
     }
 
-    public List<MethodCodeMetadata> findMethodsFor(FindMethodArgument findMethodArgument) {
+    public List<MethodMetadataMapperConfig> findMethodsFor(FindMethodArgument findMethodArgument) {
         return matchedMethodFinder.apply(findMethodArgument);
     }
 

@@ -5,7 +5,6 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -111,7 +110,7 @@ public class ClassMetaModelFactory {
         }
 
         if (fieldMetaResolver != null) {
-            stroreInCache(realRawClass, fieldMetaResolver, classMetaModel);
+            storeInCache(realRawClass, fieldMetaResolver, classMetaModel);
         }
 
         if (!typeMetadata.isSimpleType() && fieldMetaResolver != null) {
@@ -140,7 +139,7 @@ public class ClassMetaModelFactory {
         return classMetaModel;
     }
 
-    private static void stroreInCache(Class<?> realRawClass, FieldMetaResolver fieldMetaResolver, ClassMetaModel classMetaModel) {
+    private static void storeInCache(Class<?> realRawClass, FieldMetaResolver fieldMetaResolver, ClassMetaModel classMetaModel) {
         Map<FieldMetaResolver, ClassMetaModel> resolvedByFieldMetaResolver;
 
         if (RESOLVED_CLASS_META_MODELS_BY_CLASS.containsKey(realRawClass)) {
@@ -154,4 +153,9 @@ public class ClassMetaModelFactory {
             resolvedByFieldMetaResolver.put(fieldMetaResolver, classMetaModel);
         }
     }
+
+    public static void clearCache() {
+        RESOLVED_CLASS_META_MODELS_BY_CLASS.clear();
+    }
 }
+

@@ -251,4 +251,18 @@ class ClassMetaModelSamples {
             ])
             .build()
     }
+
+    static ClassMetaModel createClassModelWithGenerics(Class<?> rawClass, Class<?>... genericTypes) {
+        ClassMetaModel.builder()
+            .realClass(rawClass)
+            .genericTypes(genericTypes.collect { createClassMetaModelFromClass(it)})
+            .build()
+    }
+
+    static ClassMetaModel createClassModelWithGenerics(Class<?> rawClass, ClassMetaModel... genericTypes) {
+        ClassMetaModel.builder()
+            .realClass(rawClass)
+            .genericTypes(genericTypes as List<ClassMetaModel>)
+            .build()
+    }
 }

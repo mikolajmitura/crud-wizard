@@ -10,6 +10,7 @@ import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
@@ -38,6 +39,7 @@ class BaseSourceExpressionParserTestSpec extends UnitTestSpec {
     }
 
     def setup() {
+        ClassMetaModelFactory.clearCache()
         applicationContext.getBean(InitSourceExpressionParser) >> initSourceExpressionParser
         applicationContext.getBean(SpringBeanOrOtherMapperParser) >> springBeanOrOtherMapperParser
         applicationContext.getBean(OtherVariableSourceExpressionParser) >> otherVariableSourceExpressionParser

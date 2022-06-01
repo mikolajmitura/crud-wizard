@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.AssignExpressionAsTextResolver.getInMethodPartMessage;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator.getGeneratedNewMethodOrGetCreatedEarlier;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression.NULL_ASSIGN;
 import static pl.jalokim.utils.collection.Elements.elements;
@@ -63,11 +65,12 @@ public class EnumsMapperMethodGenerator {
                     targetEnumTypeMetaData = allTargetEnums.get(sourceEnumValue);
                 }
                 if (targetEnumTypeMetaData == null) {
-                    methodGeneratorArgument.getMapperGeneratedCodeMetadata().
-                        addError(createMessagePlaceholder("mapper.cannot.map.enum.value",
+                    methodGeneratorArgument.getMapperGeneratedCodeMetadata().addError(
+                        createMessagePlaceholder("mapper.cannot.map.enum.value",
                             sourceEnumValue, sourceFieldClassMetaModel.getTypeDescription(),
                             targetFieldClassMetaModel.getTypeDescription(),
-                            methodGeneratorArgument.getCurrentPath().getFullPath()));
+                            methodGeneratorArgument.getCurrentPath().getFullPath(),
+                            getInMethodPartMessage(methodGeneratorArgument)));
                 } else {
                     TemplateAsText templateAsText = TemplateAsText.fromText(CASE_TEMPLATE)
                         .overrideVariable("to", targetEnumTypeMetaData.getAsMappingTo())

@@ -2,8 +2,8 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete;
 
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.ClassMetaModelForMapperHelper.getClassModelInfoForGeneratedCode;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel.createOnlyOneMapperArguments;
+import static pl.jalokim.utils.collection.Elements.elements;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
@@ -13,6 +13,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateCon
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.EnumsMapperMethodGenerator;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGeneratorArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MethodMetadataMapperConfig;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 import pl.jalokim.utils.template.TemplateAsText;
 
@@ -23,7 +24,7 @@ public class MapperCodeGenerator {
     private final MapperMethodGenerator mapperMethodGenerator;
     private final EnumsMapperMethodGenerator enumsMapperMethodGenerator;
 
-    public String generateMapperCodeMetadata(MapperGenerateConfiguration mapperGenerateConfiguration) {
+    public String generateMapperCode(MapperGenerateConfiguration mapperGenerateConfiguration) {
         MapperConfiguration mapperConfiguration = mapperGenerateConfiguration.getRootConfiguration();
         var sourceMetaModel = mapperConfiguration.getSourceMetaModel();
         var targetMetaModel = mapperConfiguration.getTargetMetaModel();
@@ -36,9 +37,18 @@ public class MapperCodeGenerator {
                 getClassModelInfoForGeneratedCode(targetMetaModel)
             ));
 
+        mapperGeneratedCodeMetadata.setOtherMethodsFromConfig(
+            elements(mapperGenerateConfiguration.getMapperConfigurationByMethodName().values())
+                .map(otherMapperConfiguration ->
+                    MethodMetadataMapperConfig.builder()
+                        .methodName(otherMapperConfiguration.getName())
+                        .argumentClassMetaModel(otherMapperConfiguration.getSourceMetaModel())
+                        .returnClassMetaModel(otherMapperConfiguration.getTargetMetaModel())
+                        .build())
+                .asList());
+
         mapperGenerateConfiguration.getMapperConfigurationByMethodName()
             .forEach((methodName, subMethodConfiguration) -> {
-
                     MapperMethodGeneratorArgument methodGeneratorArgument = MapperMethodGeneratorArgument.builder()
                         .methodName(subMethodConfiguration.getName())
                         .generated(false)
@@ -48,7 +58,7 @@ public class MapperCodeGenerator {
                         .mapperConfiguration(subMethodConfiguration)
                         .propertiesOverriddenMapping(subMethodConfiguration.getPropertyOverriddenMapping())
                         .mapperGenerateConfiguration(mapperGenerateConfiguration)
-                        .currentPath(ObjectNodePath.rootNode().nextNode("#" + subMethodConfiguration.getName() + "()"))
+                        .currentPath(ObjectNodePath.rootNode())
                         .parentMethodCodeMetadata(null)
                         .build();
 

@@ -195,6 +195,10 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return realClass != null && MetadataReflectionUtils.isArrayType(realClass);
     }
 
+    public boolean isArrayOrCollection() {
+        return isArrayType() || isCollectionType();
+    }
+
     public boolean isMapType() {
         return realClass != null && MetadataReflectionUtils.isMapType(realClass);
     }

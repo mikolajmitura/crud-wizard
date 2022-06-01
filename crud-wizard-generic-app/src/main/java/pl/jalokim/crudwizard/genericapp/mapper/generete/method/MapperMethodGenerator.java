@@ -45,6 +45,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements.Iterab
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategy;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WriteToMapStrategy;
@@ -93,7 +94,7 @@ public class MapperMethodGenerator {
 
         List<MapperArgumentMethodModel> mapperMethodArguments = elements(originalMapperMethodArguments)
             .map(methodArgument -> {
-                if (methodArgument.getArgumentType().isOnlyRawClassModel()) {
+                if (methodArgument.getArgumentType().isOnlyRawClassModel() && !isElementsType(methodArgument.getArgumentType())) {
                     return methodArgument.overrideType(createNotGenericClassMetaModel(methodArgument.getArgumentType(),
                         mapperGenerateConfiguration.getFieldMetaResolverForRawSource()), methodArgument.getDerivedFromExpression());
                 }
@@ -102,7 +103,8 @@ public class MapperMethodGenerator {
             .asList();
 
         WritePropertyStrategy writePropertyStrategy = instanceLoader.createInstanceOrGetBean(WriteToMapStrategy.class);
-        if (targetMetaModel.hasRealClass() && !targetMetaModel.isSimpleType() && !targetMetaModel.isGenericModel()) {
+        if (targetMetaModel.hasRealClass() && !targetMetaModel.isSimpleType()
+            && !targetMetaModel.isGenericModel() && !targetMetaModel.isArrayOrCollection()) {
             writePropertyStrategy = createWritePropertyStrategy(targetMetaModel);
             targetMetaModel = createNotGenericClassMetaModel(targetMetaModel, mapperGenerateConfiguration.getFieldMetaResolverForRawTarget());
         }
@@ -120,16 +122,36 @@ public class MapperMethodGenerator {
             simpleTargetAssignResolver.generateMapperMethodWhenMapToSimpleType(mapperMethodArguments, methodGeneratorArgument,
                 methodBuilder, returnMethodMetaData);
 
+        } else if (isElementsType(targetMetaModel)) {
+            ValueToAssignCodeMetadata valueToAssignCodeMetadata = getValueToAssignCodeMetadataForElements(
+                methodGeneratorArgument, mapperMethodArguments.get(0).getArgumentType(), returnMethodMetaData);
+
+            methodBuilder.lastLine("return " + valueToAssignCodeMetadata.getValueGettingCode());
+
         } else {
             generateMapperMethodLinesForNotSimpleType(methodGeneratorArgument.toBuilder()
                     .targetMetaModel(targetMetaModel)
                     .mapperMethodArguments(mapperMethodArguments)
+                    .parentMapperMethodGeneratorArgument(methodGeneratorArgument)
                     .build(),
                 methodBuilder,
                 writePropertyStrategy, returnMethodMetaData);
         }
 
         return methodBuilder.build();
+    }
+
+    private ValueToAssignCodeMetadata getValueToAssignCodeMetadataForElements(MapperMethodGeneratorArgument methodGeneratorArgument,
+        ClassMetaModel sourceMetaModel, TargetFieldMetaData returnMethodMetaData) {
+
+        AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference = new AtomicReference<>();
+        assignValueToFieldWithElements(methodGeneratorArgument,
+            returnMethodMetaData,
+            assignExpressionForFieldReference,
+            List.of(new RawJavaCodeAssignExpression(sourceMetaModel, "sourceObject")));
+
+        return assignExpressionForFieldReference.get()
+            .generateCodeMetadata(methodGeneratorArgument.getMapperGeneratedCodeMetadata());
     }
 
     private void generateMapperMethodLinesForNotSimpleType(MapperMethodGeneratorArgument methodGeneratorArgument,
@@ -398,7 +420,6 @@ public class MapperMethodGenerator {
         List<ValueToAssignExpression> methodArgumentsExpressions,
         AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference) {
 
-        final ObjectNodePath fieldNameNodePath = targetFieldMetaData.getFieldNameNodePath();
         MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
 
         ClassMetaModel targetFieldClassMetaModel = targetFieldMetaData.getTargetFieldClassMetaModel();
@@ -412,7 +433,7 @@ public class MapperMethodGenerator {
             var methodArgumentCodeMetaData = methodArgumentsExpressions.get(0).generateCodeMetadata(mapperGeneratedCodeMetadata);
             ClassMetaModel sourceClassMetaModel = methodArgumentCodeMetaData.getReturnClassModel();
 
-            List<MethodCodeMetadata> foundMatchedInnerNotGeneratedMethods = methodGeneratorArgument
+            List<MethodMetadataMapperConfig> foundMatchedInnerNotGeneratedMethods = methodGeneratorArgument
                 .findMethodsFor(new FindMethodArgument(
                     methodGeneratorArgument.getMapperGeneratedCodeMetadata(),
                     targetFieldClassMetaModel,
@@ -430,9 +451,8 @@ public class MapperMethodGenerator {
                 mapperGeneratedCodeMetadata.throwMappingError(
                     createMessagePlaceholder("mapper.found.to.many.methods",
                         elements(foundMatchedInnerNotGeneratedMethods)
-                            .map(MethodCodeMetadata::getMethodName)
-                            .asConcatText(", "),
-                        fieldNameNodePath.getFullPath())
+                            .map(MethodMetadataMapperConfig::getMethodName)
+                            .asConcatText(", "))
                 );
                 return;
             } else if (canConvertByConversionService(methodArgumentCodeMetaData.getReturnClassModel(), targetFieldClassMetaModel)) {

@@ -29,8 +29,6 @@ class AssignExpressionAsTextResolver {
         TargetFieldMetaData targetFieldMetaData,
         String mappingProblemReason) {
 
-        String methodName = methodGeneratorArgument.getMethodName();
-        boolean generated = methodGeneratorArgument.isGenerated();
         ClassMetaModel targetMetaModel = methodGeneratorArgument.getTargetMetaModel();
         MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
         MapperConfiguration mapperConfiguration = methodGeneratorArgument.getMapperConfiguration();
@@ -41,13 +39,11 @@ class AssignExpressionAsTextResolver {
         ClassMetaModel targetFieldClassMetaModel = targetFieldMetaData.getTargetFieldClassMetaModel();
 
         if (assignExpressionForFieldReference.get() == null) {
-            if (mapperGenerateConfiguration.isGlobalIgnoreMappingProblems()
-                || mapperConfiguration.isIgnoreMappingProblems()
-                || targetFieldMetaData.getPropertiesOverriddenMappingForField().isIgnoreMappingProblem()) {
+            if (canIgnore(targetFieldMetaData, mapperConfiguration, mapperGenerateConfiguration)) {
                 assignExpressionForFieldReference.set(new NullAssignExpression(targetFieldClassMetaModel));
             } else {
-                String inMethodPartMessage = generated ? "" : translatePlaceholder("mapper.not.found.assign.for.method", methodName);
-                String reasonPart = mappingProblemReason == null ? "" : translatePlaceholder("mapper.mapping.problem.reason", mappingProblemReason);
+                String inMethodPartMessage = getInMethodPartMessage(methodGeneratorArgument);
+                String reasonPart = mappingProblemReason == null ? "" : " " + translatePlaceholder("mapper.mapping.problem.reason", mappingProblemReason);
 
                 mapperGeneratedCodeMetadata.addError(createMessagePlaceholder("mapper.not.found.assign.strategy",
                     fieldName, targetMetaModel.getTypeDescription(), fieldNameNodePath.getFullPath(), inMethodPartMessage + reasonPart));
@@ -58,15 +54,46 @@ class AssignExpressionAsTextResolver {
             ValueToAssignCodeMetadata valueToAssignCodeMetadata = assignExpressionForFieldReference.get()
                 .generateCodeMetadata(mapperGeneratedCodeMetadata);
 
-            return generateFetchValueForAssign(valueToAssignCodeMetadata.getReturnClassModel(),
-                targetFieldClassMetaModel, valueToAssignCodeMetadata.getFullValueExpression(),
-                mapperGeneratedCodeMetadata, fieldNameNodePath);
+            return generateFetchValueForAssign(methodGeneratorArgument,
+                valueToAssignCodeMetadata.getReturnClassModel(),
+                valueToAssignCodeMetadata.getFullValueExpression(),
+                targetFieldMetaData);
         }
         return null;
     }
 
-    private String generateFetchValueForAssign(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel,
-        String fetchValueExpression, MapperCodeMetadata mapperGeneratedCodeMetadata, ObjectNodePath currentPath) {
+    private boolean canIgnore(TargetFieldMetaData targetFieldMetaData, MapperConfiguration mapperConfiguration,
+        MapperGenerateConfiguration mapperGenerateConfiguration) {
+        return mapperGenerateConfiguration.isGlobalIgnoreMappingProblems()
+            || mapperConfiguration.isIgnoreMappingProblems()
+            || targetFieldMetaData.getPropertiesOverriddenMappingForField().isIgnoreMappingProblem();
+    }
+
+    public static String getInMethodPartMessage(MapperMethodGeneratorArgument methodGeneratorArgument) {
+        MapperMethodGeneratorArgument currentMethodArgument = methodGeneratorArgument;
+        while (currentMethodArgument != null) {
+            if (!currentMethodArgument.isGenerated()) {
+                return occurredInNotGeneratedMethod(currentMethodArgument.getMethodName());
+            }
+            currentMethodArgument = currentMethodArgument.getParentMapperMethodGeneratorArgument();
+        }
+        return "";
+    }
+
+    public static String occurredInNotGeneratedMethod(String methodName) {
+        return " " + createMessagePlaceholder("mapper.not.found.assign.for.method", methodName);
+    }
+
+    private String generateFetchValueForAssign(MapperMethodGeneratorArgument methodGeneratorArgument,
+        ClassMetaModel sourceMetaModel, String fetchValueExpression, TargetFieldMetaData targetFieldMetaData) {
+
+        MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
+        MapperConfiguration mapperConfiguration = methodGeneratorArgument.getMapperConfiguration();
+        MapperGenerateConfiguration mapperGenerateConfiguration = methodGeneratorArgument.getMapperGenerateConfiguration();
+
+        ObjectNodePath fieldNameNodePath = targetFieldMetaData.getFieldNameNodePath();
+        ClassMetaModel targetFieldClassMetaModel = targetFieldMetaData.getTargetFieldClassMetaModel();
+        ClassMetaModel targetMetaModel = targetFieldMetaData.getTargetFieldClassMetaModel();
 
         if (isTheSameTypeOrSubType(targetMetaModel, sourceMetaModel)) {
             return fetchValueExpression;
@@ -84,13 +111,20 @@ class AssignExpressionAsTextResolver {
                     fetchValueExpression, targetMetaModel.getCanonicalNameOfRealClass());
             } else if (whenConversionBetweenStringAndEnumMetaModel(sourceMetaModel, targetMetaModel)) {
                 return fetchValueExpression;
-            }
-            else {
-                mapperGeneratedCodeMetadata.throwMappingError(createMessagePlaceholder(
-                    "mapper.converter.not.found.between.metamodels",
-                    sourceMetaModel.getTypeDescription(),
-                    targetMetaModel.getTypeDescription(),
-                    currentPath.getFullPath()));
+            } else {
+
+                if (canIgnore(targetFieldMetaData, mapperConfiguration, mapperGenerateConfiguration)) {
+                    return new NullAssignExpression(targetFieldClassMetaModel)
+                        .generateCodeMetadata(mapperGeneratedCodeMetadata)
+                        .getValueGettingCode();
+                } else {
+                    mapperGeneratedCodeMetadata.addError(createMessagePlaceholder(
+                        "mapper.converter.not.found.between.metamodels",
+                        sourceMetaModel.getTypeDescription(),
+                        targetMetaModel.getTypeDescription(),
+                        fieldNameNodePath.getFullPath()));
+                }
+
                 return null;
             }
         }

@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.parser.InnerMethodByNameExtractor.getMapperConfiguration;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression.createFieldsChainToAssignExpression;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getRequiredFieldFromClassModel;
 
@@ -45,7 +46,10 @@ public class FieldChainOrEachMapByExpressionParser extends SourceExpressionParse
             CollectedExpressionPartResult collectedPartForMethodName = sourceExpressionParserContext.collectTextUntilAnyChars(')');
             String methodName = collectedPartForMethodName.getCollectedText().trim();
 
-            // TODO #1 #1 validation that methodName already exists in mapper methods (does the same from InnerMethodSourceExpressionParser)
+            getMapperConfiguration(
+                mapperConfigurationParserContext, sourceExpressionParserContext, methodName,
+                earlierExpression, this);
+
             return new EachElementMapByMethodAssignExpression(methodName, earlierExpression);
         }
 

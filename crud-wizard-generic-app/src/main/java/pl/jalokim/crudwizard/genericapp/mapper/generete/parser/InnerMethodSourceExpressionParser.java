@@ -1,10 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser;
 
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.parser.InnerMethodByNameExtractor.getMapperConfiguration;
 
 import java.util.List;
-import java.util.Map;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
@@ -30,16 +28,9 @@ class InnerMethodSourceExpressionParser extends SourceExpressionParser {
             mapperConfigurationParserContext, sourceExpressionParserContext);
         sourceExpressionParserContext.skipSpaces();
         sourceExpressionParserContext.currentCharIs(')');
-        MapperConfiguration mapperConfigurationByMethodName = sourceExpressionParserContext.getMapperGenerateConfiguration()
-            .getMapperConfigurationByMethodName(innerMethodName);
-
-        if (mapperConfigurationByMethodName == null) {
-            mapperConfigurationParserContext.throwParseException(createMessagePlaceholder("cannot.find.method.with.arguments",
-                Map.of("methodName", innerMethodName,
-                    "classesTypes", generateCodeMetadataFor(methodArgumentExpression, mapperConfigurationParserContext)
-                        .getReturnClassModel().getTypeDescription(),
-                    "givenClass", wrapAsPlaceholder("current.mapper.name"))));
-        }
+        MapperConfiguration mapperConfigurationByMethodName = getMapperConfiguration(
+            mapperConfigurationParserContext, sourceExpressionParserContext, innerMethodName,
+            methodArgumentExpression, this);
         ClassMetaModel returnClassMetaModelOfMethod = mapperConfigurationByMethodName.getTargetMetaModel();
 
         return new MethodInCurrentClassAssignExpression(innerMethodName,

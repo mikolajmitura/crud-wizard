@@ -9,13 +9,13 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MethodMetadataMapperConfig;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperValidationContext;
 
 @Data
@@ -31,6 +31,7 @@ public class MapperCodeMetadata {
     private Set<ConstructorArgument> constructorArguments = new LinkedHashSet<>();
     private MethodCodeMetadata mainMethodCodeMetadata;
     private List<MethodCodeMetadata> otherMethods = new ArrayList<>();
+    private List<MethodMetadataMapperConfig> otherMethodsFromConfig = new ArrayList<>();
     private Set<String> methodNames = new HashSet<>();
     private MapperValidationContext mapperValidationContext = new MapperValidationContext();
 
@@ -129,20 +130,20 @@ public class MapperCodeMetadata {
         mapperValidationContext.checkValidationResults();
     }
 
-    public List<MethodCodeMetadata> findMatchNotGeneratedMethod(ClassMetaModel targetClassMetaModel, ClassMetaModel sourceClassMetaModel) {
-        return elements(otherMethods)
-            .filter(Predicate.not(MethodCodeMetadata::isGenerated))
+    public List<MethodMetadataMapperConfig> findMatchNotGeneratedMethod(ClassMetaModel targetClassMetaModel, ClassMetaModel sourceClassMetaModel) {
+        return elements(otherMethodsFromConfig)
             .filter(methodCodeMetadata ->
-                methodCodeMetadata.getMethodArguments().size() == 1
-                    && methodCodeMetadata.getMethodArguments().get(0).getArgumentType().isTheSameMetaModel(sourceClassMetaModel)
+                    methodCodeMetadata.getArgumentClassMetaModel().isTheSameMetaModel(sourceClassMetaModel)
                     && methodCodeMetadata.getReturnClassMetaModel().isTheSameMetaModel(targetClassMetaModel)
             )
             .asList();
     }
 
-    public MethodCodeMetadata getMethodByName(String innerMethodName) {
-        return elements(otherMethods)
+    public MethodMetadataMapperConfig getMethodByName(String innerMethodName) {
+        return elements(otherMethodsFromConfig)
             .filter(method -> method.getMethodName().equals(innerMethodName))
             .getFirstOrNull();
     }
+
+
 }
