@@ -72,7 +72,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
         var classMetaModel = innerToModelFromDto(classMetaModelDto);
 
         setupEnumMetaModelIfShould(classMetaModel);
-        // TODO #1 setup other fields, how to resolve inner class metamodels from
+        // TODO #1 #tempoaray_context_metamodels setup other fields, how to resolve inner class metamodels from
         //  temporary context and other dto which should be mapped to classMetaModel...
         //  other fields to map
         //  - fields

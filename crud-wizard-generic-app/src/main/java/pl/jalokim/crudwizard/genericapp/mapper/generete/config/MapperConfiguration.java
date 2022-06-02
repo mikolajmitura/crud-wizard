@@ -21,7 +21,6 @@ public class MapperConfiguration {
      * When is disabled then finding of conversion between types then no attempt will be made.
      */
     @Builder.Default
-    // TODO #1 implements with usage that flag in MapperCodeGenerator
     private boolean enableAutoMapping = true;
 
     /**

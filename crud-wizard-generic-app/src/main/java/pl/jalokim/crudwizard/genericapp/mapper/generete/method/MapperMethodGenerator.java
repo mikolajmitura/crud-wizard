@@ -38,6 +38,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MappingException;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.MethodCodeMetadataBuilder;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGeneratorArgument.FindMethodArgument;
@@ -61,7 +62,6 @@ public class MapperMethodGenerator {
     public static final String ITERABLE_ELEMENT_NODE_NAME = "*";
 
     // TODO #1 mapper task orders
-    //  - implement mapping enums and test that
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (not IT)
     //  - generate mapper code and compile it, put to classloader and test that is exists (generate few times and check that latest version was used)
     //  - generate few mappers code and compile it, put to classloader and map some values by them
@@ -421,6 +421,8 @@ public class MapperMethodGenerator {
         AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference) {
 
         MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
+        MapperGenerateConfiguration mapperGenerateConfiguration = methodGeneratorArgument.getMapperGenerateConfiguration();
+        MapperConfiguration mapperConfiguration = methodGeneratorArgument.getMapperConfiguration();
 
         ClassMetaModel targetFieldClassMetaModel = targetFieldMetaData.getTargetFieldClassMetaModel();
         PropertiesOverriddenMapping propertiesOverriddenMappingForField = targetFieldMetaData.getPropertiesOverriddenMappingForField();
@@ -455,7 +457,8 @@ public class MapperMethodGenerator {
                             .asConcatText(", "))
                 );
                 return;
-            } else if (canConvertByConversionService(methodArgumentCodeMetaData.getReturnClassModel(), targetFieldClassMetaModel)) {
+            } else if (isEnabledAutoMapping(mapperGenerateConfiguration, mapperConfiguration)
+                && canConvertByConversionService(methodArgumentCodeMetaData.getReturnClassModel(), targetFieldClassMetaModel) ) {
                 assignExpressionForFieldReference.set(methodArgumentsExpressions.get(0));
             }
         }
@@ -516,5 +519,9 @@ public class MapperMethodGenerator {
         var converterDefinition = genericObjectsConversionService.findConverterDefinition(sourceMetaModel, targetMetaModel);
         return converterDefinition != null || (sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass()
             && conversionService.canConvert(sourceMetaModel.getRealClass(), targetMetaModel.getRealClass()));
+    }
+
+    private boolean isEnabledAutoMapping(MapperGenerateConfiguration mapperGenerateConfiguration, MapperConfiguration mapperConfiguration) {
+        return mapperGenerateConfiguration.isGlobalEnableAutoMapping() && mapperConfiguration.isEnableAutoMapping();
     }
 }

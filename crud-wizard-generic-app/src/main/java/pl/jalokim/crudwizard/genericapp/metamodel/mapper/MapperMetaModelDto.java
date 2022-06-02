@@ -91,13 +91,13 @@ public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
     @ClassExists
     String className;
 
-    // TODO #1 validation when added new mapper metamodel
+    // TODO #1 #validation validation when added new mapper metamodel
     // - verify that this bean, class, method exists
     // - verify that can method arguments will be resolved correctly, expected annotations and
     //  types see in DelegatedServiceMethodInvoker + GenericMapperArgument or just one some java object (without annotations, so then will be sourceObject to map).
     // - verify that newly added mapperMetaModel does not exists already, then use existing id
 
-    // TODO #1 during validation from dto should be get class metamodel etc,
+    // TODO #1 #validation during validation from dto should be get class metamodel etc,
     //  because class metamodels will not exists already in context the same with mapper metamodel etc...
 
     @Size(min = 3, max = 100)

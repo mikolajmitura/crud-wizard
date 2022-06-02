@@ -44,7 +44,7 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
     public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity) {
 
         if (mapperMetaModelEntity.getMapperName() != null) {
-            // TODO #1 generate new mapper when hash is the same and load new instance when should or load old.
+            // TODO #1 #mapping_by_mapstruct generate new mapper when hash is the same and load new instance when should or load old.
             //  when new mapper was generated then update className in mapperMetaModelEntity
         }
 

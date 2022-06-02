@@ -18,7 +18,7 @@ public class MapperConfigurationDto {
     /**
      * Mapper name or method name
      */
-    // TODO #1 create validator for unique of method name or mapper name
+    // TODO #1 #validation create validator for unique of method name or mapper name
         // use below label mapper.parser.not.unique.method.name
     @NotEmpty
     @Size(min = 3, max = 100)
@@ -38,7 +38,7 @@ public class MapperConfigurationDto {
     @Builder.Default
     Boolean ignoreMappingProblems = false;
 
-    // TODO #1 validate correctness of targetAssignPath in PropertiesOverriddenMappingDto via javax validator
+    // TODO #1 #validation validate correctness of targetAssignPath in PropertiesOverriddenMappingDto via javax validator
     //  sourceAssignExpression field will be validated through PropertiesOverriddenMappingResolver
     List<@Valid PropertiesOverriddenMappingDto> propertyOverriddenMapping;
 }

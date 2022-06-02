@@ -38,7 +38,7 @@ public class ServiceMetaModelDto extends WithAdditionalPropertiesDto {
     @Size(min = 3, max = 250)
     String className;
 
-    // TODO #1 validation when added new service metamodel
+    // TODO #1 #validation validation when added new service metamodel
     // verify that this bean, class, method exists
     // verify that can method arguments will be resolved correctly, expected annotations etc and types (see in DelegatedServiceMethodInvoker)
     // verify that newly added serviceMetaModel does not exists already, then use existing id

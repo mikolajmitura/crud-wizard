@@ -99,12 +99,12 @@ class AssignExpressionAsTextResolver {
             return fetchValueExpression;
         } else {
             var converterDefinition = genericObjectsConversionService.findConverterDefinition(sourceMetaModel, targetMetaModel);
-            if (converterDefinition != null) {
+            if (isEnabledAutoMapping(mapperGenerateConfiguration, mapperConfiguration) && converterDefinition != null) {
                 mapperGeneratedCodeMetadata.addConstructorArgument(GenericObjectsConversionService.class);
                 String converterName = converterDefinition.getBeanName();
                 return String.format("((%s) genericObjectsConversionService.convert(\"%s\", %s))",
                     targetMetaModel.getJavaGenericTypeInfo(), converterName, fetchValueExpression);
-            } else if (sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass()
+            } else if (isEnabledAutoMapping(mapperGenerateConfiguration, mapperConfiguration) &&sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass()
                 && conversionService.canConvert(sourceMetaModel.getRealClass(), targetMetaModel.getRealClass())) {
                 mapperGeneratedCodeMetadata.addConstructorArgument(ConversionService.class);
                 return String.format("conversionService.convert(%s, %s.class)",
@@ -122,7 +122,8 @@ class AssignExpressionAsTextResolver {
                         "mapper.converter.not.found.between.metamodels",
                         sourceMetaModel.getTypeDescription(),
                         targetMetaModel.getTypeDescription(),
-                        fieldNameNodePath.getFullPath()));
+                        fieldNameNodePath.getFullPath(),
+                        getInMethodPartMessage(methodGeneratorArgument)));
                 }
 
                 return null;
@@ -138,5 +139,9 @@ class AssignExpressionAsTextResolver {
     private boolean isTheSameTypeOrSubType(ClassMetaModel targetMetaModel, ClassMetaModel sourceMetaModel) {
         return sourceMetaModel.getTypeDescription().equals(targetMetaModel.getTypeDescription())
             || sourceMetaModel.isSubTypeOf(targetMetaModel);
+    }
+
+    private boolean isEnabledAutoMapping(MapperGenerateConfiguration mapperGenerateConfiguration, MapperConfiguration mapperConfiguration) {
+        return mapperGenerateConfiguration.isGlobalEnableAutoMapping() && mapperConfiguration.isEnableAutoMapping();
     }
 }

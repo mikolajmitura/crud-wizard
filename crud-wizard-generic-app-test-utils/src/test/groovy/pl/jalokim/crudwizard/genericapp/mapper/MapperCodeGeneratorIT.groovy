@@ -1011,7 +1011,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         def messagesIterator = getSortedMessagesIterator(ex)
 
         messagesIterator.next() == createMessagePlaceholder("mapper.converter.not.found.between.metamodels",
-            "otherModel", "java.lang.String", "someText")
+            "otherModel", "java.lang.String", "someText", "")
             .translateMessage()
 
         messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
@@ -1155,6 +1155,175 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         messagesIterator.next() == createMessagePlaceholder("mapper.not.found.assign.strategy",
             "toManyViaParent", "targetNestedClassMetaModel", "nestedObject.toManyViaParent",
             errorReason("{mapper.found.to.many.mappings.for.simple.type}"))
+            .translateMessage()
+    }
+
+    def "not use auto conversion of types when disabled globally"() {
+        given:
+        def nextSourceObject = ClassMetaModel.builder()
+            .name("nextSourceObject")
+            .fields([
+                createValidFieldMetaModel("firstField", Long),
+                createValidFieldMetaModel("field2", String),
+                createValidFieldMetaModel("thirdField", String),
+            ])
+            .build()
+
+        def sourceClassMetaModel = ClassMetaModel.builder()
+            .name("sourceClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("someId", Long),
+                createValidFieldMetaModel("nextObjectField", nextSourceObject),
+            ])
+            .build()
+
+        def nextTargetObject = ClassMetaModel.builder()
+            .name("nextSourceObject")
+            .fields([
+                createValidFieldMetaModel("firstField", Double),
+                createValidFieldMetaModel("secondField", Long),
+                createValidFieldMetaModel("thirdField", String),
+            ])
+            .build()
+
+        def targetClassMetaModel = ClassMetaModel.builder()
+            .name("targetClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("nextObjectField", nextTargetObject),
+                createValidFieldMetaModel("someId", String),
+            ])
+            .build()
+
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(sourceClassMetaModel)
+            .targetMetaModel(targetClassMetaModel)
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .globalEnableAutoMapping(false)
+            .build()
+
+        def otherMethod = MapperConfiguration.builder()
+            .name("mapNextObjectField")
+            .sourceMetaModel(nextSourceObject)
+            .targetMetaModel(nextTargetObject)
+            .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .mappingsByPropertyName(
+                    secondField: PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([createFieldsChainExpression(nextSourceObject, "field2")])
+                        .build()
+                )
+                .build())
+            .build()
+
+        mapperGenerateConf.addSubMapperConfiguration(otherMethod.getName(), otherMethod)
+
+        when:
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+            sourceClassMetaModel, targetClassMetaModel)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 3
+
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.converter.not.found.between.metamodels",
+            "java.lang.Long", "java.lang.Double", "firstField",
+            occurredInNotGeneratedMethod("mapNextObjectField"))
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.converter.not.found.between.metamodels",
+            "java.lang.Long", "java.lang.String", "someId", "")
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.converter.not.found.between.metamodels",
+            "java.lang.String", "java.lang.Long", "secondField",
+            occurredInNotGeneratedMethod("mapNextObjectField"))
+            .translateMessage()
+    }
+
+    def "not use auto conversion of types when disabled in other mapper method"() {
+        given:
+        def nextSourceObject = ClassMetaModel.builder()
+            .name("nextSourceObject")
+            .fields([
+                createValidFieldMetaModel("firstField", Long),
+                createValidFieldMetaModel("field2", String),
+                createValidFieldMetaModel("thirdField", String),
+            ])
+            .build()
+
+        def sourceClassMetaModel = ClassMetaModel.builder()
+            .name("sourceClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("someId", Long),
+                createValidFieldMetaModel("nextObjectField", nextSourceObject),
+            ])
+            .build()
+
+        def nextTargetObject = ClassMetaModel.builder()
+            .name("nextSourceObject")
+            .fields([
+                createValidFieldMetaModel("firstField", Double),
+                createValidFieldMetaModel("secondField", Long),
+                createValidFieldMetaModel("thirdField", String),
+            ])
+            .build()
+
+        def targetClassMetaModel = ClassMetaModel.builder()
+            .name("targetClassMetaModel")
+            .fields([
+                createValidFieldMetaModel("nextObjectField", nextTargetObject),
+                createValidFieldMetaModel("someId", String),
+            ])
+            .build()
+
+        def mainMethodConfig = MapperConfiguration.builder()
+            .sourceMetaModel(sourceClassMetaModel)
+            .targetMetaModel(targetClassMetaModel)
+            .build()
+
+        def mapperGenerateConf = MapperGenerateConfiguration.builder()
+            .rootConfiguration(mainMethodConfig)
+            .globalEnableAutoMapping(true)
+            .build()
+
+        def otherMethod = MapperConfiguration.builder()
+            .name("mapNextObjectField")
+            .sourceMetaModel(nextSourceObject)
+            .targetMetaModel(nextTargetObject)
+            .enableAutoMapping(false)
+            .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+                .mappingsByPropertyName(
+                    secondField: PropertiesOverriddenMapping.builder()
+                        .valueMappingStrategy([createFieldsChainExpression(nextSourceObject, "field2")])
+                        .build()
+                )
+                .build())
+            .build()
+
+        mapperGenerateConf.addSubMapperConfiguration(otherMethod.getName(), otherMethod)
+
+        when:
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+            sourceClassMetaModel, targetClassMetaModel)
+
+        then:
+        MapperGenerationException ex = thrown()
+        ex.messagePlaceholders.size() == 2
+
+        def messagesIterator = getSortedMessagesIterator(ex)
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.converter.not.found.between.metamodels",
+            "java.lang.Long", "java.lang.Double", "firstField",
+            occurredInNotGeneratedMethod("mapNextObjectField"))
+            .translateMessage()
+
+        messagesIterator.next() == createMessagePlaceholder("mapper.converter.not.found.between.metamodels",
+            "java.lang.String", "java.lang.Long", "secondField",
+            occurredInNotGeneratedMethod("mapNextObjectField"))
             .translateMessage()
     }
 

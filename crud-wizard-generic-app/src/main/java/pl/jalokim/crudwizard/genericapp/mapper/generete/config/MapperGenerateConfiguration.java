@@ -14,7 +14,6 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfigu
 @Builder(toBuilder = true)
 public class MapperGenerateConfiguration {
 
-    // TODO #1 implements with usage that flag  in MapperCodeGenerator
     @Builder.Default
     private boolean globalEnableAutoMapping = true;
 
