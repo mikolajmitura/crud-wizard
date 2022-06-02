@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
+package pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration;
 
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression.NULL_ASSIGN;
 
@@ -11,7 +11,7 @@ import lombok.Value;
 
 @Builder
 @Value
-public class EnumEntriesMapping {
+public class EnumEntriesMappingDto {
 
     Long id;
     /**

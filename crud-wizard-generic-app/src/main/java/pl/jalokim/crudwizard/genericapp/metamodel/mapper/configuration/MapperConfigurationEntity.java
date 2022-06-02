@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -52,4 +53,8 @@ public class MapperConfigurationEntity extends BaseEntity {
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "propert_overridden_mapping_id")
     private List<PropertiesOverriddenMappingEntity> propertyOverriddenMapping;
+
+    @OneToOne
+    @JoinColumn(name = "enum_entries_mapping_id")
+    private EnumEntriesMappingEntity enumEntriesMapping;
 }

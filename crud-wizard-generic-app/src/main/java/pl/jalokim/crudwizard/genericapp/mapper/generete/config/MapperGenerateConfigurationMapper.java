@@ -54,7 +54,6 @@ public abstract class MapperGenerateConfigurationMapper {
         expression = "java(toModelFromDto(mapperConfigurationDto.getSourceMetaModel(), temporaryMetaModelContext))")
     @Mapping(target = "targetMetaModel",
         expression = "java(toModelFromDto(mapperConfigurationDto.getTargetMetaModel(), temporaryMetaModelContext))")
-    @Mapping(target = "enumEntriesMapping", ignore = true) // TODO #1 #mapping_by_mapstruct impl this mapping
     protected abstract MapperConfiguration mapMapperConfiguration(MapperConfigurationDto mapperConfigurationDto, MetaModelContext temporaryMetaModelContext);
 
     Map<Class<?>, FieldMetaResolver> mapFieldMetaResolverForClass(List<FieldMetaResolverForClassEntryDto> fieldMetaResolversForClasses) {
