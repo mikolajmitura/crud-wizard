@@ -2,9 +2,9 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 
 public class ClassMetaModelUtils {
 
@@ -15,4 +15,10 @@ public class ClassMetaModelUtils {
             .getRequiredFieldByName(fieldName);
     }
 
+    public static FieldMetaModel getFieldFromClassModel(ClassMetaModel genericClassMetaModel,
+        String fieldName, FieldMetaResolverConfiguration fieldMetaResolverConfig) {
+
+        return createNotGenericClassMetaModel(genericClassMetaModel, fieldMetaResolverConfig)
+            .getFieldByName(fieldName);
+    }
 }

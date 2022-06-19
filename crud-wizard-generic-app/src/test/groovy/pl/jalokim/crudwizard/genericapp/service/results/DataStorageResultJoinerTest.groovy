@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.service.results
 
 import java.time.LocalDate
-import pl.jalokim.crudwizard.core.metamodels.DataStorageResultsJoinerMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageResultsJoinerMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.EqObjectsJoiner
 import spock.lang.Specification
 

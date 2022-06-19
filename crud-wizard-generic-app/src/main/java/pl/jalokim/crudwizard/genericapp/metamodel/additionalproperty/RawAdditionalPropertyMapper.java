@@ -3,7 +3,6 @@ package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.rawJsonToObject;
 
 import org.mapstruct.Mapper;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)

@@ -9,6 +9,8 @@ import java.time.LocalDateTime
 import java.time.Period
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
 import spock.lang.Specification
 import spock.lang.Unroll
 

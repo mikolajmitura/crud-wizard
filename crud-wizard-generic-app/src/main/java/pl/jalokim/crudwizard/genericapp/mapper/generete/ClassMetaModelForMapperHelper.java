@@ -5,7 +5,7 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.experimental.UtilityClass;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 @UtilityClass

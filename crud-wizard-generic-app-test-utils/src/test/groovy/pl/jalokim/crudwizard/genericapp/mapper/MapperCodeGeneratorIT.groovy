@@ -17,7 +17,6 @@ import java.time.LocalDateTime
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.core.exception.handler.DummyService
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.ClassHasSamplePersonDto
 import pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto
 import pl.jalokim.crudwizard.core.sample.FromStringToObject
@@ -56,6 +55,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.Method
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperGenerationException
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.utils.file.FileUtils

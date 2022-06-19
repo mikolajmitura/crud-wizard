@@ -4,12 +4,12 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 
 import java.time.LocalDateTime
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.EachElementMapByMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
 import spock.lang.Unroll
 
 class FieldChainOrEachMapByExpressionParserTest extends BaseSourceExpressionParserTestSpec {

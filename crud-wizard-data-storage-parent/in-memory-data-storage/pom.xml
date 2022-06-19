@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>
-            <artifactId>crud-wizard-core</artifactId>
+            <artifactId>crud-wizard-generic-app</artifactId>
             <version>${project.version}</version>
         </dependency>
 

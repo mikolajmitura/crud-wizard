@@ -2,8 +2,8 @@ package pl.jalokim.crudwizard.genericapp.mapper.conversion;
 
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 @Component("SamplePersonDto-to-long-bean")
 public class FromSamplePersonDtoToLongConverter

@@ -1,7 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.apitag;
 
 import java.util.List;
-import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 

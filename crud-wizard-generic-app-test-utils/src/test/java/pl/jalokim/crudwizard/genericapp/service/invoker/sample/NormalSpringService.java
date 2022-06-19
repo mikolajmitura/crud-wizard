@@ -61,6 +61,7 @@ public class NormalSpringService {
             .body(false);
     }
 
+    @Validated
     public SamplePersonDto createSamplePersonDtoWithValidated(@RequestBody @Validated SamplePersonDto samplePersonDto) {
         return SamplePersonDto.builder()
             .id(1L)
@@ -69,6 +70,7 @@ public class NormalSpringService {
             .build();
     }
 
+    @Validated
     public Map<String, Object> returnAllInputs(@RequestBody @NotNull JsonNode jsonNode,
         @RequestBody @Validated SamplePersonDto samplePersonDto,
         @RequestBody TranslatedPayload jsonNodeTranslated,

@@ -4,10 +4,10 @@ import static pl.jalokim.utils.reflection.InvokableReflectionUtils.invokeMethod;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import pl.jalokim.crudwizard.core.metamodels.BeanMethodMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MethodArgumentMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MethodSignatureMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 
 @Service
 public class MapperDelegatorService {

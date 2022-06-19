@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSimplePersonMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createPersonMetaModel
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
@@ -35,22 +35,27 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
+import static pl.jalokim.utils.reflection.InvokableReflectionUtils.setValueForField
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import javax.validation.ValidatorFactory
+import org.mapstruct.factory.Mappers
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import pl.jalokim.crudwizard.core.datastorage.DataStorageFactory
-import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.MapperType
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory
+import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.TemporaryContextLoader
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.GenericModelTypeFactory
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
@@ -64,6 +69,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.DataStorag
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
@@ -76,18 +82,24 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
     private MetaModelContextService metaModelContextService = Mock()
     private ApplicationContext applicationContext = Mock()
     private JdbcTemplate jdbcTemplate = Mock()
+    private ValidatorFactory validatorFactory = Mock()
     private DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository = Mock()
     private DataStorageInstances dataStorageInstances = Mock()
-    private GenericModelTypeFactory genericModelTypeFactory = new GenericModelTypeFactory(metaModelContextService)
-    private ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(genericModelTypeFactory)
+    private ClassMetaModelMapper classMetaModelMapper = Mappers.getMapper(ClassMetaModelMapper)
+    private ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(classMetaModelMapper)
     private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
     private endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
     private validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
         dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
         jdbcTemplate, dataStorageInstances)
     private BeforeEndpointValidatorUpdater beforeEndpointValidatorUpdater = new BeforeEndpointValidatorUpdater()
+    private TemporaryContextLoader temporaryContextLoader = new TemporaryContextLoader(validatorFactory,
+        metaModelContextService, classMetaModelMapper
+    )
 
     def setup() {
+        setValueForField(classMetaModelMapper, "fieldMetaModelMapper", Mappers.getMapper(FieldMetaModelMapper))
+        setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
         RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
         applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class) >> abstractHandlerMethodMapping
         abstractHandlerMethodMapping.getHandlerMethods() >> [:]
@@ -98,6 +110,8 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .nameOfQuery("some-query-name2")
             .classMetaModelInDataStorage(ClassMetaModelEntity.builder().id(CLASS_METAMODEL).build())
             .build()
+
+        validatorFactory.getValidator() >> validatorWithConverter.getValidator()
     }
 
     @Unroll
@@ -105,12 +119,14 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         given:
         MetaModelContext metaModelContext = createMetaModelContextWithOneEndpointInNodes()
         ModelsCache<ClassMetaModel> classMetaModels = new ModelsCache<>()
-        classMetaModels.put(CLASS_METAMODEL, createSimplePersonMetaModel())
+        classMetaModels.put(CLASS_METAMODEL, createPersonMetaModel())
         metaModelContext.setClassMetaModels(classMetaModels)
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
+        metaModelContextService.loadNewMetaModelContext() >> metaModelContext
 
         beforeEndpointValidatorUpdater.beforeValidation(endpointMetaModelDto)
+        temporaryContextLoader.loadTemporaryContextFor(endpointMetaModelDto)
 
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(endpointMetaModelDto)

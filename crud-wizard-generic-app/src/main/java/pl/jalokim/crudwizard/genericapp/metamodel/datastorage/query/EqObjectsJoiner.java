@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query;
 
-import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
 
 public class EqObjectsJoiner implements ObjectsJoinerVerifier<Object, Object> {
 

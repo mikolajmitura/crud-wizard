@@ -4,11 +4,11 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedLineUtils.wrapWithNextLineWith3Tabs
 
 import java.time.LocalDate
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SampleDtoWithoutGetter
 import pl.jalokim.utils.reflection.InvokableReflectionUtils
 import spock.lang.Specification

@@ -4,7 +4,7 @@ import static java.util.Optional.ofNullable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryProvider;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Component

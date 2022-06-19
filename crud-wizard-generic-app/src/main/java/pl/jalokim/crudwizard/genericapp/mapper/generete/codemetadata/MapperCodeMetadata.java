@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Set;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MethodMetadataMapperConfig;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperValidationContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 @Data
 @RequiredArgsConstructor

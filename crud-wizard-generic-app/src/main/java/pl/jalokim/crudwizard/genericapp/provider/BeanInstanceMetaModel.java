@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.genericapp.provider;
 import java.util.List;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
 
 @Value
 @Builder

@@ -58,4 +58,16 @@ class ValidatedInServiceInterceptorIT extends DummyBaseIntegrationControllerSpec
         then:
         noExceptionThrown()
     }
+
+    def "should throw validation exception when call dummy service method with @Validated but with only given groups without default"() {
+        when:
+        dummyService.create2(emptySimpleDummyDto())
+
+        then:
+        ConstraintViolationException tx = thrown()
+        def foundErrors = ValidatorWithConverter.errorsFromViolationException(tx)
+        assertValidationResults(foundErrors, [
+            errorEntry("id", notNullMessage())
+        ])
+    }
 }

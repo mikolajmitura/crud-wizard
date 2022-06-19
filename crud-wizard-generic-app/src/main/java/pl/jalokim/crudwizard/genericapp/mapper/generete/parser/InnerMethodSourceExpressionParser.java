@@ -5,10 +5,10 @@ import static pl.jalokim.crudwizard.genericapp.mapper.generete.parser.InnerMetho
 import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 @Component
 class InnerMethodSourceExpressionParser extends SourceExpressionParser {

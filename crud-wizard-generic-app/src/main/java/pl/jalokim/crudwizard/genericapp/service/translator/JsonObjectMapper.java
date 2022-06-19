@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 
 @Component
 @RequiredArgsConstructor

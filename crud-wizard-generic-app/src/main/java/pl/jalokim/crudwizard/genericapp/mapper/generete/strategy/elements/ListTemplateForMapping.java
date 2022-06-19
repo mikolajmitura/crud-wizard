@@ -2,8 +2,8 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements;
 
 import java.util.ArrayList;
 import java.util.List;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 public class ListTemplateForMapping extends CollectionTemplateForMapping {
 

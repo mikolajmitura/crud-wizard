@@ -1,15 +1,20 @@
 package pl.jalokim.crudwizard.core.metamodels
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson
-import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
 
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.DepartmentDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 
 class ClassMetaModelSamples {
@@ -207,7 +212,7 @@ class ClassMetaModelSamples {
             .build()
     }
 
-    static ClassMetaModel createSimplePersonMetaModel() {
+    static ClassMetaModel createPersonMetaModel() {
         def classMetamodel = ClassMetaModel.builder()
             .name("person")
             .fields([
@@ -242,12 +247,12 @@ class ClassMetaModelSamples {
         ClassMetaModel.builder()
             .name("employee-person")
             .extendsFromModels([
-                createSimplePersonMetaModel(),
+                createPersonMetaModel(),
                 createClassMetaModelFromClass(DepartmentDto)])
             .fields([
                 createValidFieldMetaModel("employeeId", Long),
                 createValidFieldMetaModel("fullName", Map),
-                createValidFieldMetaModel("boss", createSimplePersonMetaModel()),
+                createValidFieldMetaModel("boss", createPersonMetaModel()),
             ])
             .build()
     }

@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.genericapp.mapper;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 @Value
 @Builder(toBuilder = true)

@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 

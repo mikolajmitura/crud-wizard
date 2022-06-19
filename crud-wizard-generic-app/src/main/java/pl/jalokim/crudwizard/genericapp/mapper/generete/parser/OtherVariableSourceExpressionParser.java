@@ -1,18 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser;
 
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelConstants.STRING_MODEL;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.STRING_MODEL;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModelConstants;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 
 @Component
 public class OtherVariableSourceExpressionParser extends SourceExpressionParser {

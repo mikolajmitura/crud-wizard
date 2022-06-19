@@ -3,11 +3,11 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import spock.lang.Unroll
 
 class InnerMethodSourceExpressionParserTest extends BaseSourceExpressionParserTestSpec {

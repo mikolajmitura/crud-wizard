@@ -6,7 +6,6 @@ import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.Meth
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
@@ -14,6 +13,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverrid
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGeneratorArgument;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MethodMetadataMapperConfig;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.TargetFieldMetaData;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 
 @Value

@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 public class NullAssignExpression extends RawJavaCodeAssignExpression {
 

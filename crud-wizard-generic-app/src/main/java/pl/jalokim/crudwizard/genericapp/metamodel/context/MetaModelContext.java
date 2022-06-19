@@ -8,17 +8,17 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Data;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
-import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryProvider;
 import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagMetamodel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 
 @Data
 public class MetaModelContext {

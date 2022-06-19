@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.Value;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageResultsJoinerMetaModel;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageResultsJoinerMetaModel;
 
 @Component
 @SuppressWarnings({

@@ -6,11 +6,11 @@ import static pl.jalokim.crudwizard.genericapp.validation.validator.DataValidato
 
 import java.util.List;
 import java.util.Map;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 import pl.jalokim.crudwizard.core.validation.javax.FieldMetadataExtractor;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
 public class FieldShouldWhenOtherValidator extends BaseDataValidator<Map<String, Object>> {

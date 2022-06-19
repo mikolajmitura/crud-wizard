@@ -8,9 +8,9 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
 
 import org.springframework.http.HttpMethod
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
-import pl.jalokim.crudwizard.core.metamodels.url.UrlPart
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart
 
 class MetaModelContextSamples {
 

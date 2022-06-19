@@ -16,6 +16,7 @@ import pl.jalokim.crudwizard.core.translations.AppMessageSource;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.groups.CreateContext;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
+import pl.jalokim.crudwizard.core.validation.javax.groups.WithoutDefaultGroup;
 
 @RestController
 @RequestMapping("/test")
@@ -91,6 +92,11 @@ public class DummyRestController {
 
     @PostMapping("/update")
     void update(@RequestBody @Validated(UpdateContext.class) SomeBean someBean) {
+
+    }
+
+    @PostMapping("/update-without-default-group")
+    void updateWithoutDefaultGroup(@RequestBody @Validated({UpdateContext.class, WithoutDefaultGroup.class}) SomeBean someBean) {
 
     }
 

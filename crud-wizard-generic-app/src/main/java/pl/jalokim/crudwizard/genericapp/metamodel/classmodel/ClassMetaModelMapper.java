@@ -1,20 +1,27 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
-import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel;
+import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 
-@Mapper(config = MapperAsSpringBeanConfig.class, imports = ClassUtils.class)
+@Mapper(config = MapperAsSpringBeanConfig.class,
+    imports = {
+        ClassUtils.class,
+        ClassMetaModelState.class
+    })
 public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
     @Autowired
@@ -29,6 +36,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "basedOnClass", ignore = true)
     @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
+    @Mapping(target = "state", expression = "java(ClassMetaModelState.INITIALIZED)")
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
     @Mapping(target = "simpleRawClass", ignore = true)
@@ -68,16 +76,76 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
             .build();
     }
 
-    public ClassMetaModel toModelFromDto(ClassMetaModelDto classMetaModelDto, MetaModelContext temporaryMetaModelContext) {
-        var classMetaModel = innerToModelFromDto(classMetaModelDto);
+    public ClassMetaModel toModelFromDto(ClassMetaModelDto classMetaModelDto) {
+        TemporaryMetaModelContext temporaryMetaModelContext = getTemporaryMetaModelContext();
 
-        setupEnumMetaModelIfShould(classMetaModel);
-        // TODO #1 #tempoaray_context_metamodels setup other fields, how to resolve inner class metamodels from
-        //  temporary context and other dto which should be mapped to classMetaModel...
-        //  other fields to map
-        //  - fields
-        //  - genericTypes
-        //  - extendsFromModels
+        if (classMetaModelDto == null) {
+            return null;
+        }
+
+        ClassMetaModel classMetaModel;
+
+        if (ClassMetaModelDtoType.BY_ID.equals(classMetaModelDto.getClassMetaModelDtoType())) {
+            classMetaModel = temporaryMetaModelContext.findById(classMetaModelDto.getId());
+            if (classMetaModel == null) {
+                throw new EntityNotFoundException(classMetaModelDto.getId(), ClassMetaModelEntity.class);
+            }
+        } else if (ClassMetaModelDtoType.BY_NAME.equals(classMetaModelDto.getClassMetaModelDtoType())) {
+            classMetaModel = temporaryMetaModelContext.findByName(classMetaModelDto.getName());
+            if (classMetaModel == null) {
+                classMetaModel = ClassMetaModel.builder()
+                    .name(classMetaModelDto.getName())
+                    .state(ClassMetaModelState.ONLY_NAME)
+                    .build();
+                temporaryMetaModelContext.put(classMetaModelDto.getName(), classMetaModel);
+            }
+        } else {
+            if (classMetaModelDto.getName() != null) {
+                classMetaModel = temporaryMetaModelContext.findByName(classMetaModelDto.getName());
+
+                if (classMetaModel == null) {
+                    classMetaModel = innerToModelFromDto(classMetaModelDto);
+                    temporaryMetaModelContext.put(classMetaModelDto.getName(), classMetaModel);
+                } else {
+                    swallowUpdateFrom(classMetaModel, classMetaModelDto);
+                }
+                classMetaModel.setState(ClassMetaModelState.FOR_INITIALIZE);
+            } else {
+                classMetaModel = ClassMetaModel.builder()
+                    .className(classMetaModelDto.getClassName())
+                    .realClass(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))
+                    .build();
+            }
+        }
+
+        if (ClassMetaModelState.FOR_INITIALIZE.equals(classMetaModel.getState())) {
+            setupEnumMetaModelIfShould(classMetaModel);
+            classMetaModel.setState(ClassMetaModelState.DURING_INITIALIZATION);
+            classMetaModel.setGenericTypes(
+                elements(classMetaModelDto.getGenericTypes())
+                    .map(this::toModelFromDto)
+                    .asList()
+            );
+
+            classMetaModel.setExtendsFromModels(
+                elements(classMetaModelDto.getExtendsFromModels())
+                    .map(this::toModelFromDto)
+                    .asList()
+            );
+
+            ClassMetaModel ownerOfField = classMetaModel;
+
+            classMetaModel.setFields(
+                elements(classMetaModelDto.getFields())
+                    .map(field -> (FieldMetaModel) FieldMetaModel.builder()
+                        .fieldName(field.getFieldName())
+                        .ownerOfField(ownerOfField)
+                        .fieldType(toModelFromDto(field.getFieldType()))
+                        .build()
+                    )
+                    .asList());
+            classMetaModel.setState(ClassMetaModelState.INITIALIZED);
+        }
         return classMetaModel;
     }
 
@@ -94,5 +162,21 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
+    @Mapping(target = "state", ignore = true)
     protected abstract ClassMetaModel innerToModelFromDto(ClassMetaModelDto classMetaModelDto);
+
+    @Mapping(target = "basedOnClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getBasedOnClass()))")
+    @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
+    @Mapping(target = "enumClassMetaModel", ignore = true)
+    @Mapping(target = "parentMetamodelCacheContext", ignore = true)
+    @Mapping(target = "fields", ignore = true)
+    @Mapping(target = "extendsFromModels", ignore = true)
+    @Mapping(target = "genericTypes", ignore = true)
+    @Mapping(target = "validators", ignore = true)
+    @Mapping(target = "fieldNames", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    protected abstract void swallowUpdateFrom(@MappingTarget ClassMetaModel classMetaModel, ClassMetaModelDto classMetaModelDto);
+
+    @Mapping(target = "classMetaModelDtoType", ignore = true)
+    public abstract ClassMetaModelDto toDto(ClassMetaModelEntity classMetaModelEntity);
 }

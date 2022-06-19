@@ -1,11 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelConstants.STRING_MODEL
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.STRING_MODEL
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import spock.lang.Unroll
 
 class OtherVariableSourceExpressionParserTest extends BaseSourceExpressionParserTestSpec {

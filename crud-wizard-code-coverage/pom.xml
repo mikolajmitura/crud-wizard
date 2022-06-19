@@ -48,6 +48,11 @@
             <artifactId>crud-wizard-generic-app</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>pl.jalokim.crudwizard</groupId>
+            <artifactId>crud-wizard-generic-app-test-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>pl.jalokim.crudwizard</groupId>

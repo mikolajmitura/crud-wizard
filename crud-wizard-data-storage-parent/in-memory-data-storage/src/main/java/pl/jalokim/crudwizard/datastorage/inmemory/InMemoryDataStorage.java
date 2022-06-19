@@ -11,14 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
-import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.inmemory.InMemoryDsQueryRunner;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 
 @RequiredArgsConstructor
 public class InMemoryDataStorage implements DataStorage {

@@ -5,11 +5,11 @@ import static pl.jalokim.crudwizard.core.utils.ValueExtractorFromPath.getValueFr
 
 import java.util.List;
 import java.util.stream.Collectors;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryArguments;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
-import pl.jalokim.crudwizard.core.datastorage.query.RealExpression;
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryArguments;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryProvider;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression;
 
 public class ThirdQueryFindByIdFromFirstQueryResult implements DataStorageQueryProvider {
 

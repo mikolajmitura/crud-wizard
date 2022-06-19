@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.validator
 
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.NullValidator

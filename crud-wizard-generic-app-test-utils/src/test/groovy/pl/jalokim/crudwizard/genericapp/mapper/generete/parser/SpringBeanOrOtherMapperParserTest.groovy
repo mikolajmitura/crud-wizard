@@ -3,9 +3,6 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
-import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel
 import pl.jalokim.crudwizard.core.sample.InnerDocumentDto
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDocumentDto
@@ -13,6 +10,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ByMapperNameAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import spock.lang.Unroll
 

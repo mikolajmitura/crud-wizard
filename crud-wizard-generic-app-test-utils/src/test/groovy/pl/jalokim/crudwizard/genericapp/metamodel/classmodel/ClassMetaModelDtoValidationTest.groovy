@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
-import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
@@ -11,17 +10,20 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithClassName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidEnumMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createEmptyValidatorMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
-import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
-import static pl.jalokim.utils.test.DataFakerHelper.randomLong
-import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
+import static pl.jalokim.utils.test.DataFakerHelper.randomLong
+import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import org.springframework.jdbc.core.JdbcTemplate
+import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState
+import pl.jalokim.crudwizard.core.validation.javax.groups.PreValidation
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
@@ -41,7 +43,7 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
     @Unroll
     def "should return expected messages for default context of ClassMetaModelDto"() {
         when:
-        def foundErrors = validatorWithConverter.validateAndReturnErrors(classMetaModelDto)
+        def foundErrors = validatorWithConverter.validateAndReturnErrors(classMetaModelDto, PreValidation)
 
         then:
         assertValidationResults(foundErrors, expectedErrors)
@@ -95,7 +97,9 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
                                .build()])
             .validators([createEmptyValidatorMetaModelDto()])
             .build()                                      | [
-            errorEntry("genericTypes", fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, [])),
+            errorEntry("genericTypes", whenFieldIsInStateThenOthersShould(
+                "classMetaModelDtoType", ExpectedFieldState.EQUAL_TO_ANY, ["DEFINITION"],
+                fieldShouldWhenOtherMessage(NULL, [], "name", NOT_NULL, []))),
             errorEntry("genericTypes[0].isGenericEnumType", notNullMessage()),
             errorEntry("genericTypes[0].name",
                 whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
@@ -106,7 +110,9 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
             .extendsFromModels([createEmptyClassMetaModelDto()])
             .validators([createValidValidatorMetaModelDto()])
             .build()                                      | [
-            errorEntry("extendsFromModels", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
+            errorEntry("extendsFromModels", whenFieldIsInStateThenOthersShould(
+                "classMetaModelDtoType", ExpectedFieldState.EQUAL_TO_ANY, ["DEFINITION"],
+                fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, []))),
             errorEntry("extendsFromModels[0].name", whenFieldIsInStateThenOthersShould(
                 "id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])))
         ]

@@ -2,7 +2,7 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue;
 
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedLineUtils.wrapValueWithReturnStatement;
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 public class WriteToMapStrategy implements WritePropertyStrategy {
 

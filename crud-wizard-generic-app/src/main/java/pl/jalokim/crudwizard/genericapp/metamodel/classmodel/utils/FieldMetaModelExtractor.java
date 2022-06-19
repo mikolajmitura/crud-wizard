@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.utils.collection.Elements;
 
 @UtilityClass

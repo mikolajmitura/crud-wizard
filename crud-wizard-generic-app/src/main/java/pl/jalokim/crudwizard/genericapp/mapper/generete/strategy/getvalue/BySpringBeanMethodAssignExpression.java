@@ -7,8 +7,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Qualifier;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 

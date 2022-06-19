@@ -19,6 +19,7 @@ import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
+import pl.jalokim.crudwizard.core.validation.javax.groups.PreValidation;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumValuesInAdditionalProperties;
@@ -31,26 +32,46 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
 @SuperBuilder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
+@WhenFieldIsInStateThenOthersShould(whenField = "classMetaModelDtoType",
+    is = EQUAL_TO_ANY,
+    fieldValues = "BY_ID",
+    thenOthersShould = {
+        @FieldShouldWhenOther(field = ClassMetaModelDto.ID, should = NOT_NULL, whenField = "classMetaModelDtoType", is = NOT_NULL)
+    })
+
+@WhenFieldIsInStateThenOthersShould(whenField = "classMetaModelDtoType",
+    is = EQUAL_TO_ANY,
+    fieldValues = "BY_NAME",
+    thenOthersShould = {
+        @FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NOT_NULL, whenField = "classMetaModelDtoType", is = NOT_NULL)
+    })
+
+@WhenFieldIsInStateThenOthersShould(whenField = "classMetaModelDtoType",
+    is = EQUAL_TO_ANY,
+    fieldValues = "DEFINITION",
+    thenOthersShould = {
+        @FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NOT_NULL,
+            whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
+        @FieldShouldWhenOther(field = ClassMetaModelDto.FIELDS, should = NULL,
+            whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
+        @FieldShouldWhenOther(field = ClassMetaModelDto.GENERIC_TYPES, should = NULL,
+            whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
+        @FieldShouldWhenOther(field = ClassMetaModelDto.EXTENDS_FROM_MODELS, should = NULL,
+            whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
+
+        @FieldShouldWhenOther(field = ClassMetaModelDto.GENERIC_TYPES, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL),
+        @FieldShouldWhenOther(field = ClassMetaModelDto.EXTENDS_FROM_MODELS, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL)
+    })
+
 @WhenFieldIsInStateThenOthersShould(whenField = "id", is = NULL, thenOthersShould = {
     @FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NOT_NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NULL),
     @FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL),
     @FieldShouldWhenOther(field = ClassMetaModelDto.CLASS_NAME, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
 })
-
-@FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NOT_NULL,
-    whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE)
-@FieldShouldWhenOther(field = ClassMetaModelDto.FIELDS, should = NULL,
-    whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE)
-@FieldShouldWhenOther(field = ClassMetaModelDto.GENERIC_TYPES, should = NULL,
-    whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE)
-@FieldShouldWhenOther(field = ClassMetaModelDto.EXTENDS_FROM_MODELS, should = NULL,
-    whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE)
-
-@FieldShouldWhenOther(field = ClassMetaModelDto.GENERIC_TYPES, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
-@FieldShouldWhenOther(field = ClassMetaModelDto.EXTENDS_FROM_MODELS, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL)
 @EnumValuesInAdditionalProperties
 public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
+    public static final String ID = "id";
     public static final String NAME = "name";
     public static final String CLASS_NAME = "className";
     public static final String FIELDS = "fields";
@@ -63,10 +84,10 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @UniqueValue(entityClass = ClassMetaModelEntity.class)
-    @Size(min = 3, max = 100)
+    @Size(min = 3, max = 100, groups = PreValidation.class)
     String name;
 
-    @ClassExists(canBeAbstractOrInterface = true)
+    @ClassExists(canBeAbstractOrInterface = true, groups = PreValidation.class)
     @Size(min = 3, max = 250)
     String className;
 
@@ -93,4 +114,21 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     List<@Valid ClassMetaModelDto> extendsFromModels;
 
+    @NotNull(groups = PreValidation.class)
+    @Builder.Default
+    ClassMetaModelDtoType classMetaModelDtoType = ClassMetaModelDtoType.DEFINITION;
+
+    public static ClassMetaModelDto buildClassMetaModelDtoWithId(Long id) {
+        return ClassMetaModelDto.builder()
+            .id(id)
+            .classMetaModelDtoType(ClassMetaModelDtoType.BY_ID)
+            .build();
+    }
+
+    public static ClassMetaModelDto buildClassMetaModelDtoWithName(String name) {
+        return ClassMetaModelDto.builder()
+            .name(name)
+            .classMetaModelDtoType(ClassMetaModelDtoType.BY_NAME)
+            .build();
+    }
 }

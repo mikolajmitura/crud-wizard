@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.validator
 
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath
 import spock.lang.Specification
 import spock.lang.Unroll
 

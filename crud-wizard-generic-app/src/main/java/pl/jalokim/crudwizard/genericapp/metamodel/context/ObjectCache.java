@@ -14,6 +14,12 @@ public class ObjectCache<K, V> {
 
     private final Map<K, V> objectsById = new ConcurrentHashMap<>();
 
+    public V findById(K nullableId) {
+        return Optional.ofNullable(nullableId)
+            .flatMap(id -> Optional.ofNullable(objectsById.get(id)))
+            .orElse(null);
+    }
+
     public V getById(K nullableId) {
         return Optional.ofNullable(nullableId)
             .map(id -> Optional.ofNullable(objectsById.get(id))

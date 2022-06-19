@@ -2,7 +2,7 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
 
 import lombok.Builder;
 import lombok.Data;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 @Data
 @Builder(toBuilder = true)

@@ -3,8 +3,8 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 public class MapTemplateForMapping implements IterableTemplateForMapping {
 

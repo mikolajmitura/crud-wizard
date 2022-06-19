@@ -1,8 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue;
 
 import java.util.Comparator;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 
 public interface WritePropertyStrategy {
 

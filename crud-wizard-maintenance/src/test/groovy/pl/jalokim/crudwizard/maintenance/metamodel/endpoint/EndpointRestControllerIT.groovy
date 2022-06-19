@@ -44,4 +44,7 @@ class EndpointRestControllerIT extends MaintenanceBaseIntegrationController {
     }
 
     // TODO only just check that endpoints were invoked create, delete update etc real test should be in EndpointMetaModelServiceIT
+
+    // TODO #1 #tempoaray_context_metamodels test with first validation phase
+    //  via TemporaryContextLoader not passed, check that errors DTOs are expected
 }

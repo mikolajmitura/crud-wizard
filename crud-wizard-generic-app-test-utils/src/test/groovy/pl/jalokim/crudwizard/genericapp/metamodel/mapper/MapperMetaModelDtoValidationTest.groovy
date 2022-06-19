@@ -15,7 +15,6 @@ import java.time.LocalDate
 import org.springframework.jdbc.core.JdbcTemplate
 import pl.jalokim.crudwizard.core.exception.handler.DummyService
 import pl.jalokim.crudwizard.core.exception.handler.SimpleDummyDto
-import pl.jalokim.crudwizard.core.metamodels.MapperType
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType
 import pl.jalokim.crudwizard.genericapp.metamodel.ScriptLanguage
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto

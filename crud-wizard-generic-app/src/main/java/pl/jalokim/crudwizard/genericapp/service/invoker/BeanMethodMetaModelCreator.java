@@ -7,7 +7,7 @@ import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
 import java.lang.reflect.Method;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
 
 @Component
 @RequiredArgsConstructor

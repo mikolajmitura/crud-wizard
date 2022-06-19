@@ -5,10 +5,10 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassM
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import java.time.LocalDateTime
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSuperBuilder
 import pl.jalokim.crudwizard.core.sample.SuperDtoWithSuperBuilder
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.utils.reflection.TypeMetadata
 

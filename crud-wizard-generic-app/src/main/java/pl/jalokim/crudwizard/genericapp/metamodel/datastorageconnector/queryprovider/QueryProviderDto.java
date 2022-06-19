@@ -8,8 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryProvider;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 
 @Data

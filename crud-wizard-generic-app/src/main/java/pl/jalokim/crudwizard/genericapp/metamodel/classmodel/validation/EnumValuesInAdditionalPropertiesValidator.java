@@ -1,8 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation;
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.rawJsonToObject;
-import static pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel.ENUM_VALUES_PREFIX;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX;
 
 import javax.validation.ConstraintValidatorContext;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;

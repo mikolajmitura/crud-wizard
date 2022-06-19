@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.service.invoker;
 
-import static pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel.createWithRawClass;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel.createWithRawClass;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.annotation.Annotation;
@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MethodArgumentMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MethodSignatureMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
 import ru.vyarus.java.generics.resolver.GenericsResolver;
 import ru.vyarus.java.generics.resolver.context.GenericsContext;

@@ -1,13 +1,13 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty
-import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLDER_PREFIX
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel.PLACEHOLDER_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators2
@@ -25,10 +25,10 @@ import javax.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.core.exception.TechnicalException
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
@@ -251,7 +251,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
         then:
         TechnicalException ex = thrown()
-        ex.message == getMessage("class.metamodel.the.same.name.but.other.content", "person")
+        ex.message == getMessage("class.metamodel.the.same.name.but.other.content", "simple-person")
     }
 
     def "should return expected number of class metamodels when contains the same name and contents"() {
@@ -267,7 +267,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             assert classMetaModels.size() == 8
 
             assertFoundOneClassMetaModel(classMetaModels, {
-                classMetaModel -> classMetaModel.name == "person"})
+                classMetaModel -> classMetaModel.name == "simple-person"})
             assertFoundOneClassMetaModel(classMetaModels, {
                 classMetaModel -> classMetaModel.name == "document"})
             assertFoundOneClassMetaModel(classMetaModels, {
@@ -328,6 +328,17 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className", messageForValidator(VerifyThatCanCreateDataStorage)),
         ])
     }
+
+    // TODO #1 #tempoaray_context_metamodels test with first validation phase via TemporaryContextLoader not passed
+
+    // TODO #1 #tempoaray_context_metamodels
+    //  test when create person which contains fields:
+    //  List<person> children
+    //  List<document> documents (with real definition)
+    //  List<document> expiredDocuments (with definition by name)
+    //  Set<invoice> invoices (with definition by id)
+    //  Set<Agreement> oldAgreements (with real class)
+    //  Agreement currentAgreement (with real class)
 
     private static void assertFoundOneClassMetaModel(List<ClassMetaModel> classMetaModels, Predicate<ClassMetaModel> predicate) {
         def found = classMetaModels.findAll {

@@ -4,8 +4,8 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createM
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
 
 @Component

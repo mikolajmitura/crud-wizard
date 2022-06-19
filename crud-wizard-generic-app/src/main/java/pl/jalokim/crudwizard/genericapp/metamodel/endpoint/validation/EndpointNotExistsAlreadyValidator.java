@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import pl.jalokim.crudwizard.core.metamodels.url.UrlMetamodel;
-import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
 import pl.jalokim.crudwizard.core.translations.AppMessageSource;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlMetamodel;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 @Component

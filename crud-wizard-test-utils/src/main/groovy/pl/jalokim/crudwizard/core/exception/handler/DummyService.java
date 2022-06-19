@@ -21,6 +21,7 @@ import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
+import pl.jalokim.crudwizard.core.validation.javax.groups.WithoutDefaultGroup;
 
 @Validated
 @Service
@@ -80,10 +81,17 @@ public class DummyService {
         throw new Exception("raw exception message");
     }
 
+    @Validated
     public void create(@Validated SimpleDummyDto dto) {
 
     }
 
+    @Validated
+    public void create2(@Validated({UpdateContext.class, WithoutDefaultGroup.class}) SimpleDummyDto dto) {
+
+    }
+
+    @Validated
     public void update(@NotNull Long someId, @NotNull @Validated(UpdateContext.class) SimpleDummyDto dto) {
 
     }

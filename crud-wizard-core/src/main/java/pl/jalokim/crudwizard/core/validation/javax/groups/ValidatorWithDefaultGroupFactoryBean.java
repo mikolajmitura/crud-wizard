@@ -1,15 +1,24 @@
 package pl.jalokim.crudwizard.core.validation.javax.groups;
 
-import org.springframework.validation.Errors;
+import javax.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 
 public class ValidatorWithDefaultGroupFactoryBean extends LocalValidatorFactoryBean {
 
     @Override
-    public void validate(Object target, Errors errors, Object... validationHints) {
-        if (validationHints.length > 0) {
-            super.validate(target, errors, validationHints);
-        }
-        super.validate(target, errors);
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        InvokableReflectionUtils.invokeMethod(this, "setTargetValidator", createValidatorWithDefaultGroupsWrapper());
     }
+
+    @Override
+    public Validator getValidator() {
+        return createValidatorWithDefaultGroupsWrapper();
+    }
+
+    private Validator createValidatorWithDefaultGroupsWrapper() {
+        return new ValidatorWithDefaultGroupsWrapper(super.getValidator());
+    }
+
 }

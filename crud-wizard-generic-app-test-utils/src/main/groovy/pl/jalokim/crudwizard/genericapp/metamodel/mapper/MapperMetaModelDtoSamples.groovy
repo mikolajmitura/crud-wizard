@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper
 
-import static pl.jalokim.crudwizard.core.metamodels.MapperType.BEAN_OR_CLASS_NAME
+import static MapperType.BEAN_OR_CLASS_NAME
 
 class MapperMetaModelDtoSamples {
 

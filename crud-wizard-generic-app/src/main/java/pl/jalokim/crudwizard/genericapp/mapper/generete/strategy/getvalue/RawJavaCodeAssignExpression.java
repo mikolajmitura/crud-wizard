@@ -2,8 +2,8 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 @RequiredArgsConstructor
 @Data

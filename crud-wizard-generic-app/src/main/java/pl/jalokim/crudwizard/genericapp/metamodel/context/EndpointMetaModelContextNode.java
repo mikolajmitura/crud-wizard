@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
-import static pl.jalokim.crudwizard.core.metamodels.url.UrlPart.normalUrlPart;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.UrlPartMetaModel.createUrlPartMetamodel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart.normalUrlPart;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart;
 import pl.jalokim.utils.collection.Elements;
 
 @RequiredArgsConstructor

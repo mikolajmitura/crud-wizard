@@ -10,15 +10,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverFactory;
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto;
@@ -33,28 +32,29 @@ public abstract class MapperGenerateConfigurationMapper {
     private ClassMetaModelMapper classMetaModelMapper;
 
     public MapperGenerateConfiguration mapConfiguration(MapperGenerateConfigurationDto mapperGenerateConfigurationDto,
-        ClassMetaModel pathVariablesClassModel, ClassMetaModel requestParamsClassModel, MetaModelContext temporaryMetaModelContext) {
+        ClassMetaModelDto pathVariablesClassModel, ClassMetaModelDto requestParamsClassModel) {
+
         var mapperGenerateConfiguration = innerMapper(mapperGenerateConfigurationDto,
-            pathVariablesClassModel, requestParamsClassModel, temporaryMetaModelContext);
+            pathVariablesClassModel, requestParamsClassModel);
         mapperGenerateConfigurationDto.getSubMappersAsMethods()
             .forEach(mapperConfigurationDto -> mapperGenerateConfiguration.addSubMapperConfiguration(
-                mapperConfigurationDto.getName(), mapMapperConfiguration(mapperConfigurationDto, temporaryMetaModelContext)
+                mapperConfigurationDto.getName(), mapMapperConfiguration(mapperConfigurationDto)
             ));
         return mapperGenerateConfiguration;
     }
 
     @Mapping(target = "rootConfiguration",
-        expression = "java(mapMapperConfiguration(mapperGenerateConfigurationDto.getRootConfiguration(), temporaryMetaModelContext))")
+        expression = "java(mapMapperConfiguration(mapperGenerateConfigurationDto.getRootConfiguration()))")
     protected abstract MapperGenerateConfiguration innerMapper(MapperGenerateConfigurationDto mapperGenerateConfigurationDto,
-        ClassMetaModel pathVariablesClassModel, ClassMetaModel requestParamsClassModel, MetaModelContext temporaryMetaModelContext);
+        ClassMetaModelDto pathVariablesClassModel, ClassMetaModelDto requestParamsClassModel);
 
     protected abstract FieldMetaResolverConfiguration mapFieldMetaResolverConfiguration(FieldMetaResolverConfigurationDto fieldMetaResolverConfigurationDto);
 
     @Mapping(target = "sourceMetaModel",
-        expression = "java(toModelFromDto(mapperConfigurationDto.getSourceMetaModel(), temporaryMetaModelContext))")
+        expression = "java(toModelFromDto(mapperConfigurationDto.getSourceMetaModel()))")
     @Mapping(target = "targetMetaModel",
-        expression = "java(toModelFromDto(mapperConfigurationDto.getTargetMetaModel(), temporaryMetaModelContext))")
-    protected abstract MapperConfiguration mapMapperConfiguration(MapperConfigurationDto mapperConfigurationDto, MetaModelContext temporaryMetaModelContext);
+        expression = "java(toModelFromDto(mapperConfigurationDto.getTargetMetaModel()))")
+    protected abstract MapperConfiguration mapMapperConfiguration(MapperConfigurationDto mapperConfigurationDto);
 
     Map<Class<?>, FieldMetaResolver> mapFieldMetaResolverForClass(List<FieldMetaResolverForClassEntryDto> fieldMetaResolversForClasses) {
         return elements(fieldMetaResolversForClasses)
@@ -93,8 +93,8 @@ public abstract class MapperGenerateConfigurationMapper {
         return propertiesOverriddenMapping;
     }
 
-    public ClassMetaModel toModelFromDto(ClassMetaModelDto classMetaModelDto, MetaModelContext temporaryMetaModelContext) {
-        return classMetaModelMapper.toModelFromDto(classMetaModelDto, temporaryMetaModelContext);
+    public ClassMetaModel toModelFromDto(ClassMetaModelDto classMetaModelDto) {
+        return classMetaModelMapper.toModelFromDto(classMetaModelDto);
     }
 
     private boolean resolveNullableBoolean(Boolean nullableBoolean) {

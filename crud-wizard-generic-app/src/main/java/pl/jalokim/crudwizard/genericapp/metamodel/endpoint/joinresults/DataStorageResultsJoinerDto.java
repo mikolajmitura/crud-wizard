@@ -8,8 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
 
 @Data
 @Builder(toBuilder = true)

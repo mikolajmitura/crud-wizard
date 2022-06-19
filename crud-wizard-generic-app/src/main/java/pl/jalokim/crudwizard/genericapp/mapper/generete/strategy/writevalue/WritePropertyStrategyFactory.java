@@ -6,7 +6,7 @@ import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasOneConstructor
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasOnlyDefaultConstructor;
 
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 public class WritePropertyStrategyFactory {
 

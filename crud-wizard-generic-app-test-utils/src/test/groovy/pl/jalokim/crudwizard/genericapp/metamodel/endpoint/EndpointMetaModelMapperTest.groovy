@@ -1,9 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
-import static pl.jalokim.crudwizard.core.metamodels.PropertyPath.ALL_INDEXES
+import static pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath.ALL_INDEXES
 
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModelSamples
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity

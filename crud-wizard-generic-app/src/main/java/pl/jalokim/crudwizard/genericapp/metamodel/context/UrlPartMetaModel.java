@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNode.VARIABLE_URL_PART;
 
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.url.UrlPart;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlPart;
 
 @Value
 public class UrlPartMetaModel {

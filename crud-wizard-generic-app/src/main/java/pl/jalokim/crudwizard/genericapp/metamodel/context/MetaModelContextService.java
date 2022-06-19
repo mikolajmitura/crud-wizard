@@ -3,6 +3,8 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeCreator.loadEndpointNodes;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContext;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getListFromContext;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.isTemporaryContextExists;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -10,21 +12,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
 import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache;
+import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagMetamodel;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService;
@@ -55,6 +57,12 @@ public class MetaModelContextService implements ApplicationRunner {
 
     public synchronized void reloadAll() {
         defaultBeansService.saveAllDefaultMetaModels();
+        MetaModelContext metaModelContext = loadNewMetaModelContext();
+        metaModelContextReference.set(metaModelContext);
+        log.info("Reloaded meta model context");
+    }
+
+    public MetaModelContext loadNewMetaModelContext() {
         MetaModelContext metaModelContext = new MetaModelContext();
         loadDataStorages(metaModelContext);
         loadApiTags(metaModelContext);
@@ -66,8 +74,7 @@ public class MetaModelContextService implements ApplicationRunner {
         loadDefaultDataStorageConnectorsMetaModel(metaModelContext);
         loadEndpointMetaModels(metaModelContext);
         loadEndpointNodes(metaModelContext);
-        metaModelContextReference.set(metaModelContext);
-        log.info("Reloaded meta model context");
+        return metaModelContext;
     }
 
     private void loadDefaultQueryProvider(MetaModelContext metaModelContext) {
@@ -193,6 +200,9 @@ public class MetaModelContextService implements ApplicationRunner {
     // TODO #1 #tempoaray_context_metamodels get ClassMetaModel or from dto during validation or from real context...
     //  during load some dto should be created metamodel context connected to thread local...
     public ClassMetaModel getClassMetaModelByName(String classMetaModelName) {
+        if (isTemporaryContextExists()) {
+            return getTemporaryMetaModelContext().findByName(classMetaModelName);
+        }
         return getMetaModelContext().getClassMetaModels()
             .findOneBy(classMetaModel -> classMetaModelName.equals(classMetaModel.getName()));
     }

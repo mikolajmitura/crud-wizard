@@ -1,7 +1,8 @@
 package pl.jalokim.crudwizard.core.metamodels
 
-import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLDER_PREFIX
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel.PLACEHOLDER_PREFIX
 
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.validation.validator.ClassMetaModelWithParentsValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator

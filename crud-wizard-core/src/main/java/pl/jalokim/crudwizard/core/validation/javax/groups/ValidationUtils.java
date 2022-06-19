@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.core.validation.javax.groups;
 
-import java.util.HashSet;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -19,10 +18,6 @@ public class ValidationUtils {
     }
 
     public static <T> Set<ConstraintViolation<T>> getValidationErrors(Validator delegator, T bean, Class<?>... groups) {
-        Set<ConstraintViolation<T>> validationResults = new HashSet<>(delegator.validate(bean));
-        if (groups.length > 0) {
-            validationResults.addAll(delegator.validate(bean, groups));
-        }
-        return validationResults;
+        return delegator.validate(bean, groups);
     }
 }

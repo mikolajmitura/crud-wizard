@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
@@ -80,6 +80,9 @@ public class ClassMetaModelFactory {
         }
 
         ClassMetaModel classMetaModel = ClassMetaModel.builder().build();
+        if (fieldMetaResolver != null) {
+            storeInCache(realRawClass, fieldMetaResolver, classMetaModel);
+        }
 
         if (typeMetadata.isSimpleType() || typeMetadata.rawClassIsComingFromJavaApi()
             || typeMetadata.isHavingElementsType() || typeMetadata.isEnumType()) {
@@ -107,10 +110,6 @@ public class ClassMetaModelFactory {
                 classMetaModel.setRealClass(realRawClass);
                 classMetaModel.setClassName(realRawClass.getCanonicalName());
             }
-        }
-
-        if (fieldMetaResolver != null) {
-            storeInCache(realRawClass, fieldMetaResolver, classMetaModel);
         }
 
         if (!typeMetadata.isSimpleType() && fieldMetaResolver != null) {

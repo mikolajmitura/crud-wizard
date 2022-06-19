@@ -1,7 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.AssignExpressionAsTextResolver.getInMethodPartMessage;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator.getGeneratedNewMethodOrGetCreatedEarlier;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression.NULL_ASSIGN;
@@ -13,8 +12,6 @@ import java.util.function.Function;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EnumClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.EnumsMappingMethodResolver;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
@@ -22,6 +19,8 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.MethodCodeMetadataBuilder;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.EnumEntriesMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel;
 import pl.jalokim.utils.template.TemplateAsText;
 
 @Component

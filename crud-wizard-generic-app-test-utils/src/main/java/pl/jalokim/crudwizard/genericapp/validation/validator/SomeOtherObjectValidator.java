@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.genericapp.validation.validator;
 import static java.util.Optional.ofNullable;
 
 import java.util.Map;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
 public class SomeOtherObjectValidator extends BaseDataValidator<Map<String, Object>> {

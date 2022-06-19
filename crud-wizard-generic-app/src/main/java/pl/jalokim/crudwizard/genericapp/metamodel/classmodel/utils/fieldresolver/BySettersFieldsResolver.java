@@ -5,10 +5,10 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassM
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.ParameterMetadata;
 import pl.jalokim.utils.reflection.TypeMetadata;

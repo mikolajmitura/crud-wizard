@@ -6,8 +6,8 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import java.util.List;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 @Value
 public class MethodInCurrentClassAssignExpression implements ValueToAssignExpression {

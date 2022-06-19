@@ -7,11 +7,12 @@ import java.lang.reflect.Method;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.metamodels.BeanMethodMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.BeanInstanceMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
@@ -40,6 +41,9 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
     @Override
     @Mapping(target = "mapperScript", ignore = true)
     public abstract MapperMetaModelDto toDto(MapperMetaModelEntity entity);
+
+    @Mapping(target = "classMetaModelDtoType", ignore = true)
+    public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 
     public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity) {
 

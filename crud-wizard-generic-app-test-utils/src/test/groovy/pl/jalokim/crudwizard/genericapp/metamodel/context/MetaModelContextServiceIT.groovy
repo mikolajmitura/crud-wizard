@@ -1,25 +1,25 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context
 
-import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLDER_PREFIX
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel.PLACEHOLDER_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
 
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel
-import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
 import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader

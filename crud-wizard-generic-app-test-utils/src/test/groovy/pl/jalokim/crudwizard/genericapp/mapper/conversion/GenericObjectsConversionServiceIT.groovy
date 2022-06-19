@@ -4,8 +4,8 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import spock.lang.Unroll
 
 class GenericObjectsConversionServiceIT extends GenericAppWithReloadMetaContextSpecification {

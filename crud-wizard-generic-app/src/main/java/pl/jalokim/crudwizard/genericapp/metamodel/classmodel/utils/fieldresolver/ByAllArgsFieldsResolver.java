@@ -6,9 +6,9 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.utils.reflection.ConstructorMetadata;
 import pl.jalokim.utils.reflection.TypeMetadata;
 

@@ -6,9 +6,10 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
@@ -62,4 +63,7 @@ public abstract class DataStorageConnectorMetaModelMapper
     // TODO #53 remove this after impl
     @Mapping(target = "mapperScript", ignore = true)
     public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
+
+    @Mapping(target = "classMetaModelDtoType", ignore = true)
+    public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 }

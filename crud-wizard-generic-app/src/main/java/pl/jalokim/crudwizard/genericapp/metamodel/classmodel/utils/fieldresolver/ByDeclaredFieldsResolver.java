@@ -5,9 +5,9 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
@@ -19,8 +19,13 @@ public class ByDeclaredFieldsResolver implements FieldMetaResolver {
     public List<FieldMetaModel> findDeclaredFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         return elements(elements(typeMetadata.getRawType().getDeclaredFields())
             .filter(MetadataReflectionUtils::isNotStaticField)
+            .filter(field -> isNotGroovyMetaClass(field))
             .map(field -> resolveFieldMetaModelByField(field, typeMetadata, fieldMetaResolverConfiguration)))
             .asList();
+    }
+
+    private boolean isNotGroovyMetaClass(Field field) {
+        return !field.getType().getCanonicalName().equals("groovy.lang.MetaClass");
     }
 
     @Override

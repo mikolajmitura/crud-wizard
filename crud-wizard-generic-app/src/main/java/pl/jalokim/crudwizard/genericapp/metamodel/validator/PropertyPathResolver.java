@@ -4,7 +4,7 @@ import static pl.jalokim.utils.collection.Elements.bySplitText;
 import static pl.jalokim.utils.string.StringUtils.replaceAllWithEmpty;
 
 import lombok.experimental.UtilityClass;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.utils.constants.Constants;
 import pl.jalokim.utils.string.StringUtils;
 

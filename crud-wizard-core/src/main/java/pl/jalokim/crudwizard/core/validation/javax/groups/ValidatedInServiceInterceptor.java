@@ -1,7 +1,11 @@
 package pl.jalokim.crudwizard.core.validation.javax.groups;
 
+import static pl.jalokim.utils.collection.Elements.elements;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.ValidatorFactory;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -20,7 +24,11 @@ public class ValidatedInServiceInterceptor {
     private final ValidatorFactory validatorFactory;
     private final ApplicationContext applicationContext;
 
-    @Around("bean(*Service) || bean(*ServiceImpl)")
+    /**
+     * When some argument should be validated in some spring bean then method should be annotated with {@link org.springframework.validation.annotation.Validated}
+     * And some parameter objects should be annotated with {@link org.springframework.validation.annotation.Validated}
+     */
+    @Around("@annotation(org.springframework.validation.annotation.Validated)")
     public Object validateBeanWhenShould(ProceedingJoinPoint pjp) throws Throwable {
         if (pjp.getSignature().getClass().getCanonicalName().contains("MethodSignature")) {
             Method invokeMethod = InvokableReflectionUtils.invokeMethod(pjp.getSignature(), "getMethod");
@@ -38,7 +46,7 @@ public class ValidatedInServiceInterceptor {
     private void validateBeanWhenShould(ProceedingJoinPoint pjp, int parameterIndex, Annotation... parameterAnnotation) {
 
         Validated foundValidated = null;
-        BeforeValidationInvoke foundBeforeValidationInvoke = null;
+        List<BeforeValidationInvoke> foundBeforeValidationToInvoke = new ArrayList<>();
 
         for (Annotation annotation : parameterAnnotation) {
             if (annotation.annotationType().equals(Validated.class)) {
@@ -46,15 +54,21 @@ public class ValidatedInServiceInterceptor {
             }
 
             if (annotation.annotationType().equals(BeforeValidationInvoke.class)) {
-                foundBeforeValidationInvoke = (BeforeValidationInvoke) annotation;
+                foundBeforeValidationToInvoke.add((BeforeValidationInvoke) annotation);
+            }
+
+            if (annotation.annotationType().equals(BeforeValidationInvoke.List.class)) {
+                BeforeValidationInvoke.List beforeValidationInvokeList = (BeforeValidationInvoke.List) annotation;
+                BeforeValidationInvoke[] value = beforeValidationInvokeList.value();
+                foundBeforeValidationToInvoke.addAll(elements(value).asList());
             }
         }
 
         var methodArguments = pjp.getArgs();
-        if (foundBeforeValidationInvoke != null) {
+        foundBeforeValidationToInvoke.forEach(foundBeforeValidationInvoke -> {
             Object instance = applicationContext.getBean(foundBeforeValidationInvoke.beanType());
             InvokableReflectionUtils.invokeMethod(instance, foundBeforeValidationInvoke.methodName(), methodArguments[parameterIndex]);
-        }
+        });
 
         if (foundValidated != null) {
             Class<?>[] groups = foundValidated.value();

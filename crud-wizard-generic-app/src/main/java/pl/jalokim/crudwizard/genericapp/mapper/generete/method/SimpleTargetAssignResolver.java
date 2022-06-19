@@ -1,10 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelConstants.STRING_MODEL;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.createMethodName;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.ExpressionSourcesUtils.convertAssignExpressionsToMethodArguments;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator.getGeneratedNewMethodOrGetCreatedEarlier;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.STRING_MODEL;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
@@ -23,6 +22,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.Method
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 

@@ -2,10 +2,11 @@ package pl.jalokim.crudwizard.genericapp.rest
 
 import static org.springframework.http.HttpMethod.PUT
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.isEqualsTo
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntryWithErrorCode
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
+import static pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression.isEqualsTo
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createHttpQueryParamsClassMetaModelDto
@@ -44,11 +45,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
-import pl.jalokim.crudwizard.core.datastorage.DataStorage
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
@@ -168,9 +169,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
-                .classMetaModel(ClassMetaModelDto.builder()
-                    .id(personMetaModel.id)
-                    .build())
+                .classMetaModel(buildClassMetaModelDtoWithId(personMetaModel.id))
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createGetByIdPersonEndpoint)
@@ -187,9 +186,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def createUpdateByIdPersonEndpoint = EndpointMetaModelDto.builder()
             .baseUrl("users/{userId}")
             .operationName("updateUser")
-            .payloadMetamodel(ClassMetaModelDto.builder()
-                .id(personMetaModel.id)
-                .build())
+            .payloadMetamodel(buildClassMetaModelDtoWithId(personMetaModel.id))
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .httpMethod(PUT)
             .payloadMetamodelAdditionalValidators([
@@ -423,7 +420,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def secondDataStorageModelDto = createDataStorageMetaModelDtoWithId(metaModelContextService.getDataStorageMetaModelByName(secondDbName).getId())
         def thirdDataStorageModelDto = createDataStorageMetaModelDtoWithId(metaModelContextService.getDataStorageMetaModelByName(thirdDbName).getId())
 
-        def personClassModel = metaModelContextService.getClassMetaModelByName("person")
+        def personClassModel = metaModelContextService.getClassMetaModelByName("simple-person")
         def personSecondDbClassModel = metaModelContextService.getClassMetaModelByName("personSecondDb")
         def personDocumentDbClassModel = metaModelContextService.getClassMetaModelByName("personDocumentDb")
 
@@ -443,7 +440,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .httpMethod(HttpMethod.GET)
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
+                    .name("queryArguments1")
                     .fields([createValidFieldMetaModelDto("thirdDbId", String)])
                     .build())
             .pathParams(ClassMetaModelDto.builder()
@@ -528,11 +525,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             ])
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
                     .fields([createValidFieldMetaModelDto("thirdDbId", String)])
                     .build())
             .pathParams(ClassMetaModelDto.builder()
-                .name("pathParams")
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .build()
@@ -578,11 +573,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .operationName("deletePersonById")
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
                     .fields([createValidFieldMetaModelDto("thirdDbId", String)])
                     .build())
             .pathParams(ClassMetaModelDto.builder()
-                .name("pathParams")
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .dataStorageConnectors([
@@ -635,7 +628,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .operationName("getNormalListOfPeople")
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
+                    .name("queryArguments2")
                     .fields([
                         createValidFieldMetaModelDto("name", String),
                         createValidFieldMetaModelDto("surname", String),

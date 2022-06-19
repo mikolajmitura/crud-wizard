@@ -2,10 +2,10 @@ package pl.jalokim.crudwizard.genericapp.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 
 @Component
 @RequiredArgsConstructor

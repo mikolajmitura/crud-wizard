@@ -1,8 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
-import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getFieldFromClassModel;
 
 import java.util.List;
 import java.util.Map;
@@ -10,56 +10,70 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver;
 import pl.jalokim.utils.collection.Elements;
-import pl.jalokim.utils.reflection.TypeMetadata;
 import pl.jalokim.utils.string.StringUtils;
 
 @Component
 @RequiredArgsConstructor
 public class ClassMetaModelTypeExtractor {
 
-    private final GenericModelTypeFactory genericModelTypeFactory;
+    private final ClassMetaModelMapper classMetaModelMapper;
 
-    public Optional<TypeMetadata> getTypeByPath(ClassMetaModelDto classMetaModel, String path) {
+    public Optional<ClassMetaModel> getTypeByPath(ClassMetaModelDto classMetaModelDto, String path) {
         List<String> pathParts = Elements.bySplitText(path, "\\.").asList();
-        GenericModelType currentNode = genericModelTypeFactory.fromDto(classMetaModel, null);
+
+        ClassMetaModel currentClassMetadata = classMetaModelMapper.toModelFromDto(classMetaModelDto);
+
         String currentPath = "";
         for (String pathPart : pathParts) {
-            TypeMetadata currentTypeMetadata = currentNode.extractTypeMetadata();
-            if (currentTypeMetadata != null && isSimpleType(currentTypeMetadata.getRawType())) {
+            if (currentClassMetadata != null && currentClassMetadata.isSimpleType()) {
                 throw new TechnicalException(createMessagePlaceholder("ClassMetaModelTypeExtractor.not.expected.any.field",
                     Map.of("currentPath", currentPath,
-                        "currentNodeType", currentNode.getTypeName())));
+                        "currentNodeType", currentClassMetadata.getTypeDescription())));
             }
 
             var isSomeDynamicField = pathPart.startsWith("?");
-            currentNode = getFieldType(currentPath, currentNode, pathPart, isSomeDynamicField);
+            currentClassMetadata = getFieldType(currentPath, currentClassMetadata, pathPart, isSomeDynamicField);
             currentPath = concatPath(currentPath, pathPart);
-            if (currentNode == null) {
+            if (currentClassMetadata == null) {
                 return Optional.empty();
             }
         }
 
-        return Optional.of(convertFromWrapper(currentNode));
+        return Optional.of(currentClassMetadata);
     }
 
-    private GenericModelType getFieldType(String currentPath, GenericModelType currentNode, String pathPart, boolean suppressNotFound) {
+    private ClassMetaModel getFieldType(String currentPath, ClassMetaModel currentNode, String pathPart, boolean suppressNotFound) {
         String fieldName = pathPart.replaceFirst("\\?", "");
-        GenericModelType result = currentNode.getFieldTypeByName(fieldName, genericModelTypeFactory);
+        FieldMetaModel result = getFieldFromClassModel(currentNode, fieldName, READ_FIELD_RESOLVER_CONFIG);
 
         if (result == null && !suppressNotFound) {
-            throw new TechnicalException(createMessagePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
-                Map.of("currentPath", currentPath,
-                    "fieldName", fieldName,
-                    "currentNodeType", currentNode.getTypeName())));
-        }
-        return result;
-    }
 
-    private TypeMetadata convertFromWrapper(GenericModelType classTypeWrapper) {
-        return Optional.ofNullable(classTypeWrapper.extractTypeMetadata())
-            .orElseThrow(() -> new TechnicalException(wrapAsPlaceholder("ClassMetaModelTypeExtractor.not.as.raw.type")));
+            if (currentNode.isOnlyRawClassModel()) {
+                result = getFieldFromClassModel(currentNode, fieldName, FieldMetaResolverConfiguration.builder()
+                    .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
+                    .fieldMetaResolverForClass(Map.of(currentNode.getRealClass(), ByDeclaredFieldsResolver.INSTANCE))
+                    .build());
+            }
+
+            if (result == null) {
+                throw new TechnicalException(createMessagePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
+                    Map.of("currentPath", currentPath,
+                        "fieldName", fieldName,
+                        "currentNodeType", currentNode.getTypeDescription())));
+            }
+
+        }
+        return Optional.ofNullable(result)
+            .map(FieldMetaModel::getFieldType)
+            .orElse(null);
     }
 
     private String concatPath(String currentPath, String nextPathPart) {

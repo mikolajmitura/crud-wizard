@@ -1,17 +1,17 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.config
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelWithParents
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createPathParamsClassMetaModel
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createQueryArgumentsMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createPersonMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSimpleDocumentMetaModel
-import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSimplePersonMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createDocumentClassMetaDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.exampleClassMetaModelDtoWithExtension
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import java.time.LocalDate
 import org.mapstruct.factory.Mappers
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDto
@@ -20,7 +20,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByAllArgsFieldsResolver
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.BySettersFieldsResolver
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
@@ -31,7 +30,6 @@ import spock.lang.Specification
 
 class MapperGenerateConfigurationMapperTest extends Specification {
 
-    private MetaModelContext temporaryMetaModelContext = Mock()
     private ClassMetaModelMapper classMetaModelMapper = Mock()
     private MapperGenerateConfigurationMapper testCase = Mappers.getMapper(MapperGenerateConfigurationMapper)
 
@@ -45,25 +43,37 @@ class MapperGenerateConfigurationMapperTest extends Specification {
         def rootMapperTargetMetaModelDto = exampleClassMetaModelDtoWithExtension()
         def mapperMethodSourceMetaModelDto = simplePersonClassMetaModel()
         def mapperMethodTargetMetaModelDto = extendedPersonClassMetaModel1()
-        def pathVariablesClassModel = createPathParamsClassMetaModel()
-        def requestParamsClassModel = createQueryArgumentsMetaModel()
+        def pathVariablesClassModel = ClassMetaModelDto.builder()
+            .name("pathParamsMeta")
+            .fields([
+                createValidFieldMetaModelDto("usersIdVar", String),
+                createValidFieldMetaModelDto("ordersIdVar", Long)
+            ])
+            .build()
+        def requestParamsClassModel = ClassMetaModelDto.builder()
+                .name("somePersonApplication-queryParams")
+                .fields([
+                    createValidFieldMetaModelDto("lastContact", LocalDate),
+                    createValidFieldMetaModelDto("lastText", String),
+                    createValidFieldMetaModelDto("numberAsText", String)])
+                .build()
 
         def rootMapperSourceMetaModel = createSimpleDocumentMetaModel()
         def rootMapperTargetMetaModel = createClassMetaModelWithParents()
-        def mapperMethodSourceMetaModel = createSimplePersonMetaModel()
+        def mapperMethodSourceMetaModel = createPersonMetaModel()
         def mapperMethodTargetMetaModel = createSomePersonClassMetaModel()
 
-        classMetaModelMapper.toModelFromDto(rootMapperSourceMetaModelDto, temporaryMetaModelContext) >> rootMapperSourceMetaModel
-        classMetaModelMapper.toModelFromDto(rootMapperTargetMetaModelDto, temporaryMetaModelContext) >> rootMapperTargetMetaModel
-        classMetaModelMapper.toModelFromDto(mapperMethodSourceMetaModelDto, temporaryMetaModelContext) >> mapperMethodSourceMetaModel
-        classMetaModelMapper.toModelFromDto(mapperMethodTargetMetaModelDto, temporaryMetaModelContext) >> mapperMethodTargetMetaModel
+        classMetaModelMapper.toModelFromDto(rootMapperSourceMetaModelDto) >> rootMapperSourceMetaModel
+        classMetaModelMapper.toModelFromDto(rootMapperTargetMetaModelDto) >> rootMapperTargetMetaModel
+        classMetaModelMapper.toModelFromDto(mapperMethodSourceMetaModelDto) >> mapperMethodSourceMetaModel
+        classMetaModelMapper.toModelFromDto(mapperMethodTargetMetaModelDto) >> mapperMethodTargetMetaModel
 
         def mapperGenerateConfigurationDto = createMapperGenerateConfigurationDto(rootMapperSourceMetaModelDto,
             rootMapperTargetMetaModelDto, mapperMethodSourceMetaModelDto, mapperMethodTargetMetaModelDto)
 
         when:
         def result = testCase.mapConfiguration(mapperGenerateConfigurationDto,
-            pathVariablesClassModel, requestParamsClassModel, temporaryMetaModelContext)
+            pathVariablesClassModel, requestParamsClassModel)
 
         then:
         verifyAll(result) {

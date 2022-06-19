@@ -9,7 +9,7 @@ import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.get
 import javax.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
