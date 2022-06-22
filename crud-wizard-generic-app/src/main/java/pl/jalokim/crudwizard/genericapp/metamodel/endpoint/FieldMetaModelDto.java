@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import pl.jalokim.crudwizard.core.validation.javax.groups.PreValidation;
+import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto;
@@ -27,7 +27,7 @@ public class FieldMetaModelDto extends WithAdditionalPropertiesDto {
     @Size(min = 1, max = 100)
     String fieldName;
 
-    @NotNull(groups = PreValidation.class)
+    @NotNull(groups = FirstValidationPhase.class)
     ClassMetaModelDto fieldType;
 
     List<ValidatorMetaModelDto> validators;

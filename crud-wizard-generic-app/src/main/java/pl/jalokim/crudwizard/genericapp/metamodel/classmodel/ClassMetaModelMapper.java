@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
+import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 import static pl.jalokim.utils.collection.Elements.elements;
 
@@ -14,6 +15,7 @@ import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.ClassMetaModelBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 
@@ -42,6 +44,13 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "simpleRawClass", ignore = true)
     @Override
     public abstract ClassMetaModelEntity toEntity(ClassMetaModelDto classMetaModelDto);
+
+    @Mapping(target = "simpleRawClass", ignore = true)
+    @Mapping(target = "genericTypes", ignore = true)
+    @Mapping(target = "fields", ignore = true)
+    @Mapping(target = "validators", ignore = true)
+    @Mapping(target = "extendsFromModels", ignore = true)
+    public abstract ClassMetaModelEntity toSimpleEntity(ClassMetaModelDto classMetaModelDto, boolean dummyFlag);
 
     public ClassMetaModel toSwallowDto(MetaModelContext metaModelContext, ClassMetaModelEntity classMetaModelEntity) {
         ClassMetaModel classMetaModel = toMetaModel(classMetaModelEntity);
@@ -101,6 +110,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
             }
         } else {
             if (classMetaModelDto.getName() != null) {
+                temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
                 classMetaModel = temporaryMetaModelContext.findByName(classMetaModelDto.getName());
 
                 if (classMetaModel == null) {
@@ -111,10 +121,17 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
                 }
                 classMetaModel.setState(ClassMetaModelState.FOR_INITIALIZE);
             } else {
-                classMetaModel = ClassMetaModel.builder()
-                    .className(classMetaModelDto.getClassName())
-                    .realClass(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))
-                    .build();
+                ClassMetaModelBuilder<?, ?> classBuilder = ClassMetaModel.builder();
+
+                classBuilder.className(classMetaModelDto.getClassName())
+                    .realClass(ClassUtils.loadRealClass(classMetaModelDto.getClassName()));
+
+                if (isNotEmpty(classMetaModelDto.getGenericTypes())
+                    || isNotEmpty(classMetaModelDto.getExtendsFromModels())) {
+                    classBuilder.state(ClassMetaModelState.FOR_INITIALIZE);
+                }
+
+                classMetaModel = classBuilder.build();
             }
         }
 

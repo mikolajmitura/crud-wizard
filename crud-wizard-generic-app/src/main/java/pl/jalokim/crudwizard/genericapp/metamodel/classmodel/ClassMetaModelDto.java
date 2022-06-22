@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQU
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -17,12 +18,14 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
+import pl.jalokim.crudwizard.core.validation.javax.IdExists;
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
-import pl.jalokim.crudwizard.core.validation.javax.groups.PreValidation;
+import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumValuesInAdditionalProperties;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByName;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto;
 
@@ -69,6 +72,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
     @FieldShouldWhenOther(field = ClassMetaModelDto.CLASS_NAME, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
 })
 @EnumValuesInAdditionalProperties
+@ExistFullDefinitionInTempContextByName
 public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String ID = "id";
@@ -81,13 +85,14 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     public static final String TRUE = "true";
 
     @NotNull(groups = UpdateContext.class)
+    @IdExists(entityClass = ClassMetaModelEntity.class, groups = FirstValidationPhase.class)
     Long id;
 
     @UniqueValue(entityClass = ClassMetaModelEntity.class)
-    @Size(min = 3, max = 100, groups = PreValidation.class)
+    @Size(min = 3, max = 100, groups = FirstValidationPhase.class)
     String name;
 
-    @ClassExists(canBeAbstractOrInterface = true, groups = PreValidation.class)
+    @ClassExists(canBeAbstractOrInterface = true, groups = FirstValidationPhase.class)
     @Size(min = 3, max = 250)
     String className;
 
@@ -114,7 +119,7 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     List<@Valid ClassMetaModelDto> extendsFromModels;
 
-    @NotNull(groups = PreValidation.class)
+    @NotNull(groups = FirstValidationPhase.class)
     @Builder.Default
     ClassMetaModelDtoType classMetaModelDtoType = ClassMetaModelDtoType.DEFINITION;
 
@@ -130,5 +135,10 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
             .name(name)
             .classMetaModelDtoType(ClassMetaModelDtoType.BY_NAME)
             .build();
+    }
+
+    @JsonIgnore
+    public boolean isFullDefinitionType() {
+        return ClassMetaModelDtoType.DEFINITION.equals(classMetaModelDtoType);
     }
 }

@@ -1,9 +1,10 @@
 package pl.jalokim.crudwizard.core.validation.javax;
 
+import static pl.jalokim.crudwizard.core.validation.javax.utils.TableMetadataExtractor.getTableNameFromEntity;
+
 import com.google.common.base.CaseFormat;
 import java.util.Optional;
 import javax.persistence.Column;
-import javax.persistence.Table;
 import javax.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -26,13 +27,7 @@ public class UniqueValueValidator implements BaseConstraintValidatorWithDynamicM
     public void initialize(UniqueValue constraintAnnotation) {
         entityFieldName = StringUtils.isNotBlank(constraintAnnotation.entityFieldName()) ? constraintAnnotation.entityFieldName() : null;
         entityClass = constraintAnnotation.entityClass();
-        tableName = Optional.ofNullable(constraintAnnotation.entityClass().getAnnotation(Table.class))
-            .map(Table::name)
-            .orElseGet(() -> {
-                String tableNameAsClass = constraintAnnotation.entityClass().getSimpleName()
-                    .replace("Entity", "");
-                return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, tableNameAsClass);
-            });
+        tableName = getTableNameFromEntity(constraintAnnotation.entityClass());
     }
 
     @Override

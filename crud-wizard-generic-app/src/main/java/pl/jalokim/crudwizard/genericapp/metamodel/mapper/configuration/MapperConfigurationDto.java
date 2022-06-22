@@ -18,8 +18,6 @@ public class MapperConfigurationDto {
     /**
      * Mapper name or method name
      */
-    // TODO #1 #validation create validator for unique of method name or mapper name
-    // use below label mapper.parser.not.unique.method.name
     @NotEmpty
     @Size(min = 3, max = 100)
     String name;

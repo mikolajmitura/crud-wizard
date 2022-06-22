@@ -197,8 +197,6 @@ public class MetaModelContextService implements ApplicationRunner {
             .findOneBy(dataStorageMetaModel -> dataStorageMetaModel.getName().equals(dataStorageName));
     }
 
-    // TODO #1 #tempoaray_context_metamodels get ClassMetaModel or from dto during validation or from real context...
-    //  during load some dto should be created metamodel context connected to thread local...
     public ClassMetaModel getClassMetaModelByName(String classMetaModelName) {
         if (isTemporaryContextExists()) {
             return getTemporaryMetaModelContext().findByName(classMetaModelName);

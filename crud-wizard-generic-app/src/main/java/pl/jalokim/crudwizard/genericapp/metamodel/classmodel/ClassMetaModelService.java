@@ -6,6 +6,7 @@ import java.util.List;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
 @MetamodelService
@@ -23,45 +24,77 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
         this.classMetaModelEntitySaveContext = classMetaModelEntitySaveContext;
     }
 
+    public void saveAsSimpleClassMetaModelEntity(ClassMetaModelDto classMetaModelDto) {
+        if (classMetaModelDto.isFullDefinitionType() && classMetaModelDto.getName() != null) {
+            classMetaModelEntitySaveContext.putPartiallySavedToContext(classMetaModelDto);
+        }
+        elements(classMetaModelDto.getGenericTypes())
+            .forEach(this::saveAsSimpleClassMetaModelEntity);
+
+        elements(classMetaModelDto.getExtendsFromModels())
+            .forEach(this::saveAsSimpleClassMetaModelEntity);
+
+        elements(classMetaModelDto.getFields())
+            .map(FieldMetaModelDto::getFieldType)
+            .forEach(this::saveAsSimpleClassMetaModelEntity);
+    }
+
     @Override
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public ClassMetaModelEntity save(ClassMetaModelEntity classMetaModelEntity) {
 
-        ClassMetaModelEntity alreadySaveEntityWithThatName = classMetaModelEntitySaveContext.findEntityWhenNameTheSame(classMetaModelEntity);
-        if (classMetaModelEntity != alreadySaveEntityWithThatName) {
-            return alreadySaveEntityWithThatName;
-        }
-
+        ClassMetaModelEntity originalClassMetaModelEntity = classMetaModelEntity;
         if (classMetaModelEntity.shouldBeSimpleRawClass()) {
             return repository.findByRawClassName(classMetaModelEntity.getClassName())
                 .orElseGet(() -> {
-                    classMetaModelEntity.setSimpleRawClass(true);
-                    return repository.save(classMetaModelEntity);
+                    originalClassMetaModelEntity.setSimpleRawClass(true);
+                    return repository.save(originalClassMetaModelEntity);
                 });
         }
 
-        elements(classMetaModelEntity.getFields())
+        ClassMetaModelEntity alreadyFullySavedEntityWithThatName = classMetaModelEntitySaveContext
+            .findFullySavedWhenNameTheSame(classMetaModelEntity);
+        if (classMetaModelEntity != alreadyFullySavedEntityWithThatName) {
+            return alreadyFullySavedEntityWithThatName;
+        }
+
+        ClassMetaModelEntity alreadyPartiallySavedEntityWithThatName = classMetaModelEntitySaveContext
+            .findPartiallySavedWhenNameTheSame(classMetaModelEntity);
+
+        if (classMetaModelEntity != alreadyPartiallySavedEntityWithThatName) {
+            classMetaModelEntity = alreadyPartiallySavedEntityWithThatName;
+        }
+
+        return saveOthers(classMetaModelEntity, originalClassMetaModelEntity);
+    }
+
+    private ClassMetaModelEntity saveOthers(ClassMetaModelEntity classMetaModelEntityToSaved, ClassMetaModelEntity classMetaModelEntityUpdateSource) {
+        elements(classMetaModelEntityUpdateSource.getFields())
             .forEach(field -> {
                 validatorMetaModelService.saveOrCreateNewValidators(field.getValidators());
                 field.setFieldType(saveNewOrLoadById(field.getFieldType()));
             });
+        classMetaModelEntityToSaved.setFields(classMetaModelEntityUpdateSource.getFields());
 
-        elements(classMetaModelEntity.getGenericTypes())
+        elements(classMetaModelEntityUpdateSource.getGenericTypes())
             .forEachWithIndexed(indexed -> {
                 var genericTypeEntry = indexed.getValue();
-                classMetaModelEntity.getGenericTypes().set(indexed.getIndex(), saveNewOrLoadById(genericTypeEntry));
+                classMetaModelEntityUpdateSource.getGenericTypes().set(indexed.getIndex(), saveNewOrLoadById(genericTypeEntry));
             });
+        classMetaModelEntityToSaved.setGenericTypes(classMetaModelEntityUpdateSource.getGenericTypes());
 
-        validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntity.getValidators());
+        validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntityUpdateSource.getValidators());
+        classMetaModelEntityToSaved.setValidators(classMetaModelEntityUpdateSource.getValidators());
 
-        elements(classMetaModelEntity.getExtendsFromModels())
+        elements(classMetaModelEntityUpdateSource.getExtendsFromModels())
             .forEachWithIndexed(indexed -> {
                 var extendsFromEntry = indexed.getValue();
-                classMetaModelEntity.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
+                classMetaModelEntityUpdateSource.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
             });
+        classMetaModelEntityToSaved.setExtendsFromModels(classMetaModelEntityUpdateSource.getExtendsFromModels());
 
-        ClassMetaModelEntity savedClassMetaModelEntity = repository.save(classMetaModelEntity);
-        classMetaModelEntitySaveContext.putToContext(savedClassMetaModelEntity);
+        ClassMetaModelEntity savedClassMetaModelEntity = repository.save(classMetaModelEntityToSaved);
+        classMetaModelEntitySaveContext.putFullySavedToContext(savedClassMetaModelEntity);
 
         return savedClassMetaModelEntity;
     }

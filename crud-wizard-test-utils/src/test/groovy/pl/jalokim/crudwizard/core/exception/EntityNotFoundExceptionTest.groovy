@@ -66,7 +66,7 @@ class EntityNotFoundExceptionTest extends UnitTestSpec {
 
         then:
         EntityNotFoundException ex = thrown()
-        ex.message == getMessage(EntityNotFoundException.EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY, id, "Some bean name")
+        ex.message == getMessage(EntityNotFoundException.EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY, id, "DUMMY_DTO")
     }
 
     private static void throwEntityNotFoundException(Long id) {

@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.core.exception;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
+import static pl.jalokim.crudwizard.core.validation.javax.utils.TableMetadataExtractor.getTableNameFromEntity;
 
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 
@@ -25,7 +25,7 @@ public class EntityNotFoundException extends ApplicationException {
      * @param entityType will be translated to placeholder like "{full.package.SomeEntity}"
      */
     public EntityNotFoundException(Object id, Class<?> entityType) {
-        this(id, wrapAsPlaceholder(entityType));
+        this(id, getTableNameFromEntity(entityType));
     }
 
     /**

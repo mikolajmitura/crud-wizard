@@ -10,13 +10,15 @@ import org.springframework.validation.annotation.Validated;
 import pl.jalokim.crudwizard.core.datetime.TimeProvider;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.core.validation.javax.groups.BeforeValidationInvoke;
-import pl.jalokim.crudwizard.core.validation.javax.groups.PreValidation;
+import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntitySaveContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.TemporaryContextLoader;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefreshEvent;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
@@ -43,9 +45,14 @@ public class EndpointMetaModelService {
     public Long createNewEndpoint(
         @BeforeValidationInvoke(beanType = BeforeEndpointValidatorUpdater.class, methodName = "beforeValidation")
         @BeforeValidationInvoke(beanType = TemporaryContextLoader.class, methodName = "loadTemporaryContextFor")
-        @Validated(PreValidation.class) EndpointMetaModelDto createEndpointMetaModelDto) {
+        @Validated(FirstValidationPhase.class) EndpointMetaModelDto createEndpointMetaModelDto) {
         try {
             classMetaModelEntitySaveContext.setupContext();
+
+            TemporaryMetaModelContext temporaryMetaModelContext = TemporaryModelContextHolder.getTemporaryMetaModelContext();
+            temporaryMetaModelContext.getAllClassMetaModelDtoDefinitions()
+                .forEach(classMetaModelService::saveAsSimpleClassMetaModelEntity);
+
             final var endpointMetaModelEntity = endpointMetaModelMapper.toEntity(createEndpointMetaModelDto);
 
             endpointMetaModelEntity.setApiTag(apiTagService.saveNewOrLoadById(endpointMetaModelEntity.getApiTag()));
@@ -77,6 +84,9 @@ public class EndpointMetaModelService {
 
             EndpointMetaModelEntity newEndpoint = endpointMetaModelRepository.save(endpointMetaModelEntity);
             var newEndpointId = newEndpoint.getId();
+
+            classMetaModelEntitySaveContext.clearSaveContext();
+            clearTemporaryMetaModelContext();
 
             applicationEventPublisher.publishEvent(new MetaModelContextRefreshEvent(createNewEndpointReason(newEndpointId),
                 timeProvider.getCurrentOffsetDateTime()));

@@ -1,7 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
+import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
@@ -23,7 +25,7 @@ import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import org.springframework.jdbc.core.JdbcTemplate
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState
-import pl.jalokim.crudwizard.core.validation.javax.groups.PreValidation
+import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
@@ -37,13 +39,19 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
     private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(jdbcTemplate)
 
     def setup() {
-        jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
+        jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> {
+            args ->
+                if (args[0].contains('count(id)') && args[0].contains('id = 1000')) {
+                    return 1
+                }
+                return 0
+        }
     }
 
     @Unroll
     def "should return expected messages for default context of ClassMetaModelDto"() {
         when:
-        def foundErrors = validatorWithConverter.validateAndReturnErrors(classMetaModelDto, PreValidation)
+        def foundErrors = validatorWithConverter.validateAndReturnErrors(classMetaModelDto, FirstValidationPhase)
 
         then:
         assertValidationResults(foundErrors, expectedErrors)
@@ -67,7 +75,12 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("", getMessage("EnumValuesInAdditionalProperties.invalid.enumvalues.class")),
         ]
 
-        createClassMetaModelDtoWithId(randomLong())       | []
+        createClassMetaModelDtoWithId(100)                | [
+            errorEntry("id", createMessagePlaceholder(EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY,
+                100, "class_meta_models").translateMessage())
+        ]
+
+        createClassMetaModelDtoWithId(1000)               | []
 
         createValidClassMetaModelDtoWithClassName()       | []
 
