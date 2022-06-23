@@ -41,7 +41,7 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
     def setup() {
         jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> {
             args ->
-                if (args[0].contains('count(id)') && args[0].contains('id = 1000')) {
+                if (args[0].contains('count(ID)') && args[0].contains('ID = 1000')) {
                     return 1
                 }
                 return 0

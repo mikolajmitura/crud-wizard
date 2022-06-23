@@ -1,10 +1,9 @@
 package pl.jalokim.crudwizard.core.validation.javax;
 
+import static pl.jalokim.crudwizard.core.validation.javax.utils.TableMetadataExtractor.getNameOfColumnFromField;
 import static pl.jalokim.crudwizard.core.validation.javax.utils.TableMetadataExtractor.getTableNameFromEntity;
 
-import com.google.common.base.CaseFormat;
 import java.util.Optional;
-import javax.persistence.Column;
 import javax.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -35,9 +34,7 @@ public class UniqueValueValidator implements BaseConstraintValidatorWithDynamicM
         String fieldName = Optional.ofNullable(entityFieldName)
             .orElseGet(() -> ValueExtractorFromPath.getValueFromPath(context, "basePath.currentLeafNode").toString());
 
-        String columnName = Optional.ofNullable(MetadataReflectionUtils.getField(entityClass, fieldName).getAnnotation(Column.class))
-            .map(Column::name)
-            .orElseGet(() -> CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, fieldName));
+        String columnName = getNameOfColumnFromField(MetadataReflectionUtils.getField(entityClass, fieldName));
 
         return fetchSqlCountValue(value, columnName) == 0;
     }

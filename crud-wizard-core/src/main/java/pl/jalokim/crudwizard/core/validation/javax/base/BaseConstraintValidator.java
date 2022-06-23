@@ -60,6 +60,14 @@ public interface BaseConstraintValidator<A extends Annotation, T> extends Constr
      * Override default message for validator with custom message via {@link MessagePlaceholder}
      * attach it to certain bean property via builder {@link PropertyPathBuilder}.
      */
+    default void customMessage(ConstraintValidatorContext context, MessagePlaceholder messagePlaceholder, String propertyPath) {
+        customMessage(context, messagePlaceholder.translateMessage(), propertyPath);
+    }
+
+    /**
+     * Override default message for validator with custom message via {@link MessagePlaceholder}
+     * attach it to certain bean property via builder {@link PropertyPathBuilder}.
+     */
     default void customMessage(ConstraintValidatorContext context, MessagePlaceholder messagePlaceholder, PropertyPath propertyPath) {
         customMessage(context, messagePlaceholder.translateMessage(), propertyPath);
     }

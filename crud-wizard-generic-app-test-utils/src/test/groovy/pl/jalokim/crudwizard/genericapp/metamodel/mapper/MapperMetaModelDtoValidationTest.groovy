@@ -1,9 +1,13 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper
 
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWithoutWhenMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
@@ -29,6 +33,8 @@ import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
 
 class MapperMetaModelDtoValidationTest extends UnitTestSpec {
+
+    public static final String MAPPER_BY_SCRIPT = "mapper-by-script"
 
     private JdbcTemplate jdbcTemplate = Mock()
 
@@ -66,7 +72,7 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
             .beanName("dummyService")
             .className(DummyService.canonicalName)
             .methodName("fetchSomeMap")
-            .mapperGenerateConfiguration(createGenerateConfigurationDto())
+            .mapperGenerateConfiguration(createGenerateConfigurationDto(MAPPER_BY_SCRIPT))
             .build()                 | [
             errorEntry("methodName",
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
@@ -103,7 +109,7 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
 
         createValidByBeanMapper().toBuilder()
             .mapperScript(createMapperScript())
-            .mapperGenerateConfiguration(createGenerateConfigurationDto())
+            .mapperGenerateConfiguration(createGenerateConfigurationDto("someName"))
             .build()                 | [
             errorEntry("mapperScript",
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
@@ -111,6 +117,10 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("mapperGenerateConfiguration",
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
                     ["BEAN_OR_CLASS_NAME"], fieldShouldWithoutWhenMessage(NULL))),
+            errorEntry("name",
+                createMessagePlaceholder("UniqueMapperNamesValidator.root.names.should.be.the.same",
+                    wrapAsExternalPlaceholder("mapperGenerateConfiguration.rootConfiguration.name"))
+                    .translateMessage()),
         ]
 
         createValidByClassMapper()   | []
@@ -148,12 +158,43 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
                     ["GENERATED"], fieldShouldWithoutWhenMessage(NULL))),
         ]
+
+        createValidGeneratedMapper("mapperName1").toBuilder()
+            .mapperGenerateConfiguration(createGenerateConfigurationDto("mapperName2").toBuilder()
+                .subMappersAsMethods([
+                    MapperConfigurationDto.builder()
+                        .name("mapString")
+                        .targetMetaModel(createClassMetaModelDtoFromClass(String))
+                        .sourceMetaModel(createClassMetaModelDtoFromClass(Long))
+                        .build(),
+                    MapperConfigurationDto.builder()
+                        .name("mapLongs")
+                        .targetMetaModel(createClassMetaModelDtoFromClass(String))
+                        .sourceMetaModel(createClassMetaModelDtoFromClass(Long))
+                        .build(),
+                    MapperConfigurationDto.builder()
+                        .name("mapString")
+                        .targetMetaModel(createClassMetaModelDtoFromClass(String))
+                        .sourceMetaModel(createClassMetaModelDtoFromClass(Integer))
+                        .build()
+                ])
+                .build())
+            .build()                 | [
+            errorEntry("name",
+                createMessagePlaceholder("UniqueMapperNamesValidator.root.names.should.be.the.same",
+                    wrapAsExternalPlaceholder("mapperGenerateConfiguration.rootConfiguration.name"))
+                    .translateMessage()),
+            errorEntry("mapperGenerateConfiguration.subMappersAsMethods[0]",
+                getMessage("UniqueMapperNamesValidator.not.unique.method.name")),
+            errorEntry("mapperGenerateConfiguration.subMappersAsMethods[2]",
+                getMessage("UniqueMapperNamesValidator.not.unique.method.name")),
+        ]
     }
 
     private static MapperMetaModelDto createValidScriptMapper() {
         MapperMetaModelDto.builder()
             .mapperType(MapperType.SCRIPT)
-            .mapperName(randomText())
+            .mapperName(MAPPER_BY_SCRIPT)
             .mapperScript(createMapperScript())
             .build()
     }
@@ -184,15 +225,15 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
             .build()
     }
 
-    private static MapperMetaModelDto createValidGeneratedMapper() {
+    private static MapperMetaModelDto createValidGeneratedMapper(String mapperName = randomText()) {
         MapperMetaModelDto.builder()
             .mapperType(MapperType.GENERATED)
-            .mapperName(randomText())
-            .mapperGenerateConfiguration(createGenerateConfigurationDto())
+            .mapperName(mapperName)
+            .mapperGenerateConfiguration(createGenerateConfigurationDto(mapperName))
             .build()
     }
 
-    private static MapperGenerateConfigurationDto createGenerateConfigurationDto() {
+    private static MapperGenerateConfigurationDto createGenerateConfigurationDto(String rootMapperName) {
         MapperGenerateConfigurationDto.builder()
             .fieldMetaResolverForRawTarget(
                 FieldMetaResolverConfigurationDto.builder()
@@ -206,7 +247,7 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
                     .build()
             )
             .rootConfiguration(MapperConfigurationDto.builder()
-                .name(randomText())
+                .name(rootMapperName)
                 .targetMetaModel(otherPersonClassMetaModel())
                 .sourceMetaModel(createValidClassMetaModel())
                 .propertyOverriddenMapping([

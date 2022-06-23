@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.core.validation.javax.utils;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import com.google.common.base.CaseFormat;
+import java.lang.reflect.Field;
 import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -26,10 +27,14 @@ public class TableMetadataExtractor {
         return elements(MetadataReflectionUtils.getAllFields(entityClass))
             .filter(MetadataReflectionUtils::isNotStaticField)
             .filter(field -> field.getAnnotation(Id.class) != null)
-            .map(field -> Optional.ofNullable(field.getAnnotation(Column.class))
-            .map(Column::name)
-            .orElseGet(field::getName))
+            .map(TableMetadataExtractor::getNameOfColumnFromField)
             .findFirst()
             .orElseThrow(() -> new TechnicalException("cannot find id field in entity: " + entityClass.getCanonicalName()));
+    }
+
+    public static String getNameOfColumnFromField(Field field) {
+        return Optional.ofNullable(field.getAnnotation(Column.class))
+            .map(Column::name)
+            .orElseGet(() -> CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, field.getName()));
     }
 }

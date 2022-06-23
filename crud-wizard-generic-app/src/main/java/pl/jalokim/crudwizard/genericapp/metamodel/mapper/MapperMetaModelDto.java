@@ -20,6 +20,7 @@ import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.UniqueMapperNames;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -71,11 +72,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGen
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
     })
-
-// TODO #1 #validation create validator for unique of method name or mapper name in MapperGenerateConfigurationDto objects
-//  for mapperGenerateConfiguration.rootConfiguration.name must match with this.name
-//  and in mapperGenerateConfiguration.subMappersAsMethods should be uniques in whole list
-//  use below label mapper.parser.not.unique.method.name
+@UniqueMapperNames
 public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String ID = "id";

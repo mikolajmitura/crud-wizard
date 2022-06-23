@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
 
-// TODO #1 create test for that ExistsIdValidator
 @RequiredArgsConstructor
 public class IdExistsValidator implements BaseConstraintValidator<IdExists, Object> {
 
