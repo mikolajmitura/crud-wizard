@@ -14,13 +14,13 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.UniqueMapperNames;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -32,11 +32,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.UniqueMapper
 })
 @WhenFieldIsInStateThenOthersShould(whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, fieldValues = "BEAN_OR_CLASS_NAME",
     thenOthersShould = {
-        @FieldShouldWhenOther(field = MapperMetaModelDto.CLASS_NAME, should = NOT_NULL, whenField = MAPPER_TYPE,
+        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_BEAN_AND_METHOD, should = NOT_NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "BEAN_OR_CLASS_NAME"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.METHOD_NAME, should = NOT_NULL,
-            whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, otherFieldValues = "BEAN_OR_CLASS_NAME"
-        ),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "BEAN_OR_CLASS_NAME"),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_GENERATE_CONFIGURATION, should = NULL, whenField = MAPPER_TYPE,
@@ -48,11 +45,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.UniqueMapper
             is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_NAME, should = NOT_NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.CLASS_NAME, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.METHOD_NAME, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.BEAN_NAME, should = NULL, whenField = MAPPER_TYPE,
+        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_BEAN_AND_METHOD, should = NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_GENERATE_CONFIGURATION, should = NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
@@ -63,11 +56,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.UniqueMapper
             is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_NAME, should = NOT_NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.CLASS_NAME, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.METHOD_NAME, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.BEAN_NAME, should = NULL, whenField = MAPPER_TYPE,
+        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_BEAN_AND_METHOD, should = NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MAPPER_TYPE,
             is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
@@ -79,9 +68,7 @@ public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
     public static final String MAPPER_TYPE = "mapperType";
     public static final String MAPPER_SCRIPT = "mapperScript";
     public static final String MAPPER_NAME = "mapperName";
-    public static final String CLASS_NAME = "className";
-    public static final String METHOD_NAME = "methodName";
-    public static final String BEAN_NAME = "beanName";
+    public static final String MAPPER_BEAN_AND_METHOD = "mapperBeanAndMethod";
     public static final String MAPPER_GENERATE_CONFIGURATION = "mapperGenerateConfiguration";
 
     Long id;
@@ -90,11 +77,7 @@ public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
     @UniqueValue(entityClass = MapperMetaModelEntity.class, entityFieldName = "mapperName")
     String mapperName;
 
-    @Size(min = 3, max = 250)
-    @ClassExists
-    String className;
-
-    // TODO #1 #validation validation when added new mapper metamodel
+    // TODO #1 #bean_validation validation when added new mapper metamodel
     // - verify that this bean, class, method exists
     // - verify that can method arguments will be resolved correctly, expected annotations and
     //  types see in DelegatedServiceMethodInvoker + GenericMapperArgument or just one some java object (without annotations, so then will be sourceObject to map).
@@ -103,11 +86,8 @@ public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
     // TODO #1 #validation during validation from dto should be get class metamodel etc,
     //  because class metamodels will not exists already in context the same with mapper metamodel etc...
 
-    @Size(min = 3, max = 100)
-    String beanName;
-
-    @Size(min = 3, max = 100)
-    String methodName;
+    @Valid
+    BeanAndMethodDto mapperBeanAndMethod;
 
     @Valid
     MapperScriptDto mapperScript;

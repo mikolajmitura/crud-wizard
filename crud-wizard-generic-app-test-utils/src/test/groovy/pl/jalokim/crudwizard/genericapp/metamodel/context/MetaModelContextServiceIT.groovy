@@ -26,7 +26,7 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 
-class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecification {
+class BeanAndMethodMetaModelMetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecification {
 
     @Autowired
     private ApiTagSamples apiTagSamples
@@ -151,24 +151,28 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
                 realClass == Long
             }
 
-            mapperMetaModels.objectsById.values()*.className as Set == mapperMetaModelService.findAllMetaModels()*.className as Set
+            mapperMetaModels.objectsById.values()*.methodMetaModel.className as Set == mapperMetaModelService.findAllMetaModels()*.methodMetaModel.className as Set
             verifyAll(defaultMapperMetaModel) {
                 id == defaultBeansService.getDefaultGenericMapperId()
                 mapperInstance == genericMapperBean
-                className == DefaultGenericMapper.canonicalName
-                beanName == "defaultGenericMapper"
-                methodName == "mapToTarget"
-                methodMetaModel.name == "mapToTarget"
+                verifyAll(methodMetaModel) {
+                    className == DefaultGenericMapper.canonicalName
+                    beanName == "defaultGenericMapper"
+                    methodName == "mapToTarget"
+                }
+                methodMetaModel.methodName == "mapToTarget"
             }
 
-            serviceMetaModels.objectsById.values()*.className as Set == serviceMetaModelService.findAllMetaModels()*.className as Set
+            serviceMetaModels.objectsById.values()*.serviceBeanAndMethod.className as Set == serviceMetaModelService.findAllMetaModels()*.serviceBeanAndMethod.className as Set
             verifyAll(defaultServiceMetaModel) {
                 id == defaultBeansService.getDefaultGenericServiceId()
                 serviceInstance == genericServiceBean
-                className == DefaultGenericService.canonicalName
-                beanName == "defaultGenericService"
-                methodName == "saveOrReadFromDataStorages"
-                methodMetaModel.name == "saveOrReadFromDataStorages"
+                verifyAll(serviceBeanAndMethod) {
+                    className == DefaultGenericService.canonicalName
+                    beanName == "defaultGenericService"
+                    methodName == "saveOrReadFromDataStorages"
+                    originalMethod.name == "saveOrReadFromDataStorages"
+                }
                 serviceScript == null
             }
 

@@ -2,12 +2,15 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import java.util.Objects;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel.ServiceMetaModelBuilder;
 import pl.jalokim.crudwizard.genericapp.provider.BeanInstanceMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 
@@ -19,27 +22,38 @@ public abstract class ServiceMetaModelMapper extends AdditionalPropertyMapper<Se
 
     @Override
     @Mapping(target = "serviceInstance", ignore = true)
-    @Mapping(target = "methodMetaModel", ignore = true)
+    @Mapping(target = "serviceBeanAndMethod", ignore = true)
     public abstract ServiceMetaModel toMetaModel(ServiceMetaModelEntity serviceMetaModelEntity);
 
     public ServiceMetaModel toFullMetaModel(ServiceMetaModelEntity serviceMetaModelEntity) {
-        String className = serviceMetaModelEntity.getClassName();
-        String beanName = serviceMetaModelEntity.getBeanName();
-        String methodName = serviceMetaModelEntity.getMethodName();
 
-        BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeansProvider.getAllGenericServiceBeans())
-            .filter(serviceBean -> serviceBean.getBeanName().equals(beanName)
-                && serviceBean.getClassName().equals(className))
-            .findFirst()
-            .orElseGet(() -> genericBeansProvider.loadBeanInstanceFromSpringContext(className, beanName, methodName));
+        ServiceMetaModelBuilder<?, ?> serviceMetaModelBuilder = toMetaModel(serviceMetaModelEntity).toBuilder();
 
-        BeanMethodMetaModel beanMethodMetaModel = elements(beanInstanceMetaModel.getGenericMethodMetaModels())
-            .filter(methodMetaModel -> methodMetaModel.getName().equals(methodName))
-            .getFirst();
+        BeanAndMethodEntity serviceMethod = serviceMetaModelEntity.getServiceBeanAndMethod();
+        if (serviceMethod != null && elements(serviceMethod.getClassName(),
+            serviceMethod.getBeanName(), serviceMethod.getMethodName())
+            .allMatch(Objects::nonNull)) {
 
-        return toMetaModel(serviceMetaModelEntity).toBuilder()
-            .serviceInstance(beanInstanceMetaModel.getBeanInstance())
-            .methodMetaModel(beanMethodMetaModel)
-            .build();
+            String className = serviceMethod.getClassName();
+            String beanName = serviceMethod.getBeanName();
+            String methodName = serviceMethod.getMethodName();
+
+            BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeansProvider.getAllGenericServiceBeans())
+                .filter(serviceBean -> (beanName == null || serviceBean.getBeanName().equals(beanName))
+                    && serviceBean.getClassName().equals(className))
+                .findFirst()
+                .orElseGet(() -> genericBeansProvider.loadBeanInstanceFromSpringContext(className, beanName, methodName));
+
+            BeanAndMethodMetaModel beanMethodMetaModel = elements(beanInstanceMetaModel.getGenericMethodMetaModels())
+                .filter(methodMetaModel -> methodMetaModel.getMethodName().equals(methodName))
+                .getFirst();
+
+            serviceMetaModelBuilder
+                .serviceInstance(beanInstanceMetaModel.getBeanInstance())
+                .serviceBeanAndMethod(beanMethodMetaModel)
+                .build();
+        }
+
+        return serviceMetaModelBuilder.build();
     }
 }

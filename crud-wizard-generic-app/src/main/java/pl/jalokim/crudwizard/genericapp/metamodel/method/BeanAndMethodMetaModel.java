@@ -6,9 +6,11 @@ import lombok.Value;
 
 @Value
 @Builder
-public class BeanMethodMetaModel {
+public class BeanAndMethodMetaModel {
 
-    String name;
+    String className;
+    String beanName;
+    String methodName;
 
     Method originalMethod;
 

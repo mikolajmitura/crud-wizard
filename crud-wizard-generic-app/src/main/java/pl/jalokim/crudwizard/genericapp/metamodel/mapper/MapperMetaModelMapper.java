@@ -12,7 +12,9 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel.MapperMetaModelBuilder;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.BeanInstanceMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
@@ -47,34 +49,43 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
 
     public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity) {
 
-        if (mapperMetaModelEntity.getMapperName() != null) {
+        MapperMetaModelBuilder<?, ?> mapperMetaModelBuilder = toMetaModel(mapperMetaModelEntity).toBuilder();
+
+        if (MapperType.GENERATED.equals(mapperMetaModelEntity.getMapperType())) {
             // TODO #1 #mapping_by_mapstruct generate new mapper when hash is the same and load new instance when should or load old.
             //  when new mapper was generated then update className in mapperMetaModelEntity
+        } else if (MapperType.BEAN_OR_CLASS_NAME.equals(mapperMetaModelEntity.getMapperType())) {
+            BeanAndMethodEntity mapperBeanAndMethod = mapperMetaModelEntity.getMapperBeanAndMethod();
+
+            if (mapperBeanAndMethod != null) {
+                BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeanProvider.getAllGenericMapperBeans())
+                    .filter(mapperBean -> (mapperBeanAndMethod.getBeanName() == null || mapperBean.getBeanName().equals(mapperBeanAndMethod.getBeanName()))
+                        && mapperBean.getClassName().equals(mapperBeanAndMethod.getClassName())
+                    )
+                    .getFirstOrNull();
+
+                if (beanInstanceMetaModel == null) {
+                    Class<?> realClass = ClassUtils.loadRealClass(mapperBeanAndMethod.getClassName());
+                    Object mapperInstance = instanceLoader.createInstanceOrGetBean(mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getBeanName());
+                    Method mapperMethod = findMethodByName(realClass, mapperBeanAndMethod.getMethodName());
+
+                    mapperMetaModelBuilder
+                        .mapperInstance(mapperInstance)
+                        .methodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(mapperMethod, realClass, mapperBeanAndMethod.getBeanName()));
+                } else {
+                    BeanAndMethodMetaModel beanMethodMetaModel = elements(beanInstanceMetaModel.getGenericMethodMetaModels())
+                        .filter(methodMetaModel -> methodMetaModel.getMethodName().equals(mapperBeanAndMethod.getMethodName()))
+                        .getFirst();
+
+                    mapperMetaModelBuilder
+                        .mapperInstance(beanInstanceMetaModel.getBeanInstance())
+                        .methodMetaModel(beanMethodMetaModel);
+                }
+            }
+        } else {
+            // TODO #53 load script
+            throw new UnsupportedOperationException("Mapper script has not supported yet!");
         }
-
-        BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeanProvider.getAllGenericMapperBeans())
-            .filter(serviceBean -> serviceBean.getBeanName().equals(mapperMetaModelEntity.getBeanName())
-                && serviceBean.getClassName().equals(mapperMetaModelEntity.getClassName()))
-            .getFirstOrNull();
-
-        if (beanInstanceMetaModel == null) {
-            Class<?> realClass = ClassUtils.loadRealClass(mapperMetaModelEntity.getClassName());
-            Object mapperInstance = instanceLoader.createInstanceOrGetBean(mapperMetaModelEntity.getClassName());
-            Method mapperMethod = findMethodByName(realClass, mapperMetaModelEntity.getMethodName());
-
-            return toMetaModel(mapperMetaModelEntity).toBuilder()
-                .mapperInstance(mapperInstance)
-                .methodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(mapperMethod, realClass))
-                .build();
-        }
-
-        BeanMethodMetaModel beanMethodMetaModel = elements(beanInstanceMetaModel.getGenericMethodMetaModels())
-            .filter(methodMetaModel -> methodMetaModel.getName().equals(mapperMetaModelEntity.getMethodName()))
-            .getFirst();
-
-        return toMetaModel(mapperMetaModelEntity).toBuilder()
-            .mapperInstance(beanInstanceMetaModel.getBeanInstance())
-            .methodMetaModel(beanMethodMetaModel)
-            .build();
+        return mapperMetaModelBuilder.build();
     }
 }

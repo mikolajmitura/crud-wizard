@@ -5,13 +5,15 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
-import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
-import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
+import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
@@ -31,24 +33,27 @@ class ServiceMetaModelDtoValidationTest extends UnitTestSpec {
         where:
         serviceMetaModelDtoSamples               | expectedErrors
         createValidServiceMetaModelDto()         | []
+
         createValidServiceMetaModelDto().toBuilder()
-            .className("not.exist.class")
+            .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                .className("not.exist.class")
+                .build())
             .build()                             | [
-            errorEntry("className", messageForValidator(ClassExists, "expectedOfType", Object.canonicalName))
+            errorEntry("serviceBeanAndMethod.className", messageForValidator(ClassExists, "expectedOfType", Object.canonicalName)),
+            errorEntry("serviceBeanAndMethod.methodName", notNullMessage())
         ]
         createValidServiceMetaModelDtoAsScript() | []
+
         createValidServiceMetaModelDtoAsScript()
             .toBuilder()
-            .className(Object.class.getCanonicalName())
-            .beanName(randomText())
-            .methodName(randomText())
+            .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                .className(Object.class.getCanonicalName())
+                .beanName(randomText())
+                .methodName(randomText())
+                .build())
             .build()                             | [
-            errorEntry("className", fieldShouldWhenOtherMessage(NULL, [], "serviceScript", NOT_NULL, [])),
-            errorEntry("beanName", fieldShouldWhenOtherMessage(NULL, [], "serviceScript", NOT_NULL, [])),
-            errorEntry("methodName", fieldShouldWhenOtherMessage(NULL, [], "serviceScript", NOT_NULL, [])),
-            errorEntry("serviceScript", fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, [])),
-            errorEntry("serviceScript", fieldShouldWhenOtherMessage(NULL, [], "beanName", NOT_NULL, [])),
-            errorEntry("serviceScript", fieldShouldWhenOtherMessage(NULL, [], "methodName", NOT_NULL, []))
+            errorEntry("serviceBeanAndMethod", fieldShouldWhenOtherMessage(NULL, [], "serviceScript", NOT_NULL, [])),
+            errorEntry("serviceScript", fieldShouldWhenOtherMessage(NULL, [], "serviceBeanAndMethod", NOT_NULL, []))
         ]
     }
 }

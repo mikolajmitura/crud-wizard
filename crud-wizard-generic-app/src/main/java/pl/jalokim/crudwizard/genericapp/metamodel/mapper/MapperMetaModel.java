@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
 
 @Data
 @SuperBuilder(toBuilder = true)
@@ -17,10 +17,7 @@ public class MapperMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
     Object mapperInstance;
-    String className;
-    String beanName;
-    String methodName;
-    BeanMethodMetaModel methodMetaModel;
+    BeanAndMethodMetaModel methodMetaModel;
 
     MapperType mapperType;
     String mapperName;

@@ -57,6 +57,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDto
 import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.CreatePersonFinalMapper
@@ -95,9 +96,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
+            .serviceBeanAndMethod(BeanAndMethodDto.builder()
                 .className(NormalSpringService.canonicalName)
                 .beanName("normalSpringService")
                 .methodName("createSamplePersonDtoWithValidated")
+                .build())
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -121,9 +124,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("createSamplePersonDtoWithValidated")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("createSamplePersonDtoWithValidated")
+                    .build())
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -860,9 +865,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("validationContextAsArg")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("validationContextAsArg")
+                    .build())
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -883,9 +890,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("validationContextAsArg")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("validationContextAsArg")
+                    .build())
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -911,9 +920,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .operationName(randomText())
             .queryArguments(createHttpQueryParamsClassMetaModelDto())
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("returnTranslatedHttpQuery")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("returnTranslatedHttpQuery")
+                    .build())
                 .build())
             .responseMetaModel(createValidEndpointResponseMetaModelDto().toBuilder()
                 .successHttpCode(200)

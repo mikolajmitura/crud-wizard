@@ -5,7 +5,7 @@ import static pl.jalokim.utils.reflection.InvokableReflectionUtils.invokeMethod;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 
@@ -26,7 +26,7 @@ public class MapperDelegatorService {
     }
 
     private boolean itIsGenericMapperMethod(MapperMetaModel mapperMetaModel) {
-        BeanMethodMetaModel methodMetaModel = mapperMetaModel.getMethodMetaModel();
+        BeanAndMethodMetaModel methodMetaModel = mapperMetaModel.getMethodMetaModel();
         MethodSignatureMetaModel methodSignatureMetaModel = methodMetaModel.getMethodSignatureMetaModel();
         List<MethodArgumentMetaModel> methodArguments = methodSignatureMetaModel.getMethodArguments();
         return methodArguments.size() == 1

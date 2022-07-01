@@ -28,7 +28,6 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.Da
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
-import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWithoutWhenMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidMinMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
@@ -70,6 +69,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNo
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
@@ -219,16 +219,19 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         createValidPostEndpointMetaModelDto().toBuilder()
             .serviceMetaModel(
                 createValidServiceMetaModelDtoAsScript().toBuilder()
-                    .beanName(randomText())
+                    .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                        .build())
                     .build()
             )
             .build()                          | [
-            errorEntry("serviceMetaModel.beanName", fieldShouldWhenOtherMessage(
+            errorEntry("serviceMetaModel.serviceBeanAndMethod", fieldShouldWhenOtherMessage(
                 NULL, [], "serviceScript", NOT_NULL, []
             )),
             errorEntry("serviceMetaModel.serviceScript", fieldShouldWhenOtherMessage(
-                NULL, [], "beanName", NOT_NULL, []
-            ))
+                NULL, [], "serviceBeanAndMethod", NOT_NULL, []
+            )),
+            errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName", notNullMessage()),
+            errorEntry("serviceMetaModel.serviceBeanAndMethod.className", notNullMessage())
         ]                                                      | "invalid serviceMetaModel fields for some POST"
 
         createValidPostEndpointMetaModelDto().toBuilder()
@@ -254,19 +257,17 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 DataStorageConnectorMetaModelDto.builder()
                     .dataStorageMetaModel(DataStorageMetaModelDto.builder().build())
                     .mapperMetaModelForReturn(MapperMetaModelDto.builder()
-                        .beanName(randomText())
+                        .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                            .beanName(randomText())
+                            .build())
                         .mapperType(MapperType.BEAN_OR_CLASS_NAME)
                         .build())
                     .classMetaModelInDataStorage(createEmptyClassMetaModelDto())
                     .build()
             ])
             .build()                          | [
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.methodName",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["BEAN_OR_CLASS_NAME"], fieldShouldWithoutWhenMessage(NOT_NULL))),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.className",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["BEAN_OR_CLASS_NAME"], fieldShouldWithoutWhenMessage(NOT_NULL))),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperBeanAndMethod.methodName", notNullMessage()),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperBeanAndMethod.className", notNullMessage()),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name",
                 fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className",

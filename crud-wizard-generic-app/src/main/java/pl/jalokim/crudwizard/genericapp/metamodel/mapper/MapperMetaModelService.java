@@ -5,6 +5,7 @@ import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 import java.util.List;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 
 @MetamodelService
 public class MapperMetaModelService extends BaseService<MapperMetaModelEntity, MapperMetaModelEntityRepository> {
@@ -22,8 +23,9 @@ public class MapperMetaModelService extends BaseService<MapperMetaModelEntity, M
     }
 
     public boolean exists(MapperMetaModelDto mapperMetaModelDto) {
-        return repository.existsByBeanNameAndClassNameAndMethodName(mapperMetaModelDto.getBeanName(),
-            mapperMetaModelDto.getClassName(), mapperMetaModelDto.getMethodName());
+        BeanAndMethodDto mapperBeanAndMethod = mapperMetaModelDto.getMapperBeanAndMethod();
+        return repository.existsByBeanNameAndClassNameAndMethodName(mapperBeanAndMethod.getBeanName(),
+            mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getMethodName());
     }
 
     public Long createNewAndGetId(MapperMetaModelDto mapperMetaModelDto) {

@@ -5,6 +5,7 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
 
 @Entity
 @Builder
@@ -34,11 +36,11 @@ public class ServiceMetaModelEntity extends WithAdditionalPropertiesEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String className;
-
-    private String beanName;
-
-    private String methodName;
+    @Embedded
+    @AttributeOverride(name = "className", column = @Column(name = "class_name"))
+    @AttributeOverride(name = "beanName", column = @Column(name = "bean_name"))
+    @AttributeOverride(name = "methodName", column = @Column(name = "method_name"))
+    private BeanAndMethodEntity serviceBeanAndMethod;
 
     private String serviceScript;
 

@@ -110,13 +110,13 @@ public class DelegatedServiceMethodInvoker {
         EndpointMetaModel endpointMetaModel = genericServiceArgument.getEndpointMetaModel();
         ServiceMetaModel serviceMetaModel = endpointMetaModel.getServiceMetaModel();
         List<Object> methodArguments = collectMethodArguments(genericServiceArgument, serviceMetaModel);
-        Method originalMethod = serviceMetaModel.getMethodMetaModel().getOriginalMethod();
+        Method originalMethod = serviceMetaModel.getServiceBeanAndMethod().getOriginalMethod();
         Object result = invokeMethod(serviceMetaModel.getServiceInstance(), originalMethod, methodArguments.toArray());
         return resolveReturnObject(result, endpointMetaModel);
     }
 
     private List<Object> collectMethodArguments(GenericServiceArgument genericServiceArgument, ServiceMetaModel serviceMetaModel) {
-        var methodMetaModel = serviceMetaModel.getMethodMetaModel();
+        var methodMetaModel = serviceMetaModel.getServiceBeanAndMethod();
         var methodSignatureMetaModel = methodMetaModel.getMethodSignatureMetaModel();
         List<Object> methodArguments = new ArrayList<>();
         for (int parameterIndex = 0; parameterIndex < methodSignatureMetaModel.getMethodArguments().size(); parameterIndex++) {
@@ -340,7 +340,7 @@ public class DelegatedServiceMethodInvoker {
 
     private String atIndexInMethod(int parameterIndex, GenericServiceArgument genericServiceArgument) {
         var method = genericServiceArgument.getEndpointMetaModel().getServiceMetaModel()
-            .getMethodMetaModel().getOriginalMethod();
+            .getServiceBeanAndMethod().getOriginalMethod();
         int realIndex = parameterIndex + 1;
         return String.format("at index: %s%nin class: %s%nwith method name: %s%nin method : %s",
             realIndex, method.getDeclaringClass().getCanonicalName(), method.getName(), method);

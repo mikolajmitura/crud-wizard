@@ -10,6 +10,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWithoutWhenMessage
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
@@ -28,6 +29,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMeta
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
@@ -69,23 +71,19 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
         ]
 
         createValidScriptMapper().toBuilder()
-            .beanName("dummyService")
-            .className(DummyService.canonicalName)
-            .methodName("fetchSomeMap")
+            .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                .beanName("dummyService")
+                .className(DummyService.canonicalName)
+                .methodName("fetchSomeMap")
+                .build())
             .mapperGenerateConfiguration(createGenerateConfigurationDto(MAPPER_BY_SCRIPT))
             .build()                 | [
-            errorEntry("methodName",
+            errorEntry("mapperBeanAndMethod",
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
                     ["SCRIPT"], fieldShouldWithoutWhenMessage(NULL))),
             errorEntry("mapperGenerateConfiguration",
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["SCRIPT"], fieldShouldWithoutWhenMessage(NULL))),
-            errorEntry("beanName",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["SCRIPT"], fieldShouldWithoutWhenMessage(NULL))),
-            errorEntry("className",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["SCRIPT"], fieldShouldWithoutWhenMessage(NULL))),
+                    ["SCRIPT"], fieldShouldWithoutWhenMessage(NULL)))
         ]
 
         createValidByBeanMapper()    | []
@@ -95,16 +93,14 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
             .build()                 | []
 
         createValidByBeanMapper().toBuilder()
-            .beanName(null)
-            .className(null)
-            .methodName(null)
+            .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                .beanName(null)
+                .className(null)
+                .methodName(null)
+                .build())
             .build()                 | [
-            errorEntry("className",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["BEAN_OR_CLASS_NAME"], fieldShouldWithoutWhenMessage(NOT_NULL))),
-            errorEntry("methodName",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["BEAN_OR_CLASS_NAME"], fieldShouldWithoutWhenMessage(NOT_NULL))),
+            errorEntry("mapperBeanAndMethod.className", notNullMessage()),
+            errorEntry("mapperBeanAndMethod.methodName", notNullMessage()),
         ]
 
         createValidByBeanMapper().toBuilder()
@@ -141,22 +137,18 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
 
         createValidGeneratedMapper().toBuilder()
             .mapperScript(createMapperScript())
-            .beanName("dummyService")
-            .className(DummyService.canonicalName)
-            .methodName("fetchSomeMap")
+            .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                .beanName("dummyService")
+                .className(DummyService.canonicalName)
+                .methodName("fetchSomeMap")
+                .build())
             .build()                 | [
-            errorEntry("methodName",
+            errorEntry("mapperBeanAndMethod",
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
                     ["GENERATED"], fieldShouldWithoutWhenMessage(NULL))),
             errorEntry("mapperScript",
                 whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["GENERATED"], fieldShouldWithoutWhenMessage(NULL))),
-            errorEntry("beanName",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["GENERATED"], fieldShouldWithoutWhenMessage(NULL))),
-            errorEntry("className",
-                whenFieldIsInStateThenOthersShould("mapperType", EQUAL_TO_ANY,
-                    ["GENERATED"], fieldShouldWithoutWhenMessage(NULL))),
+                    ["GENERATED"], fieldShouldWithoutWhenMessage(NULL)))
         ]
 
         createValidGeneratedMapper("mapperName1").toBuilder()
@@ -211,17 +203,21 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
     private static MapperMetaModelDto createValidByBeanMapper() {
         MapperMetaModelDto.builder()
             .mapperType(MapperType.BEAN_OR_CLASS_NAME)
-            .beanName("dummyService")
-            .className(DummyService.canonicalName)
-            .methodName("fetchSomeMap")
+            .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                .beanName("dummyService")
+                .className(DummyService.canonicalName)
+                .methodName("fetchSomeMap")
+                .build())
             .build()
     }
 
     private static MapperMetaModelDto createValidByClassMapper() {
         MapperMetaModelDto.builder()
             .mapperType(MapperType.BEAN_OR_CLASS_NAME)
-            .className(SomeMapper.canonicalName)
-            .methodName("someMapperMethod")
+            .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                .className(SomeMapper.canonicalName)
+                .methodName("someMapperMethod")
+                .build())
             .build()
     }
 

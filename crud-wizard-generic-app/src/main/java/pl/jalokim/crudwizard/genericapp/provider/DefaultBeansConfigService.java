@@ -21,6 +21,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntityRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 
@@ -83,9 +85,12 @@ public class DefaultBeansConfigService {
                 methodMetaModel -> {
 
                     MapperMetaModelDto mapperMetaModelDto = MapperMetaModelDto.builder()
-                        .beanName(genericMapperBean.getBeanName())
-                        .className(genericMapperBean.getClassName())
-                        .methodName(methodMetaModel.getName())
+                        .mapperType(MapperType.BEAN_OR_CLASS_NAME)
+                        .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                            .beanName(genericMapperBean.getBeanName())
+                            .className(genericMapperBean.getClassName())
+                            .methodName(methodMetaModel.getMethodName())
+                            .build())
                         .build();
 
                     if (!mapperMetaModelService.exists(mapperMetaModelDto)) {
@@ -118,9 +123,11 @@ public class DefaultBeansConfigService {
             genericMapperBean.getGenericMethodMetaModels().forEach(
                 methodMetaModel -> {
                     ServiceMetaModelDto serviceMetaModelDto = ServiceMetaModelDto.builder()
-                        .beanName(genericMapperBean.getBeanName())
+                        .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                            .beanName(genericMapperBean.getBeanName())
                         .className(genericMapperBean.getClassName())
-                        .methodName(methodMetaModel.getName())
+                        .methodName(methodMetaModel.getMethodName())
+                            .build())
                         .build();
 
                     if (!serviceMetaModelService.exists(serviceMetaModelDto)) {

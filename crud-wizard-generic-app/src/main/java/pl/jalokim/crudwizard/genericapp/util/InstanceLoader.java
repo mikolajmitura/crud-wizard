@@ -40,18 +40,28 @@ public class InstanceLoader {
     }
 
     public <T> T createInstanceOrGetBean(String className) {
+        return createInstanceOrGetBean(className, null);
+    }
+
+    public <T> T createInstanceOrGetBean(String className, String beanName) {
         Class<?> realClass = ClassUtils.loadRealClass(className);
-        return createInstanceOrGetBean(realClass);
+        return createInstanceOrGetBean(realClass, beanName);
     }
 
     public <T> T createInstanceOrGetBean(Class<?> realClass) {
-        return (T) tryLoadAsSpringBean(realClass)
+        return createInstanceOrGetBean(realClass, null);
+    }
+
+    public <T> T createInstanceOrGetBean(Class<?> realClass, String beanName) {
+        return (T) tryLoadAsSpringBean(realClass, beanName)
             .orElseGet(() -> tryGetOrCreateNotSpringInstance(realClass));
     }
 
-    private <T> Optional<T> tryLoadAsSpringBean(Class<?> realClass) {
+    private <T> Optional<T> tryLoadAsSpringBean(Class<?> realClass, String nullableBeanName) {
         try {
-            return Optional.of((T) applicationContext.getBean(realClass));
+            return Optional.ofNullable(nullableBeanName)
+                .map(beanName -> (T) applicationContext.getBean(beanName, realClass))
+                .or(() -> Optional.of((T) applicationContext.getBean(realClass)));
         } catch (BeansException ex) {
             return Optional.empty();
         }

@@ -33,11 +33,11 @@ class BeanMethodMetaModelCreatorTest extends Specification {
 
         when:
         def resultMethodMetaModel = testCase.createBeanMethodMetaModel(methodName,
-            NormalSpringService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4')
+            NormalSpringService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4', null)
 
         then:
         verifyAll(resultMethodMetaModel) {
-            name == methodName
+            methodName == methodName
             originalMethod == findMethodByName(NormalSpringService, methodName)
             verifyAll(methodSignatureMetaModel) {
                 !returnType.isGenericType()
@@ -77,11 +77,11 @@ class BeanMethodMetaModelCreatorTest extends Specification {
 
         when:
         def resultMethodMetaModel = testCase.createBeanMethodMetaModel(methodName,
-            MapGenericService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4')
+            MapGenericService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4', null)
 
         then:
         verifyAll(resultMethodMetaModel) {
-            name == methodName
+            methodName == methodName
             originalMethod == findMethodByName(MapGenericService, methodName)
             verifyAll(methodSignatureMetaModel) {
                 returnType.isGenericType()
@@ -111,7 +111,7 @@ class BeanMethodMetaModelCreatorTest extends Specification {
             .join(System.lineSeparator())
 
         when:
-        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName)
+        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName, null)
 
         then:
         TechnicalException ex = thrown()
@@ -123,7 +123,7 @@ class BeanMethodMetaModelCreatorTest extends Specification {
         def methodName = "notExistMethodName"
 
         when:
-        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName)
+        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName, null)
 
         then:
         TechnicalException ex = thrown()

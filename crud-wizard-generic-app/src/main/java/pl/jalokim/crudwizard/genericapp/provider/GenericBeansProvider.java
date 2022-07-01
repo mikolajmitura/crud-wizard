@@ -18,6 +18,7 @@ import pl.jalokim.crudwizard.genericapp.config.GenericMapper;
 import pl.jalokim.crudwizard.genericapp.config.GenericMethod;
 import pl.jalokim.crudwizard.genericapp.config.GenericService;
 import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class GenericBeansProvider {
     private final AtomicReference<List<BeanInstanceMetaModel>> allGenericServiceBeansReference = new AtomicReference<>();
 
     private final ApplicationContext applicationContext;
+    private final InstanceLoader instanceLoader;
     private final BeanMethodMetaModelCreator beanMethodMetaModelCreator;
 
     public List<BeanInstanceMetaModel> getAllGenericMapperBeans() {
@@ -49,6 +51,7 @@ public class GenericBeansProvider {
         List<BeanInstanceMetaModel> genericInstanceBeanMetaModel = new ArrayList<>();
         Map<String, Object> genericMappers = applicationContext.getBeansWithAnnotation(annotationType);
         for (var genericMapperEntry : genericMappers.entrySet()) {
+            String beanName = genericMapperEntry.getKey();
             Object beanInstance = genericMapperEntry.getValue();
             String genericInstanceClassName = beanInstance.getClass().getCanonicalName();
             String realClassName = clearCglibClassName(genericInstanceClassName);
@@ -61,7 +64,7 @@ public class GenericBeansProvider {
                 .genericMethodMetaModels(
                     elements(realClass.getMethods())
                         .filter(declaredMethod -> declaredMethod.isAnnotationPresent(GenericMethod.class))
-                        .map(declaredMethod -> beanMethodMetaModelCreator.createBeanMethodMetaModel(declaredMethod, realClass))
+                        .map(declaredMethod -> beanMethodMetaModelCreator.createBeanMethodMetaModel(declaredMethod, realClass, beanName))
                         .asList()
                 )
                 .build());
@@ -70,12 +73,12 @@ public class GenericBeansProvider {
     }
 
     public BeanInstanceMetaModel loadBeanInstanceFromSpringContext(String className, String beanName, String methodName) {
-        Object beanInstance = applicationContext.getBean(beanName, loadRealClass(className));
+        Object beanInstance = instanceLoader.createInstanceOrGetBean(className, beanName);
         return BeanInstanceMetaModel.builder()
             .beanInstance(beanInstance)
             .className(className)
             .beanName(beanName)
-            .genericMethodMetaModels(List.of(beanMethodMetaModelCreator.createBeanMethodMetaModel(methodName, className)))
+            .genericMethodMetaModels(List.of(beanMethodMetaModelCreator.createBeanMethodMetaModel(methodName, className, beanName)))
             .build();
     }
 }

@@ -44,15 +44,19 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
             }
 
             verifyAll(mapperMetaModelEntityRepository.getOne(defaultGenericMapperId)) {
-                className == DefaultGenericMapper.canonicalName
-                beanName == "defaultGenericMapper"
-                methodName == "mapToTarget"
+                verifyAll(mapperBeanAndMethod) {
+                    className == DefaultGenericMapper.canonicalName
+                    beanName == "defaultGenericMapper"
+                    methodName == "mapToTarget"
+                }
             }
 
             verifyAll(serviceMetaModelRepository.getOne(genericServiceMetaModelId)) {
-                className == DefaultGenericService.canonicalName
-                beanName == "defaultGenericService"
-                methodName == "saveOrReadFromDataStorages"
+                verifyAll(serviceBeanAndMethod) {
+                    className == DefaultGenericService.canonicalName
+                    beanName == "defaultGenericService"
+                    methodName == "saveOrReadFromDataStorages"
+                }
                 serviceScript == null
             }
 
