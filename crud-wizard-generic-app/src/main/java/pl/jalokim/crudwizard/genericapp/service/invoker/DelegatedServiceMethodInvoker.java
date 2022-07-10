@@ -66,7 +66,7 @@ public class DelegatedServiceMethodInvoker {
      *
      * by type HttpServletResponse from {@link GenericServiceArgument.response}
      *
-     * by type JsonNode from urlPathParams from {@link GenericServiceArgument.requestBody}
+     * by type JsonNode from {@link GenericServiceArgument.requestBody}
      *
      * by type TranslatedPayload from {@link GenericServiceArgument.requestBodyTranslated}
      *

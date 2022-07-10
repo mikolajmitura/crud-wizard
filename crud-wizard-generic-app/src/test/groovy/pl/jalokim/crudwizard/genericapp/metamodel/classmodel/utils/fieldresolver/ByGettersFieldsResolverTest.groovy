@@ -4,12 +4,17 @@ import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolver
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
 import pl.jalokim.utils.reflection.TypeMetadata
 import spock.lang.Specification
 
 class ByGettersFieldsResolverTest extends Specification {
 
     ByGettersFieldsResolver testCase = new ByGettersFieldsResolver()
+
+    def setup() {
+        ClassMetaModelFactory.clearCache()
+    }
 
     def "return expected list of field metamodels for SomeDto"() {
         given:

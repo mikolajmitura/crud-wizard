@@ -21,6 +21,13 @@ public class ClassMetaModelFactory {
 
     private static final Map<Class<?>, Map<FieldMetaResolver, ClassMetaModel>> RESOLVED_CLASS_META_MODELS_BY_CLASS = new ConcurrentHashMap<>();
 
+    public static ClassMetaModel fromRawClass(Class<?> rawClass) {
+        return ClassMetaModel.builder()
+            .className(rawClass.getCanonicalName())
+            .realClass(rawClass)
+            .build();
+    }
+
     /**
      * It generates all ClassMetaModel instances as generic model.
      */
@@ -113,8 +120,11 @@ public class ClassMetaModelFactory {
         }
 
         if (!typeMetadata.isSimpleType() && fieldMetaResolver != null) {
-            List<FieldMetaModel> fieldMetaModels = fieldMetaResolver.findDeclaredFields(typeMetadata, fieldMetaResolverConfig);
-
+            List<FieldMetaModel> fieldMetaModels = List.of();
+            if (!typeMetadata.getRawType().equals(Object.class)
+                && !typeMetadata.rawClassIsComingFromJavaApi()) {
+                fieldMetaModels = fieldMetaResolver.findDeclaredFields(typeMetadata, fieldMetaResolverConfig);
+            }
             classMetaModel.setFields(fieldMetaModels);
         }
 

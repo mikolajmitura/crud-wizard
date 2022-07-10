@@ -23,6 +23,14 @@ public class BySettersFieldsResolver implements FieldMetaResolver {
             .filter(method -> method.getName().startsWith("set"))
             .filter(MetadataReflectionUtils::isPublicMethod)
             .filter(method -> methodReturnsVoidAndHasArgumentsSize(method, 1))
+            .filter(method -> {
+                try {
+                    typeMetadata.getMetaForMethod(method);
+                    return true;
+                } catch (Exception ex) {
+                    return false;
+                }
+            })
             .map(typeMetadata::getMetaForMethod)
             .map(methodMetadata -> {
                 String fieldName = StringCaseUtils.firstLetterToLowerCase(methodMetadata.getName().substring(3));

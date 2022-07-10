@@ -35,6 +35,7 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 import static pl.jalokim.utils.reflection.InvokableReflectionUtils.setValueForField
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getMethod
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import javax.validation.ValidatorFactory
@@ -43,6 +44,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import pl.jalokim.crudwizard.core.exception.handler.DummyService
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory
 import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier
@@ -70,6 +72,11 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParams
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
+import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
+import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
+import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
@@ -89,9 +96,10 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
     private ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(classMetaModelMapper)
     private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
     private endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
+    private MethodSignatureMetaModelResolver methodSignatureMetaModelResolver = new MethodSignatureMetaModelResolver(jsonObjectMapper)
     private validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
         dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
-        jdbcTemplate, dataStorageInstances)
+        jdbcTemplate, dataStorageInstances, methodSignatureMetaModelResolver, classMetaModelMapper)
     private BeforeEndpointValidatorUpdater beforeEndpointValidatorUpdater = new BeforeEndpointValidatorUpdater()
     private TemporaryContextLoader temporaryContextLoader = new TemporaryContextLoader(validatorFactory,
         metaModelContextService, classMetaModelMapper
@@ -102,6 +110,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
         RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
         applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class) >> abstractHandlerMethodMapping
+
         abstractHandlerMethodMapping.getHandlerMethods() >> [:]
         jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
         dataStorageInstances.getDataStorageFactoryForClass(_) >> Mock(DataStorageFactory)
@@ -121,12 +130,15 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         ModelsCache<ClassMetaModel> classMetaModels = new ModelsCache<>()
         classMetaModels.put(CLASS_METAMODEL, createPersonMetaModel())
         metaModelContext.setClassMetaModels(classMetaModels)
+        metaModelContext.setDefaultServiceMetaModel(createDefaultService())
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
         metaModelContextService.loadNewMetaModelContext() >> metaModelContext
 
         beforeEndpointValidatorUpdater.beforeValidation(endpointMetaModelDto)
         temporaryContextLoader.loadTemporaryContextFor(endpointMetaModelDto)
+
+        applicationContext.getBean("dummyService") >> new DummyService()
 
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(endpointMetaModelDto)
@@ -256,7 +268,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .dataStorageConnectors([
                 DataStorageConnectorMetaModelDto.builder()
                     .dataStorageMetaModel(DataStorageMetaModelDto.builder().build())
-                    .mapperMetaModelForReturn(MapperMetaModelDto.builder()
+                    .mapperMetaModelForPersist(MapperMetaModelDto.builder()
                         .mapperBeanAndMethod(BeanAndMethodDto.builder()
                             .beanName(randomText())
                             .build())
@@ -266,12 +278,14 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                     .build()
             ])
             .build()                          | [
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperBeanAndMethod.methodName", notNullMessage()),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForReturn.mapperBeanAndMethod.className", notNullMessage()),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperBeanAndMethod.methodName", notNullMessage()),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperBeanAndMethod.className", notNullMessage()),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name",
                 fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className",
                 fieldShouldWhenOtherMessage(NOT_NULL, [], "id", NULL, [])),
+            errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage",
+                createMessagePlaceholder("ClassMetaModel.id.field.not.found", "").translateMessage()),
             errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.name",
                 whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
         ]                                                      | "invalid dataStorageConnectors fields for some POST"
@@ -435,10 +449,28 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         ]                                                      | "invalid left path and invalid right path, and not the same types for join"
     }
 
+    private ServiceMetaModel createDefaultService() {
+
+        def method = getMethod(DefaultGenericService, "saveOrReadFromDataStorages", GenericServiceArgument)
+        def defaultGenericServiceInstance = new DefaultGenericService(null, null, null, null, null)
+
+        ServiceMetaModel.builder()
+            .serviceInstance(defaultGenericServiceInstance)
+            .serviceBeanAndMethod(BeanAndMethodMetaModel.builder()
+                .className(DefaultGenericService.canonicalName)
+                .beanName("defaultGenericService")
+                .methodName("saveOrReadFromDataStorages")
+                .originalMethod(method)
+                .methodSignatureMetaModel(methodSignatureMetaModelResolver.resolveMethodSignature(method, DefaultGenericService))
+                .build())
+            .build()
+    }
+
     @Unroll
     def "should return expected messages for update context of EndpointMetaModelDto"() {
         given:
         MetaModelContext metaModelContext = new MetaModelContext()
+        metaModelContext.setDefaultServiceMetaModel(createDefaultService())
         metaModelContextService.getMetaModelContext() >> metaModelContext
 
         when:

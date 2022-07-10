@@ -5,6 +5,7 @@ import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createIdFieldType
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createListWithMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
@@ -403,7 +404,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                     .classMetaModelInDataStorage(ClassMetaModelDto.builder()
                         .name("valid")
                         .fields([
-                            createValidFieldMetaModelDto("id", Long)
+                            createIdFieldType("id", Long)
                         ])
                         .build())
                     .build()
@@ -419,7 +420,9 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
         assertValidationResults(foundErrors, [
             errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage", messageForValidator(ExistFullDefinitionInTempContextByName)),
-            errorEntry("payloadMetamodel", messageForValidator(ExistFullDefinitionInTempContextByName))
+            errorEntry("payloadMetamodel", messageForValidator(ExistFullDefinitionInTempContextByName)),
+            errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage",
+                createMessagePlaceholder("ClassMetaModel.id.field.not.found", "document").translateMessage())
         ])
     }
 

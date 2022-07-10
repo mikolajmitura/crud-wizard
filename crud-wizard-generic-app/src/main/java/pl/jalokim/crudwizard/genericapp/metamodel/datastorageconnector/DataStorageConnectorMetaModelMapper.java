@@ -24,7 +24,7 @@ public abstract class DataStorageConnectorMetaModelMapper
 
     @Override
     @Mapping(target = "dataStorageMetaModel", ignore = true)
-    @Mapping(target = "mapperMetaModelForReturn", ignore = true)
+    @Mapping(target = "mapperMetaModelForPersist", ignore = true)
     @Mapping(target = "mapperMetaModelForQuery", ignore = true)
     @Mapping(target = "classMetaModelInDataStorage", ignore = true)
     @Mapping(target = "queryProvider", ignore = true)
@@ -40,9 +40,9 @@ public abstract class DataStorageConnectorMetaModelMapper
                 dataStorageConnectorEntity::getDataStorageMetaModel))
                 .orElse(metaModelContext.getDefaultDataStorageMetaModel())
             )
-            .mapperMetaModelForReturn(ofNullable(getFromContextByEntity(
+            .mapperMetaModelForPersist(ofNullable(getFromContextByEntity(
                 metaModelContext::getMapperMetaModels,
-                dataStorageConnectorEntity::getMapperMetaModelForReturn))
+                dataStorageConnectorEntity::getMapperMetaModelForPersist))
                 .orElse(metaModelContext.getDefaultMapperMetaModel())
             )
             .mapperMetaModelForQuery(ofNullable(getFromContextByEntity(

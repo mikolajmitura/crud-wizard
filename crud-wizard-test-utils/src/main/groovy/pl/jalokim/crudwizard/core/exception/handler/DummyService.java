@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.core.exception.handler;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
@@ -110,5 +111,9 @@ public class DummyService {
 
     public LocalDate getSomeRandomLocalDate() {
         return LocalDate.of(2022, 5, 11);
+    }
+
+    public Long somePost(JsonNode jsonNode) {
+        return 11L;
     }
 }

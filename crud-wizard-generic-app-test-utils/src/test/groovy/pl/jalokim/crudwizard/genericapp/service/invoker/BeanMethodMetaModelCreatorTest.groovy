@@ -58,7 +58,7 @@ class BeanMethodMetaModelCreatorTest extends Specification {
                 verifyAll(methodArguments[3]) {
                     annotations*.annotationType() as Set == [RequestHeader] as Set
                     argumentType.rawClass == Map
-                    argumentType.originalType.toString() == "Map<String, Object>"
+                    argumentType.originalType.toString() == "java.util.Map<java.lang.String, java.lang.Object>"
                     MapType mapType = ((MapType) argumentType.jacksonJavaType)
                     mapType.keyType.toString() == "[simple type, class java.lang.String]"
                     mapType.contentType.toString() == "[simple type, class java.lang.Object]"
@@ -87,11 +87,11 @@ class BeanMethodMetaModelCreatorTest extends Specification {
                 returnType.isGenericType()
                 !returnType.isRawClass()
                 returnType.rawClass == MapGenericService.SomeGenericValue
-                returnType.originalType.toString() == "MapGenericService.SomeGenericValue<Long, Double>"
+                returnType.originalType.toString() == 'pl.jalokim.crudwizard.genericapp.service.invoker.sample.MapGenericService$SomeGenericValue<java.lang.Long, java.lang.Double>'
                 returnType.jacksonJavaType.toString() == "[simple type, class $MapGenericService.canonicalName\$SomeGenericValue<$Long.canonicalName,$Double.canonicalName>]"
                 verifyAll(methodArguments[0]) {
                     annotations*.annotationType() as Set == [Validated, RequestBody] as Set
-                    argumentType.originalType.toString() == "Map<Long, List<String>>"
+                    argumentType.originalType.toString() == "java.util.Map<java.lang.Long, java.util.List<java.lang.String>>"
                 }
                 verifyAll(methodArguments[1]) {
                     annotations*.annotationType() as Set == [PathParam] as Set

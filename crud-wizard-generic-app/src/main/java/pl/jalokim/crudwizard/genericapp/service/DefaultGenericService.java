@@ -269,7 +269,7 @@ public class DefaultGenericService {
                 .targetMetaModel(targetMetaModel)
                 .build();
 
-            Object mappedObjectForDs = mapperDelegatorService.mapToTarget(dataStorageConnector.getMapperMetaModelForReturn(), mapperArgument);
+            Object mappedObjectForDs = mapperDelegatorService.mapToTarget(dataStorageConnector.getMapperMetaModelForPersist(), mapperArgument);
             Object currentOrNewId = dataStorageConnector.getDataStorage().saveOrUpdate(targetMetaModel, mappedObjectForDs);
             resultsByDataStorageName.put(dataStorageName, currentOrNewId);
         }

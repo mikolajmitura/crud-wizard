@@ -25,8 +25,8 @@ public class DataStorageConnectorMetaModelService {
         dataStorageConnectorMetaModelEntity.setDataStorageMetaModel(dataStorageMetaModelService.saveNewOrLoadById(
             dataStorageConnectorMetaModelEntity.getDataStorageMetaModel()));
 
-        dataStorageConnectorMetaModelEntity.setMapperMetaModelForReturn(mapperMetaModelService.saveNewOrLoadById(
-            dataStorageConnectorMetaModelEntity.getMapperMetaModelForReturn()));
+        dataStorageConnectorMetaModelEntity.setMapperMetaModelForPersist(mapperMetaModelService.saveNewOrLoadById(
+            dataStorageConnectorMetaModelEntity.getMapperMetaModelForPersist()));
 
         dataStorageConnectorMetaModelEntity.setMapperMetaModelForQuery(mapperMetaModelService.saveNewOrLoadById(
             dataStorageConnectorMetaModelEntity.getMapperMetaModelForQuery()));

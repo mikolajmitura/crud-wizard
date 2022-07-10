@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
 
 @RequiredArgsConstructor
 public class PersonToThirdDbMapper {
@@ -15,7 +14,7 @@ public class PersonToThirdDbMapper {
     private final PersonDocumentInThirdDbIdMapper personDocumentInThirdDbIdMapper;
 
     @SuppressWarnings("unchecked")
-    Object personToThirdDbMapperCreate(GenericMapperArgument genericMapperArgument) {
+    Map<String, Object> personToThirdDbMapperCreate(GenericMapperArgument genericMapperArgument) {
         Map<String, Object> thirdDbPerson = new HashMap<>();
         Map<String, Object> sourceObject = (Map<String, Object>) genericMapperArgument.getSourceObject();
         Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();

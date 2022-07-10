@@ -158,6 +158,9 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
                         .fieldName(field.getFieldName())
                         .ownerOfField(ownerOfField)
                         .fieldType(toModelFromDto(field.getFieldType()))
+                        .additionalProperties(elements(field.getAdditionalProperties())
+                        .map(this::additionalPropertyToModel)
+                        .asList())
                         .build()
                     )
                     .asList());

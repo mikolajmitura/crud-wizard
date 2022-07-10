@@ -63,7 +63,7 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
             verifyAll(dataStorageConnectorMetaModelRepository.getOne(defaultDataStorageConnectorsId[0])) {
                 dataStorageMetaModel.id == defaultDataStorageId
                 mapperMetaModelForQuery.id == defaultGenericMapperId
-                mapperMetaModelForReturn.id == defaultGenericMapperId
+                mapperMetaModelForPersist.id == defaultGenericMapperId
                 classMetaModelInDataStorage == null
             }
         }

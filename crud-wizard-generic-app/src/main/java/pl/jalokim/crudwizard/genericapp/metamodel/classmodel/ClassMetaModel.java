@@ -7,6 +7,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassM
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isTypeOf;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -21,21 +23,25 @@ import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
+import pl.jalokim.utils.reflection.ReflectionOperationException;
 import pl.jalokim.utils.string.StringUtils;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder(toBuilder = true)
+@Slf4j
 public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
@@ -325,7 +331,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
         if (realClass != null) {
             return Objects.equals(realClass, otherClassMetaModel.getRealClass())
-                && Objects.equals(genericTypes, otherClassMetaModel.genericTypes);
+                && hasTheSameElementsWithTheSameOrder(genericTypes, otherClassMetaModel.genericTypes);
         }
 
         return Objects.equals(name, otherClassMetaModel.getName());
@@ -333,5 +339,61 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     public Class<?> getRealClassOrBasedOn() {
         return realClass == null ? basedOnClass : realClass;
+    }
+
+    public boolean hasGenericTypes() {
+        return !genericTypes.isEmpty();
+    }
+
+    public FieldMetaModel getIdFieldMetaModel() {
+        if (isGenericModel()) {
+            return findIfField()
+                .orElseThrow(() -> new TechnicalException(createMessagePlaceholder("ClassMetaModel.id.field.not.found", getName())));
+        } else if (isOnlyRawClassModel()) {
+            try {
+                Field id = MetadataReflectionUtils.getField(realClass, "id");
+                return FieldMetaModel.builder()
+                    .fieldName("id")
+                    .fieldType(ClassMetaModelFactory.fromRawClass(id.getType()))
+                    .build();
+            } catch (ReflectionOperationException ex) {
+                log.warn("real class: " + realClass.getCanonicalName() + " does not have id field", ex);
+            }
+        }
+        throw new TechnicalException(createMessagePlaceholder("ClassMetaModel.id.field.not.found", getTypeDescription()));
+    }
+
+    public boolean hasIdField() {
+        return findIfField().isPresent();
+    }
+
+    private Optional<FieldMetaModel> findIfField() {
+        return elements(fetchAllFields())
+            .filter(field -> field.getAdditionalProperties().stream()
+                .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
+            .findFirst()
+            .or(() -> {
+                try {
+                    Field id = MetadataReflectionUtils.getField(realClass, "id");
+                    return Optional.of(FieldMetaModel.builder()
+                        .fieldName("id")
+                        .fieldType(ClassMetaModelFactory.fromRawClass(id.getType()))
+                        .build());
+                } catch (ReflectionOperationException ex) {
+                    return Optional.empty();
+                }
+            });
+    }
+
+    public static boolean hasTheSameElementsWithTheSameOrder(List<ClassMetaModel> first, List<ClassMetaModel> second) {
+        if (first.size() != second.size()) {
+            return false;
+        }
+        AtomicBoolean matchAll = new AtomicBoolean(true);
+        elements(first).forEachWithIndex((index, element) -> {
+                matchAll.set(matchAll.get() && element.isTheSameMetaModel(second.get(index)));
+            }
+        );
+        return matchAll.get();
     }
 }

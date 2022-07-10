@@ -21,7 +21,7 @@ public class DataStorageConnectorMetaModel extends WithAdditionalPropertiesMetaM
     Long id;
     DataStorageMetaModel dataStorageMetaModel;
 
-    MapperMetaModel mapperMetaModelForReturn;
+    MapperMetaModel mapperMetaModelForPersist;
     MapperMetaModel mapperMetaModelForQuery;
     ClassMetaModel classMetaModelInDataStorage;
     /**

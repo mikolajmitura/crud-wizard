@@ -18,6 +18,12 @@ public class MapperDelegatorService {
 //            // TODO #53 call mapper script somehow...
 //            throw new UnsupportedOperationException("Mapper script has not supported yet!");
 //        } else
+
+        // TODO #1 mapper_delegator should delegate to mapper arguments as expected in BeansAndMethodsExistsValidator:
+        //  for normal mapper COMMON_EXPECTED_ARGS_TYPE + MAPPER_EXPECTED_ARGS_TYPE
+        //  for final result mapper when data source only one then COMMON_EXPECTED_ARGS_TYPE + MAPPER_EXPECTED_ARGS_TYPE
+        //  for final result mapper when more than one data sources then COMMON_EXPECTED_ARGS_TYPE + input can be GenericMapperArgument.class, JoinedResultsRow.class
+
             if (itIsGenericMapperMethod(mapperMetaModel)) {
             return invokeMethod(mapperMetaModel.getMapperInstance(), mapperMetaModel.getMethodMetaModel().getOriginalMethod(), mapperArgument);
         } else {

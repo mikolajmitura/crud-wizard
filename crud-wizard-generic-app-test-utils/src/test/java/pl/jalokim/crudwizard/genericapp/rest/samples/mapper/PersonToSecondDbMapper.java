@@ -19,7 +19,7 @@ public class PersonToSecondDbMapper {
     private final MetaModelContextService metaModelContextService;
 
     @SuppressWarnings("unchecked")
-    Object personToSecondDbMapperCreate(GenericMapperArgument genericMapperArgument) {
+    Map<String, Object> personToSecondDbMapperCreate(GenericMapperArgument genericMapperArgument) {
         DataStorage secondDb = metaModelContextService.getDataStorageByName("second-db");
         List<Object> foundEntities = secondDb.findEntities(buildSelectFromAndWhere(
             metaModelContextService.getClassMetaModelByName("personSecondDb"),

@@ -175,6 +175,10 @@ class ClassMetaModelDtoSamples {
             .build()
     }
 
+    static FieldMetaModelDto createIdFieldType(String fieldName, Class<?> fieldType) {
+        createValidFieldMetaModelDto(fieldName, fieldType, [], [isIdFieldType()])
+    }
+
     static FieldMetaModelDto createIgnoredForQueryFieldMetaModelDto(String fieldName, Class<?> fieldType) {
         createValidFieldMetaModelDto(fieldName, fieldType, [], [
             additionalPropertyRawJsonString(DefaultDataStorageQueryProvider.IGNORE_IN_QUERY_PARAM, "true")

@@ -180,7 +180,7 @@ class BeanAndMethodMetaModelMetaModelContextServiceIT extends GenericAppWithRelo
             verifyAll(defaultDataStorageConnectorMetaModels[0]) {
                 dataStorageMetaModel == defaultDataStorageMetaModel
                 mapperMetaModelForQuery == defaultMapperMetaModel
-                mapperMetaModelForReturn == defaultMapperMetaModel
+                mapperMetaModelForPersist == defaultMapperMetaModel
                 classMetaModelInDataStorage == null
             }
 

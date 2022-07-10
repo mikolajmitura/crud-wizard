@@ -35,4 +35,14 @@ public abstract class RawAdditionalPropertyMapper {
             .valueAsObject(rawJsonToObject(additionalPropertyEntity.getRawJson(), valueRealClassName))
             .build();
     }
+
+    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyDto additionalPropertyDto) {
+        String valueRealClassName = additionalPropertyDto.getValueRealClassName();
+        return AdditionalPropertyMetaModel.builder()
+            .name(additionalPropertyDto.getName())
+            .valueRealClassName(valueRealClassName)
+            .rawJson(additionalPropertyDto.getRawJson())
+            .valueAsObject(rawJsonToObject(additionalPropertyDto.getRawJson(), valueRealClassName))
+            .build();
+    }
 }
