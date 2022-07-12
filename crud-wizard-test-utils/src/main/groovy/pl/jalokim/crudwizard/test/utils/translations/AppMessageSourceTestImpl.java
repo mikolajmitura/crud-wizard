@@ -33,6 +33,7 @@ import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
 import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
 import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource;
 import pl.jalokim.crudwizard.core.translations.TestAppMessageSourceHolder;
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
@@ -185,6 +186,15 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
                 "whenField", wrapAsExternalPlaceholder(whenField),
                 "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
                 "fieldValues", fieldValues.isEmpty() ? Constants.EMPTY : joinValues(fieldValues)));
+    }
+
+    public static String classNotExistsMessage() {
+        return classNotExistsMessage(Object.class);
+    }
+
+    public static String classNotExistsMessage(Class<?> typeOf) {
+        return messageForValidator(ClassExists.class,
+            Map.of("expectedOfType" , typeOf.getCanonicalName()));
     }
 
     private static String joinValues(List<String> list) {

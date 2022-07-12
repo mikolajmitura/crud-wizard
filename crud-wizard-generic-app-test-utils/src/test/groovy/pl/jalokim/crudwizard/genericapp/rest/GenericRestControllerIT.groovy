@@ -8,6 +8,7 @@ import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.get
 import static pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression.isEqualsTo
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithGenerics
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createHttpQueryParamsClassMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createIgnoredForQueryFieldMetaModelDto
@@ -408,7 +409,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                     createMapperMetaModelDto(PersonToThirdDbMapper.class, "personToThirdDbMapperCreate"))
             ])
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
-                .classMetaModel(createClassMetaModelDtoFromClass(Long))
+                .classMetaModel(createClassMetaModelDtoWithGenerics(Map, 
+                    createClassMetaModelDtoFromClass(String),
+                    createClassMetaModelDtoFromClass(Object)))
                 .mapperMetaModel(createMapperMetaModelDto(CreatePersonFinalMapper.class, "returnIdFromDefaultDs"))
                 .build())
             .build()

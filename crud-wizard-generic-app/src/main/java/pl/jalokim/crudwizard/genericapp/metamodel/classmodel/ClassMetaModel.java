@@ -274,7 +274,13 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     public boolean isSubTypeOf(ClassMetaModel expectedParent) {
         if (hasRealClass() && expectedParent.hasRealClass()) {
-            return isTypeOf(getRealClass(), expectedParent.getRealClass());
+            if (!hasGenericTypes() && !expectedParent.hasGenericTypes()) {
+                return isTypeOf(getRealClass(), expectedParent.getRealClass());
+            } else if (hasGenericTypes() && expectedParent.hasGenericTypes()) {
+                return isTheSameMetaModel(expectedParent);
+            } else if (hasGenericTypes() && !expectedParent.hasGenericTypes()) {
+                return isTypeOf(getRealClass(), expectedParent.getRealClass());
+            }
         }
 
         List<ClassMetaModel> allExtendsOf = getAllExtendsOf();

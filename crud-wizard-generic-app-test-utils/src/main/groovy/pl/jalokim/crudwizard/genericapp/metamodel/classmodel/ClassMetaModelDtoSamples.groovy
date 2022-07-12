@@ -4,7 +4,6 @@ import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objec
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
-import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
 import org.springframework.data.domain.Page
@@ -131,7 +130,7 @@ class ClassMetaModelDtoSamples {
 
     static ClassMetaModelDto createValidClassMetaModelDtoWithName() {
         ClassMetaModelDto.builder()
-            .name(randomText())
+            .name("someValidMetamodel")
             .fields([createValidFieldMetaModelDto()])
             .isGenericEnumType(false)
             .build()
@@ -159,7 +158,7 @@ class ClassMetaModelDtoSamples {
 
     static FieldMetaModelDto createValidFieldMetaModelDto() {
         FieldMetaModelDto.builder()
-            .fieldName(randomText())
+            .fieldName("somefieldName")
             .fieldType(createValidClassMetaModelDtoWithClassName())
             .build()
     }
@@ -219,6 +218,13 @@ class ClassMetaModelDtoSamples {
             .name(name)
             .rawJson("\"$value\"")
             .valueRealClassName(String.canonicalName)
+            .build()
+    }
+
+    static ClassMetaModelDto createClassMetaModelDtoWithGenerics(Class<?> rawClass, ClassMetaModelDto... genericTypes) {
+        ClassMetaModelDto.builder()
+            .className(rawClass.canonicalName)
+            .genericTypes(genericTypes as List<ClassMetaModelDto>)
             .build()
     }
 }

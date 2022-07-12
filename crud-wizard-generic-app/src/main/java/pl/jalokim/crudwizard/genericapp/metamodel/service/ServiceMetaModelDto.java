@@ -28,10 +28,6 @@ public class ServiceMetaModelDto extends WithAdditionalPropertiesDto {
 
     Long id;
 
-    // TODO #1 #bean_validation validation when added new service metamodel
-    // verify that this bean, class, method exists
-    // verify that can method arguments will be resolved correctly, expected annotations etc and types (see in DelegatedServiceMethodInvoker)
-    // verify that newly added serviceMetaModel does not exists already, then use existing id
     @Valid
     BeanAndMethodDto serviceBeanAndMethod;
 

@@ -77,14 +77,8 @@ public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
     @UniqueValue(entityClass = MapperMetaModelEntity.class, entityFieldName = "mapperName")
     String mapperName;
 
-    // TODO #1 #bean_validation validation when added new mapper metamodel
-    // - verify that this bean, class, method exists
-    // - verify that can method arguments will be resolved correctly, expected annotations and
-    //  types see in DelegatedServiceMethodInvoker + GenericMapperArgument or just one some java object (without annotations, so then will be sourceObject to map).
-    // - verify that newly added mapperMetaModel does not exists already, then use existing id
-
-    // TODO #1 #validation during validation from dto should be get class metamodel etc,
-    //  because class metamodels will not exists already in context the same with mapper metamodel etc...
+    // TODO #1 #validation put to temp context mapper dto with mapperName during validation due
+    //  to fact that other mapper by name can be used by other mapper.
 
     @Valid
     BeanAndMethodDto mapperBeanAndMethod;

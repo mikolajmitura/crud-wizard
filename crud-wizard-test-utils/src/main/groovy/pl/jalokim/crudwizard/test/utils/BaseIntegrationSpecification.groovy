@@ -20,6 +20,7 @@ import pl.jalokim.crudwizard.core.datetime.TimeProvider
 import pl.jalokim.crudwizard.core.datetime.TimeProviderHolder
 import pl.jalokim.crudwizard.core.translations.AppMessageSource
 import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
+import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -47,6 +48,10 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     @Override
     TimeProvider getTimeProvider() {
         return timeProvider
+    }
+
+    def setupSpec() {
+        AppMessageSourceTestImpl.initStaticAppMessageSource()
     }
 
     def setup() {

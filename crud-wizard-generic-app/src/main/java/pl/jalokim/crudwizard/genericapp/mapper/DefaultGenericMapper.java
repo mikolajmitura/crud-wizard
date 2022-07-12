@@ -22,7 +22,7 @@ public class DefaultGenericMapper {
     public Object mapToTarget(GenericMapperArgument mapperArgument) {
         if (mapperArgument.getTargetMetaModel() != null) {
             if (mapperArgument.getTargetMetaModel().isTheSameMetaModel(mapperArgument.getSourceMetaModel())) {
-                // TODO should be deep copy.
+                // TODO #1 should be deep copy???
                 return mapperArgument.getSourceObject();
             }
             // it returns list of maps where every map contains results from data storages.

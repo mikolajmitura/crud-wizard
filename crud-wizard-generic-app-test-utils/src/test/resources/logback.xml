@@ -18,5 +18,8 @@
     <logger name="pl.jalokim.crudwizard" level="warn" additivity="false">
         <appender-ref ref="Console"/>
     </logger>
+    <logger name="pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.BeansAndMethodsExistsValidator" level="warn" additivity="false">
+        <appender-ref ref="Console"/>
+    </logger>
 
 </configuration>

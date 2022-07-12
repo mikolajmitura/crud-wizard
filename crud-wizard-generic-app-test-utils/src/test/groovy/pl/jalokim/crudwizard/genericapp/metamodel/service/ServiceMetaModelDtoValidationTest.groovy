@@ -6,13 +6,11 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
-import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
-import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
@@ -39,7 +37,6 @@ class ServiceMetaModelDtoValidationTest extends UnitTestSpec {
                 .className("not.exist.class")
                 .build())
             .build()                             | [
-            errorEntry("serviceBeanAndMethod.className", messageForValidator(ClassExists, "expectedOfType", Object.canonicalName)),
             errorEntry("serviceBeanAndMethod.methodName", notNullMessage())
         ]
         createValidServiceMetaModelDtoAsScript() | []
