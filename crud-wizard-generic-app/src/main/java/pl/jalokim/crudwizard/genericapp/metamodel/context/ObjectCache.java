@@ -40,4 +40,8 @@ public class ObjectCache<K, V> {
             .filter(findBy)
             .getFirstOrNull();
     }
+
+    public boolean idExists(K id) {
+        return objectsById.get(id) != null;
+    }
 }

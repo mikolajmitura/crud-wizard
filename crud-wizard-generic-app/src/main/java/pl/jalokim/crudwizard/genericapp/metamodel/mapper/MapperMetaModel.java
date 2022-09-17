@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
+import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
@@ -23,4 +24,5 @@ public class MapperMetaModel extends WithAdditionalPropertiesMetaModel {
     String mapperName;
     ClassMetaModel sourceClassMetaModel;
     ClassMetaModel targetClassMetaModel;
+    MetaModelState state;
 }

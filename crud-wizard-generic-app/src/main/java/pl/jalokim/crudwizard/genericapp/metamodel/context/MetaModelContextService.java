@@ -183,6 +183,9 @@ public class MetaModelContextService implements ApplicationRunner {
     }
 
     public MetaModelContext getMetaModelContext() {
+        if (isTemporaryContextExists()) {
+            return getTemporaryMetaModelContext();
+        }
         return metaModelContextReference.get();
     }
 
@@ -198,9 +201,6 @@ public class MetaModelContextService implements ApplicationRunner {
     }
 
     public ClassMetaModel getClassMetaModelByName(String classMetaModelName) {
-        if (isTemporaryContextExists()) {
-            return getTemporaryMetaModelContext().findByName(classMetaModelName);
-        }
         return getMetaModelContext().getClassMetaModels()
             .findOneBy(classMetaModel -> classMetaModelName.equals(classMetaModel.getName()));
     }

@@ -23,6 +23,7 @@ import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
 import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumValuesInAdditionalProperties;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByName;
@@ -89,6 +90,7 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @UniqueValue(entityClass = ClassMetaModelEntity.class)
+    // TODO uniqueness should be checked in whole temp context, due to fact that in one flow somebody can provide the same names
     @Size(min = 3, max = 100, groups = FirstValidationPhase.class)
     String name;
 
@@ -121,24 +123,24 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     @NotNull(groups = FirstValidationPhase.class)
     @Builder.Default
-    ClassMetaModelDtoType classMetaModelDtoType = ClassMetaModelDtoType.DEFINITION;
+    MetaModelDtoType classMetaModelDtoType = MetaModelDtoType.DEFINITION;
 
     public static ClassMetaModelDto buildClassMetaModelDtoWithId(Long id) {
         return ClassMetaModelDto.builder()
             .id(id)
-            .classMetaModelDtoType(ClassMetaModelDtoType.BY_ID)
+            .classMetaModelDtoType(MetaModelDtoType.BY_ID)
             .build();
     }
 
     public static ClassMetaModelDto buildClassMetaModelDtoWithName(String name) {
         return ClassMetaModelDto.builder()
             .name(name)
-            .classMetaModelDtoType(ClassMetaModelDtoType.BY_NAME)
+            .classMetaModelDtoType(MetaModelDtoType.BY_NAME)
             .build();
     }
 
     @JsonIgnore
     public boolean isFullDefinitionType() {
-        return ClassMetaModelDtoType.DEFINITION.equals(classMetaModelDtoType);
+        return MetaModelDtoType.DEFINITION.equals(classMetaModelDtoType);
     }
 }

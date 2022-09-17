@@ -13,7 +13,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 @Component
 class InitSourceExpressionParser extends SourceExpressionParser {
 
-    // TODO #1 #validation test all errors via validator or normally, better via dto validation.
     public InitSourceExpressionParser(ApplicationContext applicationContext) {
         super(applicationContext);
     }

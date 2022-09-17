@@ -14,6 +14,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextServic
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper;
+import pl.jalokim.utils.collection.Elements;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class TemporaryContextLoader {
     private final ValidatorFactory validatorFactory;
     private final MetaModelContextService metaModelContextService;
     private final ClassMetaModelMapper classMetaModelMapper;
+    private final MapperMetaModelMapper mapperMetaModelMapper;
 
     public void loadTemporaryContextFor(EndpointMetaModelDto createEndpointMetaModelDto) {
 
@@ -41,9 +45,19 @@ public class TemporaryContextLoader {
             .forEach(connector ->
                 updateOrCreateClassMetaModelInContext(connector.getClassMetaModelInDataStorage())
             );
+
+        Elements.elements(createEndpointMetaModelDto.getDataStorageConnectors())
+            .forEach(dataStorageConnectorMetaModelDto -> {
+                updateOrCreateMapperMetaModelInContext(dataStorageConnectorMetaModelDto.getMapperMetaModelForQuery());
+                updateOrCreateMapperMetaModelInContext(dataStorageConnectorMetaModelDto.getMapperMetaModelForPersist());
+            });
     }
 
     public void updateOrCreateClassMetaModelInContext(ClassMetaModelDto classMetaModelDto) {
         classMetaModelMapper.toModelFromDto(classMetaModelDto);
+    }
+
+    public void updateOrCreateMapperMetaModelInContext(MapperMetaModelDto mapperMetaModelDto) {
+        mapperMetaModelMapper.toModelFromDto(mapperMetaModelDto);
     }
 }

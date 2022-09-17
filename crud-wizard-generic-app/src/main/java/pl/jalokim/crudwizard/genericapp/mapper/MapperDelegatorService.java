@@ -19,7 +19,7 @@ public class MapperDelegatorService {
 //            throw new UnsupportedOperationException("Mapper script has not supported yet!");
 //        } else
 
-        // TODO #1 how should be invoked mapper
+        // TODO #1 how mapper should be invoked
         //  when is generated and when is provided as bean
         //  when generated mapper should be put to class loader? In mapper, or during save to db?
         //  should be some mappers type for distinguish

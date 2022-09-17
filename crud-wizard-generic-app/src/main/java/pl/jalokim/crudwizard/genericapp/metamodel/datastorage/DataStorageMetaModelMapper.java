@@ -22,6 +22,7 @@ public abstract class DataStorageMetaModelMapper
     public abstract DataStorageMetaModel toMetaModel(DataStorageMetaModelEntity entity);
 
     @Mapping(target = "mapperScript", ignore = true) // TODO #53 remove this after impl
+    @Mapping(target = "metamodelDtoType", ignore = true)
     public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
 
     @Mapping(target = "classMetaModelDtoType", ignore = true)

@@ -61,6 +61,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelConte
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
+import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageInstances
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
@@ -70,14 +71,18 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.DataStorag
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
+import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
+import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
+import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 
@@ -93,6 +98,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
     private DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository = Mock()
     private DataStorageInstances dataStorageInstances = Mock()
     private ClassMetaModelMapper classMetaModelMapper = Mappers.getMapper(ClassMetaModelMapper)
+    private MapperMetaModelMapper mapperMetaModelMapper = Mappers.getMapper(MapperMetaModelMapper)
     private ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(classMetaModelMapper)
     private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
     private endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
@@ -102,12 +108,23 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         jdbcTemplate, dataStorageInstances, methodSignatureMetaModelResolver, classMetaModelMapper)
     private BeforeEndpointValidatorUpdater beforeEndpointValidatorUpdater = new BeforeEndpointValidatorUpdater()
     private TemporaryContextLoader temporaryContextLoader = new TemporaryContextLoader(validatorFactory,
-        metaModelContextService, classMetaModelMapper
+        metaModelContextService, classMetaModelMapper, mapperMetaModelMapper
     )
 
     def setup() {
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", Mappers.getMapper(FieldMetaModelMapper))
         setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
+
+        GenericBeansProvider genericBeanProvider = Mock()
+        InstanceLoader instanceLoader = Mock()
+
+        setValueForField(mapperMetaModelMapper, "genericBeanProvider", genericBeanProvider)
+        setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
+        setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(
+            new MethodSignatureMetaModelResolver(jsonObjectMapper)))
+        setValueForField(mapperMetaModelMapper, "classMetaModelMapper", classMetaModelMapper)
+        setValueForField(mapperMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
+
         RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
         applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class) >> abstractHandlerMethodMapping
 
@@ -121,6 +138,10 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             .build()
 
         validatorFactory.getValidator() >> validatorWithConverter.getValidator()
+    }
+
+    def cleanup() {
+        TemporaryModelContextHolder.clearTemporaryMetaModelContext()
     }
 
     @Unroll
@@ -471,7 +492,10 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         given:
         MetaModelContext metaModelContext = new MetaModelContext()
         metaModelContext.setDefaultServiceMetaModel(createDefaultService())
+        metaModelContext.setClassMetaModels(new ModelsCache())
         metaModelContextService.getMetaModelContext() >> metaModelContext
+        metaModelContextService.loadNewMetaModelContext() >> metaModelContext
+        temporaryContextLoader.loadTemporaryContextFor(endpointMetaModelDto)
 
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(endpointMetaModelDto, EndpointUpdateContext)

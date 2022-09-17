@@ -7,8 +7,10 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelD
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.MAPPER_TYPE;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +19,8 @@ import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
+import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
+import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.UniqueMapperNames;
@@ -75,16 +79,18 @@ public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
 
     @Size(min = 3, max = 100)
     @UniqueValue(entityClass = MapperMetaModelEntity.class, entityFieldName = "mapperName")
+    // TODO uniqueness should be checked in whole temp context, due to fact that in one flow somebody can provide the same names
     String mapperName;
-
-    // TODO #1 #validation put to temp context mapper dto with mapperName during validation due
-    //  to fact that other mapper by name can be used by other mapper.
 
     @Valid
     BeanAndMethodDto mapperBeanAndMethod;
 
     @Valid
     MapperScriptDto mapperScript;
+
+    @NotNull(groups = FirstValidationPhase.class)
+    @Builder.Default
+    MetaModelDtoType metamodelDtoType = MetaModelDtoType.DEFINITION;
 
     MapperType mapperType;
 

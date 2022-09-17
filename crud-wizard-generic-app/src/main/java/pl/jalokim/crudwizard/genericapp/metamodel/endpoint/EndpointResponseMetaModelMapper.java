@@ -47,6 +47,7 @@ public abstract class EndpointResponseMetaModelMapper
 
     // TODO #53 remove this after impl
     @Mapping(target = "mapperScript", ignore = true)
+    @Mapping(target = "metamodelDtoType", ignore = true)
     public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
 
     @Mapping(target = "classMetaModelDtoType", ignore = true)

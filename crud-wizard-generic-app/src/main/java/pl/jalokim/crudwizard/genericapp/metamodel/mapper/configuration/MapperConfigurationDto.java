@@ -36,8 +36,9 @@ public class MapperConfigurationDto {
     @Builder.Default
     Boolean ignoreMappingProblems = false;
 
-    // TODO #1 #validation validate correctness of targetAssignPath in PropertiesOverriddenMappingDto via javax validator
-    //  sourceAssignExpression field will be validated through PropertiesOverriddenMappingResolver
+    // TODO #1 #validation #_2 validate correctness of targetAssignPath in PropertiesOverriddenMappingDto via javax validator
+    // TODO #1 #validation #_3 sourceAssignExpression field will be validated through PropertiesOverriddenMappingResolver
+    //  (parsing expressions and validate existence of things in parsed expression) invoked by javax validator
     List<@Valid PropertiesOverriddenMappingDto> propertyOverriddenMapping;
 
     @Builder.Default

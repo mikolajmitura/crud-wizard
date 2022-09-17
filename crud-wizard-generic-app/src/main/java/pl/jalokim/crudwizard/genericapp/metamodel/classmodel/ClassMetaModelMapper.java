@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
+import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.ClassMetaModelBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
@@ -22,7 +24,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelCont
 @Mapper(config = MapperAsSpringBeanConfig.class,
     imports = {
         ClassUtils.class,
-        ClassMetaModelState.class
+        MetaModelState.class
     })
 public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
@@ -38,7 +40,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "basedOnClass", ignore = true)
     @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
-    @Mapping(target = "state", expression = "java(ClassMetaModelState.INITIALIZED)")
+    @Mapping(target = "state", expression = "java(pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState.INITIALIZED)")
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
     @Mapping(target = "simpleRawClass", ignore = true)
@@ -94,32 +96,32 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
 
         ClassMetaModel classMetaModel;
 
-        if (ClassMetaModelDtoType.BY_ID.equals(classMetaModelDto.getClassMetaModelDtoType())) {
-            classMetaModel = temporaryMetaModelContext.findById(classMetaModelDto.getId());
+        if (MetaModelDtoType.BY_ID.equals(classMetaModelDto.getClassMetaModelDtoType())) {
+            classMetaModel = temporaryMetaModelContext.findClassMetaModelById(classMetaModelDto.getId());
             if (classMetaModel == null) {
                 throw new EntityNotFoundException(classMetaModelDto.getId(), ClassMetaModelEntity.class);
             }
-        } else if (ClassMetaModelDtoType.BY_NAME.equals(classMetaModelDto.getClassMetaModelDtoType())) {
-            classMetaModel = temporaryMetaModelContext.findByName(classMetaModelDto.getName());
+        } else if (MetaModelDtoType.BY_NAME.equals(classMetaModelDto.getClassMetaModelDtoType())) {
+            classMetaModel = temporaryMetaModelContext.findClassMetaModelByName(classMetaModelDto.getName());
             if (classMetaModel == null) {
                 classMetaModel = ClassMetaModel.builder()
                     .name(classMetaModelDto.getName())
-                    .state(ClassMetaModelState.ONLY_NAME)
+                    .state(MetaModelState.ONLY_NAME)
                     .build();
-                temporaryMetaModelContext.put(classMetaModelDto.getName(), classMetaModel);
+                temporaryMetaModelContext.putToContext(classMetaModelDto.getName(), classMetaModel);
             }
         } else {
             if (classMetaModelDto.getName() != null) {
                 temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
-                classMetaModel = temporaryMetaModelContext.findByName(classMetaModelDto.getName());
+                classMetaModel = temporaryMetaModelContext.findClassMetaModelByName(classMetaModelDto.getName());
 
                 if (classMetaModel == null) {
                     classMetaModel = innerToModelFromDto(classMetaModelDto);
-                    temporaryMetaModelContext.put(classMetaModelDto.getName(), classMetaModel);
+                    temporaryMetaModelContext.putToContext(classMetaModelDto.getName(), classMetaModel);
                 } else {
                     swallowUpdateFrom(classMetaModel, classMetaModelDto);
                 }
-                classMetaModel.setState(ClassMetaModelState.FOR_INITIALIZE);
+                classMetaModel.setState(MetaModelState.FOR_INITIALIZE);
             } else {
                 ClassMetaModelBuilder<?, ?> classBuilder = ClassMetaModel.builder();
 
@@ -128,16 +130,16 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
 
                 if (isNotEmpty(classMetaModelDto.getGenericTypes())
                     || isNotEmpty(classMetaModelDto.getExtendsFromModels())) {
-                    classBuilder.state(ClassMetaModelState.FOR_INITIALIZE);
+                    classBuilder.state(MetaModelState.FOR_INITIALIZE);
                 }
 
                 classMetaModel = classBuilder.build();
             }
         }
 
-        if (ClassMetaModelState.FOR_INITIALIZE.equals(classMetaModel.getState())) {
+        if (MetaModelState.FOR_INITIALIZE.equals(classMetaModel.getState())) {
             setupEnumMetaModelIfShould(classMetaModel);
-            classMetaModel.setState(ClassMetaModelState.DURING_INITIALIZATION);
+            classMetaModel.setState(MetaModelState.DURING_INITIALIZATION);
             classMetaModel.setGenericTypes(
                 elements(classMetaModelDto.getGenericTypes())
                     .map(this::toModelFromDto)
@@ -164,7 +166,7 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
                         .build()
                     )
                     .asList());
-            classMetaModel.setState(ClassMetaModelState.INITIALIZED);
+            classMetaModel.setState(MetaModelState.INITIALIZED);
         }
         return classMetaModel;
     }
