@@ -1,10 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
-import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createPersonMetaModel
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EMPTY
@@ -21,6 +21,8 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.isIdFieldType
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples.createMetaModelContextWithOneEndpointInNodes
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.isTemporaryContextExists
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDtoSamples.createDataStorageMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetListOfPerson
@@ -36,47 +38,28 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
-import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
-import static pl.jalokim.utils.reflection.InvokableReflectionUtils.setValueForField
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getMethod
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
-import javax.validation.ValidatorFactory
-import org.mapstruct.factory.Mappers
-import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpMethod
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import pl.jalokim.crudwizard.core.exception.handler.DummyService
-import pl.jalokim.crudwizard.core.translations.MessagePlaceholder
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
-import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory
 import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMetaModelValidationTestSpec
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapper
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.TemporaryContextLoader
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor
-import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
-import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageInstances
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.DataStorageResultsJoinCorrectness
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
@@ -84,72 +67,20 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.Propertie
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
-import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
-import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator
-import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
-import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
-import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 
-class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
+class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
 
     private static final DS_CONNECTOR_ID = 1L
     private static final CLASS_METAMODEL = 2L
 
-    private MetaModelContextService metaModelContextService = Mock()
-    private ApplicationContext applicationContext = Mock()
-    private JdbcTemplate jdbcTemplate = Mock()
-    private ValidatorFactory validatorFactory = Mock()
-    private DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository = Mock()
-    private DataStorageInstances dataStorageInstances = Mock()
-    private ClassMetaModelMapper classMetaModelMapper = Mappers.getMapper(ClassMetaModelMapper)
-    private MapperMetaModelMapper mapperMetaModelMapper = Mappers.getMapper(MapperMetaModelMapper)
-    private ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(classMetaModelMapper)
-    private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
-    private endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
-    private MethodSignatureMetaModelResolver methodSignatureMetaModelResolver = new MethodSignatureMetaModelResolver(jsonObjectMapper)
-    private validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
-        dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
-        jdbcTemplate, dataStorageInstances, methodSignatureMetaModelResolver, classMetaModelMapper)
-    private BeforeEndpointValidatorUpdater beforeEndpointValidatorUpdater = new BeforeEndpointValidatorUpdater()
-    private TemporaryContextLoader temporaryContextLoader = new TemporaryContextLoader(validatorFactory,
-        metaModelContextService, classMetaModelMapper, mapperMetaModelMapper
-    )
-
     def setup() {
-        setValueForField(classMetaModelMapper, "fieldMetaModelMapper", Mappers.getMapper(FieldMetaModelMapper))
-        setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-
-        GenericBeansProvider genericBeanProvider = Mock()
-        InstanceLoader instanceLoader = Mock()
-
-        setValueForField(mapperMetaModelMapper, "genericBeanProvider", genericBeanProvider)
-        setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
-        setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(
-            new MethodSignatureMetaModelResolver(jsonObjectMapper)))
-        setValueForField(mapperMetaModelMapper, "classMetaModelMapper", classMetaModelMapper)
-        setValueForField(mapperMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-
-        RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
-        applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class) >> abstractHandlerMethodMapping
-
-        abstractHandlerMethodMapping.getHandlerMethods() >> [:]
-        jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
-        dataStorageInstances.getDataStorageFactoryForClass(_) >> Mock(DataStorageFactory)
-
         dataStorageConnectorMetaModelRepository.findExactlyOneById(DS_CONNECTOR_ID) >> DataStorageConnectorMetaModelEntity.builder()
             .nameOfQuery("some-query-name2")
             .classMetaModelInDataStorage(ClassMetaModelEntity.builder().id(CLASS_METAMODEL).build())
             .build()
-
-        validatorFactory.getValidator() >> validatorWithConverter.getValidator()
-    }
-
-    def cleanup() {
-        TemporaryModelContextHolder.clearTemporaryMetaModelContext()
     }
 
     @Unroll
@@ -161,7 +92,12 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
         metaModelContext.setClassMetaModels(classMetaModels)
         metaModelContext.setDefaultServiceMetaModel(createDefaultService())
 
-        metaModelContextService.getMetaModelContext() >> metaModelContext
+        metaModelContextService.getMetaModelContext() >> {
+            if (isTemporaryContextExists()) {
+                return getTemporaryMetaModelContext()
+            }
+            metaModelContext
+        }
         metaModelContextService.loadNewMetaModelContext() >> metaModelContext
 
         beforeEndpointValidatorUpdater.beforeValidation(endpointMetaModelDto)
@@ -543,6 +479,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 .isGenericEnumType(false)
                 .fields([
                     createValidFieldMetaModelDto("id", String, [], [isIdFieldType()]),
+                    createValidFieldMetaModelDto("userLogin", String),
                     createValidFieldMetaModelDto("name", String),
                     createValidFieldMetaModelDto("surname", String),
                     createValidFieldMetaModelDto("documentSerialNumber", String),
@@ -576,7 +513,27 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                                     PropertiesOverriddenMappingDto.builder()
                                         .targetAssignPath("named")
                                         .sourceAssignExpression("name")
-                                        .build()
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("invalidPathsByDot")
+                                        .sourceAssignExpression("name.test")
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("invalidOtherVariable")
+                                        .sourceAssignExpression('$otherVariableName.field')
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("invalidSpringExpression")
+                                        .sourceAssignExpression('@someBean.mapString()')
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("invalidMapperName")
+                                        .sourceAssignExpression('@personEventMapper($rootSourceObject)')
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("invalidCastExpression")
+                                        .sourceAssignExpression('((c_com.pl.NotExistsClass)$mappingContext.personId)')
+                                        .build(),
                                 ])
                                 .build())
                             .build())
@@ -588,6 +545,11 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                             createValidFieldMetaModelDto("uuid", String, [], [isIdFieldType()]),
                             createValidFieldMetaModelDto("name", String),
                             createValidFieldMetaModelDto("surname", String),
+                            createValidFieldMetaModelDto("invalidPathsByDot", String),
+                            createValidFieldMetaModelDto("invalidOtherVariable", String),
+                            createValidFieldMetaModelDto("invalidSpringExpression", String),
+                            createValidFieldMetaModelDto("invalidMapperName", String),
+                            createValidFieldMetaModelDto("invalidCastExpression", String),
                             createValidFieldMetaModelDto("document", ClassMetaModelDto.builder()
                                 .name("document")
                                 .isGenericEnumType(false)
@@ -598,11 +560,12 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                         ])
                         .build())
                     .build()
+
             ])
             .build()                          | [
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration" +
                 ".rootConfiguration.propertyOverriddenMapping[1].targetAssignPath",
-                MessagePlaceholder.translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
+                translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
                     [
                         "currentPath"    : "document",
                         "fieldName"      : "createdBy",
@@ -611,7 +574,7 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 )),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration" +
                 ".rootConfiguration.propertyOverriddenMapping[0].targetAssignPath",
-                MessagePlaceholder.translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
+                translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
                     [
                         "currentPath"    : "",
                         "fieldName"      : "documents",
@@ -620,13 +583,29 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 )),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration" +
                 ".rootConfiguration.propertyOverriddenMapping[3].targetAssignPath",
-                MessagePlaceholder.translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
+                translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
                     [
                         "currentPath"    : "",
                         "fieldName"      : "named",
                         "currentNodeType": "personEntity"
                     ]
-                ))
+                )),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
+                ".propertyOverriddenMapping[4].sourceAssignExpression",
+                parseExpressionMessage(24, translatePlaceholder("cannot.find.field.name", "test", String.canonicalName))),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
+                ".propertyOverriddenMapping[5].sourceAssignExpression",
+                parseExpressionMessage(42, translatePlaceholder("invalid.other.variable.name", "otherVariableName"))),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
+                ".propertyOverriddenMapping[6].sourceAssignExpression",
+                parseExpressionMessage(33, translatePlaceholder("cannot.find.bean.name", "someBean"))),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
+                ".propertyOverriddenMapping[7].sourceAssignExpression",
+                parseExpressionMessage(36, translatePlaceholder("MappersModelsCache.not.found.mapper", "personEventMapper"))),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
+                ".propertyOverriddenMapping[8].sourceAssignExpression",
+                parseExpressionMessage(47, translatePlaceholder("mapper.parser.class.not.found", "com.pl.NotExistsClass"))),
+
         ]                                                      | "invalid payload with invalid target fields in mappings"
     }
 
@@ -675,5 +654,9 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
             errorEntry("httpMethod", notNullMessage()),
             errorEntry("operationName", notNullMessage())
         ]
+    }
+
+    private static String parseExpressionMessage(int columnNumber, String message) {
+        translatePlaceholder("MapperContextEntryError.column") + ":" + columnNumber + ", " + message
     }
 }

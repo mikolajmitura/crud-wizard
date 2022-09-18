@@ -1,6 +1,5 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper
 
-import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
@@ -14,87 +13,37 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
-import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
-import static pl.jalokim.utils.reflection.InvokableReflectionUtils.setValueForField
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
-import javax.validation.ValidatorFactory
-import org.mapstruct.factory.Mappers
-import org.springframework.jdbc.core.JdbcTemplate
 import pl.jalokim.crudwizard.core.exception.handler.DummyService
 import pl.jalokim.crudwizard.core.exception.handler.SimpleDummyDto
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMetaModelValidationTestSpec
 import pl.jalokim.crudwizard.genericapp.metamodel.ScriptLanguage
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapper
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.TemporaryContextLoader
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
-import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
-import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator
-import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
-import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
-import pl.jalokim.crudwizard.test.utils.UnitTestSpec
-import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
 
-class MapperMetaModelDtoValidationTest extends UnitTestSpec {
+class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
 
     public static final String MAPPER_BY_SCRIPT = "mapper-by-script"
-
-    private JdbcTemplate jdbcTemplate = Mock()
-    private ClassMetaModelMapper classMetaModelMapper = Mappers.getMapper(ClassMetaModelMapper)
-    private FieldMetaModelMapper fieldMetaModelMapper = Mappers.getMapper(FieldMetaModelMapper)
-    private MapperMetaModelMapper mapperMetaModelMapper = Mappers.getMapper(MapperMetaModelMapper)
-    private jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
-    private ValidatorFactory validatorFactory = Mock()
-    private MetaModelContextService metaModelContextService = Mock()
-
-    private TemporaryContextLoader temporaryContextLoader = new TemporaryContextLoader(validatorFactory,
-        metaModelContextService, classMetaModelMapper, mapperMetaModelMapper
-    )
-
-    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(jdbcTemplate, classMetaModelMapper)
-
-    def setup() {
-        setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
-        setValueForField(fieldMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-        setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-        jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
-
-        GenericBeansProvider genericBeanProvider = Mock()
-        InstanceLoader instanceLoader = Mock()
-
-        setValueForField(mapperMetaModelMapper, "genericBeanProvider", genericBeanProvider)
-        setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
-        setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(
-            new MethodSignatureMetaModelResolver(jsonObjectMapper)))
-        setValueForField(mapperMetaModelMapper, "classMetaModelMapper", classMetaModelMapper)
-        setValueForField(mapperMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-
-    }
-
-    def cleanup() {
-        TemporaryModelContextHolder.clearTemporaryMetaModelContext()
-    }
 
     @Unroll
     def "return expected validation messages for given mapperMetaModelDto: #mapperMetaModelDto"() {
         given:
-        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(new MetaModelContext())
+        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(new MetaModelContext(),
+            EndpointMetaModelDto.builder().build())
         TemporaryModelContextHolder.setTemporaryContext(temporaryMetaModelContext)
 
         def generateConfig = mapperMetaModelDto.getMapperGenerateConfiguration()
@@ -310,7 +259,9 @@ class MapperMetaModelDtoValidationTest extends UnitTestSpec {
             .rootConfiguration(MapperConfigurationDto.builder()
                 .name(rootMapperName)
                 .targetMetaModel(otherPersonClassMetaModel())
-                .sourceMetaModel(createValidClassMetaModel())
+                .sourceMetaModel(createValidClassMetaModel().toBuilder()
+                    .name("otherPerson")
+                    .build())
                 .propertyOverriddenMapping([
                     PropertiesOverriddenMappingDto.builder()
                         .targetAssignPath("motherData")

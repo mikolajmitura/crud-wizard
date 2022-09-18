@@ -33,6 +33,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextServic
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 
@@ -60,7 +61,7 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
         metaModelContext.setClassMetaModels(classMetaModels)
         metaModelContextService.getMetaModelContext() >> metaModelContext
 
-        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(metaModelContext)
+        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(metaModelContext, EndpointMetaModelDto.builder().build())
         TemporaryModelContextHolder.setTemporaryContext(temporaryMetaModelContext)
     }
 

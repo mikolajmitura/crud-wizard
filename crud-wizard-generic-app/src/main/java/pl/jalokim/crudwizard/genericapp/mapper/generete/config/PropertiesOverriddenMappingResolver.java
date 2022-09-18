@@ -10,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException.ErrorSource;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.MapperConfigurationParserContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory;
@@ -33,31 +35,31 @@ public class PropertiesOverriddenMappingResolver {
         var fieldMetaResolverForRawTarget =  mapperGenerateConfiguration.getFieldMetaResolverForRawTarget();
 
         parserContext.setCurrentMapperConfiguration(mapperGenerateConfiguration.getRootConfiguration());
-       elements(rootMapperMappingEntries)
-           .forEachWithIndex((lineNumber, mappingEntry) ->
+        elements(rootMapperMappingEntries)
+           .forEachWithIndex((entryIndex, mappingEntry) ->
                    parseMappingEntry(parserContext, mappingEntry,
-                        lineNumber, fieldMetaResolverForRawTarget));
+                        entryIndex, fieldMetaResolverForRawTarget));
 
         mappingEntriesByMethodName.forEach(
             (methodName, mappingEntries) -> {
                 MapperConfiguration methodMappingEntries = mapperGenerateConfiguration.getMapperConfigurationByMethodName(methodName);
                 parserContext.setCurrentMapperConfiguration(methodMappingEntries);
                 elements(mappingEntries)
-                    .forEachWithIndex((lineNumber, mappingEntry) ->
+                    .forEachWithIndex((entryIndex, mappingEntry) ->
                         parseMappingEntry(parserContext, mappingEntry,
-                            lineNumber, fieldMetaResolverForRawTarget));
+                            entryIndex, fieldMetaResolverForRawTarget));
             }
         );
 
         parserContext.throwExceptionWhenHasErrors();
     }
 
-    private void parseMappingEntry(MapperConfigurationParserContext parserContext,
-        MappingEntryModel mappingEntry, int lineNumber,
+    public void parseMappingEntry(MapperConfigurationParserContext parserContext,
+        MappingEntryModel mappingEntry, int entryIndex,
         FieldMetaResolverConfiguration fieldMetaResolverForRawTarget) {
 
         try {
-            tryParseEntry(parserContext, mappingEntry, lineNumber, fieldMetaResolverForRawTarget);
+            tryParseEntry(parserContext, mappingEntry, entryIndex, fieldMetaResolverForRawTarget);
         } catch (EntryMappingParseException entryMappingParseException) {
             parserContext.addException(entryMappingParseException);
             log.debug("parse entry exception: {}", entryMappingParseException.getMessage());
@@ -68,7 +70,7 @@ public class PropertiesOverriddenMappingResolver {
     }
 
     private void tryParseEntry(MapperConfigurationParserContext parserContext,
-        MappingEntryModel mappingEntry, int lineNumber, FieldMetaResolverConfiguration fieldMetaResolverForRawTarget) {
+        MappingEntryModel mappingEntry, int entryIndex, FieldMetaResolverConfiguration fieldMetaResolverForRawTarget) {
 
         MapperConfiguration mapperConfiguration = parserContext.getCurrentMapperConfiguration();
 
@@ -77,7 +79,7 @@ public class PropertiesOverriddenMappingResolver {
             targetMetaModel = ClassMetaModelFactory.generateGenericClassMetaModel(targetMetaModel.getRealClass(), fieldMetaResolverForRawTarget);
         }
 
-        parserContext.nextLine(lineNumber);
+        parserContext.nextEntry(entryIndex);
         String targetExpression = mappingEntry.getTargetAssignPath();
         String sourceExpression = mappingEntry.getSourceAssignExpression();
 
@@ -85,12 +87,15 @@ public class PropertiesOverriddenMappingResolver {
 
         PropertiesOverriddenMapping currentOverriddenMapping = parserContext.getCurrentMapperConfiguration().getPropertyOverriddenMapping();
         if (StringUtils.isNotBlank(targetExpression)) {
-            targetFieldClassMetaModel = FieldMetaModelExtractor.extractFieldMetaModel(targetMetaModel, targetExpression)
-                .getFieldType();
+            try {
+                targetFieldClassMetaModel = FieldMetaModelExtractor.extractFieldMetaModel(targetMetaModel, targetExpression)
+                    .getFieldType();
+            } catch (TechnicalException ex) {
+                parserContext.throwParseExceptionWithRawMessage(ErrorSource.TARGET_EXPRESSION, ex.getMessage());
+            }
 
             List<String> pathParts = Elements.bySplitText(replaceAllWithEmpty(targetExpression, " "), "\\.")
                 .asList();
-
 
             for (String pathPart : pathParts) {
                 Map<String, PropertiesOverriddenMapping> mappingsByPropertyName = currentOverriddenMapping.getMappingsByPropertyName();

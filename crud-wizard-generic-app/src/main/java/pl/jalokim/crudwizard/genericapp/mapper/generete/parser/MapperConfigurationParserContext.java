@@ -15,6 +15,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfigu
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException.ErrorSource;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.utils.collection.Elements;
@@ -36,19 +37,20 @@ public class MapperConfigurationParserContext {
     private PropertiesOverriddenMapping propertyOverriddenMapping;
 
     @Getter
-    private int currentLineNumber;
+    private int currentEntryIndex;
     @Getter
     private Integer columnNumber;
 
+    @Getter
     private final List<Throwable> errors = new ArrayList<>();
 
     @Getter
     @Setter
     private MapperConfiguration currentMapperConfiguration;
 
-    public void nextLine(int lineNumber) {
+    public void nextEntry(int entryIndex) {
         columnNumber = null;
-        currentLineNumber = lineNumber;
+        currentEntryIndex = entryIndex;
         sourceExpressionParserContext = null;
         currentSourceExpressionParser = applicationContext.getBean(InitSourceExpressionParser.class);
     }
@@ -85,6 +87,10 @@ public class MapperConfigurationParserContext {
         throw createParseException(rawMessage);
     }
 
+    public void throwParseExceptionWithRawMessage(ErrorSource errorType, String rawMessage) {
+        throw createParseException(errorType, rawMessage);
+    }
+
     public EntryMappingParseException createParseException(MessagePlaceholder messagePlaceholder) {
         return createParseException(messagePlaceholder.translateMessage());
     }
@@ -94,9 +100,14 @@ public class MapperConfigurationParserContext {
         return new EntryMappingParseException(mapperContextEntryError);
     }
 
+    public EntryMappingParseException createParseException(ErrorSource errorType, String message) {
+        MapperContextEntryError mapperContextEntryError = createMapperContextEntryError(message);
+        return new EntryMappingParseException(errorType, mapperContextEntryError);
+    }
+
     private MapperContextEntryError createMapperContextEntryError(String message) {
         return MapperContextEntryError.builder()
-            .entryIndex(currentLineNumber)
+            .entryIndex(currentEntryIndex)
             .columnNumber(columnNumber)
             .errorReason(message)
             .build();

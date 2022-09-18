@@ -11,8 +11,8 @@ import javax.validation.Payload;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = TargetAssignPathsValidator.class)
-public @interface TargetAssignPaths {
+@Constraint(validatedBy = MapperGenerateConfigValidator.class)
+public @interface MapperGenerateConfigCheck {
 
     String message() default "";
 

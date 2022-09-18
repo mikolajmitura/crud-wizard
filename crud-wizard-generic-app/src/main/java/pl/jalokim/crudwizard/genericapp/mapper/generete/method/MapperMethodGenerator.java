@@ -63,14 +63,15 @@ public class MapperMethodGenerator {
 
     // TODO #1 mapper task orders
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (not IT) #validation
-    //      - correct source field expressions
-    //          - other loaded mappers (be the name) in the same context
-    //          - spring beans existence (on mock)
-    //          - class mapper existence
+    //      - errors during generation of mapper code (not found auto mappers, too many found mappers etc)
+    //      implements this in MapperGenerateConfigValidator ##_1
+    //          - MapperCodeGenerator.generateMapperCode()
+    //          - compile generated code and put it to classloader
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (IT) #validation
-    //      - real spring beans, classes
-    //      - other mapper name (created in the same context)
-    //      - other mapper name (created earlier, available only when full flow is implemented)
+    //      - real spring beans, classes (positive and negative case)
+    //      - other mapper name (created in the same context) (positive and negative case)
+    //      - inner mapper name (created in the same context) (positive and negative case)
+    //      - other mapper name (created earlier, available only when full flow is implemented) (positive and negative case)
     //  - generate mapper code and compile it, put to classloader and test that is exists (generate few times and check that latest version was used)
     //  - generate few mappers code and compile it, put to classloader and map some values by them
     //  - MapperDelegatorService

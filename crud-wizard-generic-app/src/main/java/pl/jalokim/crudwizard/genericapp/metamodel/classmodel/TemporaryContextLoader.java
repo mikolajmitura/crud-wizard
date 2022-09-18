@@ -33,7 +33,7 @@ public class TemporaryContextLoader {
             FirstValidationPhase.class, WithoutDefaultGroup.class);
 
         MetaModelContext metaModelContext = metaModelContextService.loadNewMetaModelContext();
-        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(metaModelContext);
+        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(metaModelContext, createEndpointMetaModelDto);
         TemporaryModelContextHolder.setTemporaryContext(temporaryMetaModelContext);
 
         updateOrCreateClassMetaModelInContext(createEndpointMetaModelDto.getPayloadMetamodel());

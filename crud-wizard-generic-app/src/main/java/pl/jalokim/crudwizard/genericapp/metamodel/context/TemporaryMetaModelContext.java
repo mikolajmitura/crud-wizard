@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.Getter;
 import org.apache.commons.lang3.RandomUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 
@@ -18,7 +20,11 @@ public class TemporaryMetaModelContext extends MetaModelContext {
     private final Map<String, ClassMetaModelDto> classMetaModelDtoDefinitionByName = new HashMap<>();
     private final Map<String, MapperMetaModelDto> mapperModelDtoDefinitionByName = new HashMap<>();
 
-    public TemporaryMetaModelContext(MetaModelContext metaModelContext) {
+    @Getter
+    private final EndpointMetaModelDto createEndpointMetaModelDto;
+
+    public TemporaryMetaModelContext(MetaModelContext metaModelContext, EndpointMetaModelDto createEndpointMetaModelDto) {
+        this.createEndpointMetaModelDto = createEndpointMetaModelDto;
         setDataStorages(metaModelContext.getDataStorages());
         setApiTags(metaModelContext.getApiTags());
         setValidatorMetaModels(metaModelContext.getValidatorMetaModels());
@@ -63,6 +69,7 @@ public class TemporaryMetaModelContext extends MetaModelContext {
     public void putToContext(String name, MapperMetaModel mapperMetaModel) {
         mapperMetaModelsByName.put(name, mapperMetaModel);
         getMapperMetaModels().put(generateRandomId(getMapperMetaModels()), mapperMetaModel);
+        getMapperMetaModels().setMapperModelWithName(name, mapperMetaModel);
     }
 
     public void putDefinitionOfClassMetaModelDto(ClassMetaModelDto classMetaModelDto) {

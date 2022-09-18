@@ -15,8 +15,17 @@ public class MapperContextEntryError {
     String errorReason;
 
     public String toString() {
+        return getMessageWithEntryIndex();
+    }
+
+    public String getMessageWithEntryIndex() {
         String columnPart = columnNumber == null ? "" : " " + createMessagePlaceholder("MapperContextEntryError.column") + ":" + columnNumber;
         return String.format("%s:%s%s - %s", createMessagePlaceholder("MapperContextEntryError.entry"),
             entryIndex, columnPart, errorReason);
+    }
+
+    public String getMessageWithoutEntryIndex() {
+        String columnPart = columnNumber == null ? "" : createMessagePlaceholder("MapperContextEntryError.column") + ":" + columnNumber + ", ";
+        return String.format("%s%s", columnPart, errorReason);
     }
 }

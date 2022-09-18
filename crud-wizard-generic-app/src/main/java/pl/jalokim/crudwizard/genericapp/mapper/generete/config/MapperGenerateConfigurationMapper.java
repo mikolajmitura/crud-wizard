@@ -31,15 +31,20 @@ public abstract class MapperGenerateConfigurationMapper {
     @Autowired
     private ClassMetaModelMapper classMetaModelMapper;
 
+    /**
+     * Conversion from mapper configuration dto to MapperGenerateConfiguration but without parsing expressions.
+     */
     public MapperGenerateConfiguration mapConfiguration(MapperGenerateConfigurationDto mapperGenerateConfigurationDto,
         ClassMetaModelDto pathVariablesClassModel, ClassMetaModelDto requestParamsClassModel) {
 
         var mapperGenerateConfiguration = innerMapper(mapperGenerateConfigurationDto,
             pathVariablesClassModel, requestParamsClassModel);
-        mapperGenerateConfigurationDto.getSubMappersAsMethods()
+
+        elements(mapperGenerateConfigurationDto.getSubMappersAsMethods())
             .forEach(mapperConfigurationDto -> mapperGenerateConfiguration.addSubMapperConfiguration(
                 mapperConfigurationDto.getName(), mapMapperConfiguration(mapperConfigurationDto)
             ));
+
         return mapperGenerateConfiguration;
     }
 
@@ -65,7 +70,7 @@ public abstract class MapperGenerateConfigurationMapper {
     PropertiesOverriddenMapping mapPropertiesOverriddenMapping(List<PropertiesOverriddenMappingDto> mappingEntries) {
         var propertiesOverriddenMapping = PropertiesOverriddenMapping.builder().build();
 
-        for (PropertiesOverriddenMappingDto mappingEntry : mappingEntries) {
+        for (PropertiesOverriddenMappingDto mappingEntry : elements(mappingEntries).asList()) {
             String targetAssignPath = mappingEntry.getTargetAssignPath();
 
             var currentOverriddenMappingRef = new AtomicReference<>(propertiesOverriddenMapping);
