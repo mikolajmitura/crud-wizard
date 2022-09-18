@@ -63,9 +63,10 @@ public class MapperMethodGenerator {
 
     // TODO #1 mapper task orders
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (not IT) #validation
-    //      - other loaded mappers in the same context
-    //      - correct target field expression
-    //      - correct source field expressions ( bean, classes existence (beans on mock))
+    //      - correct source field expressions
+    //          - other loaded mappers (be the name) in the same context
+    //          - spring beans existence (on mock)
+    //          - class mapper existence
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (IT) #validation
     //      - real spring beans, classes
     //      - other mapper name (created in the same context)

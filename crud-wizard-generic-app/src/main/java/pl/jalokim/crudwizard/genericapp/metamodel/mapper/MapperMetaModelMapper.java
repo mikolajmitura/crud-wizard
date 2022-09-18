@@ -144,8 +144,11 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
         if (mapperMetaModel != null && MetaModelState.FOR_INITIALIZE.equals(mapperMetaModel.getState())) {
 
             BeanAndMethodDto mapperBeanAndMethod = mapperMetaModelDto.getMapperBeanAndMethod();
-            mapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(
-                mapperBeanAndMethod.getMethodName(), mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getBeanName()));
+
+            if (mapperBeanAndMethod != null){
+                mapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(
+                    mapperBeanAndMethod.getMethodName(), mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getBeanName()));
+            }
 
             MapperMetaModel finalMapperMetaModel = mapperMetaModel;
             Optional.ofNullable(mapperMetaModelDto.getMapperGenerateConfiguration())

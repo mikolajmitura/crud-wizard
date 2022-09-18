@@ -52,7 +52,7 @@ public class TemporaryMetaModelContext extends MetaModelContext {
     public MapperMetaModel findMapperMetaModelByName(String name) {
         return Optional.ofNullable(mapperMetaModelsByName
             .findById(name))
-            .orElseGet(() -> getMapperMetaModels().getMapperMetaModelByName(name));
+            .orElseGet(() -> getMapperMetaModels().getMappersModelByMapperName().get(name));
     }
 
     public void putToContext(String name, ClassMetaModel classMetaModel) {

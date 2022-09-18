@@ -23,13 +23,13 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 @Data
 public class MetaModelContext {
 
-    private ModelsCache<DataStorageMetaModel> dataStorages;
-    private ModelsCache<ApiTagMetamodel> apiTags;
-    private ModelsCache<ValidatorMetaModel> validatorMetaModels;
-    private ModelsCache<ClassMetaModel> classMetaModels;
-    private MappersModelsCache mapperMetaModels;
-    private ModelsCache<ServiceMetaModel> serviceMetaModels;
-    private ModelsCache<EndpointMetaModel> endpointMetaModels;
+    private ModelsCache<DataStorageMetaModel> dataStorages = new ModelsCache<>();
+    private ModelsCache<ApiTagMetamodel> apiTags = new ModelsCache<>();
+    private ModelsCache<ValidatorMetaModel> validatorMetaModels = new ModelsCache<>();
+    private ModelsCache<ClassMetaModel> classMetaModels = new ModelsCache<>();
+    private MappersModelsCache mapperMetaModels = new MappersModelsCache();
+    private ModelsCache<ServiceMetaModel> serviceMetaModels = new ModelsCache<>();
+    private ModelsCache<EndpointMetaModel> endpointMetaModels = new ModelsCache<>();
 
     private EndpointMetaModelContextNode endpointMetaModelContextNode = createRootMetaModelNode();
 

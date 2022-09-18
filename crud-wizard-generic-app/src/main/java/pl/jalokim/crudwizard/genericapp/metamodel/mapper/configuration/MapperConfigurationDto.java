@@ -8,9 +8,11 @@ import javax.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Value;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.TargetAssignPaths;
 
 @Value
 @Builder(toBuilder = true)
+@TargetAssignPaths
 public class MapperConfigurationDto {
 
     Long id;
@@ -36,8 +38,7 @@ public class MapperConfigurationDto {
     @Builder.Default
     Boolean ignoreMappingProblems = false;
 
-    // TODO #1 #validation #_2 validate correctness of targetAssignPath in PropertiesOverriddenMappingDto via javax validator
-    // TODO #1 #validation #_3 sourceAssignExpression field will be validated through PropertiesOverriddenMappingResolver
+    // TODO #1 #validation ##_3 sourceAssignExpression field will be validated through PropertiesOverriddenMappingResolver
     //  (parsing expressions and validate existence of things in parsed expression) invoked by javax validator
     List<@Valid PropertiesOverriddenMappingDto> propertyOverriddenMapping;
 

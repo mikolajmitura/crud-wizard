@@ -97,6 +97,10 @@ public class MessagePlaceholder {
         return createMessagePlaceholder(propertyKey, placeholderArgs).translateMessage();
     }
 
+    public static String translatePlaceholder(String propertyKey, Map<String, Object> placeholderArgs) {
+        return createMessagePlaceholder(propertyKey, placeholderArgs).translateMessage();
+    }
+
     /**
      * placeholder which should be translated at frontend side
      * @param textToWrap value to wrap

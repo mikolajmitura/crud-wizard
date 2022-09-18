@@ -10,6 +10,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQU
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_EMPTY
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createDocumentClassMetaDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEmptyClassMetaModelDto
@@ -17,8 +18,10 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.exampleClassMetaModelDtoWithExtension
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.isIdFieldType
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples.createMetaModelContextWithOneEndpointInNodes
+import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDtoSamples.createDataStorageMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetListOfPerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
@@ -38,6 +41,7 @@ import static pl.jalokim.utils.reflection.InvokableReflectionUtils.setValueForFi
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getMethod
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import java.time.LocalDate
 import javax.validation.ValidatorFactory
 import org.mapstruct.factory.Mappers
 import org.springframework.context.ApplicationContext
@@ -45,6 +49,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import pl.jalokim.crudwizard.core.exception.handler.DummyService
+import pl.jalokim.crudwizard.core.translations.MessagePlaceholder
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory
 import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier
@@ -73,6 +78,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParams
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
@@ -468,6 +476,158 @@ class EndpointMetaModelDtoValidationTest extends UnitTestSpec {
                 [leftType : Byte.canonicalName,
                  rightType: String.canonicalName]))
         ]                                                      | "invalid left path and invalid right path, and not the same types for join"
+
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(ClassMetaModelDto.builder()
+                .name("personDto")
+                .isGenericEnumType(false)
+                .fields([
+                    createValidFieldMetaModelDto("id", String, [], [isIdFieldType()]),
+                    createValidFieldMetaModelDto("name", String),
+                    createValidFieldMetaModelDto("surname", String),
+                    createValidFieldMetaModelDto("documentSerialNumber", String),
+                    createValidFieldMetaModelDto("documentValidTo", LocalDate),
+                ])
+                .build())
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .dataStorageMetaModel(createDataStorageMetaModelDtoWithId(1))
+                    .mapperMetaModelForPersist(MapperMetaModelDto.builder()
+                        .mapperName("personDtoToEntityMapper")
+                        .mapperType(MapperType.GENERATED)
+                        .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                            .rootConfiguration(MapperConfigurationDto.builder()
+                                .name("personDtoToEntityMapper")
+                                .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                .targetMetaModel(buildClassMetaModelDtoWithName("personEntity"))
+                                .propertyOverriddenMapping([
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("document.serialNumber")
+                                        .sourceAssignExpression("documentSerialNumber")
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("document.validTo")
+                                        .sourceAssignExpression("documentValidTo")
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("uuid")
+                                        .sourceAssignExpression("id")
+                                        .build()
+                                ])
+                                .build())
+                            .build())
+                        .build())
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personEntity")
+                        .isGenericEnumType(false)
+                        .fields([
+                            createValidFieldMetaModelDto("uuid", String, [], [isIdFieldType()]),
+                            createValidFieldMetaModelDto("name", String),
+                            createValidFieldMetaModelDto("surname", String),
+                            createValidFieldMetaModelDto("document", ClassMetaModelDto.builder()
+                                .name("document")
+                                .isGenericEnumType(false)
+                                .fields([
+                                    createValidFieldMetaModelDto("serialNumber", String),
+                                    createValidFieldMetaModelDto("validTo", LocalDate)
+                                ]).build())
+                        ])
+                        .build())
+                    .build()
+            ])
+            .build()                          | []             | "valid payload with few mappers"
+
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(ClassMetaModelDto.builder()
+                .name("personDto")
+                .isGenericEnumType(false)
+                .fields([
+                    createValidFieldMetaModelDto("id", String, [], [isIdFieldType()]),
+                    createValidFieldMetaModelDto("name", String),
+                    createValidFieldMetaModelDto("surname", String),
+                    createValidFieldMetaModelDto("documentSerialNumber", String),
+                    createValidFieldMetaModelDto("documentValidTo", LocalDate),
+                ])
+                .build())
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .dataStorageMetaModel(createDataStorageMetaModelDtoWithId(1))
+                    .mapperMetaModelForPersist(MapperMetaModelDto.builder()
+                        .mapperName("personDtoToEntityMapper")
+                        .mapperType(MapperType.GENERATED)
+                        .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                            .rootConfiguration(MapperConfigurationDto.builder()
+                                .name("personDtoToEntityMapper")
+                                .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                .targetMetaModel(buildClassMetaModelDtoWithName("personEntity"))
+                                .propertyOverriddenMapping([
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("documents.serialNumber")
+                                        .sourceAssignExpression("documentSerialNumber")
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("document.createdBy")
+                                        .sourceAssignExpression("documentValidTo")
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("uuid")
+                                        .sourceAssignExpression("id")
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("named")
+                                        .sourceAssignExpression("name")
+                                        .build()
+                                ])
+                                .build())
+                            .build())
+                        .build())
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personEntity")
+                        .isGenericEnumType(false)
+                        .fields([
+                            createValidFieldMetaModelDto("uuid", String, [], [isIdFieldType()]),
+                            createValidFieldMetaModelDto("name", String),
+                            createValidFieldMetaModelDto("surname", String),
+                            createValidFieldMetaModelDto("document", ClassMetaModelDto.builder()
+                                .name("document")
+                                .isGenericEnumType(false)
+                                .fields([
+                                    createValidFieldMetaModelDto("serialNumber", String),
+                                    createValidFieldMetaModelDto("validTo", LocalDate)
+                                ]).build())
+                        ])
+                        .build())
+                    .build()
+            ])
+            .build()                          | [
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration" +
+                ".rootConfiguration.propertyOverriddenMapping[1].targetAssignPath",
+                MessagePlaceholder.translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
+                    [
+                        "currentPath"    : "document",
+                        "fieldName"      : "createdBy",
+                        "currentNodeType": "document"
+                    ]
+                )),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration" +
+                ".rootConfiguration.propertyOverriddenMapping[0].targetAssignPath",
+                MessagePlaceholder.translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
+                    [
+                        "currentPath"    : "",
+                        "fieldName"      : "documents",
+                        "currentNodeType": "personEntity"
+                    ]
+                )),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration" +
+                ".rootConfiguration.propertyOverriddenMapping[3].targetAssignPath",
+                MessagePlaceholder.translatePlaceholder("ClassMetaModelTypeExtractor.invalid.path",
+                    [
+                        "currentPath"    : "",
+                        "fieldName"      : "named",
+                        "currentNodeType": "personEntity"
+                    ]
+                ))
+        ]                                                      | "invalid payload with invalid target fields in mappings"
     }
 
     private ServiceMetaModel createDefaultService() {
