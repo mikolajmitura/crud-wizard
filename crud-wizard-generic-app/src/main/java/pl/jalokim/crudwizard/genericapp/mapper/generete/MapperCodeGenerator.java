@@ -24,7 +24,7 @@ public class MapperCodeGenerator {
     private final MapperMethodGenerator mapperMethodGenerator;
     private final EnumsMapperMethodGenerator enumsMapperMethodGenerator;
 
-    public String generateMapperCode(MapperGenerateConfiguration mapperGenerateConfiguration) {
+    public MapperCodeMetadata generateMapperCodeMetadata(MapperGenerateConfiguration mapperGenerateConfiguration) {
         MapperConfiguration mapperConfiguration = mapperGenerateConfiguration.getRootConfiguration();
         var sourceMetaModel = mapperConfiguration.getSourceMetaModel();
         var targetMetaModel = mapperConfiguration.getTargetMetaModel();
@@ -86,12 +86,14 @@ public class MapperCodeGenerator {
             ));
 
         mapperGeneratedCodeMetadata.checkValidationResults();
-
-        return generateMapperCode(mapperGeneratedCodeMetadata);
+        return mapperGeneratedCodeMetadata;
     }
 
-    private String generateMapperCode(MapperCodeMetadata mapperGeneratedCodeMetadata) {
+    public String generateMapperCode(MapperGenerateConfiguration mapperGenerateConfiguration) {
+        return generateMapperCode(generateMapperCodeMetadata(mapperGenerateConfiguration));
+    }
 
+    public String generateMapperCode(MapperCodeMetadata mapperGeneratedCodeMetadata) {
         MethodCodeMetadata mainMethodCodeMetadata = mapperGeneratedCodeMetadata.getMainMethodCodeMetadata();
 
         return TemplateAsText.fromClassPath("templates/mapper/mapper-class-template", true)

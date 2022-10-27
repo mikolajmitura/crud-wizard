@@ -63,11 +63,6 @@ public class MapperMethodGenerator {
     public static final String ITERABLE_ELEMENT_NODE_NAME = "*";
 
     // TODO #1 mapper task orders
-    //  - validation of correctness of mapping during add new endpoint with mappers, and test (not IT) #validation
-    //      - errors during generation of mapper code (not found auto mappers, too many found mappers etc)
-    //      implements this in MapperGenerateConfigValidator ##_1 #NOW
-    //          - MapperCodeGenerator.generateMapperCode()
-    //          - compile generated code and put it to classloader
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (IT) #validation
     //      - real spring beans, classes (positive and negative case)
     //      - other mapper name (created in the same context) (positive and negative case)
@@ -223,7 +218,8 @@ public class MapperMethodGenerator {
             String expressionForReturnLine = assignExpressionAsTextResolver.getExpressionForAssignWhenExists(methodGeneratorArgument,
                 assignExpressionForFieldReference,
                 returnMethodMetaData,
-                null);
+                null,
+                true);
 
             if (expressionForReturnLine != null) {
                 methodBuilder.lastLine("return " + expressionForReturnLine);
@@ -279,7 +275,7 @@ public class MapperMethodGenerator {
         return assignExpressionAsTextResolver.getExpressionForAssignWhenExists(methodGeneratorArgument,
             assignExpressionForFieldReference,
             targetFieldMetaData,
-            mappingProblemReason);
+            mappingProblemReason, false);
     }
 
     public void assignValueToFieldWithElements(MapperMethodGeneratorArgument methodGeneratorArgument,

@@ -27,7 +27,7 @@ public class AssignExpressionAsTextResolver {
     String getExpressionForAssignWhenExists(MapperMethodGeneratorArgument methodGeneratorArgument,
         AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference,
         TargetFieldMetaData targetFieldMetaData,
-        String mappingProblemReason) {
+        String mappingProblemReason, boolean suppressProblemWithFindConversion) {
 
         ClassMetaModel targetMetaModel = methodGeneratorArgument.getTargetMetaModel();
         MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
@@ -57,7 +57,7 @@ public class AssignExpressionAsTextResolver {
             return generateFetchValueForAssign(methodGeneratorArgument,
                 valueToAssignCodeMetadata.getReturnClassModel(),
                 valueToAssignCodeMetadata.getFullValueExpression(),
-                targetFieldMetaData);
+                targetFieldMetaData, suppressProblemWithFindConversion);
         }
         return null;
     }
@@ -85,7 +85,8 @@ public class AssignExpressionAsTextResolver {
     }
 
     private String generateFetchValueForAssign(MapperMethodGeneratorArgument methodGeneratorArgument,
-        ClassMetaModel sourceMetaModel, String fetchValueExpression, TargetFieldMetaData targetFieldMetaData) {
+        ClassMetaModel sourceMetaModel, String fetchValueExpression,
+        TargetFieldMetaData targetFieldMetaData, boolean suppressProblemWithFindConversion) {
 
         MapperCodeMetadata mapperGeneratedCodeMetadata = methodGeneratorArgument.getMapperGeneratedCodeMetadata();
         MapperConfiguration mapperConfiguration = methodGeneratorArgument.getMapperConfiguration();
@@ -118,12 +119,14 @@ public class AssignExpressionAsTextResolver {
                         .generateCodeMetadata(mapperGeneratedCodeMetadata)
                         .getValueGettingCode();
                 } else {
-                    mapperGeneratedCodeMetadata.addError(createMessagePlaceholder(
-                        "mapper.converter.not.found.between.metamodels",
-                        sourceMetaModel.getTypeDescription(),
-                        targetMetaModel.getTypeDescription(),
-                        fieldNameNodePath.getFullPath(),
-                        getInMethodPartMessage(methodGeneratorArgument)));
+                    if (!suppressProblemWithFindConversion) {
+                        mapperGeneratedCodeMetadata.addError(createMessagePlaceholder(
+                            "mapper.converter.not.found.between.metamodels",
+                            sourceMetaModel.getTypeDescription(),
+                            targetMetaModel.getTypeDescription(),
+                            fieldNameNodePath.getFullPath(),
+                            getInMethodPartMessage(methodGeneratorArgument)));
+                    }
                 }
 
                 return null;

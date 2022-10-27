@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath.PropertyPathBuilder;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
@@ -22,20 +24,31 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverrid
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException.ErrorSource;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.MapperConfigurationParserContext;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperGenerationException;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
+import pl.jalokim.crudwizard.genericapp.util.CodeCompiler;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MapperGenerateConfigValidator implements BaseConstraintValidator<MapperGenerateConfigCheck, MapperGenerateConfigurationDto> {
+public class MapperGenerateConfigValidator implements BaseConstraintValidator<MapperGenerateConfigCheck, MapperMetaModelDto> {
 
     private final MapperGenerateConfigurationMapper mapperGenerateConfigurationMapper;
     private final PropertiesOverriddenMappingResolver propertiesOverriddenMappingResolver;
     private final ApplicationContext applicationContext;
+    private final MapperCodeGenerator mapperCodeGenerator;
+    private final CodeCompiler codeCompiler;
 
     @Override
-    public boolean isValidValue(MapperGenerateConfigurationDto mapperGenerateConfigurationDto, ConstraintValidatorContext context) {
+    public boolean isValidValue(MapperMetaModelDto mapperMetaModelDto, ConstraintValidatorContext context) {
+        MapperGenerateConfigurationDto mapperGenerateConfigurationDto = mapperMetaModelDto.getMapperGenerateConfiguration();
+        MapperType mapperType = mapperMetaModelDto.getMapperType();
+        if (mapperGenerateConfigurationDto == null || !MapperType.GENERATED.equals(mapperType)) {
+            return true;
+        }
         AtomicBoolean isValid = new AtomicBoolean(true);
 
         if (mapperGenerateConfigurationDto.getRootConfiguration() != null) {
@@ -56,7 +69,9 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
 
             validateSourceExpression(mapperGenerateConfiguration, isValid,
                 mapperConfigurationDto, mapperConfiguration, context,
-                PropertyPath.builder().addNextProperty("rootConfiguration"));
+                PropertyPath.builder()
+                    .addNextProperty("mapperGenerateConfiguration")
+                    .addNextProperty("rootConfiguration"));
 
             if (isNotEmpty(mapperGenerateConfigurationDto.getSubMappersAsMethods())) {
 
@@ -68,12 +83,25 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
 
                         validateSourceExpression(mapperGenerateConfiguration, isValid,
                             mapperMethodConfigDto, mapperMethodConfig, context,
-                            PropertyPath.builder().addNextPropertyAndIndex("subMappersAsMethods", index));
+                            PropertyPath.builder()
+                                .addNextProperty("mapperGenerateConfiguration")
+                                .addNextPropertyAndIndex("subMappersAsMethods", index));
                     });
             }
 
             if (isValid.get()) {
-                // TODO #1 try generate mapper code ##_1 #NOW
+                try {
+                    MapperCodeMetadata mapperCodeMetadata = mapperCodeGenerator.generateMapperCodeMetadata(mapperGenerateConfiguration);
+                    String generatedMapperCode = mapperCodeGenerator.generateMapperCode(mapperCodeMetadata);
+                    codeCompiler.compileCode(mapperCodeMetadata.getMapperClassName(), "pl.jalokim.crudwizard.generated.mapper", generatedMapperCode);
+                } catch (MapperGenerationException ex) {
+                    isValid.set(false);
+                    ex.getMessagePlaceholders().forEach(entry -> customMessage(context, entry));
+                } catch (Exception exception) {
+                    log.error("unexpected exceptions occurred during validation: ", exception);
+                    isValid.set(false);
+                    customMessage(context,  exception.getMessage());
+                }
             }
         }
 
@@ -130,7 +158,7 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
     private String resolveFieldName(ErrorSource errorSource) {
         switch (errorSource) {
             case SOURCE_EXPRESSION:
-                return  "sourceAssignExpression";
+                return "sourceAssignExpression";
             case TARGET_EXPRESSION:
                 return "targetAssignPath";
             default:

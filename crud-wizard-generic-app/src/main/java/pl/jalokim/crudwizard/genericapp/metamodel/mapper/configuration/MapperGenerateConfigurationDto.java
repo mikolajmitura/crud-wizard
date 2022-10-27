@@ -5,11 +5,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.MapperGenerateConfigCheck;
 
 @Value
 @Builder(toBuilder = true)
-@MapperGenerateConfigCheck
 public class MapperGenerateConfigurationDto {
 
     Long id;

@@ -23,6 +23,7 @@ import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.MapperGenerateConfigCheck;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation.UniqueMapperNames;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 
@@ -66,6 +67,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
             is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
     })
 @UniqueMapperNames
+@MapperGenerateConfigCheck
 public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String ID = "id";

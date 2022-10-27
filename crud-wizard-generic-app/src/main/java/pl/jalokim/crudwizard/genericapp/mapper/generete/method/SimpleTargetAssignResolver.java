@@ -55,7 +55,7 @@ public class SimpleTargetAssignResolver {
         String expression = assignExpressionAsTextResolver.getExpressionForAssignWhenExists(methodGeneratorArgument,
             assignExpressionForFieldReference,
             returnMethodMetaData,
-            null);
+            null, false);
 
         if (expression != null) {
             methodBuilder.lastLine("return " + expression);
