@@ -29,23 +29,23 @@ class MpersonToCSamplePersonDtoMapper implements GeneratedMapper {
 		return pl.jalokim.crudwizard.core.sample.SamplePersonDto.builder()
 
 		.birthDay(((java.time.LocalDate) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("birthDay"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("birthDay"))
 			.orElse(null)))
 
 		.id(((java.lang.Long) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("id"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
 			.orElse(null)))
 
 		.lastLogin(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("lastLogin"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("lastLogin"))
 			.orElse(null)))
 
 		.name(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("name"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
 			.orElse(null)))
 
 		.surname(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("surname"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("surname"))
 			.orElse(null)))
         .build();
     }

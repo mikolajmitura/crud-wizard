@@ -29,15 +29,15 @@ class MsomeDtoWithBuilderToCSomeDtoWithBuilderMapper implements GeneratedMapper 
 		return pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder.builder()
 
 		.localDateTime1(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("localDateTime1"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("localDateTime1"))
 			.orElse(null)))
 
 		.test1(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("test1"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("test1"))
 			.orElse(null)))
 
 		.testLong1(((java.lang.Long) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("testLong1"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("testLong1"))
 			.orElse(null)))
         .build();
     }

@@ -37,11 +37,6 @@ public class MapperConfigurationParserContext {
     private PropertiesOverriddenMapping propertyOverriddenMapping;
 
     @Getter
-    private int currentEntryIndex;
-    @Getter
-    private Integer columnNumber;
-
-    @Getter
     private final List<Throwable> errors = new ArrayList<>();
 
     @Getter
@@ -49,22 +44,8 @@ public class MapperConfigurationParserContext {
     private MapperConfiguration currentMapperConfiguration;
 
     public void nextEntry(int entryIndex) {
-        columnNumber = null;
-        currentEntryIndex = entryIndex;
         sourceExpressionParserContext = null;
         currentSourceExpressionParser = applicationContext.getBean(InitSourceExpressionParser.class);
-    }
-
-    public void nextColumnNumber() {
-        columnNumber++;
-    }
-
-    public void previousColumnNumber() {
-        columnNumber--;
-    }
-
-    public void setInitColumnNumber(int columnNumber) {
-        this.columnNumber = columnNumber;
     }
 
     public void throwParseException(MessagePlaceholder messagePlaceholder) {
@@ -107,8 +88,7 @@ public class MapperConfigurationParserContext {
 
     private MapperContextEntryError createMapperContextEntryError(String message) {
         return MapperContextEntryError.builder()
-            .entryIndex(currentEntryIndex)
-            .columnNumber(columnNumber)
+            .columnNumber(sourceExpressionParserContext == null ? null : sourceExpressionParserContext.getCurrentCharIndex() + 1)
             .errorReason(message)
             .build();
     }

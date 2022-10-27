@@ -14,7 +14,7 @@ class CSamplePersonDtoToMpersonMapper implements GeneratedMapper {
     }
 
     @Override
-    public Map<String, Object> mainMap(GenericMapperArgument genericMapperArgument) {
+    public java.util.Map<java.lang.String, java.lang.Object> mainMap(GenericMapperArgument genericMapperArgument) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
         Object sourceObject = genericMapperArgument.getSourceObject();
         Map<String, String> headers = genericMapperArgument.getHeaders();
@@ -47,7 +47,7 @@ class CSamplePersonDtoToMpersonMapper implements GeneratedMapper {
 		map.put("surname", ((java.lang.String) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.core.sample.SamplePersonDto) value).getSurname())
 			.orElse(null)));
-        return (Map<String, Object>) map;
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
     }
 
 }

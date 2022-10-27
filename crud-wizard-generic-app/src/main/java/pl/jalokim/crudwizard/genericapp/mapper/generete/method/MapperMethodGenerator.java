@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedLineUtils.wrapWithNextLineWith2Tabs;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.SOURCE_OBJECT_VAR_NAME;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.createMethodName;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.regenerateMethodName;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping.containsNestedMappings;
@@ -64,7 +65,7 @@ public class MapperMethodGenerator {
     // TODO #1 mapper task orders
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (not IT) #validation
     //      - errors during generation of mapper code (not found auto mappers, too many found mappers etc)
-    //      implements this in MapperGenerateConfigValidator ##_1
+    //      implements this in MapperGenerateConfigValidator ##_1 #NOW
     //          - MapperCodeGenerator.generateMapperCode()
     //          - compile generated code and put it to classloader
     //  - validation of correctness of mapping during add new endpoint with mappers, and test (IT) #validation
@@ -158,7 +159,7 @@ public class MapperMethodGenerator {
         assignValueToFieldWithElements(methodGeneratorArgument,
             returnMethodMetaData,
             assignExpressionForFieldReference,
-            List.of(new RawJavaCodeAssignExpression(sourceMetaModel, "sourceObject")));
+            List.of(new RawJavaCodeAssignExpression(sourceMetaModel, SOURCE_OBJECT_VAR_NAME)));
 
         return assignExpressionForFieldReference.get()
             .generateCodeMetadata(methodGeneratorArgument.getMapperGeneratedCodeMetadata());

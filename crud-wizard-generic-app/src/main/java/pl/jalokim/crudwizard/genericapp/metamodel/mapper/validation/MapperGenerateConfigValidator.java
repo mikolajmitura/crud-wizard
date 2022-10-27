@@ -73,7 +73,7 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
             }
 
             if (isValid.get()) {
-                // TODO #1 try generate mapper code ##_1
+                // TODO #1 try generate mapper code ##_1 #NOW
             }
         }
 

@@ -3,7 +3,6 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.utils.test.ExpectedErrorUtilBuilder.assertException
 
-import lombok.Getter
 import org.springframework.context.ApplicationContext
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
@@ -19,10 +18,10 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
 
     def setup() {
         mapperConfigurationParserContext = new MapperConfigurationParserContext(applicationContext, mapperGenerateConfiguration)
-        mapperConfigurationParserContext.setInitColumnNumber(4)
 
         sourceExpressionParserContext = new SourceExpressionParserContext("  @   555  123cvx.gfa)h",
             mapperConfigurationParserContext, null, null)
+        mapperConfigurationParserContext.sourceExpressionParserContext = sourceExpressionParserContext
     }
 
     def "MapperConfigurationParserContext returns expected values on methods"() {
@@ -31,13 +30,12 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
 
         then:
         sourceExpressionParserContext.getCurrentCharIndex() == 2
-        mapperConfigurationParserContext.getColumnNumber() == 6
         sourceExpressionParserContext.getCurrentChar() == '@' as char
         sourceExpressionParserContext.skipSpaces()
         sourceExpressionParserContext.getCurrentChar() == '@' as char
         assertException({
             sourceExpressionParserContext.nextCharIs("." as char)
-        }).thenNestedException(createExpectedException(7, createMessagePlaceholder("expected.any.of.chars", ".")))
+        }).thenNestedException(createExpectedException(4, createMessagePlaceholder("expected.any.of.chars", ".")))
         sourceExpressionParserContext.moveToPreviousChar()
 
         and:
@@ -92,7 +90,10 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
         sourceExpressionParserContext.currentCharIs('h' as char)
         sourceExpressionParserContext.isLastCurrentChar()
         sourceExpressionParserContext.moveToNextCharIfExists()
-        sourceExpressionParserContext.isLastCurrentChar()
+        sourceExpressionParserContext.isReadAll()
+        sourceExpressionParserContext.moveToNextCharIfExists()
+        sourceExpressionParserContext.isReadAll()
+        !sourceExpressionParserContext.isLastCurrentChar()
     }
 
     def "collectTextUntilAnyChars throws parse exception"() {
@@ -103,7 +104,7 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
 
         then:
         EntryMappingParseException ex = thrown()
-        ex.message == createParseExceptionMessage(26, createMessagePlaceholder("expected.any.of.chars", '#, %')).toString()
+        ex.message == createParseExceptionMessage(23, createMessagePlaceholder("expected.any.of.chars", '#, %')).toString()
     }
 
     def "cannot find next char"() {
@@ -117,7 +118,7 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
         then:
         wasLastChar
         EntryMappingParseException ex = thrown()
-        ex.message == createParseExceptionMessage(26, createMessagePlaceholder("mapper.parser.expected.any.char")).toString()
+        ex.message == createParseExceptionMessage(24, createMessagePlaceholder("mapper.parser.expected.any.char")).toString()
     }
 
     private static EntryMappingParseException createExpectedException(int column, MessagePlaceholder messagePlaceholder) {
@@ -126,7 +127,6 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
 
     private static MapperContextEntryError createParseExceptionMessage(int column, MessagePlaceholder messagePlaceholder) {
         MapperContextEntryError.builder()
-            .entryIndex(0)
             .columnNumber(column)
             .errorReason(messagePlaceholder.translateMessage())
             .build()

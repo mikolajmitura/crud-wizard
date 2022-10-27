@@ -245,7 +245,7 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
             verifyAll(mappingsByPropertyName.get("someLocalDateTime")) {
                 valueMappingStrategy == [
                     new FieldsChainToAssignExpression(PERSONAL_DATA_MODEL,
-                        "((Map<String, Object>) mappingContext.get(\"personalData\"))",
+                        "((java.util.Map<java.lang.String, java.lang.Object>) mappingContext.get(\"personalData\"))",
                         [PERSONAL_DATA_MODEL.getRequiredFieldByName("exampleLocalDateTime")])
                 ]
                 mappingsByPropertyName.keySet().isEmpty()

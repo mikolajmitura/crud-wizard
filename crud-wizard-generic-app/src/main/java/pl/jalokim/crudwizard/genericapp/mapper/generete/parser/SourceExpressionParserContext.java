@@ -74,14 +74,8 @@ public class SourceExpressionParserContext {
             int offsetIndex = charsWhichMeansExpressionFinish.length + i;
             newChars[offsetIndex] = untilChars[i];
         }
-        CollectedExpressionPartResult collectedExpressionPartResult = collectTextUntilAnyCharsOrTillEnd(newChars);
-        if (collectedExpressionPartResult.getCutWithText() == ')'
-            || collectedExpressionPartResult.getCutWithText() == ','
-            || collectedExpressionPartResult.getCutWithText() == '.') {
-            mapperConfigurationParserContext.previousColumnNumber();
-        }
 
-        return collectedExpressionPartResult;
+        return collectTextUntilAnyCharsOrTillEnd(newChars);
     }
 
     public CollectedExpressionPartResult collectTextUntilAnyCharsOrTillEnd(char... untilChars) {
@@ -131,7 +125,6 @@ public class SourceExpressionParserContext {
     public void moveToNextChar() {
         currentCharIndex++;
         validateCharIndex();
-        mapperConfigurationParserContext.nextColumnNumber();
     }
 
     public void nextCharIs(char expectedChar) {
@@ -149,6 +142,9 @@ public class SourceExpressionParserContext {
     }
 
     public char getCurrentChar() {
+        if (isReadAll()) {
+            return '\u0000';
+        }
         validateCharIndex();
         return currentWholeExpression.charAt(currentCharIndex);
     }
@@ -158,17 +154,18 @@ public class SourceExpressionParserContext {
         if (currentCharIndex < 0) {
             throwExceptionWhenInvalidCharIndex();
         }
-        mapperConfigurationParserContext.previousColumnNumber();
     }
 
     public void moveToNextCharIfExists() {
-        if (!isLastCurrentChar()) {
+        if (!isLastCurrentChar() && !isReadAll()) {
             moveToNextChar();
+        } else {
+            currentCharIndex++;
         }
     }
 
     private void validateCharIndex() {
-        if (currentWholeExpression.length() - 1 < currentCharIndex) {
+        if (isReadAll()) {
             throwExceptionWhenInvalidCharIndex();
         }
     }
@@ -179,6 +176,10 @@ public class SourceExpressionParserContext {
 
     public boolean isLastCurrentChar() {
         return (currentWholeExpression.length() == 0 && currentCharIndex == 0) || currentWholeExpression.length() - 1 == currentCharIndex;
+    }
+
+    public boolean isReadAll() {
+        return currentCharIndex >= currentWholeExpression.length();
     }
 
     public ClassMetaModel getSourceMetaModel() {

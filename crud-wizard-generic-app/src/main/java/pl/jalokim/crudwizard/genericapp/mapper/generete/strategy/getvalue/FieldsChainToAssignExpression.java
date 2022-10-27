@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.getRawJavaGenericTypeInfoForGenericModel;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getRequiredFieldFromClassModel;
 import static pl.jalokim.utils.collection.Elements.elements;
 
@@ -60,7 +61,7 @@ public class FieldsChainToAssignExpression implements ValueToAssignExpression {
             if (currentClassMetaModel.isGenericModel()) {
                 currentClassMetaModel.getRequiredFieldByName(fieldName);
                 invokeChain.append(GeneratedLineUtils.wrapWithNextLineWith3Tabs(
-                    ".map(genericMap -> ((Map<String, Object>) genericMap).get(\"%s\"))",
+                    ".map(genericMap -> ((" + getRawJavaGenericTypeInfoForGenericModel() + ") genericMap).get(\"%s\"))",
                     fieldName));
 
             } else {

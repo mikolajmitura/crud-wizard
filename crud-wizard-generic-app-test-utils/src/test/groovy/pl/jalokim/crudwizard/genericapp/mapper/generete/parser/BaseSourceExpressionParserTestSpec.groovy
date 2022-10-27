@@ -69,7 +69,6 @@ class BaseSourceExpressionParserTestSpec extends UnitTestSpec {
     protected SourceExpressionParserContext createSourceExpressionParserContext(String expression, ClassMetaModel targetFieldClassMetaModel) {
         def sourceExpressionParserContext = new SourceExpressionParserContext(expression, mapperConfigurationParserContext,
             mapperConfiguration, targetFieldClassMetaModel)
-        mapperConfigurationParserContext.setInitColumnNumber(0)
         sourceExpressionParserContext
     }
 }

@@ -29,15 +29,15 @@ class MsomeSimpleValueDtoModelToCSomeSimpleValueDtoMapper implements GeneratedMa
 		return new pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto(
 
 		((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someString3"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString3"))
 			.orElse(null)),
 
 		((java.lang.Long) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someLong3"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someLong3"))
 			.orElse(null)),
 
 		((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someDataTime3"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someDataTime3"))
 			.orElse(null))
         );
     }

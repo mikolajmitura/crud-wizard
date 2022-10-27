@@ -46,6 +46,7 @@ import org.springframework.http.HttpMethod
 import pl.jalokim.crudwizard.core.exception.handler.DummyService
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists
 import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier
+import pl.jalokim.crudwizard.genericapp.mapper.instance.SomeTestMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseMetaModelValidationTestSpec
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
@@ -67,6 +68,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.Propertie
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
+import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SomeRawDto
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import spock.lang.Unroll
@@ -516,7 +518,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                                         .build(),
                                     PropertiesOverriddenMappingDto.builder()
                                         .targetAssignPath("invalidPathsByDot")
-                                        .sourceAssignExpression("name.test")
+                                        .sourceAssignExpression("name.test.nextField")
                                         .build(),
                                     PropertiesOverriddenMappingDto.builder()
                                         .targetAssignPath("invalidOtherVariable")
@@ -534,6 +536,18 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                                         .targetAssignPath("invalidCastExpression")
                                         .sourceAssignExpression('((c_com.pl.NotExistsClass)$mappingContext.personId)')
                                         .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("invalidRawException")
+                                        .sourceAssignExpression('j())')
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("otherMapperExists")
+                                        .sourceAssignExpression('@someRawDtoMapper($rootSourceObject)')
+                                        .build(),
+                                    PropertiesOverriddenMappingDto.builder()
+                                        .targetAssignPath("invalidInnerMethodName")
+                                        .sourceAssignExpression('#innerMethodNameNotExist($rootSourceObject)')
+                                        .build(),
                                 ])
                                 .build())
                             .build())
@@ -550,6 +564,9 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                             createValidFieldMetaModelDto("invalidSpringExpression", String),
                             createValidFieldMetaModelDto("invalidMapperName", String),
                             createValidFieldMetaModelDto("invalidCastExpression", String),
+                            createValidFieldMetaModelDto("invalidRawException", String),
+                            createValidFieldMetaModelDto("otherMapperExists", String),
+                            createValidFieldMetaModelDto("invalidInnerMethodName", String),
                             createValidFieldMetaModelDto("document", ClassMetaModelDto.builder()
                                 .name("document")
                                 .isGenericEnumType(false)
@@ -559,6 +576,18 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                                 ]).build())
                         ])
                         .build())
+                    .build(),
+                DataStorageConnectorMetaModelDto.builder()
+                    .dataStorageMetaModel(createDataStorageMetaModelDtoWithId(1))
+                    .mapperMetaModelForPersist(MapperMetaModelDto.builder()
+                        .mapperName("someRawDtoMapper")
+                        .mapperType(MapperType.BEAN_OR_CLASS_NAME)
+                        .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                            .className(SomeTestMapper.canonicalName)
+                            .methodName("mapSomeRawDto")
+                            .build())
+                        .build())
+                    .classMetaModelInDataStorage(createClassMetaModelDtoFromClass(SomeRawDto))
                     .build()
 
             ])
@@ -592,19 +621,34 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                 )),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
                 ".propertyOverriddenMapping[4].sourceAssignExpression",
-                parseExpressionMessage(24, translatePlaceholder("cannot.find.field.name", "test", String.canonicalName))),
+                parseExpressionMessage(11, translatePlaceholder("cannot.find.field.name", "test", String.canonicalName))),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
                 ".propertyOverriddenMapping[5].sourceAssignExpression",
-                parseExpressionMessage(42, translatePlaceholder("invalid.other.variable.name", "otherVariableName"))),
+                parseExpressionMessage(24, translatePlaceholder("invalid.other.variable.name", "otherVariableName"))),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
                 ".propertyOverriddenMapping[6].sourceAssignExpression",
-                parseExpressionMessage(33, translatePlaceholder("cannot.find.bean.name", "someBean"))),
+                parseExpressionMessage(11, translatePlaceholder("cannot.find.bean.name", "someBean"))),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
                 ".propertyOverriddenMapping[7].sourceAssignExpression",
-                parseExpressionMessage(36, translatePlaceholder("MappersModelsCache.not.found.mapper", "personEventMapper"))),
+                parseExpressionMessage(20, translatePlaceholder("MappersModelsCache.not.found.mapper", "personEventMapper"))),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
                 ".propertyOverriddenMapping[8].sourceAssignExpression",
-                parseExpressionMessage(47, translatePlaceholder("mapper.parser.class.not.found", "com.pl.NotExistsClass"))),
+                parseExpressionMessage(27, translatePlaceholder("mapper.parser.class.not.found", "com.pl.NotExistsClass"))),
+
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
+                ".propertyOverriddenMapping[9].sourceAssignExpression",
+                parseExpressionMessage(4, translatePlaceholder("RawJavaCodeSourceExpressionParser.invalid.expression"))),
+
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.mapperGenerateConfiguration.rootConfiguration" +
+                ".propertyOverriddenMapping[11].sourceAssignExpression",
+                parseExpressionMessage(43, translatePlaceholder("cannot.find.method.with.arguments",
+                    [
+                        "methodName"  : "innerMethodNameNotExist",
+                        "classesTypes": "personDto",
+                        "givenClass"  : translatePlaceholder("current.mapper.name")
+                    ]
+
+                ))),
 
         ]                                                      | "invalid payload with invalid target fields in mappings"
     }

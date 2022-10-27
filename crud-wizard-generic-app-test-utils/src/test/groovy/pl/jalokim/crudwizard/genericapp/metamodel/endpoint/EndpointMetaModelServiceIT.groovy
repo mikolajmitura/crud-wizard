@@ -725,7 +725,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             errorEntry("responseMetaModel.mapperMetaModel.mapperBeanAndMethod.methodName",
                 invalidMethodReturnType(
                     "java.util.List<pl.jalokim.crudwizard.genericapp.rest.samples.dto.SomeRawDto>",
-                    'java.util.List<Map<String, Object>>')),
+                    'java.util.List<java.util.Map<java.lang.String, java.lang.Object>>')),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",
                 invalidMethodParameter(0, BeanType.MAPPER)),
             errorEntry("responseMetaModel.mapperMetaModel.mapperBeanAndMethod.methodName",
@@ -796,7 +796,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             errorEntry("responseMetaModel.mapperMetaModel.mapperBeanAndMethod.methodName",
                 invalidMethodReturnType(
                     "java.util.List<pl.jalokim.crudwizard.genericapp.rest.samples.dto.SomeRawDto>",
-                    'java.util.Map<java.lang.String, Map<String, Object>>')),
+                    'java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.Object>>')),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",
                 invalidMethodParameter(0, BeanType.MAPPER)),
             errorEntry("responseMetaModel.mapperMetaModel.mapperBeanAndMethod.methodName",

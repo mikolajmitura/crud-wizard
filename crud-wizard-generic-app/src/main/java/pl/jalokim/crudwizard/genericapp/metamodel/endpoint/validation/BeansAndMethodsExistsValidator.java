@@ -7,18 +7,17 @@ import static pl.jalokim.crudwizard.core.utils.ClassUtils.checkThatClassExists;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.clearCglibClassName;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator;
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.MAP_STRING_OBJECT_MODEL;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.MAP_STRING_STRING_MODEL;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.OBJECT_MODEL;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.STRING_MODEL;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.classMetaModelFromType;
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.BeansAndMethodsExistsValidator.InnerError.newError;
-import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.BeansAndMethodsExistsValidator.TypePredicate.newTypePredicate;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.MAPPER_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.SERVICE_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.argAsTypes;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
 import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,11 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -41,10 +36,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
@@ -61,29 +52,23 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.ExpectedMethodArgument;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.TypePredicate;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlMetamodel;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService;
-import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
 import pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRow;
-import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
-import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
-import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.ReflectionOperationException;
-import pl.jalokim.utils.reflection.TypeMetadata;
-import pl.jalokim.utils.string.StringUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -94,111 +79,6 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
     private final ClassMetaModelMapper classMetaModelMapper;
     private final ApplicationContext applicationContext;
     private final MetaModelContextService metaModelContextService;
-
-    private static final ClassMetaModelsPredicate METHOD_ARG_IS_SIMPLE_TYPE = (
-        methodArgumentMetaModel,
-        methodArgClassMetaModel,
-        inputTypeOfMapperOrService) -> methodArgClassMetaModel.isSimpleType();
-
-    private static final List<ExpectedMethodArgument> COMMON_EXPECTED_ARGS_TYPE = List.of(
-        argAsTypes(EndpointMetaModel.class,
-            HttpServletRequest.class,
-            HttpServletResponse.class),
-        argAnnotatedAndAsMetaModels(RequestBody.class,
-            newTypePredicate(Object.class, (
-                methodArgumentMetaModel,
-                methodArgClassMetaModel,
-                inputTypeOfMapperOrService) ->
-                expectedTypeForRequestBody(methodArgClassMetaModel, inputTypeOfMapperOrService, 0)
-            )),
-        argAnnotatedAndAsMetaModels(RequestHeader.class,
-            newTypePredicate(MAP_STRING_STRING_MODEL),
-            newTypePredicate(OBJECT_MODEL, METHOD_ARG_IS_SIMPLE_TYPE,
-                (
-                    methodArgumentMetaModel,
-                    methodArgClassMetaModel,
-                    inputTypeOfMapperOrService) ->
-                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestHeader.class).name())
-                        || StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestHeader.class).value())
-            )),
-        argAnnotatedAndAsMetaModels(RequestParam.class,
-            newTypePredicate(MAP_STRING_OBJECT_MODEL),
-            newTypePredicate(OBJECT_MODEL, METHOD_ARG_IS_SIMPLE_TYPE,
-                (
-                    methodArgumentMetaModel,
-                    methodArgClassMetaModel,
-                    inputTypeOfMapperOrService) ->
-                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestParam.class).name())
-                        || StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestParam.class).value())
-            )),
-        argAnnotatedAndAsMetaModels(PathVariable.class,
-            newTypePredicate(OBJECT_MODEL, METHOD_ARG_IS_SIMPLE_TYPE,
-                (
-                    methodArgumentMetaModel,
-                    methodArgClassMetaModel,
-                    inputTypeOfMapperOrService) ->
-                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(PathVariable.class).name())
-                        || StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(PathVariable.class).value())))
-    );
-
-    private static final List<ExpectedMethodArgument> SERVICE_EXPECTED_ARGS_TYPE = List.of(
-        argAsTypes(GenericServiceArgument.class,
-            ValidationSessionContext.class,
-            JsonNode.class,
-            TranslatedPayload.class)
-    );
-
-    private static final List<ExpectedMethodArgument> MAPPER_EXPECTED_ARGS_TYPE = List.of(
-        argAsTypes(GenericMapperArgument.class),
-        argAsPredicates(newTypePredicate(Object.class, (
-            methodArgumentMetaModel,
-            methodArgClassMetaModel,
-            inputTypeOfMapper) -> canBeAssignAsMapperArgument(methodArgClassMetaModel, inputTypeOfMapper)
-        ))
-    );
-
-    private static boolean canBeAssignAsMapperArgument(ClassMetaModel methodArgClassMetaModel,
-        ClassMetaModel expectedInputTypeOfMapper) {
-
-        log.debug("methodArgClassMetaModel: {}, expectedInputTypeOfMapper: {}",
-            methodArgClassMetaModel.getTypeDescription(),
-            expectedInputTypeOfMapper.getTypeDescription());
-
-        if (expectedInputTypeOfMapper.isGenericMetamodelEnum()) {
-            boolean result = methodArgClassMetaModel.isSubTypeOf(STRING_MODEL);
-            log.debug("expectedInputTypeOfMapper is generic enum but methodArgClassMetaModel is type of String, result: {}", result);
-            return result;
-        } else if (expectedInputTypeOfMapper.isGenericModel()) {
-            boolean result = methodArgClassMetaModel.isTheSameMetaModel(MAP_STRING_OBJECT_MODEL)
-                || MAP_STRING_OBJECT_MODEL.isSubTypeOf(methodArgClassMetaModel);
-            log.debug("expectedInputTypeOfMapper is generic metamodel but methodArgClassMetaModel is type of Map<String, Object> "
-                + "or Map is sub type of methodArgClassMetaModel, result: {}", result);
-            return result;
-        } else if (expectedInputTypeOfMapper.hasGenericTypes()) {
-
-            boolean result = methodArgClassMetaModel.hasGenericTypes()
-                && expectedInputTypeOfMapper.getGenericTypes().size() == methodArgClassMetaModel.getGenericTypes().size();
-
-            log.debug("methodArgClassMetaModel has generic types and the same size like expectedInputTypeOfMapper, result: {}", result);
-
-            AtomicBoolean matchAll = new AtomicBoolean(true);
-            if (result) {
-                var methodGenericTypes = methodArgClassMetaModel.getGenericTypes();
-                var expectedGenericTypes = expectedInputTypeOfMapper.getGenericTypes();
-                elements(methodGenericTypes).forEachWithIndex((index, methodArgumentType) -> {
-                        matchAll.set(matchAll.get() && canBeAssignAsMapperArgument(methodArgumentType, (expectedGenericTypes.get(index))));
-                    }
-                );
-            }
-            log.debug("generic types of expectedInputTypeOfMapper and methodArgClassMetaModel are the same, result: {}", matchAll);
-
-            return result && matchAll.get();
-        }
-
-        boolean result = expectedInputTypeOfMapper.isSubTypeOf(methodArgClassMetaModel);
-        log.debug("expectedInputTypeOfMapper is sub type of methodArgClassMetaModel, result: {}", result);
-        return result;
-    }
 
     /*
         payloads:                   valid as java type
@@ -228,64 +108,6 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         validateMappersInDataStorageConnectors(endpointMetaModelDto, context, isValid);
 
         return isValid.get();
-    }
-
-    private static boolean expectedTypeForRequestBody(ClassMetaModel methodArgClassMetaModel,
-        ClassMetaModel inputTypeOfMapperOrService, int genericTypeNestingLevel) {
-
-        log.debug("methodArgClassMetaModel: {}, inputTypeOfMapperOrService: {}",
-            methodArgClassMetaModel.getTypeDescription(),
-            inputTypeOfMapperOrService.getTypeDescription());
-
-        if (genericTypeNestingLevel == 0 && Elements.of(JsonNode.class,
-            TranslatedPayload.class)
-            .anyMatch(givenClass -> givenClass.equals(methodArgClassMetaModel.getRealClass()))) {
-            log.debug("methodArgClassMetaModel is JsonNode or TranslatedPayload");
-            return true;
-        } else if (inputTypeOfMapperOrService.isGenericMetamodelEnum()) {
-            boolean result = methodArgClassMetaModel.isSubTypeOf(STRING_MODEL);
-            log.debug("when inputTypeOfMapperOrService is generic meta model, methodArgClassMetaModel is a String when, result: {}", result);
-            return result;
-        } else if (inputTypeOfMapperOrService.isGenericModel()) {
-            boolean result = methodArgClassMetaModel.isTheSameMetaModel(MAP_STRING_OBJECT_MODEL)
-                || (!methodArgClassMetaModel.isSimpleType()
-                && !methodArgClassMetaModel.isCollectionType()
-                && !methodArgClassMetaModel.isMapType());
-            log.debug("methodArgClassMetaModel is generic object, not simple, not map<String,Object>, not collection and not map, result: {}", result);
-            return result;
-        } else if (inputTypeOfMapperOrService.isSimpleType()) {
-            boolean result = methodArgClassMetaModel.isSimpleType();
-            log.debug("methodArgClassMetaModel is simple, result: {}", result);
-            return result;
-        } else if (inputTypeOfMapperOrService.isCollectionType()) {
-            boolean result = methodArgClassMetaModel.isCollectionType()
-                && expectedTypeForRequestBody(
-                methodArgClassMetaModel.getGenericTypes().get(0),
-                inputTypeOfMapperOrService.getGenericTypes().get(0),
-                ++genericTypeNestingLevel
-            );
-            log.debug("methodArgClassMetaModel is collection, result: {}", result);
-            return result;
-        } else if (inputTypeOfMapperOrService.isMapType()) {
-            boolean result = methodArgClassMetaModel.isMapType()
-                && expectedTypeForRequestBody(
-                methodArgClassMetaModel.getGenericTypes().get(0),
-                inputTypeOfMapperOrService.getGenericTypes().get(0),
-                ++genericTypeNestingLevel
-            ) && expectedTypeForRequestBody(
-                methodArgClassMetaModel.getGenericTypes().get(1),
-                inputTypeOfMapperOrService.getGenericTypes().get(1),
-                genericTypeNestingLevel
-            );
-            log.debug("methodArgClassMetaModel is map, result: {}", result);
-            return result;
-        }
-
-        boolean result = !methodArgClassMetaModel.isSimpleType()
-            && !methodArgClassMetaModel.isCollectionType()
-            && !methodArgClassMetaModel.isMapType();
-        log.debug("methodArgClassMetaModel is not simple, not collection, not map, result: {}", result);
-        return result;
     }
 
     private void validateMappersInDataStorageConnectors(EndpointMetaModelDto endpointMetaModelDto,
@@ -366,10 +188,10 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
     }
 
     private void validateMapperBeanAndMethod(ConstraintValidatorContext context, AtomicBoolean isValid,
-        Integer index, MapperMetaModelDto mapperMetaModelForQuery, ClassMetaModel expectedMethodArgumentType,
+        Integer index, MapperMetaModelDto mapperMetaModel, ClassMetaModel expectedMethodArgumentType,
         ClassMetaModel expectedMethodReturnType, String mapperFieldName) {
 
-        BeanAndMethodDto mapperBeanAndMethod = Optional.ofNullable(mapperMetaModelForQuery)
+        BeanAndMethodDto mapperBeanAndMethod = Optional.ofNullable(mapperMetaModel)
             .map(MapperMetaModelDto::getMapperBeanAndMethod)
             .orElse(null);
 
@@ -378,7 +200,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
             if (isEmpty(innerErrors)
                 && canValidateMethodArguments(mapperBeanAndMethod)
-                && mapperMetaModelForQuery.getMapperType().equals(MapperType.BEAN_OR_CLASS_NAME)) {
+                && mapperMetaModel.getMapperType().equals(MapperType.BEAN_OR_CLASS_NAME)) {
 
                 if (expectedMethodArgumentType != null) {
                     validateMethodArguments(innerErrors, mapperBeanAndMethod,
@@ -389,7 +211,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                 }
 
                 if (expectedMethodReturnType != null) {
-                    ClassMetaModel methodReturnClassModel = getMethodReturnClassMetaModel(mapperBeanAndMethod);
+                    ClassMetaModel methodReturnClassModel = methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(mapperBeanAndMethod);
                     validateMethodReturnType(innerErrors, methodReturnClassModel, expectedMethodReturnType);
                 }
             }
@@ -465,7 +287,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
                             var dataStorageConnectors = endpointMetaModelDto.getDataStorageConnectors();
 
-                            ClassMetaModel methodReturnClassModel = getMethodReturnClassMetaModel(mapperBeanAndMethod);
+                            ClassMetaModel methodReturnClassModel = methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(mapperBeanAndMethod);
 
                             boolean endpointReturnsListOrPage = false;
                             if (expectedResponseClassModel.hasRealClass() &&
@@ -502,7 +324,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                                 "BeansAndMethodsExistsValidator.mapper.type",
                                 MAP_STRING_OBJECT_MODEL);
 
-                            ClassMetaModel methodReturnClassModel = getMethodReturnClassMetaModel(mapperBeanAndMethod);
+                            ClassMetaModel methodReturnClassModel = methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(mapperBeanAndMethod);
                             validateMethodReturnType(innerErrors, methodReturnClassModel, expectedResponseClassModel);
                         }
                     }
@@ -552,13 +374,12 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         try {
             log.debug("validateMethodArguments");
             log.debug("bean type: {}, method name: {}", beanAndMethodDto.getClassName(), beanAndMethodDto.getMethodName());
-            MethodSignatureMetaModel methodSignatureMetaModel = getMethodSignatureMetaModel(beanAndMethodDto);
+            MethodSignatureMetaModel methodSignatureMetaModel = methodSignatureMetaModelResolver.getMethodSignatureMetaModel(beanAndMethodDto);
 
             int methodArgIndex = 0;
             for (MethodArgumentMetaModel methodArgument : methodSignatureMetaModel.getMethodArguments()) {
                 log.debug("argument index: {} name: {}", methodArgIndex, methodArgument.getParameter().getName());
-                ClassMetaModel classMetaModelFromMethodArg = classMetaModelFromType(
-                    methodArgument.getArgumentType());
+                ClassMetaModel classMetaModelFromMethodArg = classMetaModelFromType(methodArgument.getArgumentType());
                 log.debug("classMetaModelFromMethodArg: {}", classMetaModelFromMethodArg.getTypeDescription());
                 boolean foundExpectedMethodArgType = false;
                 for (ExpectedMethodArgument expectedMethodArgument : methodExpectedArguments) {
@@ -579,13 +400,13 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                         .anyMatch(typePredicate -> {
                                 log.debug("checking predicate at index: {}", index.incrementAndGet());
                                 boolean subTypeOfResult = classMetaModelFromMethodArg
-                                    .isSubTypeOf(typePredicate.isSubTypeOf);
+                                    .isSubTypeOf(typePredicate.getIsSubTypeOf());
 
                                 log.debug("classMetaModelFromMethodArg is sub type of {}, result: {}",
-                                    typePredicate.isSubTypeOf.getTypeDescription(), subTypeOfResult);
+                                    typePredicate.getIsSubTypeOf().getTypeDescription(), subTypeOfResult);
 
-                                boolean predicatesAllEmptyOrAllMatch = typePredicate.predicatesOfModel.isEmpty() ||
-                                    typePredicate.predicatesOfModel.stream().allMatch(
+                                boolean predicatesAllEmptyOrAllMatch = typePredicate.getPredicatesOfModel().isEmpty() ||
+                                    typePredicate.getPredicatesOfModel().stream().allMatch(
                                         predicateClass -> predicateClass.test(
                                             methodArgument,
                                             classMetaModelFromMethodArg,
@@ -621,23 +442,6 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         } catch (TechnicalException ex) {
             // nop
         }
-    }
-
-    private MethodSignatureMetaModel getMethodSignatureMetaModel(BeanAndMethodDto beanAndMethodDto) {
-        Class<?> beanClass = ClassUtils.loadRealClass(beanAndMethodDto.getClassName());
-        Method foundMethod = findMethodByName(beanClass, beanAndMethodDto.getMethodName());
-        return methodSignatureMetaModelResolver.resolveMethodSignature(foundMethod, beanClass);
-    }
-
-    private ClassMetaModel getMethodReturnClassMetaModel(BeanAndMethodDto beanAndMethodDto) {
-        MethodSignatureMetaModel methodSignatureMetaModel = getMethodSignatureMetaModel(beanAndMethodDto);
-        return classMetaModelFromType(methodSignatureMetaModel.getReturnType());
-    }
-
-    private List<ExpectedMethodArgument> getCommonExpectedArgsTypeAndOther(List<ExpectedMethodArgument> otherExpectedArguments) {
-        return elements(COMMON_EXPECTED_ARGS_TYPE)
-            .concat(otherExpectedArguments)
-            .asList();
     }
 
     private List<InnerError> validateExistenceBeanAndMethod(BeanAndMethodDto beanAndMethodDto) {
@@ -682,7 +486,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         if (foundMethod.getAnnotation(GenericMethod.class) == null
             && beanClass.getAnnotation(GenericService.class) == null) {
 
-            ClassMetaModel methodReturnClassModel = getMethodReturnClassMetaModel(beanAndMethodDto);
+            ClassMetaModel methodReturnClassModel = methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(beanAndMethodDto);
             if (MetadataReflectionUtils.isTypeOf(methodReturnClassModel.getRealClass(), ResponseEntity.class)) {
                 methodReturnClassModel = methodReturnClassModel.getGenericTypes().get(0);
             }
@@ -759,75 +563,6 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         static InnerError newError(String propertyName, String message) {
             return new InnerError(propertyName, message);
         }
-    }
-
-    @Builder
-    @Value
-    private static class ExpectedMethodArgument {
-
-        @Builder.Default
-        List<TypePredicate> typePredicates = new ArrayList<>();
-        Class<? extends Annotation> isAnnotatedWith;
-    }
-
-    @Builder
-    @Value
-    static class TypePredicate {
-
-        @NotNull
-        ClassMetaModel isSubTypeOf;
-        @Builder.Default
-        List<ClassMetaModelsPredicate> predicatesOfModel = List.of();
-
-        static TypePredicate newTypePredicate(Class<?> isSubTypeOf, ClassMetaModelsPredicate... predicateOfType) {
-            return newTypePredicate(ClassMetaModel.builder()
-                .realClass(isSubTypeOf)
-                .build(), predicateOfType);
-        }
-
-        static TypePredicate newTypePredicate(ClassMetaModel isSubTypeOf, ClassMetaModelsPredicate... predicateOfType) {
-            return TypePredicate.builder()
-                .isSubTypeOf(isSubTypeOf)
-                .predicatesOfModel(elements(predicateOfType).asList())
-                .build();
-        }
-    }
-
-    private static ExpectedMethodArgument argAsTypes(Class<?>... realClass) {
-        return ExpectedMethodArgument.builder()
-            .typePredicates(
-                elements(realClass)
-                    .map(TypePredicate::newTypePredicate)
-                    .asList())
-            .build();
-    }
-
-    private static ExpectedMethodArgument argAsPredicates(TypePredicate... typePredicates) {
-        return argAnnotatedAndAsMetaModels(null, typePredicates);
-    }
-
-    private static ExpectedMethodArgument argAnnotatedAndAsMetaModels(Class<? extends Annotation> isAnnotatedWith, TypePredicate... typePredicates) {
-        return ExpectedMethodArgument.builder()
-            .isAnnotatedWith(isAnnotatedWith)
-            .typePredicates(elements(typePredicates).asList())
-            .build();
-    }
-
-    private ClassMetaModel classMetaModelFromType(JavaTypeMetaModel javaTypeMetaModel) {
-        TypeMetadata typeMetadata;
-        if (javaTypeMetaModel.getOriginalType() != null) {
-            typeMetadata = MetadataReflectionUtils.getTypeMetadataFromType(javaTypeMetaModel.getOriginalType());
-        } else {
-            typeMetadata = MetadataReflectionUtils.getTypeMetadataFromClass(javaTypeMetaModel.getRawClass());
-        }
-        return ClassMetaModelFactory.createClassMetaModelFor(typeMetadata, READ_FIELD_RESOLVER_CONFIG, false);
-    }
-
-    private interface ClassMetaModelsPredicate {
-
-        boolean test(MethodArgumentMetaModel methodArgumentMetaModel,
-            ClassMetaModel methodArgClassMetaModel,
-            ClassMetaModel inputTypeOfMapperOrService);
     }
 
     private ClassMetaModel getClassMetaModelByDto(ClassMetaModelDto classMetaModelDto) {

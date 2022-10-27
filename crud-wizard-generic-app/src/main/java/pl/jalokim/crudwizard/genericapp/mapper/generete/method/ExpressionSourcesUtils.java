@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.SOURCE_OBJECT_VAR_NAME;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 
@@ -21,7 +22,7 @@ class ExpressionSourcesUtils {
 
         return elements(methodArgumentsExpressions)
             .mapWithIndex((index, expression) -> new MapperArgumentMethodModel(
-                methodArgumentsExpressions.size() == 1 ? "sourceObject" : "argument" + index,
+                methodArgumentsExpressions.size() == 1 ? SOURCE_OBJECT_VAR_NAME : "argument" + index,
                 expression.generateCodeMetadata(mapperGeneratedCodeMetadata).getReturnClassModel(),
                 expression))
             .asList();

@@ -14,7 +14,7 @@ class MmetamodelWithEnums2ToMmetamodelWithEnums2Mapper implements GeneratedMappe
     }
 
     @Override
-    public Map<String, Object> mainMap(GenericMapperArgument genericMapperArgument) {
+    public java.util.Map<java.lang.String, java.lang.Object> mainMap(GenericMapperArgument genericMapperArgument) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
         Object sourceObject = genericMapperArgument.getSourceObject();
         Map<String, String> headers = genericMapperArgument.getHeaders();
@@ -29,13 +29,13 @@ class MmetamodelWithEnums2ToMmetamodelWithEnums2Mapper implements GeneratedMappe
 		Map<String, Object> map = new java.util.HashMap<>();
 
 		map.put("spec1enum", ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3) spec1enumMap(genericMapperArgument, ((String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("spec1enum"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("spec1enum"))
 			.orElse(null)))));
 
 		map.put("spec2enum", ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3) spec2enumMap(genericMapperArgument, ((String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("spec2enum"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("spec2enum"))
 			.orElse(null)))));
-        return (Map<String, Object>) map;
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
     }
     private pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3 spec1enumMap(GenericMapperArgument genericMapperArgument, String sourceObject) {
         switch(sourceObject) {

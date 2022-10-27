@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
 
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression
@@ -108,5 +109,28 @@ class RawJavaCodeSourceExpressionParserTest extends BaseSourceExpressionParserTe
         expression                                                                                        | _
         "@normalSpringService.getSomeDocumentDtoById(((c_java.lang.Long)j(someMap.get(\"someKey\"))))"    | _
         "@normalSpringService.getSomeDocumentDtoById ( ((c_java.lang.Long) j(someMap.get(\"someKey\"))))" | _
+    }
+
+
+    @Unroll
+    def "return expected exception when expression is invalid"() {
+        given:
+        def targetClassMetaModel = createClassMetaModelFromClass(Long)
+
+        when:
+        parseExpression(expression, targetClassMetaModel)
+
+        then:
+        EntryMappingParseException ex = thrown()
+        ex.getMapperContextEntryError().getErrorReason() == translatePlaceholder("RawJavaCodeSourceExpressionParser.invalid.expression")
+
+        where:
+        expression  | _
+        "j ( (((()" | _
+        "j ())"     | _
+        "j())"      | _
+        "j ( (1)"   | _
+        "j ( (ab)"  | _
+        "j ()ab()"  | _
     }
 }

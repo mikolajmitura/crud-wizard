@@ -29,31 +29,31 @@ class MsomeDtoWithSettersModeToCSomeDtoWithSettersMapper implements GeneratedMap
 		pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters newObject = new pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters();
 
 		newObject.setBirthDay(conversionService.convert(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("birthDay"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("birthDay"))
 			.orElse(null)), java.time.LocalDate.class));
 
 		newObject.setId(conversionService.convert(((java.lang.Integer) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("id"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
 			.orElse(null)), java.lang.Long.class));
 
 		newObject.setLastLogin(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("lastLogin"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("lastLogin"))
 			.orElse(null)));
 
 		newObject.setName(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("name"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
 			.orElse(null)));
 
 		newObject.setSomeLong2(((java.lang.Long) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someLong2"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someLong2"))
 			.orElse(null)));
 
 		newObject.setSomeString2(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someString2"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString2"))
 			.orElse(null)));
 
 		newObject.setSurname(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("surname"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("surname"))
 			.orElse(null)));
         return (pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters) newObject;
     }

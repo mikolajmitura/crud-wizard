@@ -2,11 +2,14 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.ROOT_SOURCE_OBJECT_VAR_NAME
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression.createRawJavaCodeExpression
 
 import pl.jalokim.crudwizard.core.sample.InnerDocumentDto
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDocumentDto
 import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ByMapperNameAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
@@ -261,8 +264,53 @@ class SpringBeanOrOtherMapperParserTest extends BaseSourceExpressionParserTestSp
         result.generateCodeMetadata().returnClassModel.realClass == SamplePersonDto
 
         where:
-        expression                                            | _
-        "@givenMapperName(innerDocument).createdBy"           | _
-        " @ givenMapperName (  innerDocument ) . createdBy  " | _
+        expression                                                          | _
+        "@givenMapperName(innerDocument).createdBy"                         | _
+        " @ givenMapperName (  innerDocument ) . createdBy  "               | _
+        ' @ givenMapperName (  $sourceObject.innerDocument ) . createdBy  ' | _
+    }
+
+    @Unroll
+    def "return expression for mapper by name with rootSourceObject"() {
+        given:
+        MappersModelsCache mappersModelsCache = Mock()
+        metaModelContext.getMapperMetaModels() >> mappersModelsCache
+
+        ClassMetaModel documentMetaModel = ClassMetaModel.builder()
+            .name("document")
+            .fields([createValidFieldMetaModel("createdBy", SamplePersonDto)])
+            .build()
+
+        ClassMetaModel someDocumentDtoModelWrapper = ClassMetaModel.builder()
+            .name("documentWrapper")
+            .fields([createValidFieldMetaModel("innerDocument", SomeDocumentDto)])
+            .build()
+
+        MapperMetaModel mapperMetaModel = MapperMetaModel.builder()
+            .sourceClassMetaModel(someDocumentDtoModelWrapper)
+            .targetClassMetaModel(documentMetaModel)
+            .build()
+
+        mapperGenerateConfiguration.getRootConfiguration() >> MapperConfiguration.builder()
+            .sourceMetaModel(someDocumentDtoModelWrapper)
+            .build()
+
+        mappersModelsCache.getMapperMetaModelByName("givenMapperName") >> mapperMetaModel
+
+        mapperConfiguration.getSourceMetaModel() >> someDocumentDtoModelWrapper
+
+        when:
+        ByMapperNameAssignExpression byMapperNameAssignExpression = parseExpression(expression)
+
+        then:
+        byMapperNameAssignExpression.mapperName == "givenMapperName"
+        byMapperNameAssignExpression.mapperReturnClassMetaModel == documentMetaModel
+        byMapperNameAssignExpression.valueExpression == createRawJavaCodeExpression(someDocumentDtoModelWrapper, ROOT_SOURCE_OBJECT_VAR_NAME)
+
+        where:
+        expression                                     | _
+        '@givenMapperName($rootSourceObject)'          | _
+        ' @ givenMapperName (  $rootSourceObject )   ' | _
+        ' @ givenMapperName (  $rootSourceObject)   '  | _
     }
 }

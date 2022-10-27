@@ -2,11 +2,18 @@ package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
 
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
 import static pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState.INITIALIZED;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.classMetaModelFromType;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.MAPPER_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -17,6 +24,7 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
@@ -26,12 +34,17 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGen
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.ExpectedMethodArgument;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.BeanInstanceMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
+import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
+@Slf4j
 public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<MapperMetaModelDto, MapperMetaModelEntity, MapperMetaModel> {
 
     @Autowired
@@ -45,6 +58,9 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
 
     @Autowired
     private ClassMetaModelMapper classMetaModelMapper;
+
+    @Autowired
+    private MethodSignatureMetaModelResolver methodSignatureMetaModelResolver;
 
     @Override
     @Mapping(target = "mapperInstance", ignore = true)
@@ -129,7 +145,7 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
                     .build();
                 temporaryMetaModelContext.putToContext(mapperMetaModelDto.getMapperName(), mapperMetaModel);
             }
-        } else if (mapperMetaModelDto.getMapperName() != null)  {
+        } else if (mapperMetaModelDto.getMapperName() != null) {
             temporaryMetaModelContext.putDefinitionOfMapperMetaModelDto(mapperMetaModelDto);
             mapperMetaModel = temporaryMetaModelContext.findMapperMetaModelByName(mapperMetaModelDto.getMapperName());
             if (mapperMetaModel == null) {
@@ -145,7 +161,7 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
 
             BeanAndMethodDto mapperBeanAndMethod = mapperMetaModelDto.getMapperBeanAndMethod();
 
-            if (mapperBeanAndMethod != null){
+            if (mapperBeanAndMethod != null) {
                 mapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(
                     mapperBeanAndMethod.getMethodName(), mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getBeanName()));
             }
@@ -160,11 +176,102 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
                         classMetaModelMapper.toModelFromDto(rootConfiguration.getTargetMetaModel()));
                 });
 
+            Optional.ofNullable(mapperMetaModelDto.getMapperBeanAndMethod())
+                .ifPresent(beanAndMethodDto -> {
+                    if (beanAndMethodDto.getClassName() != null && beanAndMethodDto.getMethodName() != null) {
+                        try {
+                            Class<?> realClass = ClassUtils.loadRealClass(beanAndMethodDto.getClassName());
+                            Object mapperInstance = instanceLoader.createInstanceOrGetBean(beanAndMethodDto.getClassName(), beanAndMethodDto.getBeanName());
+                            Method mapperMethod = findMethodByName(realClass, beanAndMethodDto.getMethodName());
+
+                            finalMapperMetaModel.setMapperInstance(mapperInstance);
+                            finalMapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator
+                                .createBeanMethodMetaModel(mapperMethod, realClass, beanAndMethodDto.getBeanName()));
+
+                            MethodSignatureMetaModel methodSignatureMetaModel = methodSignatureMetaModelResolver.getMethodSignatureMetaModel(beanAndMethodDto);
+
+                            ClassMetaModel foundMapperInputMetamodel = null;
+                            for (MethodArgumentMetaModel methodArgument : methodSignatureMetaModel.getMethodArguments()) {
+                                var methodArgumentPredicates = getCommonExpectedArgsTypeAndOther(MAPPER_EXPECTED_ARGS_TYPE);
+
+                                List<ExpectedMethodArgument> canBeInputOfMapperPredicates = methodArgumentPredicates.stream()
+                                    .filter(ExpectedMethodArgument::isArgumentCanBeInputOfMapper)
+                                    .collect(Collectors.toList());
+
+                                ClassMetaModel argumentClassMetaModel = classMetaModelFromType(methodArgument.getArgumentType());
+
+                                List<ExpectedMethodArgument> cannotBeInputOfMapperPredicates = methodArgumentPredicates.stream()
+                                    .filter(predicate -> !predicate.isArgumentCanBeInputOfMapper())
+                                    .collect(Collectors.toList());
+
+
+                                boolean resolvedAsMapperInput = isResolvedAsMapperInput(methodArgument, canBeInputOfMapperPredicates, argumentClassMetaModel);
+                                boolean resolvedAsOtherThanInputMapper = isResolvedAsOtherThanInputMapper(methodArgument,
+                                    cannotBeInputOfMapperPredicates, argumentClassMetaModel);
+
+                                if (resolvedAsMapperInput && !resolvedAsOtherThanInputMapper) {
+                                    foundMapperInputMetamodel = argumentClassMetaModel;
+                                    break;
+                                }
+                            }
+
+                            finalMapperMetaModel.setSourceClassMetaModel(foundMapperInputMetamodel);
+                            finalMapperMetaModel.setTargetClassMetaModel(methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(beanAndMethodDto));
+
+                        } catch (Exception exception) {
+                            log.warn("unexpected exception", exception);
+                        }
+                    }
+                });
 
             mapperMetaModel.setState(INITIALIZED);
         }
 
         return mapperMetaModel;
+    }
+
+    private boolean isResolvedAsMapperInput(MethodArgumentMetaModel methodArgument,
+        List<ExpectedMethodArgument> canBeInputOfMapperPredicates, ClassMetaModel argumentClassMetaModel) {
+        boolean resolvedAsMapperInput = true;
+
+        for (ExpectedMethodArgument canBeInputOfMapperPredicate : canBeInputOfMapperPredicates) {
+            resolvedAsMapperInput = true;
+            if (canBeInputOfMapperPredicate.getIsAnnotatedWith() != null) {
+                resolvedAsMapperInput = elements(methodArgument.getAnnotations())
+                        .map(Annotation::annotationType)
+                        .asList()
+                        .contains(canBeInputOfMapperPredicate.getIsAnnotatedWith());
+            }
+
+            resolvedAsMapperInput = resolvedAsMapperInput && canBeInputOfMapperPredicate.getTypePredicates().stream()
+                .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getIsSubTypeOf()));
+
+        }
+        return resolvedAsMapperInput;
+    }
+    private boolean isResolvedAsOtherThanInputMapper(MethodArgumentMetaModel methodArgument,
+        List<ExpectedMethodArgument> predicates, ClassMetaModel argumentClassMetaModel) {
+
+        boolean resolvedAsOtherThanInputMapper = false;
+
+        for (ExpectedMethodArgument predicate : predicates) {
+            if (predicate.getIsAnnotatedWith() != null) {
+                resolvedAsOtherThanInputMapper = elements(methodArgument.getAnnotations())
+                        .map(Annotation::annotationType)
+                        .asList()
+                        .contains(predicate.getIsAnnotatedWith());
+            } else {
+                resolvedAsOtherThanInputMapper = true;
+            }
+
+            resolvedAsOtherThanInputMapper = resolvedAsOtherThanInputMapper && predicate.getTypePredicates().stream()
+                .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getIsSubTypeOf()));
+
+            if (resolvedAsOtherThanInputMapper) {
+                break;
+            }
+        }
+        return resolvedAsOtherThanInputMapper;
     }
 
     @Mapping(target = "mapperInstance", ignore = true)

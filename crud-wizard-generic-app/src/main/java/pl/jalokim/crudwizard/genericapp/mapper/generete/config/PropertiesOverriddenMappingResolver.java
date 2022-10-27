@@ -104,7 +104,6 @@ public class PropertiesOverriddenMappingResolver {
             }
         }
 
-        parserContext.setInitColumnNumber(targetExpression.length());
         parserContext.initSourceExpressionContext(sourceExpression, mapperConfiguration,
             currentOverriddenMapping, targetFieldClassMetaModel);
 

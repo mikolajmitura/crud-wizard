@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser;
 
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.SOURCE_OBJECT_VAR_NAME;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getRequiredFieldFromClassModel;
 
 import java.util.List;
@@ -23,7 +24,7 @@ class InitSourceExpressionParser extends SourceExpressionParser {
 
         sourceExpressionParserContext.skipSpaces();
         if (sourceExpressionParserContext.isLastCurrentChar()) {
-            return new RawJavaCodeAssignExpression(sourceExpressionParserContext.getSourceMetaModel(), "sourceObject");
+            return new RawJavaCodeAssignExpression(sourceExpressionParserContext.getSourceMetaModel(), SOURCE_OBJECT_VAR_NAME);
         }
         char currentChar = sourceExpressionParserContext.getCurrentChar();
         sourceExpressionParserContext.moveToNextCharIfExists();
@@ -59,7 +60,7 @@ class InitSourceExpressionParser extends SourceExpressionParser {
         String nextFieldName = validateVariableAndGet(fieldNameCollectResult.getCollectedText(), mapperConfigurationParserContext);
         moveToPreviousWhenShould(sourceExpressionParserContext);
 
-        return new FieldsChainToAssignExpression(sourceMetaModel, "sourceObject",
+        return new FieldsChainToAssignExpression(sourceMetaModel, SOURCE_OBJECT_VAR_NAME,
             List.of(getRequiredFieldFromClassModel(sourceMetaModel, nextFieldName,
                 mapperConfigurationParserContext.getFieldMetaResolverForRawSource())));
     }

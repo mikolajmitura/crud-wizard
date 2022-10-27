@@ -137,16 +137,9 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
 
         ClassMetaModel sourceClassMetaModelOfMapper = mapperMetaModelByName.getSourceClassMetaModel();
         ClassMetaModel returnClassModelOfExpression = generateCodeMetadataFor(valueExpression, mapperConfigurationParserContext).getReturnClassModel();
-        boolean methodArgumentIsOk = false;
-        if (sourceClassMetaModelOfMapper.equals(returnClassModelOfExpression)) {
-            methodArgumentIsOk = true;
-        } else if (sourceClassMetaModelOfMapper.hasRealClass() && returnClassModelOfExpression.hasRealClass()) {
-            Class<?> sourceClassOfMapperArgument = sourceClassMetaModelOfMapper.getRealClass();
-            Class<?> returnClassOfExpression = returnClassModelOfExpression.getRealClass();
-            if (MetadataReflectionUtils.isTypeOf(returnClassOfExpression, sourceClassOfMapperArgument)) {
-                methodArgumentIsOk = true;
-            }
-        }
+        boolean methodArgumentIsOk = sourceClassMetaModelOfMapper.getJavaGenericTypeInfo()
+            .equals(returnClassModelOfExpression.getJavaGenericTypeInfo()) ||
+            returnClassModelOfExpression.isSubTypeOf(sourceClassMetaModelOfMapper);
 
         if (!methodArgumentIsOk) {
             mapperConfigurationParserContext.throwParseException("expected.mapper.type.argument",

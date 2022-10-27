@@ -258,7 +258,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             return "String";
         }
         if (isGenericModel()) {
-            return "Map<String, Object>";
+            return getRawJavaGenericTypeInfoForGenericModel();
         }
         if (getRealClass() != null) {
             String realClass = getCanonicalNameOfRealClass();
@@ -271,6 +271,10 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             return realClass + genericParts;
         }
         throw new IllegalStateException("Cannot generate java generic type for class metamodel: " + this);
+    }
+
+    public static String getRawJavaGenericTypeInfoForGenericModel() {
+        return Map.class.getCanonicalName() + "<" + String.class.getCanonicalName() + ", " + Object.class.getCanonicalName() + ">";
     }
 
     public boolean isSubTypeOf(ClassMetaModel expectedParent) {

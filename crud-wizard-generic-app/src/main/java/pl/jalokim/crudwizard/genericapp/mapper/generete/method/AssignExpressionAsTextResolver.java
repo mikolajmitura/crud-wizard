@@ -19,7 +19,7 @@ import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 
 @Component
 @RequiredArgsConstructor
-class AssignExpressionAsTextResolver {
+public class AssignExpressionAsTextResolver {
 
     private final GenericObjectsConversionService genericObjectsConversionService;
     private final ConversionService conversionService;

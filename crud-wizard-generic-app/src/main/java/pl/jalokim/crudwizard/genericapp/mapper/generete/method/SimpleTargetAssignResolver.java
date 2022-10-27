@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.SOURCE_OBJECT_VAR_NAME;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeMetadata.createMethodName;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.ExpressionSourcesUtils.convertAssignExpressionsToMethodArguments;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator.getGeneratedNewMethodOrGetCreatedEarlier;
@@ -28,7 +29,7 @@ import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
 
 @Component
 @RequiredArgsConstructor
-class SimpleTargetAssignResolver {
+public class SimpleTargetAssignResolver {
 
     private final GenericObjectsConversionService genericObjectsConversionService;
     private final AssignExpressionAsTextResolver assignExpressionAsTextResolver;
@@ -43,7 +44,7 @@ class SimpleTargetAssignResolver {
 
         if (currentNodeOverriddenMappings.isEmpty()) {
             currentNodeOverriddenMappings = methodArguments.stream()
-                .map(argument -> new RawJavaCodeAssignExpression(argument.getArgumentType(), "sourceObject"))
+                .map(argument -> new RawJavaCodeAssignExpression(argument.getArgumentType(), SOURCE_OBJECT_VAR_NAME))
                 .collect(Collectors.toList());
         }
 

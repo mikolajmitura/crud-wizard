@@ -172,4 +172,10 @@ public class SomeTestMapper {
     public Long mapIdInvalid2(String id) {
         return null;
     }
+
+    public SomeRawDto mapSomeRawDto(@RequestHeader Map<String, String> headers,
+        EndpointMetaModel endpointMetaModel,
+        Map<String, Object> someMap) {
+        return null;
+    }
 }

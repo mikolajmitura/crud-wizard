@@ -250,7 +250,7 @@ class ClassMetaModelTest extends Specification {
         createClassMetaModelFromClass(CollectionElement[]) | "pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement[]"
         ClassMetaModel.builder()
             .name("someModel")
-            .build()                                       | "Map<String, Object>"
+            .build()                                       | "java.util.Map<java.lang.String, java.lang.Object>"
     }
 
     private boolean assertFieldNameAndType(List<FieldMetaModel> foundFields, String fieldName, Class<?> expectedFieldType) {

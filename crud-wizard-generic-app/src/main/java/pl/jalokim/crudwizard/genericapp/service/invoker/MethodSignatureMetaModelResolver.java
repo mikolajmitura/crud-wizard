@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.service.invoker;
 
+import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.classMetaModelFromType;
 import static pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel.createWithRawClass;
 import static pl.jalokim.utils.collection.Elements.elements;
 
@@ -10,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.utils.ClassUtils;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
@@ -35,6 +40,17 @@ public class MethodSignatureMetaModelResolver {
             .returnType(createJavaTypeMetaModel(instanceClass, rawReturnClass, methodReturnType))
             .methodArguments(resolveMethodArguments(instanceClass, methodContext))
             .build();
+    }
+
+    public ClassMetaModel getMethodReturnClassMetaModel(BeanAndMethodDto beanAndMethodDto) {
+        MethodSignatureMetaModel methodSignatureMetaModel = getMethodSignatureMetaModel(beanAndMethodDto);
+        return classMetaModelFromType(methodSignatureMetaModel.getReturnType());
+    }
+
+    public MethodSignatureMetaModel getMethodSignatureMetaModel(BeanAndMethodDto beanAndMethodDto) {
+        Class<?> beanClass = ClassUtils.loadRealClass(beanAndMethodDto.getClassName());
+        Method foundMethod = findMethodByName(beanClass, beanAndMethodDto.getMethodName());
+        return resolveMethodSignature(foundMethod, beanClass);
     }
 
     private List<MethodArgumentMetaModel> resolveMethodArguments(Class<?> instanceClass, MethodGenericsContext methodContext) {

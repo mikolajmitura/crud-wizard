@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.ROOT_SOURCE_OBJECT_VAR_NAME;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.SOURCE_OBJECT_VAR_NAME;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.STRING_MODEL;
 
 import java.util.ArrayList;
@@ -46,6 +48,8 @@ public class OtherVariableSourceExpressionParser extends SourceExpressionParser 
             var collectTextFieldChainStyle = sourceExpressionParserContext.collectTextUntilFieldExpressionIsFinished();
             moveToPreviousWhenShould(sourceExpressionParserContext);
             variableParts.add(collectTextFieldChainStyle.getCollectedText().trim());
+        } else {
+            sourceExpressionParserContext.moveToPreviousChar();
         }
 
         String mainVariable = validateVariableAndGet(variableParts.get(0), mapperConfigurationParserContext);
@@ -59,10 +63,10 @@ public class OtherVariableSourceExpressionParser extends SourceExpressionParser 
             mainClassMetaModel = mapperConfigurationParserContext.getRequestParamsClassModel();
         } else if (mainVariable.equals(MAPPING_CONTEXT_VARIABLE_NAME)) {
             mainClassMetaModel = ClassMetaModelConstants.MAP_STRING_OBJECT_MODEL;
-        } else if (mainVariable.equals("rootSourceObject")) {
+        } else if (mainVariable.equals(ROOT_SOURCE_OBJECT_VAR_NAME)) {
             mainClassMetaModel = mapperConfigurationParserContext.getMapperGenerateConfiguration()
                 .getRootConfiguration().getSourceMetaModel();
-        } else if (mainVariable.equals("sourceObject")) {
+        } else if (mainVariable.equals(SOURCE_OBJECT_VAR_NAME)) {
             mainClassMetaModel = sourceExpressionParserContext.getSourceMetaModel();
         } else {
             mapperConfigurationParserContext.throwParseException("invalid.other.variable.name", mainVariable);

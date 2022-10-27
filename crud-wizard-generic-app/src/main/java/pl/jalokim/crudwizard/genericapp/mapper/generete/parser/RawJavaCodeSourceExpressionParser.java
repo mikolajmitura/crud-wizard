@@ -30,15 +30,26 @@ public class RawJavaCodeSourceExpressionParser extends SourceExpressionParser {
             String rawCode = collected.getCollectedText();
             collectedRawTextBuilder.append(rawCode);
             foundLeftParenthesis = foundLeftParenthesis + StringUtils.countSearchedChar(rawCode, '(');
-            if (foundLeftParenthesis != foundRightParenthesis) {
-                collectedRawTextBuilder.append(collected.getCutWithText());
-            }
-        } while (foundLeftParenthesis != foundRightParenthesis);
+            collectedRawTextBuilder.append(collected.getCutWithText());
+        } while (foundLeftParenthesis != foundRightParenthesis && !sourceExpressionParserContext.isReadAll());
+
+        String rawExpression = collectedRawTextBuilder.toString().trim();
+        rawExpression = rawExpression.substring(0, rawExpression.length() - 1);
+        foundLeftParenthesis = StringUtils.countSearchedChar(rawExpression, '(');
+        foundRightParenthesis = StringUtils.countSearchedChar(rawExpression, ')');
+
+        if (foundLeftParenthesis != foundRightParenthesis) {
+            mapperConfigurationParserContext.throwParseException("RawJavaCodeSourceExpressionParser.invalid.expression");
+        }
+
+        if (StringUtils.isBlank(rawExpression)) {
+            mapperConfigurationParserContext.throwParseException("RawJavaCodeSourceExpressionParser.invalid.expression");
+        }
 
         ClassMetaModel expectedClassMetaModel = sourceExpressionParserContext.getCurrentClassMetaModelAsCast();
         if (expectedClassMetaModel == null) {
             expectedClassMetaModel = sourceExpressionParserContext.getTargetFieldClassMetaModel();
         }
-        return new RawJavaCodeAssignExpression(expectedClassMetaModel, collectedRawTextBuilder.toString());
+        return new RawJavaCodeAssignExpression(expectedClassMetaModel, rawExpression);
     }
 }

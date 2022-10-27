@@ -31,18 +31,18 @@ pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionServi
 
 		return new pl.jalokim.crudwizard.core.sample.ClassHasSamplePersonDto(
 
-		((pl.jalokim.crudwizard.core.sample.SamplePersonDto) genericObjectsConversionService.convert("metaModelPersonToSamplePersonDto", ((Map<String, Object>) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("samplePersonDto"))
+		((pl.jalokim.crudwizard.core.sample.SamplePersonDto) genericObjectsConversionService.convert("metaModelPersonToSamplePersonDto", ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("samplePersonDto"))
 			.orElse(null)))),
 
-		((pl.jalokim.crudwizard.core.sample.SamplePersonDto) genericObjectsConversionService.convert("metaModelPersonToSamplePersonDto", ((Map<String, Object>) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("otherPersonDto"))
+		((pl.jalokim.crudwizard.core.sample.SamplePersonDto) genericObjectsConversionService.convert("metaModelPersonToSamplePersonDto", ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("otherPersonDto"))
 			.orElse(null)))),
 
 		((pl.jalokim.crudwizard.core.sample.SomeObjectWithFewObjects) null),
 
 		conversionService.convert(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someId"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someId"))
 			.orElse(null)), java.lang.Long.class)
         );
     }

@@ -14,7 +14,7 @@ class CSomePerson1ToMsomePerson1Mapper implements GeneratedMapper {
     }
 
     @Override
-    public Map<String, Object> mainMap(GenericMapperArgument genericMapperArgument) {
+    public java.util.Map<java.lang.String, java.lang.Object> mainMap(GenericMapperArgument genericMapperArgument) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
         Object sourceObject = genericMapperArgument.getSourceObject();
         Map<String, String> headers = genericMapperArgument.getHeaders();
@@ -28,7 +28,7 @@ class CSomePerson1ToMsomePerson1Mapper implements GeneratedMapper {
 
 		Map<String, Object> map = new java.util.HashMap<>();
 
-		map.put("emailContact", ((Map<String, Object>) mapCSomeContact1ToMsomeContact1(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1) Optional.ofNullable(sourceObject)
+		map.put("emailContact", ((java.util.Map<java.lang.String, java.lang.Object>) mapCSomeContact1ToMsomeContact1(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1) value).getEmailContact())
 			.orElse(null)))));
 
@@ -36,7 +36,7 @@ class CSomePerson1ToMsomePerson1Mapper implements GeneratedMapper {
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1) value).getId())
 			.orElse(null)));
 
-		map.put("idCard", ((Map<String, Object>) mapDocument(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1) Optional.ofNullable(sourceObject)
+		map.put("idCard", ((java.util.Map<java.lang.String, java.lang.Object>) mapDocument(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1) value).getIdCard())
 			.orElse(null)))));
 
@@ -44,23 +44,23 @@ class CSomePerson1ToMsomePerson1Mapper implements GeneratedMapper {
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1) value).getName())
 			.orElse(null)));
 
-		map.put("passport", ((Map<String, Object>) mapDocument(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1) Optional.ofNullable(sourceObject)
+		map.put("passport", ((java.util.Map<java.lang.String, java.lang.Object>) mapDocument(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1) value).getPassport())
 			.orElse(null)))));
 
-		map.put("phoneContact", ((Map<String, Object>) mapCSomeContact1ToMsomeContact1(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1) Optional.ofNullable(sourceObject)
+		map.put("phoneContact", ((java.util.Map<java.lang.String, java.lang.Object>) mapCSomeContact1ToMsomeContact1(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1) value).getPhoneContact())
 			.orElse(null)))));
 
-		map.put("someMetaData", ((Map<String, Object>) null));
+		map.put("someMetaData", ((java.util.Map<java.lang.String, java.lang.Object>) null));
 
 		map.put("surname", ((java.lang.String) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1) value).getSurname())
 			.orElse(null)));
-        return (Map<String, Object>) map;
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
     }
     @GeneratedMethod
-    public Map<String, Object> mapCSomeContact1ToMsomeContact1(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1 sourceObject) {
+    public java.util.Map<java.lang.String, java.lang.Object> mapCSomeContact1ToMsomeContact1(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1 sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
         Map<String, String> headers = genericMapperArgument.getHeaders();
         Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
@@ -81,11 +81,11 @@ class CSomePerson1ToMsomePerson1Mapper implements GeneratedMapper {
 		map.put("value", ((java.lang.String) Optional.ofNullable(sourceObject)
 			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1) value).getValue())
 			.orElse(null)));
-        return (Map<String, Object>) map;
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
     }
 
 
-    public Map<String, Object> mapDocument(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1 sourceObject) {
+    public java.util.Map<java.lang.String, java.lang.Object> mapDocument(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1 sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
         Map<String, String> headers = genericMapperArgument.getHeaders();
         Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
@@ -108,7 +108,7 @@ class CSomePerson1ToMsomePerson1Mapper implements GeneratedMapper {
 			.orElse(null)));
 
 		map.put("validTo", ((java.time.LocalDate) null));
-        return (Map<String, Object>) map;
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
     }
 
 }

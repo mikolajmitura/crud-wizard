@@ -8,11 +8,18 @@ import javax.validation.ValidatorFactory
 import org.mapstruct.factory.Mappers
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.context.ApplicationContext
+import org.springframework.core.convert.ConversionService
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.ClassMetaModelConverter
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMappingResolver
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.AssignExpressionAsTextResolver
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.EnumsMapperMethodGenerator
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGenerator
+import pl.jalokim.crudwizard.genericapp.mapper.generete.method.SimpleTargetAssignResolver
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.CastMetaModelSourceExpressionParser
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.ClassMetaModelMapperParser
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.FieldChainOrEachMapByExpressionParser
@@ -69,7 +76,18 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         jdbcTemplate, dataStorageInstances, methodSignatureMetaModelResolver, classMetaModelMapper,
         mapperGenerateConfigurationMapper, propertiesOverriddenMappingResolver)
 
+    GenericBeansProvider genericBeanProvider = Mock()
+    InstanceLoader instanceLoader = Mock()
     RequestMappingHandlerMapping abstractHandlerMethodMapping = Mock()
+    ConversionService conversionService = Mock()
+    GenericObjectsConversionService genericObjectsConversionService = new GenericObjectsConversionService(applicationContext)
+    AssignExpressionAsTextResolver assignExpressionAsTextResolver = new AssignExpressionAsTextResolver(genericObjectsConversionService, conversionService)
+    EnumsMapperMethodGenerator enumsMapperMethodGenerator = new EnumsMapperMethodGenerator()
+    SimpleTargetAssignResolver simpleTargetAssignResolver = new SimpleTargetAssignResolver(genericObjectsConversionService,
+        assignExpressionAsTextResolver, enumsMapperMethodGenerator)
+    MapperMethodGenerator mapperMethodGenerator = new MapperMethodGenerator(genericObjectsConversionService, assignExpressionAsTextResolver,
+        simpleTargetAssignResolver, conversionService, instanceLoader
+    )
 
     Map<Class, Object> applicationContextMapping = Map.of(
         InitSourceExpressionParser, new InitSourceExpressionParser(applicationContext),
@@ -79,6 +97,7 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         RawJavaCodeSourceExpressionParser, new RawJavaCodeSourceExpressionParser(applicationContext),
         InnerMethodSourceExpressionParser, new InnerMethodSourceExpressionParser(applicationContext),
         CastMetaModelSourceExpressionParser, new CastMetaModelSourceExpressionParser(applicationContext, classMetaModelMapperParser),
+        MapperMethodGenerator, mapperMethodGenerator,
     )
 
     def setup() {
@@ -90,14 +109,12 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", Mappers.getMapper(FieldMetaModelMapper))
         setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
 
-        GenericBeansProvider genericBeanProvider = Mock()
-        InstanceLoader instanceLoader = Mock()
-
         setValueForField(mapperMetaModelMapper, "genericBeanProvider", genericBeanProvider)
         setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
         setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(
             new MethodSignatureMetaModelResolver(jsonObjectMapper)))
         setValueForField(mapperMetaModelMapper, "classMetaModelMapper", classMetaModelMapper)
+        setValueForField(mapperMetaModelMapper, "methodSignatureMetaModelResolver", methodSignatureMetaModelResolver)
 
         setValueForField(mapperGenerateConfigurationMapper, "classMetaModelMapper", classMetaModelMapper)
 
@@ -114,6 +131,7 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
             }
             throw new IllegalArgumentException("Cannot find bean with type: ${type.canonicalName}")
         }
+        applicationContext.getBeanNamesForType(ClassMetaModelConverter.class) >> []
     }
 
     def cleanup() {

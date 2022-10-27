@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete;
 
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.SOURCE_OBJECT_VAR_NAME;
+
 import java.util.List;
 import lombok.Value;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
@@ -17,7 +19,7 @@ public class MapperArgumentMethodModel {
     }
 
     public static List<MapperArgumentMethodModel> createOnlyOneMapperArguments(ClassMetaModel argumentType) {
-        return List.of(new MapperArgumentMethodModel("sourceObject", argumentType, null));
+        return List.of(new MapperArgumentMethodModel(SOURCE_OBJECT_VAR_NAME, argumentType, null));
     }
 
 }

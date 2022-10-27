@@ -29,19 +29,19 @@ class MsomeDtoWithSuperBuilderModelToCSomeDtoWithSimpleSuperBuilderMapper implem
 		return pl.jalokim.crudwizard.core.sample.SomeDtoWithSimpleSuperBuilder.builder()
 
 		.localDateTime1(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("localDateTime1"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("localDateTime1"))
 			.orElse(null)))
 
 		.someLong1(((java.lang.Long) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someLong1"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someLong1"))
 			.orElse(null)))
 
 		.someString1(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("someString1"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString1"))
 			.orElse(null)))
 
 		.superStringField(((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((Map<String, Object>) genericMap).get("superStringField"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("superStringField"))
 			.orElse(null)))
         .build();
     }

@@ -42,8 +42,8 @@ class FieldsChainToAssignExpressionTest extends Specification {
             "argument.getSource()", [insuranceFieldModel, personWrapperField, samplePersonFieldModel, birthDatFieldModel])
 
         String expectedCode = "Optional.ofNullable(argument.getSource())" +
-            wrapWithNextLineWith3Tabs('.map(genericMap -> ((Map<String, Object>) genericMap).get("insurance"))') +
-            wrapWithNextLineWith3Tabs('.map(genericMap -> ((Map<String, Object>) genericMap).get("personWrapper"))') +
+            wrapWithNextLineWith3Tabs('.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("insurance"))') +
+            wrapWithNextLineWith3Tabs('.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("personWrapper"))') +
             wrapWithNextLineWith3Tabs('.map(value -> InvokableReflectionUtils.getValueOfField(value, "samplePersonDto"))') +
             wrapWithNextLineWith3Tabs('.map(value -> ((pl.jalokim.crudwizard.core.sample.SamplePersonDto) value).getBirthDay())') +
             wrapWithNextLineWith3Tabs('.orElse(null)')
