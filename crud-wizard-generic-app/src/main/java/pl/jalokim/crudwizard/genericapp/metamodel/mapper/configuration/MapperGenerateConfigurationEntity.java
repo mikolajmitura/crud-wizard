@@ -43,7 +43,7 @@ public class MapperGenerateConfigurationEntity extends BaseEntity {
     @JoinColumn(name = "field_resolver_for_source_id")
     private FieldMetaResolverConfigurationEntity fieldMetaResolverForRawSource;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "root_configuration_id")
     private MapperConfigurationEntity rootConfiguration;
 

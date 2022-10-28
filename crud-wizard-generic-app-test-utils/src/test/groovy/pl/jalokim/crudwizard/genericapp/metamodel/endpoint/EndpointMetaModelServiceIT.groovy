@@ -35,6 +35,7 @@ import org.springframework.http.HttpMethod
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.sample.Agreement
+import pl.jalokim.crudwizard.core.sample.PersonEvent
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
 import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
@@ -59,6 +60,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity
@@ -1373,14 +1377,134 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         assertValidationResults(foundErrors, expectedErrors)
 
         where:
-        queryMapper                                           | expectedErrors | testCase
-        createBeanAndMethodDto(SomeTestMapper, "mapIdValid1") | []             | "fine query mappers for get one object"
+        queryMapper                                             | expectedErrors | testCase
+        createBeanAndMethodDto(SomeTestMapper, "mapIdValid1")   | []             | "fine query mappers for get one object"
         createBeanAndMethodDto(SomeTestMapper, "mapIdInvalid2") | [
             errorEntry("dataStorageConnectors[1].mapperMetaModelForQuery.methodName",
                 invalidMethodReturnType(Long.canonicalName, String.canonicalName)),
             errorEntry("dataStorageConnectors[1].mapperMetaModelForQuery.methodName",
                 invalidMethodParameter(0, BeanType.MAPPER))
-        ]             | "invalid query mappers for get one object"
+        ]                                                                        | "invalid query mappers for get one object"
+    }
+
+    @Unroll
+    def "return expected errors during generate mappers code #testCase"() {
+        given:
+        def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personEntity")
+                        .fields([
+                            createIdFieldType("id", Long),
+                            createValidFieldMetaModelDto("code", String),
+                            createValidFieldMetaModelDto("personEvent", PersonEvent),
+                            createValidFieldMetaModelDto("forInnerMethod", String),
+                            createValidFieldMetaModelDto("bySpringExpression", String),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(
+                        MapperMetaModelDto.builder()
+                            .mapperName("personDtoToEntityMapper")
+                            .mapperType(MapperType.GENERATED)
+                            .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                                .rootConfiguration(MapperConfigurationDto.builder()
+                                    .name("personDtoToEntityMapper")
+                                    .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                    .targetMetaModel(buildClassMetaModelDtoWithName("personEntity"))
+                                    .propertyOverriddenMapping([
+                                        PropertiesOverriddenMappingDto.builder()
+                                            .targetAssignPath("personEvent")
+                                            .sourceAssignExpression(mapperExpression)
+                                            .build(),
+                                        PropertiesOverriddenMappingDto.builder()
+                                            .targetAssignPath("forInnerMethod")
+                                            .sourceAssignExpression(innerMethodNameExpression)
+                                            .build(),
+                                        PropertiesOverriddenMappingDto.builder()
+                                            .targetAssignPath("bySpringExpression")
+                                            .sourceAssignExpression(bySpringBeanExpression)
+                                            .build(),
+                                    ])
+                                    .build())
+                                .subMappersAsMethods([MapperConfigurationDto.builder()
+                                                          .name("mapIdToText")
+                                                          .sourceMetaModel(createClassMetaModelDtoFromClass(Long))
+                                                          .targetMetaModel(createClassMetaModelDtoFromClass(String))
+                                                          .build()])
+                                .build())
+                            .build())
+                    .build(),
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(createClassMetaModelDtoFromClass(PersonEvent))
+                    .mapperMetaModelForPersist(
+                        MapperMetaModelDto.builder()
+                            .mapperName("personEventMapper")
+                            .mapperType(MapperType.GENERATED)
+                            .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                                .rootConfiguration(
+                                    MapperConfigurationDto.builder()
+                                        .name("personEventMapper")
+                                        .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                        .targetMetaModel(createClassMetaModelDtoFromClass(PersonEvent))
+                                        .build()
+                                )
+                                .build())
+                            .build())
+                    .build(),
+            ])
+            .payloadMetamodel(ClassMetaModelDto.builder()
+                .name("personDto")
+                .fields([
+                    createValidFieldMetaModelDto("id", Long),
+                    createValidFieldMetaModelDto("code", String),
+                ])
+                .build())
+            .build()
+        def foundErrors = []
+
+        when:
+        try {
+            endpointMetaModelService.createNewEndpoint(postEndpoint)
+        } catch (ConstraintViolationException ex) {
+            foundErrors = ValidatorWithConverter.errorsFromViolationException(ex)
+        }
+
+        then:
+        assertValidationResults(foundErrors, expectedErrors)
+
+        where:
+        mapperExpression                        | innerMethodNameExpression | bySpringBeanExpression              | expectedErrors | testCase
+        '@personEventMapper($rootSourceObject)' | "#mapIdToText(id)"        | "@dummyService.getSomeRandomText()" | []             |
+            "generate mappers correctly, real spring bean, real innerMapper, real other mapper in the same context created"
+
+        '@notExistMapper($rootSourceObject)'    | "#notExistMethod(id)"     | "@springBean.getSomeRandomText()"   | [
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[1].sourceAssignExpression",
+                parseExpressionMessage(19,
+                    translatePlaceholder("cannot.find.method.with.arguments",
+                        [
+                            methodName  : "notExistMethod",
+                            classesTypes: Long.canonicalName,
+                            givenClass  : "{current.mapper.name}"]
+                    ))
+            ),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[2].sourceAssignExpression",
+                parseExpressionMessage(13,
+                    translatePlaceholder("cannot.find.bean.name", "springBean"))
+            ),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[0].sourceAssignExpression",
+                parseExpressionMessage(17,
+                    translatePlaceholder("MappersModelsCache.not.found.mapper", "notExistMapper"))
+            )
+        ]                                                                                                                          |
+            "like above but with errors"
+    }
+
+    private static String parseExpressionMessage(int columnNumber, String message) {
+        translatePlaceholder("MapperContextEntryError.column") + ":" + columnNumber + ", " + message
     }
 
     private static void assertFoundOneClassMetaModel(List<ClassMetaModel> classMetaModels, Predicate<ClassMetaModel> predicate) {

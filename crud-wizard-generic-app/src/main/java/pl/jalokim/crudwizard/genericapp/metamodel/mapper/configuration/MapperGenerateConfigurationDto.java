@@ -1,5 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration;
 
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.READ;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.WRITE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto.createResolverConfigurationWith;
+
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -21,10 +25,12 @@ public class MapperGenerateConfigurationDto {
     Boolean globalIgnoreMappingProblems = false;
 
     @Valid
-    FieldMetaResolverConfigurationDto fieldMetaResolverForRawTarget;
+    @Builder.Default
+    FieldMetaResolverConfigurationDto fieldMetaResolverForRawTarget = createResolverConfigurationWith(WRITE);
 
     @Valid
-    FieldMetaResolverConfigurationDto fieldMetaResolverForRawSource;
+    @Builder.Default
+    FieldMetaResolverConfigurationDto fieldMetaResolverForRawSource = createResolverConfigurationWith(READ);
 
     @Valid
     @NotNull

@@ -54,7 +54,7 @@ public class MapperConfigurationEntity extends BaseEntity {
     @JoinColumn(name = "propert_overridden_mapping_id")
     private List<PropertiesOverriddenMappingEntity> propertyOverriddenMapping;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "enum_entries_mapping_id")
     private EnumEntriesMappingEntity enumEntriesMapping;
 }

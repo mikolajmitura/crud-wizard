@@ -5,6 +5,7 @@ import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -100,7 +101,7 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
                 } catch (Exception exception) {
                     log.error("unexpected exceptions occurred during validation: ", exception);
                     isValid.set(false);
-                    customMessage(context,  exception.getMessage());
+                    customMessage(context, Optional.ofNullable(exception.getMessage()).orElse(exception.getClass().getName()));
                 }
             }
         }

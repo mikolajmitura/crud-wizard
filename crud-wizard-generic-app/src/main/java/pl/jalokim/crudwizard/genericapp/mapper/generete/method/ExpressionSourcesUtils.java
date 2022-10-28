@@ -2,14 +2,18 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperGenerateConstants.SOURCE_OBJECT_VAR_NAME;
+import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
@@ -47,7 +51,42 @@ class ExpressionSourcesUtils {
                     mapperGeneratedCodeMetadata, targetFieldMetaData));
             }
         }
+        if (isEmpty(methodArgumentsExpressions) && containsObjectSourceInAnyNestedExpressions(methodGeneratorArgument.getMapperGeneratedCodeMetadata(),
+            targetFieldMetaData.getPropertiesOverriddenMappingForField())) {
+
+            methodArgumentsExpressions.addAll(elements(methodGeneratorArgument.getMapperMethodArguments())
+            .map(argument -> new RawJavaCodeAssignExpression(argument.getArgumentType(), argument.getArgumentName()))
+            .asList());
+        }
         return methodArgumentsExpressions;
+    }
+
+    private static boolean containsObjectSourceInAnyNestedExpressions(MapperCodeMetadata mapperGeneratedCodeMetadata,
+        PropertiesOverriddenMapping propertiesOverriddenMapping) {
+        AtomicBoolean foundSourceObjectInExpressions = new AtomicBoolean();
+        containsObjectSourceInAnyNestedExpressions(foundSourceObjectInExpressions, mapperGeneratedCodeMetadata, propertiesOverriddenMapping);
+        return foundSourceObjectInExpressions.get();
+    }
+
+    private static void containsObjectSourceInAnyNestedExpressions(AtomicBoolean foundObjectSource,
+        MapperCodeMetadata mapperGeneratedCodeMetadata, PropertiesOverriddenMapping propertiesOverriddenMapping) {
+        if (foundObjectSource.get()) {
+            return;
+        }
+        var mappingsByPropertyName = propertiesOverriddenMapping.getMappingsByPropertyName();
+        if (mappingsByPropertyName != null) {
+            for (var entry : mappingsByPropertyName.entrySet()) {
+                for (ValueToAssignExpression valueToAssignExpression : entry.getValue().getValueMappingStrategy()) {
+                    ValueToAssignCodeMetadata valueToAssignCodeMetadata = valueToAssignExpression.generateCodeMetadata(mapperGeneratedCodeMetadata);
+                    String fullValueExpression = valueToAssignCodeMetadata.getFullValueExpression();
+                    if (fullValueExpression.contains(SOURCE_OBJECT_VAR_NAME)) {
+                        foundObjectSource.set(true);
+                        return;
+                    }
+                }
+                containsObjectSourceInAnyNestedExpressions(foundObjectSource, mapperGeneratedCodeMetadata, entry.getValue());
+            }
+        }
     }
 
     private static List<ValueToAssignExpression> findValueExpressionsInMethodArgumentsByFieldName(MapperMethodGeneratorArgument methodGeneratorArgument,

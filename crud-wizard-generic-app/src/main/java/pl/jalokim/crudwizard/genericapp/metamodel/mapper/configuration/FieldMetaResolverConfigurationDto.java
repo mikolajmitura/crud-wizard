@@ -17,4 +17,10 @@ public class FieldMetaResolverConfigurationDto {
     FieldMetaResolverStrategyType fieldMetaResolverStrategyType;
 
     List<@Valid FieldMetaResolverForClassEntryDto> fieldMetaResolverForClass;
+
+    public static FieldMetaResolverConfigurationDto createResolverConfigurationWith(FieldMetaResolverStrategyType fieldMetaResolverStrategyType) {
+        return FieldMetaResolverConfigurationDto.builder()
+            .fieldMetaResolverStrategyType(fieldMetaResolverStrategyType)
+            .build();
+    }
 }
