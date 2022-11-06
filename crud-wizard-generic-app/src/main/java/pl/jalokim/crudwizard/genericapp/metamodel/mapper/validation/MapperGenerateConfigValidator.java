@@ -94,7 +94,7 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
                 try {
                     MapperCodeMetadata mapperCodeMetadata = mapperCodeGenerator.generateMapperCodeMetadata(mapperGenerateConfiguration);
                     String generatedMapperCode = mapperCodeGenerator.generateMapperCode(mapperCodeMetadata);
-                    codeCompiler.compileCode(mapperCodeMetadata.getMapperClassName(), "pl.jalokim.crudwizard.generated.mapper", generatedMapperCode);
+                    codeCompiler.compileCodeAndReturnPath(mapperCodeMetadata.getMapperClassName(), "pl.jalokim.crudwizard.generated.mapper", generatedMapperCode);
                 } catch (MapperGenerationException ex) {
                     isValid.set(false);
                     ex.getMessagePlaceholders().forEach(entry -> customMessage(context, entry));

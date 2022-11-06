@@ -44,7 +44,7 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
     @Unroll
     def "return expected validation messages for given mapperMetaModelDto: #mapperMetaModelDto"() {
         given:
-        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(new MetaModelContext(),
+        TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(123L, new MetaModelContext(),
             EndpointMetaModelDto.builder().build())
         TemporaryModelContextHolder.setTemporaryContext(temporaryMetaModelContext)
 
@@ -217,11 +217,11 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
         createInvalidConfigWithCompilationProblem()      | [
             errorEntry("",
                 Elements.of("compilation problems: ",
-                    "target\\generatedMappers\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper.java:31: " +
+                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper.java:31: " +
                         "error: incompatible types: int cannot be converted to LocalDateTime",
                     "\t\tmap.put(\"generated\", ((java.time.LocalDateTime) 12323));",
                     "\t\t                                                ^",
-                    "target\\generatedMappers\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper.java:41: " +
+                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper.java:41: " +
                         "error: incompatible types: int cannot be converted to LocalDateTime",
                     "\t\tmap.put(\"otherField\", ((java.time.LocalDateTime) 123));",
                     "\t\t                                                 ^").concatWithNewLines())

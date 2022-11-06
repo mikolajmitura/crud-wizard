@@ -54,7 +54,10 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "extendsFromModels", ignore = true)
     public abstract ClassMetaModelEntity toSimpleEntity(ClassMetaModelDto classMetaModelDto, boolean dummyFlag);
 
-    public ClassMetaModel toSwallowDto(MetaModelContext metaModelContext, ClassMetaModelEntity classMetaModelEntity) {
+    /**
+     * To simple model means without nested objects. Nested object contains only id values.
+     */
+    public ClassMetaModel toSimpleModel(MetaModelContext metaModelContext, ClassMetaModelEntity classMetaModelEntity) {
         ClassMetaModel classMetaModel = toMetaModel(classMetaModelEntity);
         classMetaModel.setGenericTypes(mapToList(
             classMetaModelEntity.getGenericTypes(),

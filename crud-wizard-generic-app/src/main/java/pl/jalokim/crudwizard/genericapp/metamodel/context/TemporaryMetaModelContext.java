@@ -21,10 +21,14 @@ public class TemporaryMetaModelContext extends MetaModelContext {
     private final Map<String, MapperMetaModelDto> mapperModelDtoDefinitionByName = new HashMap<>();
 
     @Getter
+    private final Long sessionTimestamp;
+
+    @Getter
     private final EndpointMetaModelDto createEndpointMetaModelDto;
 
-    public TemporaryMetaModelContext(MetaModelContext metaModelContext, EndpointMetaModelDto createEndpointMetaModelDto) {
+    public TemporaryMetaModelContext(Long sessionTimestamp, MetaModelContext metaModelContext, EndpointMetaModelDto createEndpointMetaModelDto) {
         this.createEndpointMetaModelDto = createEndpointMetaModelDto;
+        this.sessionTimestamp = sessionTimestamp;
         setDataStorages(metaModelContext.getDataStorages());
         setApiTags(metaModelContext.getApiTags());
         setValidatorMetaModels(metaModelContext.getValidatorMetaModels());
@@ -38,6 +42,10 @@ public class TemporaryMetaModelContext extends MetaModelContext {
         setDefaultDataStorageMetaModel(metaModelContext.getDefaultDataStorageMetaModel());
         setDefaultDataStorageQueryProvider(metaModelContext.getDefaultDataStorageQueryProvider());
         setDefaultDataStorageConnectorMetaModels(metaModelContext.getDefaultDataStorageConnectorMetaModels());
+    }
+
+    public TemporaryMetaModelContext(MetaModelContext metaModelContext, EndpointMetaModelDto createEndpointMetaModelDto) {
+        this(System.currentTimeMillis(), metaModelContext, createEndpointMetaModelDto);
     }
 
     public ClassMetaModel findClassMetaModelById(Long id) {

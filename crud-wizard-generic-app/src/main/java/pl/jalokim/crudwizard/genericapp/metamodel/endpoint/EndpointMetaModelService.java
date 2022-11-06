@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import pl.jalokim.crudwizard.core.datetime.TimeProvider;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.core.validation.javax.groups.AfterValidationInvoke;
 import pl.jalokim.crudwizard.core.validation.javax.groups.BeforeValidationInvoke;
 import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
@@ -20,6 +21,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextRefres
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.AfterValidationCleanTempFiles;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
@@ -45,6 +47,7 @@ public class EndpointMetaModelService {
     public Long createNewEndpoint(
         @BeforeValidationInvoke(beanType = BeforeEndpointValidatorUpdater.class, methodName = "beforeValidation")
         @BeforeValidationInvoke(beanType = TemporaryContextLoader.class, methodName = "loadTemporaryContextFor")
+        @AfterValidationInvoke(beanType = AfterValidationCleanTempFiles.class, methodName = "cleanTempDir")
         @Validated(FirstValidationPhase.class) EndpointMetaModelDto createEndpointMetaModelDto) {
         try {
             classMetaModelEntitySaveContext.setupContext();

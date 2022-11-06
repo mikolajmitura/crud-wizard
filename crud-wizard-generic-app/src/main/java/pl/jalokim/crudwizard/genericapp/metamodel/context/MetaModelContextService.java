@@ -112,7 +112,7 @@ public class MetaModelContextService implements ApplicationRunner {
 
     private void loadClassMetaModels(MetaModelContext metaModelContext) {
         var classMetaModels = new ModelsCache<ClassMetaModel>();
-        for (var classMetaModel : classMetaModelService.findAllSwallowModels(metaModelContext)) {
+        for (var classMetaModel : classMetaModelService.findSimpleModels(metaModelContext)) {
             classMetaModels.put(classMetaModel.getId(), classMetaModel);
         }
         metaModelContext.setClassMetaModels(classMetaModels);
@@ -145,7 +145,7 @@ public class MetaModelContextService implements ApplicationRunner {
     private void loadMapperMetaModels(MetaModelContext metaModelContext) {
         var mapperMetaModels = new MappersModelsCache();
         var defaultGenericMapperId = defaultBeansService.getDefaultGenericMapperId();
-        for (var mapperMetaModel : mapperMetaModelService.findAllMetaModels()) {
+        for (var mapperMetaModel : mapperMetaModelService.findAllMetaModels(metaModelContext)) {
             mapperMetaModels.put(mapperMetaModel.getId(), mapperMetaModel);
             if (mapperMetaModel.getId().equals(defaultGenericMapperId)) {
                 metaModelContext.setDefaultMapperMetaModel(mapperMetaModel);

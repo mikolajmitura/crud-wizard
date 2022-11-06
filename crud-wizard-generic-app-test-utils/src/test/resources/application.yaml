@@ -6,3 +6,7 @@ some-example:
     someLong: test-default
   invalid-field-name:
     notExist: someValue
+
+
+crudWizard:
+  compiledCodeRootPath: target/generatedMappers

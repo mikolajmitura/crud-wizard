@@ -151,7 +151,8 @@ class BeanAndMethodMetaModelMetaModelContextServiceIT extends GenericAppWithRelo
                 realClass == Long
             }
 
-            mapperMetaModels.objectsById.values()*.methodMetaModel.className as Set == mapperMetaModelService.findAllMetaModels()*.methodMetaModel.className as Set
+            mapperMetaModels.objectsById.values()*.methodMetaModel.className as Set == mapperMetaModelService
+                .findAllMetaModels(reloadedContext)*.methodMetaModel.className as Set
             verifyAll(defaultMapperMetaModel) {
                 id == defaultBeansService.getDefaultGenericMapperId()
                 mapperInstance == genericMapperBean

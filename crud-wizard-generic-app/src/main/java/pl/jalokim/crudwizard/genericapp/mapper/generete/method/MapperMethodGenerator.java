@@ -63,8 +63,6 @@ public class MapperMethodGenerator {
     public static final String ITERABLE_ELEMENT_NODE_NAME = "*";
 
     // TODO #1 mapper task orders
-    //  - validation of correctness of mapping during add new endpoint with mappers, and test (IT EndpointMetaModelServiceIT) #validation
-    //      - other mapper name (created earlier, available only when full flow is implemented) (positive and negative case) #NOW
     //  - generate mapper code and compile it, put to classloader and test that is exists (generate few times and check that latest version was used)
     //  - generate few mappers code and compile it, put to classloader and map some values by them
     //  - MapperDelegatorService

@@ -28,6 +28,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel.MapperMetaModelBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
@@ -79,11 +80,18 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
     @Mapping(target = "classMetaModelDtoType", ignore = true)
     public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 
-    public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity) {
+    public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity, MetaModelContext metaModelContext) {
 
         MapperMetaModelBuilder<?, ?> mapperMetaModelBuilder = toMetaModel(mapperMetaModelEntity).toBuilder();
 
         if (MapperType.GENERATED.equals(mapperMetaModelEntity.getMapperType())) {
+
+            var rootMapperConf = mapperMetaModelEntity.getMapperGenerateConfiguration().getRootConfiguration();
+            mapperMetaModelBuilder.sourceClassMetaModel(metaModelContext.getClassMetaModels()
+                .findById(rootMapperConf.getSourceMetaModel().getId()));
+
+            mapperMetaModelBuilder.targetClassMetaModel(metaModelContext.getClassMetaModels()
+                .findById(rootMapperConf.getTargetMetaModel().getId()));
             // TODO #1 #mapping generate new mapper when hash is the same and load new instance when should or load old.
             //  when new mapper was generated then update className in mapperMetaModelEntity
         } else if (MapperType.BEAN_OR_CLASS_NAME.equals(mapperMetaModelEntity.getMapperType())) {

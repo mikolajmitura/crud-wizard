@@ -1503,6 +1503,106 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             "like above but with errors"
     }
 
+
+    def "use mapper name created earlier in other endpoint"() {
+        given:
+        def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personEntity")
+                        .fields([
+                            createIdFieldType("id", Long),
+                            createValidFieldMetaModelDto("code", String),
+                            createValidFieldMetaModelDto("createdDate", LocalDate),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(
+                        MapperMetaModelDto.builder()
+                            .mapperName("personDtoToEntityMapper")
+                            .mapperType(MapperType.GENERATED)
+                            .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                                .rootConfiguration(MapperConfigurationDto.builder()
+                                    .name("personDtoToEntityMapper")
+                                    .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                    .targetMetaModel(buildClassMetaModelDtoWithName("personEntity"))
+                                    .propertyOverriddenMapping([
+                                        PropertiesOverriddenMappingDto.builder()
+                                            .targetAssignPath("createdDate")
+                                            .sourceAssignExpression("created")
+                                            .build(),
+                                    ])
+                                    .build())
+                                .build())
+                            .build())
+                    .build(),
+            ])
+            .payloadMetamodel(ClassMetaModelDto.builder()
+                .name("personDto")
+                .fields([
+                    createIdFieldType("id", Long),
+                    createValidFieldMetaModelDto("code", String),
+                    createValidFieldMetaModelDto("created", LocalDate),
+                    createValidFieldMetaModelDto("otherCode", String),
+                ])
+                .build())
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(postEndpoint)
+
+        def putEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+            .baseUrl("wrapper-people")
+            .operationName("createPerson")
+            .apiTag(ApiTagDto.builder()
+                .name("wrapper-people")
+                .build())
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personWrapperEntity")
+                        .fields([
+                            createIdFieldType("id", Long),
+                            createValidFieldMetaModelDto("uuid", String),
+                            createValidFieldMetaModelDto("person", buildClassMetaModelDtoWithName("personEntity")),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(
+                        MapperMetaModelDto.builder()
+                            .mapperName("personWrapperDtoToEntityMapper")
+                            .mapperType(MapperType.GENERATED)
+                            .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                                .rootConfiguration(MapperConfigurationDto.builder()
+                                    .name("personWrapperDtoToEntityMapper")
+                                    .sourceMetaModel(buildClassMetaModelDtoWithName("personWrapperDto"))
+                                    .targetMetaModel(buildClassMetaModelDtoWithName("personWrapperEntity"))
+                                    .propertyOverriddenMapping([
+                                        PropertiesOverriddenMappingDto.builder()
+                                            .targetAssignPath("person")
+                                            .sourceAssignExpression("@personDtoToEntityMapper(person)")
+                                            .build(),
+                                    ])
+                                    .build())
+                                .build())
+                            .build())
+                    .build(),
+            ])
+            .payloadMetamodel(ClassMetaModelDto.builder()
+                .name("personWrapperDto")
+                .fields([
+                    createIdFieldType("id", Long),
+                    createValidFieldMetaModelDto("uuid", String),
+                    createValidFieldMetaModelDto("person", buildClassMetaModelDtoWithName("personDto")),
+                ])
+                .build())
+            .build()
+
+        when:
+        endpointMetaModelService.createNewEndpoint(putEndpoint)
+
+        then:
+        noExceptionThrown()
+    }
+
     private static String parseExpressionMessage(int columnNumber, String message) {
         translatePlaceholder("MapperContextEntryError.column") + ":" + columnNumber + ", " + message
     }

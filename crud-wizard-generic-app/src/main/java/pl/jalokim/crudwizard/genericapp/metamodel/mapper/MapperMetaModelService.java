@@ -7,6 +7,7 @@ import java.util.Optional;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
@@ -24,8 +25,9 @@ public class MapperMetaModelService extends BaseService<MapperMetaModelEntity, M
         this.classMetaModelService = classMetaModelService;
     }
 
-    public List<MapperMetaModel> findAllMetaModels() {
-        return mapToList(repository.findAll(), mapperMetaModelMapper::toFullMetaModel);
+    public List<MapperMetaModel> findAllMetaModels(MetaModelContext metaModelContext) {
+        return mapToList(repository.findAll(),
+            metaModelEntity -> mapperMetaModelMapper.toFullMetaModel(metaModelEntity, metaModelContext));
     }
 
     public boolean exists(MapperMetaModelDto mapperMetaModelDto) {

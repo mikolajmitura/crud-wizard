@@ -15,6 +15,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
+import pl.jalokim.utils.reflection.MetadataReflectionUtils;
+import pl.jalokim.utils.reflection.ReflectionOperationException;
 
 @Aspect
 @Component
@@ -47,6 +49,7 @@ public class ValidatedInServiceInterceptor {
 
         Validated foundValidated = null;
         List<BeforeValidationInvoke> foundBeforeValidationToInvoke = new ArrayList<>();
+        List<AfterValidationInvoke> foundAfterValidationToInvoke = new ArrayList<>();
 
         for (Annotation annotation : parameterAnnotation) {
             if (annotation.annotationType().equals(Validated.class)) {
@@ -62,17 +65,53 @@ public class ValidatedInServiceInterceptor {
                 BeforeValidationInvoke[] value = beforeValidationInvokeList.value();
                 foundBeforeValidationToInvoke.addAll(elements(value).asList());
             }
+
+            if (annotation.annotationType().equals(AfterValidationInvoke.class)) {
+                foundAfterValidationToInvoke.add((AfterValidationInvoke) annotation);
+            }
+
+            if (annotation.annotationType().equals(AfterValidationInvoke.List.class)) {
+                AfterValidationInvoke.List beforeValidationInvokeList = (AfterValidationInvoke.List) annotation;
+                AfterValidationInvoke[] value = beforeValidationInvokeList.value();
+                foundAfterValidationToInvoke.addAll(elements(value).asList());
+            }
         }
 
         var methodArguments = pjp.getArgs();
         foundBeforeValidationToInvoke.forEach(foundBeforeValidationInvoke -> {
             Object instance = applicationContext.getBean(foundBeforeValidationInvoke.beanType());
-            InvokableReflectionUtils.invokeMethod(instance, foundBeforeValidationInvoke.methodName(), methodArguments[parameterIndex]);
+            invokeBeanAndMethod(instance, foundBeforeValidationInvoke.methodName(), methodArguments[parameterIndex]);
         });
 
         if (foundValidated != null) {
             Class<?>[] groups = foundValidated.value();
-            ValidationUtils.validateBean(validatorFactory.getValidator(), methodArguments[parameterIndex], groups);
+            try {
+                ValidationUtils.validateBean(validatorFactory.getValidator(), methodArguments[parameterIndex], groups);
+            } finally {
+                foundAfterValidationToInvoke.forEach(foundAfterValidationInvoke -> {
+                    Object instance = applicationContext.getBean(foundAfterValidationInvoke.beanType());
+                    invokeBeanAndMethod(instance, foundAfterValidationInvoke.methodName(), methodArguments[parameterIndex]);
+                });
+            }
+        }
+    }
+
+    public void invokeBeanAndMethod(Object instance, String methodName,  Object methodArg) {
+        List<Method> allNotStaticMethods = MetadataReflectionUtils.getAllNotStaticMethods(instance.getClass());
+
+        try {
+            InvokableReflectionUtils.invokeMethod(instance, methodName, methodArg);
+        } catch (ReflectionOperationException ex) {
+            boolean foundAndInvoked = false;
+            for (Method allNotStaticMethod : allNotStaticMethods) {
+                if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 0) {
+                    InvokableReflectionUtils.invokeMethod(instance, methodName);
+                    foundAndInvoked = true;
+                }
+            }
+            if (!foundAndInvoked) {
+                throw new ReflectionOperationException("cannot invoke method with empty arguments", ex);
+            }
         }
     }
 }

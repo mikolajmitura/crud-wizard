@@ -99,9 +99,9 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
         return savedClassMetaModelEntity;
     }
 
-    public List<ClassMetaModel> findAllSwallowModels(MetaModelContext metaModelContext) {
+    public List<ClassMetaModel> findSimpleModels(MetaModelContext metaModelContext) {
         return elements(repository.findAll())
-            .map(entity -> classMetaModelMapper.toSwallowDto(metaModelContext, entity))
+            .map(entity -> classMetaModelMapper.toSimpleModel(metaModelContext, entity))
             .asList();
     }
 }

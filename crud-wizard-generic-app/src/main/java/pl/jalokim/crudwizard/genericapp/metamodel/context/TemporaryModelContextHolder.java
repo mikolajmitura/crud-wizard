@@ -22,4 +22,8 @@ public class TemporaryModelContextHolder {
     public static void setTemporaryContext(TemporaryMetaModelContext temporaryContext) {
         TEMPORARY_META_MODEL_CONTEXT_THREAD_LOCAL.set(temporaryContext);
     }
+
+    public static Long getSessionTimeStamp() {
+        return getTemporaryMetaModelContext().getSessionTimestamp();
+    }
 }

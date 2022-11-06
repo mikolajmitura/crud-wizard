@@ -87,7 +87,7 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         simpleTargetAssignResolver, conversionService, instanceLoader
     )
     MapperCodeGenerator mapperCodeGenerator = new MapperCodeGenerator(mapperMethodGenerator, enumsMapperMethodGenerator)
-    CodeCompiler codeCompiler = new CodeCompiler()
+    CodeCompiler codeCompiler = new CodeCompiler("target/generatedMappers")
 
     ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
         dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
