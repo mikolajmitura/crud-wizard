@@ -8,5 +8,5 @@ some-example:
     notExist: someValue
 
 
-crudWizard:
+crud.wizard:
   compiledCodeRootPath: target/generatedMappers

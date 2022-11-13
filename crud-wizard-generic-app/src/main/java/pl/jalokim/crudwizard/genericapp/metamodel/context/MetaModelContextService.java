@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ApplicationEventPublisher;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.genericapp.cleaner.TempDirCleanEvent;
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
 import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagMetamodel;
@@ -35,7 +35,7 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 @MetamodelService
 @RequiredArgsConstructor
 @Slf4j
-public class MetaModelContextService implements ApplicationRunner {
+public class MetaModelContextService {
 
     public AtomicReference<MetaModelContext> metaModelContextReference = new AtomicReference<>();
 
@@ -49,17 +49,14 @@ public class MetaModelContextService implements ApplicationRunner {
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
     private final EndpointMetaModelService endpointMetaModelService;
     private final InstanceLoader instanceLoader;
-
-    @Override
-    public void run(ApplicationArguments args) {
-        reloadAll();
-    }
+    private final ApplicationEventPublisher publisher;
 
     public synchronized void reloadAll() {
         defaultBeansService.saveAllDefaultMetaModels();
         MetaModelContext metaModelContext = loadNewMetaModelContext();
         metaModelContextReference.set(metaModelContext);
         log.info("Reloaded meta model context");
+        publisher.publishEvent(new TempDirCleanEvent("after reload"));
     }
 
     public MetaModelContext loadNewMetaModelContext() {

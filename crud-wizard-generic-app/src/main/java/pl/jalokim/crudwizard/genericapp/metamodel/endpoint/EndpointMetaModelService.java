@@ -10,8 +10,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import pl.jalokim.crudwizard.core.datetime.TimeProvider;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.core.validation.javax.groups.AfterValidationInvoke;
 import pl.jalokim.crudwizard.core.validation.javax.groups.BeforeValidationInvoke;
 import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
+import pl.jalokim.crudwizard.genericapp.cleaner.AfterValidationTempFilesCleaner;
 import pl.jalokim.crudwizard.genericapp.compiler.ClassLoaderService;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntitySaveContext;
@@ -48,6 +50,7 @@ public class EndpointMetaModelService {
     public Long createNewEndpoint(
         @BeforeValidationInvoke(beanType = BeforeEndpointValidatorUpdater.class, methodName = "beforeValidation")
         @BeforeValidationInvoke(beanType = TemporaryContextLoader.class, methodName = "loadTemporaryContextFor")
+        @AfterValidationInvoke(beanType = AfterValidationTempFilesCleaner.class, methodName = "cleanWhenValidationNotPassed")
         @Validated(FirstValidationPhase.class) EndpointMetaModelDto createEndpointMetaModelDto) {
         try {
             classMetaModelEntitySaveContext.setupContext();
@@ -110,5 +113,4 @@ public class EndpointMetaModelService {
     public static String createNewEndpointReason(Long newEndpointId) {
         return "createNewEndpoint with id: " + newEndpointId;
     }
-
 }

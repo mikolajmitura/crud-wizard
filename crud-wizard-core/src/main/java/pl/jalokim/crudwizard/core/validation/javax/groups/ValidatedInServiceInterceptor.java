@@ -6,6 +6,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.ConstraintViolationException;
 import javax.validation.ValidatorFactory;
 import lombok.AllArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -41,7 +42,6 @@ public class ValidatedInServiceInterceptor {
                 validateBeanWhenShould(pjp, parameterIndex, parameterAnnotation);
             }
         }
-
         return pjp.proceed();
     }
 
@@ -80,35 +80,56 @@ public class ValidatedInServiceInterceptor {
         var methodArguments = pjp.getArgs();
         foundBeforeValidationToInvoke.forEach(foundBeforeValidationInvoke -> {
             Object instance = applicationContext.getBean(foundBeforeValidationInvoke.beanType());
-            invokeBeanAndMethod(instance, foundBeforeValidationInvoke.methodName(), methodArguments[parameterIndex]);
+            invokeBeanAndMethod(instance, foundBeforeValidationInvoke.methodName(), methodArguments[parameterIndex], null);
         });
 
         if (foundValidated != null) {
+            ValidationResult validationResult = new ValidationResult();
             Class<?>[] groups = foundValidated.value();
             try {
                 ValidationUtils.validateBean(validatorFactory.getValidator(), methodArguments[parameterIndex], groups);
+            } catch (ConstraintViolationException constraintViolationException) {
+                validationResult.setConstraintViolationException(constraintViolationException);
+                throw constraintViolationException;
             } finally {
                 foundAfterValidationToInvoke.forEach(foundAfterValidationInvoke -> {
                     Object instance = applicationContext.getBean(foundAfterValidationInvoke.beanType());
-                    invokeBeanAndMethod(instance, foundAfterValidationInvoke.methodName(), methodArguments[parameterIndex]);
+                    invokeBeanAndMethod(instance, foundAfterValidationInvoke.methodName(), methodArguments[parameterIndex], validationResult);
                 });
             }
         }
     }
 
-    public void invokeBeanAndMethod(Object instance, String methodName,  Object methodArg) {
+    public void invokeBeanAndMethod(Object instance, String methodName, Object methodArg, ValidationResult validationResult) {
         List<Method> allNotStaticMethods = MetadataReflectionUtils.getAllNotStaticMethods(instance.getClass());
 
         try {
-            InvokableReflectionUtils.invokeMethod(instance, methodName, methodArg);
+            if (validationResult == null) {
+                InvokableReflectionUtils.invokeMethod(instance, methodName, methodArg);
+            } else {
+                Object[] methodArgs = new Object[2];
+                methodArgs[0] = methodArg;
+                methodArgs[1] = validationResult;
+                InvokableReflectionUtils.invokeMethod(instance, methodName, methodArgs);
+            }
         } catch (ReflectionOperationException ex) {
             boolean foundAndInvoked = false;
-            for (Method allNotStaticMethod : allNotStaticMethods) {
-                if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 0) {
-                    InvokableReflectionUtils.invokeMethod(instance, methodName);
-                    foundAndInvoked = true;
+            if (validationResult != null) {
+                for (Method allNotStaticMethod : allNotStaticMethods) {
+                    if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 1) {
+                        InvokableReflectionUtils.invokeMethod(instance, methodName, validationResult);
+                        foundAndInvoked = true;
+                    }
+                }
+            } else {
+                for (Method allNotStaticMethod : allNotStaticMethods) {
+                    if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 0) {
+                        InvokableReflectionUtils.invokeMethod(instance, methodName);
+                        foundAndInvoked = true;
+                    }
                 }
             }
+
             if (!foundAndInvoked) {
                 throw new ReflectionOperationException("cannot invoke method with empty arguments", ex);
             }

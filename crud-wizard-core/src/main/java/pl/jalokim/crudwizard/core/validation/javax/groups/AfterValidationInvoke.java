@@ -15,6 +15,11 @@ public @interface AfterValidationInvoke {
 
     Class<?> beanType();
 
+    /**
+     * given method name should contains method argument with type {@link ValidationResult}
+     * or
+     * first argument is for validated object and second argument is type of {@link ValidationResult}
+     */
     String methodName();
 
     @Target({ElementType.PARAMETER})

@@ -1,0 +1,22 @@
+crud.wizard:
+  compiledCodeRootPath: target/testapp/generatedMappers
+  metamodel:
+    datasource:
+      url: jdbc:h2:file:./target/testDb/appDB
+      driverClassName: org.h2.Driver
+      username: sa
+      password:
+
+server:
+  port: 51455
+
+spring:
+  jpa:
+    database-platform: #empty (detected at runtime) do not remove this line
+    open-in-view: false
+    properties:
+      hibernate:
+        hbm2ddl.auto: update # validate
+        jdbc.lob.non_contextual_creation: true
+        physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl

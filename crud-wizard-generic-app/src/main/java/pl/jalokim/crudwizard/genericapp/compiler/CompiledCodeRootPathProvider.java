@@ -10,7 +10,7 @@ public class CompiledCodeRootPathProvider {
     @Getter
     private final String compiledCodeRootPath;
 
-    public CompiledCodeRootPathProvider(@Value("${crudWizard.compiledCodeRootPath:compiledCode}") String compiledCodeRootPath) {
+    public CompiledCodeRootPathProvider(@Value("${crud.wizard.compiledCodeRootPath:compiledCode}") String compiledCodeRootPath) {
         this.compiledCodeRootPath = compiledCodeRootPath;
     }
 }

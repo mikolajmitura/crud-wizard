@@ -15,6 +15,11 @@ public @interface BeforeValidationInvoke {
 
     Class<?> beanType();
 
+    /**
+     * first argument in method should be type of validate object
+     * or
+     * method should not have arguments
+     */
     String methodName();
 
     @Target({ElementType.PARAMETER})

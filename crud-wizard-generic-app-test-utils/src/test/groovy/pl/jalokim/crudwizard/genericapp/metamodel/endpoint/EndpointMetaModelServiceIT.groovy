@@ -25,6 +25,9 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.function.Predicate
@@ -37,6 +40,7 @@ import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.sample.Agreement
 import pl.jalokim.crudwizard.core.sample.PersonEvent
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue
+import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeRootPathProvider
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
 import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
@@ -103,6 +107,9 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
     @Autowired
     private ClassMetaModelRepository classMetaModelRepository
+
+    @Autowired
+    private CompiledCodeRootPathProvider codeRootPathProvider
 
     def "should save POST new endpoint with default mapper, service, data storage"() {
         given:
@@ -1482,29 +1489,29 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         '@personEventMapper($rootSourceObject)' | "#mapIdToText(id)"        | "@dummyService.getSomeRandomText()" | []             |
             "generate mappers correctly, real spring bean, real innerMapper, real other mapper in the same context created"
 
-//        '@notExistMapper($rootSourceObject)'    | "#notExistMethod(id)"     | "@springBean.getSomeRandomText()"   | [
-//            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
-//                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[1].sourceAssignExpression",
-//                parseExpressionMessage(19,
-//                    translatePlaceholder("cannot.find.method.with.arguments",
-//                        [
-//                            methodName  : "notExistMethod",
-//                            classesTypes: Long.canonicalName,
-//                            givenClass  : "{current.mapper.name}"]
-//                    ))
-//            ),
-//            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
-//                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[2].sourceAssignExpression",
-//                parseExpressionMessage(13,
-//                    translatePlaceholder("cannot.find.bean.name", "springBean"))
-//            ),
-//            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
-//                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[0].sourceAssignExpression",
-//                parseExpressionMessage(17,
-//                    translatePlaceholder("MappersModelsCache.not.found.mapper", "notExistMapper"))
-//            )
-//        ]                                                                                                                          |
-//            "like above but with errors"
+        '@notExistMapper($rootSourceObject)'    | "#notExistMethod(id)"     | "@springBean.getSomeRandomText()"   | [
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[1].sourceAssignExpression",
+                parseExpressionMessage(19,
+                    translatePlaceholder("cannot.find.method.with.arguments",
+                        [
+                            methodName  : "notExistMethod",
+                            classesTypes: Long.canonicalName,
+                            givenClass  : "{current.mapper.name}"]
+                    ))
+            ),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[2].sourceAssignExpression",
+                parseExpressionMessage(13,
+                    translatePlaceholder("cannot.find.bean.name", "springBean"))
+            ),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[0].sourceAssignExpression",
+                parseExpressionMessage(17,
+                    translatePlaceholder("MappersModelsCache.not.found.mapper", "notExistMapper"))
+            )
+        ]                                                                                                                          |
+            "like above but with errors"
     }
 
 
@@ -1654,12 +1661,14 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         long endpointId = endpointMetaModelService.createNewEndpoint(postEndpoint)
         String firstCompiledMapperHash = null
         String firstMapperFullClassName = null
+        String firstMapperFullFilePath = null
         inTransaction {
             def endpointEntity = endpointMetaModelRepository.getOne(endpointId)
             def mapperEntity = endpointEntity.getDataStorageConnectors().get(0).getMapperMetaModelForPersist()
             def compiledMetadata = mapperEntity.getMapperGenerateConfiguration().getMapperCompiledCodeMetadata()
             firstCompiledMapperHash = compiledMetadata.generatedCodeHash
             firstMapperFullClassName = compiledMetadata.fullClassName
+            firstMapperFullFilePath = compiledMetadata.fullPath
             return
         }
         def metaModelContext = metaModelContextService.getMetaModelContext()
@@ -1670,6 +1679,8 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         metaModelContextService.reloadAll()
 
         then:
+        Files.exists(Path.of(firstMapperFullFilePath))
+        Files.exists(Path.of(firstMapperFullFilePath.replace(".class", ".java")))
         def afterFirstReloadContext = metaModelContextService.getMetaModelContext()
         def afterFirstReloadMapperModel = afterFirstReloadContext.getMapperMetaModels().getMapperMetaModelByName("personDtoToEntityMapper")
         def afterFirstReloadMapperInstance = afterFirstReloadMapperModel.mapperInstance
@@ -1694,8 +1705,12 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             def personEntityClassMetaModel = newMetaModelContext.findClassMetaModelByName("personEntity")
             def personDtoClassEntity = classMetaModelRepository.getOne(personDtoClassMetaModel.id)
             def personEntityClassEntity = classMetaModelRepository.getOne(personEntityClassMetaModel.id)
-            personDtoClassEntity.getFields().find {it.fieldName = 'code'}.fieldName = "newCode"
-            personEntityClassEntity.getFields().find {it.fieldName = 'code'}.fieldName = "newCode"
+            personDtoClassEntity.getFields().find {
+                it.fieldName = 'code'
+            }.fieldName = "newCode"
+            personEntityClassEntity.getFields().find {
+                it.fieldName = 'code'
+            }.fieldName = "newCode"
             return
         }
 
@@ -1703,22 +1718,104 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         metaModelContextService.reloadAll()
 
         then:
+        !Files.exists(Path.of(firstMapperFullFilePath))
+        !Files.exists(Path.of(firstMapperFullFilePath.replace(".class", ".java")))
         def afterSecondReloadContext = metaModelContextService.getMetaModelContext()
         def afterSecondReloadMapperModel = afterSecondReloadContext.getMapperMetaModels().getMapperMetaModelByName("personDtoToEntityMapper")
         def afterSecondReloadMapperInstance = afterSecondReloadMapperModel.mapperInstance
         String afterSecondReloadCompiledMapperHash = null
         String afterSecondReloadMapperFullClassName = null
+        String afterSecondReloadMapperFullFilePath = null
         inTransaction {
             def endpointEntity = endpointMetaModelRepository.getOne(endpointId)
             def mapperEntity = endpointEntity.getDataStorageConnectors().get(0).getMapperMetaModelForPersist()
             def compiledMetadata = mapperEntity.getMapperGenerateConfiguration().getMapperCompiledCodeMetadata()
             afterSecondReloadCompiledMapperHash = compiledMetadata.generatedCodeHash
             afterSecondReloadMapperFullClassName = compiledMetadata.fullClassName
+            afterSecondReloadMapperFullFilePath = compiledMetadata.fullPath
             return
         }
+        Files.exists(Path.of(afterSecondReloadMapperFullFilePath))
+        Files.exists(Path.of(afterSecondReloadMapperFullFilePath.replace(".class", ".java")))
         afterSecondReloadCompiledMapperHash != firstCompiledMapperHash
         afterSecondReloadMapperFullClassName != firstMapperFullClassName
         afterSecondReloadMapperInstance != firstMapperInstance
+    }
+
+    def "after not passed validation temp files should be removed"() {
+        given:
+        fixedInstant(Instant.ofEpochMilli(1668361280915))
+        def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personEntity")
+                        .fields([
+                            createIdFieldType("id", Long),
+                            createValidFieldMetaModelDto("code", String),
+                            createValidFieldMetaModelDto("createdDate", LocalDate),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(
+                        MapperMetaModelDto.builder()
+                            .mapperName("personDtoToEntityMapper")
+                            .mapperType(MapperType.GENERATED)
+                            .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                                .rootConfiguration(MapperConfigurationDto.builder()
+                                    .name("personDtoToEntityMapper")
+                                    .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                    .targetMetaModel(buildClassMetaModelDtoWithName("personEntity"))
+                                    .propertyOverriddenMapping([
+                                        PropertiesOverriddenMappingDto.builder()
+                                            .targetAssignPath("createdDate")
+                                            .sourceAssignExpression("created")
+                                            .build(),
+                                    ])
+                                    .build())
+                                .build())
+                            .build())
+                    .build(),
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personEntity2")
+                        .fields([
+                            createIdFieldType("id", Long),
+                            createValidFieldMetaModelDto("uuid", String),
+                            createValidFieldMetaModelDto("created", LocalDate),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(
+                        MapperMetaModelDto.builder()
+                            .mapperName("personDtoToEntityMapper2")
+                            .mapperType(MapperType.GENERATED)
+                            .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                                .rootConfiguration(MapperConfigurationDto.builder()
+                                    .name("personDtoToEntityMapper2")
+                                    .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                    .targetMetaModel(buildClassMetaModelDtoWithName("personEntity2"))
+                                    .build())
+                                .build())
+                            .build())
+                    .build(),
+            ])
+            .payloadMetamodel(ClassMetaModelDto.builder()
+                .name("personDto")
+                .fields([
+                    createIdFieldType("id", Long),
+                    createValidFieldMetaModelDto("code", String),
+                    createValidFieldMetaModelDto("created", LocalDate),
+                    createValidFieldMetaModelDto("otherCode", String),
+                ])
+                .build())
+            .build()
+
+        when:
+        endpointMetaModelService.createNewEndpoint(postEndpoint)
+
+        then:
+        ConstraintViolationException ex = thrown()
+        ex.message != null
+        !Files.exists(Path.of(codeRootPathProvider.compiledCodeRootPath + "/1668361280915"))
     }
 
     private static String parseExpressionMessage(int columnNumber, String message) {

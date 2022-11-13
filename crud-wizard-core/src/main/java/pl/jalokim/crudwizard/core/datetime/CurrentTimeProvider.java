@@ -35,4 +35,8 @@ public class CurrentTimeProvider implements TimeProvider {
         return YearMonth.now(clock);
     }
 
+    @Override
+    public Long getCurrentTimestamp() {
+        return clock.instant().toEpochMilli();
+    }
 }

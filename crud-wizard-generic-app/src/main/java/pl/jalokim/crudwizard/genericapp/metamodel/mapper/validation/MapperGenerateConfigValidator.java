@@ -106,6 +106,7 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
                     var generatedMapperCode = mapperCodeGenerator.generateMapperCode(mapperCodeMetadata);
                     var compiledCodeMetadata = codeCompiler.compileCodeAndReturnMetaData(mapperCodeMetadata.getMapperClassName(),
                         GENERATED_MAPPER_PACKAGE, generatedMapperCode, sessionTimeStamp);
+                    log.info("compiled code for: {} for mapper: {}", mapperCodeMetadata.getMapperClassName(), mapperMetaModelDto.getMapperName());
                     mapperGenerateConfigurationDto.setMapperCompiledCodeMetadata(compiledCodeMetadata);
                 } catch (MapperGenerationException ex) {
                     isValid.set(false);

@@ -6,6 +6,7 @@ import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.compiler.ClassLoaderService;
@@ -25,6 +26,7 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @MetamodelService
 @RequiredArgsConstructor
+@Slf4j
 public class MapperGeneratedInstanceService {
 
     private final MapperCodeGenerator mapperCodeGenerator;
@@ -66,6 +68,8 @@ public class MapperGeneratedInstanceService {
                     GENERATED_MAPPER_PACKAGE, generatedMapperCode, currentTimestamp);
                 String newClassLoaderName = currentTimestamp.toString();
                 classLoaderService.createNewClassLoader(newClassLoaderName);
+                log.info("compiled code for: {} for mapper: {}", newCompiledCodeMetadata.getFullClassName(),
+                    mapperGenerateConfigurationEntity.getRootConfiguration().getName());
                 Class<?> newMapperInstance = classLoaderService.loadClass(newCompiledCodeMetadata.getFullClassName(), newClassLoaderName);
 
                 mapperCompiledCodeMetadata.setFullPath(newCompiledCodeMetadata.getFullPath());
@@ -78,6 +82,7 @@ public class MapperGeneratedInstanceService {
 
                 return instanceLoader.createInstanceOrGetBean(newMapperInstance);
             } else {
+                log.info("use earlier compiled class: {}", mapperCompiledCodeMetadata.getFullClassName());
                 return classLoaderService.loadClass(mapperCompiledCodeMetadata.getFullClassName(), mapperCompiledCodeMetadata.getSessionGenerationTimestamp());
             }
         } catch (Exception exception) {
