@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeMetadataDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
@@ -31,7 +32,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMappe
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel.MapperMetaModelBuilder;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperCompiledCodeMetadataEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
@@ -82,18 +85,19 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
 
     public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity, MetaModelContext metaModelContext) {
 
-        MapperMetaModelBuilder<?, ?> mapperMetaModelBuilder = toMetaModel(mapperMetaModelEntity).toBuilder();
+        MapperMetaModel initMapperMetaModel = toMetaModel(mapperMetaModelEntity);
+        MapperMetaModelBuilder<?, ?> mapperMetaModelBuilder = initMapperMetaModel.toBuilder();
 
         if (MapperType.GENERATED.equals(mapperMetaModelEntity.getMapperType())) {
 
-            var rootMapperConf = mapperMetaModelEntity.getMapperGenerateConfiguration().getRootConfiguration();
+            MapperGenerateConfigurationEntity mapperGenerateConfigurationEntity = mapperMetaModelEntity.getMapperGenerateConfiguration();
+            var rootMapperConf = mapperGenerateConfigurationEntity.getRootConfiguration();
             mapperMetaModelBuilder.sourceClassMetaModel(metaModelContext.getClassMetaModels()
                 .findById(rootMapperConf.getSourceMetaModel().getId()));
 
             mapperMetaModelBuilder.targetClassMetaModel(metaModelContext.getClassMetaModels()
                 .findById(rootMapperConf.getTargetMetaModel().getId()));
-            // TODO #1 #mapping generate new mapper when hash is the same and load new instance when should or load old.
-            //  when new mapper was generated then update className in mapperMetaModelEntity
+
         } else if (MapperType.BEAN_OR_CLASS_NAME.equals(mapperMetaModelEntity.getMapperType())) {
             BeanAndMethodEntity mapperBeanAndMethod = mapperMetaModelEntity.getMapperBeanAndMethod();
 
@@ -154,7 +158,6 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
                 temporaryMetaModelContext.putToContext(mapperMetaModelDto.getMapperName(), mapperMetaModel);
             }
         } else if (mapperMetaModelDto.getMapperName() != null) {
-            temporaryMetaModelContext.putDefinitionOfMapperMetaModelDto(mapperMetaModelDto);
             mapperMetaModel = temporaryMetaModelContext.findMapperMetaModelByName(mapperMetaModelDto.getMapperName());
             if (mapperMetaModel == null) {
                 mapperMetaModel = innerToModelFromDto(mapperMetaModelDto);
@@ -212,7 +215,6 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
                                     .filter(predicate -> !predicate.isArgumentCanBeInputOfMapper())
                                     .collect(Collectors.toList());
 
-
                                 boolean resolvedAsMapperInput = isResolvedAsMapperInput(methodArgument, canBeInputOfMapperPredicates, argumentClassMetaModel);
                                 boolean resolvedAsOtherThanInputMapper = isResolvedAsOtherThanInputMapper(methodArgument,
                                     cannotBeInputOfMapperPredicates, argumentClassMetaModel);
@@ -246,9 +248,9 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
             resolvedAsMapperInput = true;
             if (canBeInputOfMapperPredicate.getIsAnnotatedWith() != null) {
                 resolvedAsMapperInput = elements(methodArgument.getAnnotations())
-                        .map(Annotation::annotationType)
-                        .asList()
-                        .contains(canBeInputOfMapperPredicate.getIsAnnotatedWith());
+                    .map(Annotation::annotationType)
+                    .asList()
+                    .contains(canBeInputOfMapperPredicate.getIsAnnotatedWith());
             }
 
             resolvedAsMapperInput = resolvedAsMapperInput && canBeInputOfMapperPredicate.getTypePredicates().stream()
@@ -257,6 +259,7 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
         }
         return resolvedAsMapperInput;
     }
+
     private boolean isResolvedAsOtherThanInputMapper(MethodArgumentMetaModel methodArgument,
         List<ExpectedMethodArgument> predicates, ClassMetaModel argumentClassMetaModel) {
 
@@ -265,9 +268,9 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
         for (ExpectedMethodArgument predicate : predicates) {
             if (predicate.getIsAnnotatedWith() != null) {
                 resolvedAsOtherThanInputMapper = elements(methodArgument.getAnnotations())
-                        .map(Annotation::annotationType)
-                        .asList()
-                        .contains(predicate.getIsAnnotatedWith());
+                    .map(Annotation::annotationType)
+                    .asList()
+                    .contains(predicate.getIsAnnotatedWith());
             } else {
                 resolvedAsOtherThanInputMapper = true;
             }
@@ -295,4 +298,7 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
     @Mapping(target = "targetClassMetaModel", ignore = true)
     @Mapping(target = "methodMetaModel", ignore = true)
     protected abstract void swallowUpdateFrom(@MappingTarget MapperMetaModel mapperMetaModel, MapperMetaModelDto mapperMetaModelDto);
+
+    @Mapping(target = "id", ignore = true)
+    protected abstract MapperCompiledCodeMetadataEntity mapToEntity(CompiledCodeMetadataDto compiledCodeMetadata);
 }

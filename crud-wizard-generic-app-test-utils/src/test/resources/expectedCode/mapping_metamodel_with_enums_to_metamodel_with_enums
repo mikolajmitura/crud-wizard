@@ -7,11 +7,11 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class MmetamodelWithEnums1ToMmetamodelWithEnums2Mapper implements GeneratedMapper {
+class MmetamodelWithEnums1ToMmetamodelWithEnums2Mapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
 		private final pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator enumClassMetaModelValidator;
 		private final pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService genericObjectsConversionService;
-    MmetamodelWithEnums1ToMmetamodelWithEnums2Mapper(org.springframework.core.convert.ConversionService conversionService,
+    MmetamodelWithEnums1ToMmetamodelWithEnums2Mapper1(org.springframework.core.convert.ConversionService conversionService,
 @org.springframework.beans.factory.annotation.Qualifier("enumClassMetaModelValidator")pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator enumClassMetaModelValidator,
 pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService genericObjectsConversionService) {
 		this.conversionService = conversionService;

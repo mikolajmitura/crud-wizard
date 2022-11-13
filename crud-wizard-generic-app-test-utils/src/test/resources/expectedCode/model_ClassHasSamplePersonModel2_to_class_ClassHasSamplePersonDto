@@ -7,10 +7,10 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper implements GeneratedMapper {
+class MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
 		private final pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService normalSpringService;
-    MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper(org.springframework.core.convert.ConversionService conversionService,
+    MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper1(org.springframework.core.convert.ConversionService conversionService,
 @org.springframework.beans.factory.annotation.Qualifier("normalSpringService")pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService normalSpringService) {
 		this.conversionService = conversionService;
 		this.normalSpringService = normalSpringService;

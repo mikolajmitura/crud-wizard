@@ -153,7 +153,9 @@ public class MetaModelContextService implements ApplicationRunner {
             Optional.ofNullable(mapperMetaModel.getMapperName())
                 .ifPresent(mapperName -> mapperMetaModels.setMapperModelWithName(mapperName, mapperMetaModel));
         }
+
         metaModelContext.setMapperMetaModels(mapperMetaModels);
+        mapperMetaModelService.updateGeneratedMappers(metaModelContext);
     }
 
     private void loadServiceMetaModels(MetaModelContext metaModelContext) {

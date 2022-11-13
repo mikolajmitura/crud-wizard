@@ -7,10 +7,10 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper implements GeneratedMapper {
+class MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
 		private final pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker;
-    MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper(org.springframework.core.convert.ConversionService conversionService,
+    MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1(org.springframework.core.convert.ConversionService conversionService,
 pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker) {
 		this.conversionService = conversionService;
 		this.generatedMapperInvoker = generatedMapperInvoker;

@@ -1,24 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getSessionTimeStamp;
-import static pl.jalokim.utils.file.FileUtils.deleteFileOrDirectory;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.genericapp.util.CodeCompiler;
 
 @Component
 @RequiredArgsConstructor
 public class AfterValidationCleanTempFiles {
 
-    private final CodeCompiler codeCompiler;
-
+    // TODO #1 create job which will be fired after validations,
+    //  after reload context which will be clean not used classes and source codes
     public void cleanTempDir() {
-        String pathToDelete = codeCompiler.getCompiledCodeRootPath() + "/" + getSessionTimeStamp();
-        if (Files.exists(Path.of(pathToDelete))) {
-            deleteFileOrDirectory(pathToDelete);
-        }
+//        String pathToDelete = codeCompiler.getCompiledCodeRootPath() + "/" + getSessionTimeStamp();
+//        if (Files.exists(Path.of(pathToDelete))) {
+//            deleteFileOrDirectory(pathToDelete);
+//        }
     }
 }

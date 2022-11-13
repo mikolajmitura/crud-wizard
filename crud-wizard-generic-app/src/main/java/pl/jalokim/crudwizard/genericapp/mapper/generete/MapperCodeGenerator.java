@@ -21,10 +21,12 @@ import pl.jalokim.utils.template.TemplateAsText;
 @RequiredArgsConstructor
 public class MapperCodeGenerator {
 
+    public static final String GENERATED_MAPPER_PACKAGE = "pl.jalokim.crudwizard.generated.mapper";
+
     private final MapperMethodGenerator mapperMethodGenerator;
     private final EnumsMapperMethodGenerator enumsMapperMethodGenerator;
 
-    public MapperCodeMetadata generateMapperCodeMetadata(MapperGenerateConfiguration mapperGenerateConfiguration) {
+    public MapperCodeMetadata generateMapperCodeMetadata(MapperGenerateConfiguration mapperGenerateConfiguration, Long sessionTimeStamp) {
         MapperConfiguration mapperConfiguration = mapperGenerateConfiguration.getRootConfiguration();
         var sourceMetaModel = mapperConfiguration.getSourceMetaModel();
         var targetMetaModel = mapperConfiguration.getTargetMetaModel();
@@ -32,9 +34,10 @@ public class MapperCodeGenerator {
         MapperCodeMetadata mapperGeneratedCodeMetadata = new MapperCodeMetadata(mapperMethodGenerator, mapperGenerateConfiguration);
 
         mapperGeneratedCodeMetadata.setMapperClassName(
-            String.format("%sTo%sMapper",
+            String.format("%sTo%sMapper%s",
                 getClassModelInfoForGeneratedCode(sourceMetaModel),
-                getClassModelInfoForGeneratedCode(targetMetaModel)
+                getClassModelInfoForGeneratedCode(targetMetaModel),
+                sessionTimeStamp
             ));
 
         mapperGeneratedCodeMetadata.setOtherMethodsFromConfig(
@@ -87,10 +90,6 @@ public class MapperCodeGenerator {
 
         mapperGeneratedCodeMetadata.checkValidationResults();
         return mapperGeneratedCodeMetadata;
-    }
-
-    public String generateMapperCode(MapperGenerateConfiguration mapperGenerateConfiguration) {
-        return generateMapperCode(generateMapperCodeMetadata(mapperGenerateConfiguration));
     }
 
     public String generateMapperCode(MapperCodeMetadata mapperGeneratedCodeMetadata) {

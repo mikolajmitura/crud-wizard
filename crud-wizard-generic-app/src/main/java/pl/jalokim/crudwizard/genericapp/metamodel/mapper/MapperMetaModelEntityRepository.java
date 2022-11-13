@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,6 @@ public interface MapperMetaModelEntityRepository extends JpaRepository<MapperMet
         + "and m.mapperBeanAndMethod.methodName = :methodName "
     )
     boolean existsByBeanNameAndClassNameAndMethodName(String beanName, String className, String methodName);
+
+    List<MapperMetaModelEntity> findAllByMapperType(MapperType mapperType);
 }

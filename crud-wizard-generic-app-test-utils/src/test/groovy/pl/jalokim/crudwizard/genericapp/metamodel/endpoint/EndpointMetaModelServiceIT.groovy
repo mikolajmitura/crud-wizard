@@ -47,6 +47,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByName
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ContextRefreshStatus
@@ -99,6 +100,9 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
     @Autowired
     private MetaModelContextService metaModelContextService
+
+    @Autowired
+    private ClassMetaModelRepository classMetaModelRepository
 
     def "should save POST new endpoint with default mapper, service, data storage"() {
         given:
@@ -1478,29 +1482,29 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         '@personEventMapper($rootSourceObject)' | "#mapIdToText(id)"        | "@dummyService.getSomeRandomText()" | []             |
             "generate mappers correctly, real spring bean, real innerMapper, real other mapper in the same context created"
 
-        '@notExistMapper($rootSourceObject)'    | "#notExistMethod(id)"     | "@springBean.getSomeRandomText()"   | [
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
-                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[1].sourceAssignExpression",
-                parseExpressionMessage(19,
-                    translatePlaceholder("cannot.find.method.with.arguments",
-                        [
-                            methodName  : "notExistMethod",
-                            classesTypes: Long.canonicalName,
-                            givenClass  : "{current.mapper.name}"]
-                    ))
-            ),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
-                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[2].sourceAssignExpression",
-                parseExpressionMessage(13,
-                    translatePlaceholder("cannot.find.bean.name", "springBean"))
-            ),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
-                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[0].sourceAssignExpression",
-                parseExpressionMessage(17,
-                    translatePlaceholder("MappersModelsCache.not.found.mapper", "notExistMapper"))
-            )
-        ]                                                                                                                          |
-            "like above but with errors"
+//        '@notExistMapper($rootSourceObject)'    | "#notExistMethod(id)"     | "@springBean.getSomeRandomText()"   | [
+//            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+//                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[1].sourceAssignExpression",
+//                parseExpressionMessage(19,
+//                    translatePlaceholder("cannot.find.method.with.arguments",
+//                        [
+//                            methodName  : "notExistMethod",
+//                            classesTypes: Long.canonicalName,
+//                            givenClass  : "{current.mapper.name}"]
+//                    ))
+//            ),
+//            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+//                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[2].sourceAssignExpression",
+//                parseExpressionMessage(13,
+//                    translatePlaceholder("cannot.find.bean.name", "springBean"))
+//            ),
+//            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist." +
+//                "mapperGenerateConfiguration.rootConfiguration.propertyOverriddenMapping[0].sourceAssignExpression",
+//                parseExpressionMessage(17,
+//                    translatePlaceholder("MappersModelsCache.not.found.mapper", "notExistMapper"))
+//            )
+//        ]                                                                                                                          |
+//            "like above but with errors"
     }
 
 
@@ -1601,6 +1605,120 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
         then:
         noExceptionThrown()
+    }
+
+    def "return the same generated mapper instance when should or generate new one"() {
+        given:
+        def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .name("personEntity")
+                        .fields([
+                            createIdFieldType("id", Long),
+                            createValidFieldMetaModelDto("code", String),
+                            createValidFieldMetaModelDto("createdDate", LocalDate),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(
+                        MapperMetaModelDto.builder()
+                            .mapperName("personDtoToEntityMapper")
+                            .mapperType(MapperType.GENERATED)
+                            .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                                .rootConfiguration(MapperConfigurationDto.builder()
+                                    .name("personDtoToEntityMapper")
+                                    .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
+                                    .targetMetaModel(buildClassMetaModelDtoWithName("personEntity"))
+                                    .propertyOverriddenMapping([
+                                        PropertiesOverriddenMappingDto.builder()
+                                            .targetAssignPath("createdDate")
+                                            .sourceAssignExpression("created")
+                                            .build(),
+                                    ])
+                                    .build())
+                                .build())
+                            .build())
+                    .build(),
+            ])
+            .payloadMetamodel(ClassMetaModelDto.builder()
+                .name("personDto")
+                .fields([
+                    createIdFieldType("id", Long),
+                    createValidFieldMetaModelDto("code", String),
+                    createValidFieldMetaModelDto("created", LocalDate),
+                    createValidFieldMetaModelDto("otherCode", String),
+                ])
+                .build())
+            .build()
+
+        long endpointId = endpointMetaModelService.createNewEndpoint(postEndpoint)
+        String firstCompiledMapperHash = null
+        String firstMapperFullClassName = null
+        inTransaction {
+            def endpointEntity = endpointMetaModelRepository.getOne(endpointId)
+            def mapperEntity = endpointEntity.getDataStorageConnectors().get(0).getMapperMetaModelForPersist()
+            def compiledMetadata = mapperEntity.getMapperGenerateConfiguration().getMapperCompiledCodeMetadata()
+            firstCompiledMapperHash = compiledMetadata.generatedCodeHash
+            firstMapperFullClassName = compiledMetadata.fullClassName
+            return
+        }
+        def metaModelContext = metaModelContextService.getMetaModelContext()
+        def mapperModel = metaModelContext.getMapperMetaModels().getMapperMetaModelByName("personDtoToEntityMapper")
+        def firstMapperInstance = mapperModel.mapperInstance
+
+        when: 'noting changed so generated code should be the same'
+        metaModelContextService.reloadAll()
+
+        then:
+        def afterFirstReloadContext = metaModelContextService.getMetaModelContext()
+        def afterFirstReloadMapperModel = afterFirstReloadContext.getMapperMetaModels().getMapperMetaModelByName("personDtoToEntityMapper")
+        def afterFirstReloadMapperInstance = afterFirstReloadMapperModel.mapperInstance
+        String afterFirstReloadCompiledMapperHash = null
+        String afterFirstReloadMapperFullClassName = null
+        inTransaction {
+            def endpointEntity = endpointMetaModelRepository.getOne(endpointId)
+            def mapperEntity = endpointEntity.getDataStorageConnectors().get(0).getMapperMetaModelForPersist()
+            def compiledMetadata = mapperEntity.getMapperGenerateConfiguration().getMapperCompiledCodeMetadata()
+            afterFirstReloadCompiledMapperHash = compiledMetadata.generatedCodeHash
+            afterFirstReloadMapperFullClassName = compiledMetadata.fullClassName
+            return
+        }
+        afterFirstReloadCompiledMapperHash == firstCompiledMapperHash
+        afterFirstReloadMapperFullClassName == firstMapperFullClassName
+        afterFirstReloadMapperInstance == firstMapperInstance
+
+        and: 'changed class metamodel so mappers should be new one generated'
+        def newMetaModelContext = metaModelContextService.getMetaModelContext()
+        inTransaction {
+            def personDtoClassMetaModel = newMetaModelContext.findClassMetaModelByName("personDto")
+            def personEntityClassMetaModel = newMetaModelContext.findClassMetaModelByName("personEntity")
+            def personDtoClassEntity = classMetaModelRepository.getOne(personDtoClassMetaModel.id)
+            def personEntityClassEntity = classMetaModelRepository.getOne(personEntityClassMetaModel.id)
+            personDtoClassEntity.getFields().find {it.fieldName = 'code'}.fieldName = "newCode"
+            personEntityClassEntity.getFields().find {it.fieldName = 'code'}.fieldName = "newCode"
+            return
+        }
+
+        when:
+        metaModelContextService.reloadAll()
+
+        then:
+        def afterSecondReloadContext = metaModelContextService.getMetaModelContext()
+        def afterSecondReloadMapperModel = afterSecondReloadContext.getMapperMetaModels().getMapperMetaModelByName("personDtoToEntityMapper")
+        def afterSecondReloadMapperInstance = afterSecondReloadMapperModel.mapperInstance
+        String afterSecondReloadCompiledMapperHash = null
+        String afterSecondReloadMapperFullClassName = null
+        inTransaction {
+            def endpointEntity = endpointMetaModelRepository.getOne(endpointId)
+            def mapperEntity = endpointEntity.getDataStorageConnectors().get(0).getMapperMetaModelForPersist()
+            def compiledMetadata = mapperEntity.getMapperGenerateConfiguration().getMapperCompiledCodeMetadata()
+            afterSecondReloadCompiledMapperHash = compiledMetadata.generatedCodeHash
+            afterSecondReloadMapperFullClassName = compiledMetadata.fullClassName
+            return
+        }
+        afterSecondReloadCompiledMapperHash != firstCompiledMapperHash
+        afterSecondReloadMapperFullClassName != firstMapperFullClassName
+        afterSecondReloadMapperInstance != firstMapperInstance
     }
 
     private static String parseExpressionMessage(int columnNumber, String message) {

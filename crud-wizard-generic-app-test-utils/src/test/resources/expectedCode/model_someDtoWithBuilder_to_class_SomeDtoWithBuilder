@@ -7,9 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class MsomeDtoWithBuilderToCSomeDtoWithBuilderMapper implements GeneratedMapper {
+class MsomeDtoWithBuilderToCSomeDtoWithBuilderMapper1 implements GeneratedMapper {
 
-    MsomeDtoWithBuilderToCSomeDtoWithBuilderMapper() {
+    MsomeDtoWithBuilderToCSomeDtoWithBuilderMapper1() {
 
     }
 

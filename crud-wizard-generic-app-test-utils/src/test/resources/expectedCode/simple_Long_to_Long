@@ -7,9 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class CLongToCLongMapper implements GeneratedMapper {
+class CLongToCLongMapper1 implements GeneratedMapper {
 
-    CLongToCLongMapper() {
+    CLongToCLongMapper1() {
 
     }
 

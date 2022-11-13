@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationContext
 import org.springframework.core.convert.ConversionService
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import pl.jalokim.crudwizard.genericapp.compiler.CodeCompiler
+import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeRootPathProvider
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.ClassMetaModelConverter
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService
@@ -46,7 +48,6 @@ import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
 import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
-import pl.jalokim.crudwizard.genericapp.util.CodeCompiler
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
@@ -87,7 +88,8 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         simpleTargetAssignResolver, conversionService, instanceLoader
     )
     MapperCodeGenerator mapperCodeGenerator = new MapperCodeGenerator(mapperMethodGenerator, enumsMapperMethodGenerator)
-    CodeCompiler codeCompiler = new CodeCompiler("target/generatedMappers")
+    CompiledCodeRootPathProvider codeRootPathProvider = new CompiledCodeRootPathProvider("target/generatedMappers")
+    CodeCompiler codeCompiler = new CodeCompiler(codeRootPathProvider)
 
     ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
         dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,

@@ -11,4 +11,8 @@ public interface TimeProvider {
     LocalDate getCurrentDate();
 
     YearMonth getCurrentYearMonth();
+
+    default Long getCurrentTimestamp() {
+        return System.currentTimeMillis();
+    }
 }

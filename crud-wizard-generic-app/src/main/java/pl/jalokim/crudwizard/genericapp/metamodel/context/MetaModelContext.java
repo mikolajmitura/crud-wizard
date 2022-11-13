@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.core.utils.NullableHelper.helpWithNulls;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNode.createRootMetaModelNode;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -52,6 +53,18 @@ public class MetaModelContext {
 
     public static <R> R getFromContext(Supplier<ModelsCache<R>> gettingModelById, Supplier<Long> gettingId) {
         return gettingModelById.get().getById(helpWithNulls(gettingId));
+    }
+
+    public ClassMetaModel findClassMetaModelByName(String name) {
+        return Optional.ofNullable(name)
+            .map(notNullName -> getClassMetaModels().findOneBy(givenClassModel -> notNullName.equals(givenClassModel.getName())))
+            .orElse(null);
+    }
+
+    public MapperMetaModel findMapperMetaModelByName(String name) {
+        return Optional.ofNullable(name)
+            .map(notNullName -> getMapperMetaModels().getMappersModelByMapperName().get(name))
+            .orElse(null);
     }
 
 }

@@ -1,6 +1,6 @@
-package pl.jalokim.crudwizard.genericapp.util;
+package pl.jalokim.crudwizard.genericapp.compiler;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getSessionTimeStamp;
+import static pl.jalokim.crudwizard.genericapp.util.GeneratedCodeMd5Generator.generateMd5Hash;
 import static pl.jalokim.utils.file.FileUtils.writeToFile;
 
 import java.io.File;
@@ -10,29 +10,22 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 
 @Component
+@RequiredArgsConstructor
 public class CodeCompiler {
 
-    @Getter
-    private final String compiledCodeRootPath;
+    private final CompiledCodeRootPathProvider compiledCodeRootPathProvider;
 
-    public CodeCompiler(@Value("${crudWizard.compiledCodeRootPath:compiledCode}") String compiledCodeRootPath) {
-        this.compiledCodeRootPath = compiledCodeRootPath;
-    }
-
-    /**
-     * @return return full path for generated code
-     */
-    public String compileCodeAndReturnPath(String className, String packageName, String sourceCode) {
-        File sourceFile = new File(StringUtils.concatElements("/", compiledCodeRootPath, getSessionTimeStamp().toString(),
+    public CompiledCodeMetadataDto compileCodeAndReturnMetaData(String className, String packageName, String sourceCode, Long sessionTimeStamp) {
+        String compiledCodeRootPath = compiledCodeRootPathProvider.getCompiledCodeRootPath();
+        File sourceFile = new File(StringUtils.concatElements("/", compiledCodeRootPath, sessionTimeStamp.toString(),
             packageName.replace(".", "/"), className + ".java"));
         boolean createdFolder = sourceFile.getParentFile().mkdirs();
         if (!createdFolder) {
@@ -48,7 +41,13 @@ public class CodeCompiler {
             String errorsContent = errorOutPutStream.toString(StandardCharsets.UTF_8);
             validateResults(errorsContent);
         }
-        return sourceFile.toString().replaceAll("\\.java", ".class");
+        return CompiledCodeMetadataDto.builder()
+            .fullPath(sourceFile.toString().replaceAll("\\.java", ".class"))
+            .fullClassName(packageName + "." + className)
+            .simpleClassName(className)
+            .sessionGenerationTimestamp(sessionTimeStamp.toString())
+            .generatedCodeHash(generateMd5Hash(className, sourceCode, sessionTimeStamp))
+            .build();
     }
 
     private void validateResults(String errorsContent) {

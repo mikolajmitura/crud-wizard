@@ -8,9 +8,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 import java.util.ArrayList;
 import java.util.List;
 
-class MotherWithElementsModelToCOtherWithElementsMapper implements GeneratedMapper {
+class MotherWithElementsModelToCOtherWithElementsMapper1 implements GeneratedMapper {
 
-    MotherWithElementsModelToCOtherWithElementsMapper() {
+    MotherWithElementsModelToCOtherWithElementsMapper1() {
 
     }
 

@@ -47,6 +47,14 @@ public class ClassMetaModelEntitySaveContext {
         getSavedEntities().putPartiallySavedToContext(classMetaModelDto);
     }
 
+    public void putDuringInitializationEntity(ClassMetaModelEntity classMetaModelEntity) {
+        getSavedEntities().putDuringInitializationEntity(classMetaModelEntity);
+    }
+
+    public boolean isDuringFullSave(ClassMetaModelEntity classMetaModelEntity) {
+        return getSavedEntities().isDuringFullSave(classMetaModelEntity);
+    }
+
     @RequiredArgsConstructor
     public static class SavedEntities {
 
@@ -54,6 +62,7 @@ public class ClassMetaModelEntitySaveContext {
         private final ClassMetaModelRepository classMetaModelRepository;
         private final ClassMetaModelMapper classMetaModelMapper;
         private final Map<String, ClassMetaModelEntity> partiallyEntitiesSaved = new HashMap<>();
+        private final Map<String, ClassMetaModelEntity> duringFullSaveEntities = new HashMap<>();
         private final Map<String, ClassMetaModelEntity> fullyEntitiesSaved = new HashMap<>();
 
         public void putFullySavedToContext(ClassMetaModelEntity savedClassMetaModelEntity) {
@@ -66,7 +75,7 @@ public class ClassMetaModelEntitySaveContext {
         public void putPartiallySavedToContext(ClassMetaModelDto classMetaModelDto) {
 
             if (classMetaModelDto.getName() != null && !partiallyEntitiesSaved.containsKey(classMetaModelDto.getName())) {
-                ClassMetaModelEntity classMetaModelEntity = classMetaModelMapper.toSimpleEntity(classMetaModelDto, true);
+                ClassMetaModelEntity classMetaModelEntity = classMetaModelMapper.toSimpleEntity(classMetaModelDto, false);
                 validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntity.getValidators());
                 ClassMetaModelEntity savedClassMetaModelEntity = classMetaModelRepository.save(classMetaModelEntity);
                 partiallyEntitiesSaved.put(savedClassMetaModelEntity.getName(), savedClassMetaModelEntity);
@@ -91,6 +100,16 @@ public class ClassMetaModelEntitySaveContext {
                 }
             }
             return classMetaModelEntity;
+        }
+
+        public void putDuringInitializationEntity(ClassMetaModelEntity classMetaModelEntity) {
+            if (classMetaModelEntity.getName() != null && !duringFullSaveEntities.containsKey(classMetaModelEntity.getName())) {
+                duringFullSaveEntities.put(classMetaModelEntity.getName(), classMetaModelEntity);
+            }
+        }
+
+        public boolean isDuringFullSave(ClassMetaModelEntity classMetaModelEntity) {
+            return classMetaModelEntity.getName() != null && duringFullSaveEntities.containsKey(classMetaModelEntity.getName());
         }
     }
 }

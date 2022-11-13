@@ -6,6 +6,7 @@ import java.util.List;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
@@ -42,13 +43,24 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
     @Override
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public ClassMetaModelEntity save(ClassMetaModelEntity classMetaModelEntity) {
+        var temporaryMetaModelContext = TemporaryModelContextHolder.getTemporaryMetaModelContext();
+        ClassMetaModelDto fullDtoDefinition = temporaryMetaModelContext.getClassMetaModelDtoByName(classMetaModelEntity.getName());
+        ClassMetaModelEntity classMetaModelEntityUpdateSource;
+        if (fullDtoDefinition == null) {
+            ClassMetaModel classMetaModelByName = temporaryMetaModelContext.findClassMetaModelByName(classMetaModelEntity.getName());
+            if (classMetaModelByName != null) {
+                return repository.getOne(classMetaModelByName.getId());
+            }
+            classMetaModelEntityUpdateSource = classMetaModelEntity;
+        } else {
+            classMetaModelEntityUpdateSource = classMetaModelMapper.toEntity(fullDtoDefinition);
+        }
 
-        ClassMetaModelEntity originalClassMetaModelEntity = classMetaModelEntity;
         if (classMetaModelEntity.shouldBeSimpleRawClass()) {
             return repository.findByRawClassName(classMetaModelEntity.getClassName())
                 .orElseGet(() -> {
-                    originalClassMetaModelEntity.setSimpleRawClass(true);
-                    return repository.save(originalClassMetaModelEntity);
+                    classMetaModelEntityUpdateSource.setSimpleRawClass(true);
+                    return repository.save(classMetaModelEntityUpdateSource);
                 });
         }
 
@@ -65,10 +77,15 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
             classMetaModelEntity = alreadyPartiallySavedEntityWithThatName;
         }
 
-        return saveOthers(classMetaModelEntity, originalClassMetaModelEntity);
+        if (classMetaModelEntitySaveContext.isDuringFullSave(classMetaModelEntity)) {
+            return classMetaModelEntity;
+        }
+
+        return saveOthers(classMetaModelEntity, classMetaModelEntityUpdateSource);
     }
 
     private ClassMetaModelEntity saveOthers(ClassMetaModelEntity classMetaModelEntityToSaved, ClassMetaModelEntity classMetaModelEntityUpdateSource) {
+        classMetaModelEntitySaveContext.putDuringInitializationEntity(classMetaModelEntityToSaved);
         elements(classMetaModelEntityUpdateSource.getFields())
             .forEach(field -> {
                 validatorMetaModelService.saveOrCreateNewValidators(field.getValidators());

@@ -7,9 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class CSamplePersonDtoToMpersonMapper implements GeneratedMapper {
+class CSamplePersonDtoToMpersonMapper1 implements GeneratedMapper {
 
-    CSamplePersonDtoToMpersonMapper() {
+    CSamplePersonDtoToMpersonMapper1() {
 
     }
 

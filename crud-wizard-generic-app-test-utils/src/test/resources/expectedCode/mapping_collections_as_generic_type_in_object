@@ -8,9 +8,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 import java.util.HashSet;
 import java.util.Set;
 
-class CListAsListGenericType1ToCListAsListGenericType2Mapper implements GeneratedMapper {
+class CListAsListGenericType1ToCListAsListGenericType2Mapper1 implements GeneratedMapper {
 
-    CListAsListGenericType1ToCListAsListGenericType2Mapper() {
+    CListAsListGenericType1ToCListAsListGenericType2Mapper1() {
 
     }
 

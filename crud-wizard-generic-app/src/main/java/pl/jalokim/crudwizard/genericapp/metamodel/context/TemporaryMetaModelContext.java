@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
+import static pl.jalokim.crudwizard.core.datetime.TimeProviderHolder.getTimeProvider;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,14 +13,12 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 
 public class TemporaryMetaModelContext extends MetaModelContext {
 
     private final ObjectCache<String, ClassMetaModel> classMetaModelsByName = new ObjectCache<>();
     private final ObjectCache<String, MapperMetaModel> mapperMetaModelsByName = new ObjectCache<>();
     private final Map<String, ClassMetaModelDto> classMetaModelDtoDefinitionByName = new HashMap<>();
-    private final Map<String, MapperMetaModelDto> mapperModelDtoDefinitionByName = new HashMap<>();
 
     @Getter
     private final Long sessionTimestamp;
@@ -45,7 +45,7 @@ public class TemporaryMetaModelContext extends MetaModelContext {
     }
 
     public TemporaryMetaModelContext(MetaModelContext metaModelContext, EndpointMetaModelDto createEndpointMetaModelDto) {
-        this(System.currentTimeMillis(), metaModelContext, createEndpointMetaModelDto);
+        this(getTimeProvider().getCurrentTimestamp(), metaModelContext, createEndpointMetaModelDto);
     }
 
     public ClassMetaModel findClassMetaModelById(Long id) {
@@ -56,17 +56,17 @@ public class TemporaryMetaModelContext extends MetaModelContext {
         return getMapperMetaModels().findById(id);
     }
 
+    @Override
     public ClassMetaModel findClassMetaModelByName(String name) {
-        return Optional.ofNullable(classMetaModelsByName
-            .findById(name))
-            .orElseGet(() -> getClassMetaModels().findOneBy(
-                givenClassModel -> name.equals(givenClassModel.getName())));
+        return Optional.ofNullable(classMetaModelsByName.findById(name))
+            .orElseGet(() -> super.findClassMetaModelByName(name));
     }
 
+    @Override
     public MapperMetaModel findMapperMetaModelByName(String name) {
         return Optional.ofNullable(mapperMetaModelsByName
             .findById(name))
-            .orElseGet(() -> getMapperMetaModels().getMappersModelByMapperName().get(name));
+            .orElseGet(() -> super.findMapperMetaModelByName(name));
     }
 
     public void putToContext(String name, ClassMetaModel classMetaModel) {
@@ -84,12 +84,14 @@ public class TemporaryMetaModelContext extends MetaModelContext {
         classMetaModelDtoDefinitionByName.put(classMetaModelDto.getName(), classMetaModelDto);
     }
 
-    public void putDefinitionOfMapperMetaModelDto(MapperMetaModelDto mapperMetaModelDto) {
-        mapperModelDtoDefinitionByName.put(mapperMetaModelDto.getMapperName(), mapperMetaModelDto);
-    }
-
     public List<ClassMetaModelDto> getAllClassMetaModelDtoDefinitions() {
         return new ArrayList<>(classMetaModelDtoDefinitionByName.values());
+    }
+
+    public ClassMetaModelDto getClassMetaModelDtoByName(String nullableName) {
+        return Optional.ofNullable(nullableName)
+            .map(classMetaModelDtoDefinitionByName::get)
+            .orElse(null);
     }
 
     private Long generateRandomId(ModelsCache<?> modelsCache) {

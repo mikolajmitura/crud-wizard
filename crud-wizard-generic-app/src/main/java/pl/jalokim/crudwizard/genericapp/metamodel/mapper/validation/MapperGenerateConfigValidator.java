@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper.validation;
 
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator.GENERATED_MAPPER_PACKAGE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getSessionTimeStamp;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath.PropertyPathBuilder;
+import pl.jalokim.crudwizard.genericapp.compiler.CodeCompiler;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
@@ -26,11 +29,13 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParse
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException.ErrorSource;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.MapperConfigurationParserContext;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperGenerationException;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto;
-import pl.jalokim.crudwizard.genericapp.util.CodeCompiler;
 
 @Component
 @RequiredArgsConstructor
@@ -53,12 +58,16 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
         AtomicBoolean isValid = new AtomicBoolean(true);
 
         if (mapperGenerateConfigurationDto.getRootConfiguration() != null) {
-            var createEndpointMetaModelDto = getTemporaryMetaModelContext().getCreateEndpointMetaModelDto();
+            TemporaryMetaModelContext temporaryMetaModelContext = getTemporaryMetaModelContext();
+            var createEndpointMetaModelDto = temporaryMetaModelContext.getCreateEndpointMetaModelDto();
 
             MapperGenerateConfiguration mapperGenerateConfiguration;
             try {
                 mapperGenerateConfiguration = mapperGenerateConfigurationMapper.mapConfiguration(
-                    mapperGenerateConfigurationDto, createEndpointMetaModelDto.getPathParams(), createEndpointMetaModelDto.getQueryArguments());
+                    mapperGenerateConfigurationMapper.mapToEntity(mapperGenerateConfigurationDto),
+                    findClassMetaModelForDto(createEndpointMetaModelDto.getPathParams()),
+                    findClassMetaModelForDto(createEndpointMetaModelDto.getQueryArguments()),
+                    temporaryMetaModelContext);
             } catch (Exception ex) {
                 customMessage(context, "{MapperGenerateConfigurationMapper.create.config.problem}");
                 log.error("unexpected error", ex);
@@ -92,9 +101,12 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
 
             if (isValid.get()) {
                 try {
-                    MapperCodeMetadata mapperCodeMetadata = mapperCodeGenerator.generateMapperCodeMetadata(mapperGenerateConfiguration);
-                    String generatedMapperCode = mapperCodeGenerator.generateMapperCode(mapperCodeMetadata);
-                    codeCompiler.compileCodeAndReturnPath(mapperCodeMetadata.getMapperClassName(), "pl.jalokim.crudwizard.generated.mapper", generatedMapperCode);
+                    Long sessionTimeStamp = getSessionTimeStamp();
+                    MapperCodeMetadata mapperCodeMetadata = mapperCodeGenerator.generateMapperCodeMetadata(mapperGenerateConfiguration, sessionTimeStamp);
+                    var generatedMapperCode = mapperCodeGenerator.generateMapperCode(mapperCodeMetadata);
+                    var compiledCodeMetadata = codeCompiler.compileCodeAndReturnMetaData(mapperCodeMetadata.getMapperClassName(),
+                        GENERATED_MAPPER_PACKAGE, generatedMapperCode, sessionTimeStamp);
+                    mapperGenerateConfigurationDto.setMapperCompiledCodeMetadata(compiledCodeMetadata);
                 } catch (MapperGenerationException ex) {
                     isValid.set(false);
                     ex.getMessagePlaceholders().forEach(entry -> customMessage(context, entry));
@@ -107,6 +119,12 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
         }
 
         return isValid.get();
+    }
+
+    private ClassMetaModel findClassMetaModelForDto(ClassMetaModelDto classMetaModelDto) {
+        return Optional.ofNullable(classMetaModelDto)
+            .map(model -> getTemporaryMetaModelContext().findClassMetaModelByName(model.getName()))
+            .orElse(null);
     }
 
     private void validateSourceExpression(MapperGenerateConfiguration mapperGenerateConfiguration, AtomicBoolean isValid,

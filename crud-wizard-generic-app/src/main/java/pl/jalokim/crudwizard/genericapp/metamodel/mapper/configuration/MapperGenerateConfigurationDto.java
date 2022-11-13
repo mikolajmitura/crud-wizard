@@ -7,10 +7,15 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.Fi
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeMetadataDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 
-@Value
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder(toBuilder = true)
 public class MapperGenerateConfigurationDto {
 
@@ -37,4 +42,19 @@ public class MapperGenerateConfigurationDto {
     MapperConfigurationDto rootConfiguration;
 
     List<@Valid MapperConfigurationDto> subMappersAsMethods;
+
+    /**
+     * This is assigned automatically from given endpoint in BeforeEndpointValidatorUpdater
+     */
+    ClassMetaModelDto pathVariablesClassModel;
+
+    /**
+     * This is assigned automatically from given endpoint in BeforeEndpointValidatorUpdater
+     */
+    ClassMetaModelDto requestParamsClassModel;
+
+    /**
+     * This is set in MapperGenerateConfigValidator
+     */
+    CompiledCodeMetadataDto mapperCompiledCodeMetadata;
 }

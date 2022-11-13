@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 
 @Entity
 @Builder
@@ -47,9 +48,25 @@ public class MapperGenerateConfigurationEntity extends BaseEntity {
     @JoinColumn(name = "root_configuration_id")
     private MapperConfigurationEntity rootConfiguration;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "compiled_code_metadata_id")
+    private MapperCompiledCodeMetadataEntity mapperCompiledCodeMetadata;
+
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "sub_mappers_as_methods_id")
     private List<MapperConfigurationEntity> subMappersAsMethods;
 
+    /**
+     * This is assigned from given endpoint
+     */
+    @ManyToOne
+    @JoinColumn(name = "path_variables_model_id")
+    private ClassMetaModelEntity pathVariablesClassModel;
 
+    /**
+     * This is assigned from given endpoint
+     */
+    @ManyToOne
+    @JoinColumn(name = "request_params_model_id")
+    private ClassMetaModelEntity requestParamsClassModel;
 }

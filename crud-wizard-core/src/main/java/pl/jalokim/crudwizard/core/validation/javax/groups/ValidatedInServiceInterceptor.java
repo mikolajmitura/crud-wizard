@@ -71,8 +71,8 @@ public class ValidatedInServiceInterceptor {
             }
 
             if (annotation.annotationType().equals(AfterValidationInvoke.List.class)) {
-                AfterValidationInvoke.List beforeValidationInvokeList = (AfterValidationInvoke.List) annotation;
-                AfterValidationInvoke[] value = beforeValidationInvokeList.value();
+                AfterValidationInvoke.List afterValidationInvokeList = (AfterValidationInvoke.List) annotation;
+                AfterValidationInvoke[] value = afterValidationInvokeList.value();
                 foundAfterValidationToInvoke.addAll(elements(value).asList());
             }
         }

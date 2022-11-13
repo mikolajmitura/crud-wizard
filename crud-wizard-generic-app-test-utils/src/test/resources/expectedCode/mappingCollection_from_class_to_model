@@ -13,9 +13,9 @@ import java.util.Map.Entry;
 import java.util.Map;
 import java.util.Set;
 
-class MmappingCollectionsModelToCMappingCollectionsMapper implements GeneratedMapper {
+class MmappingCollectionsModelToCMappingCollectionsMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
-    MmappingCollectionsModelToCMappingCollectionsMapper(org.springframework.core.convert.ConversionService conversionService) {
+    MmappingCollectionsModelToCMappingCollectionsMapper1(org.springframework.core.convert.ConversionService conversionService) {
 		this.conversionService = conversionService;
     }
 

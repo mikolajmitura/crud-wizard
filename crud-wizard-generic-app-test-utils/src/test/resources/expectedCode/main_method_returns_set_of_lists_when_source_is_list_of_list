@@ -10,9 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper implements GeneratedMapper {
+class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper1 implements GeneratedMapper {
 
-    CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper() {
+    CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper1() {
 
     }
 

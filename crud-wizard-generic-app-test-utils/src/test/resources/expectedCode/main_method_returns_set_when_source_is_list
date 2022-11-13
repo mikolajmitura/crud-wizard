@@ -8,9 +8,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 import java.util.HashSet;
 import java.util.Set;
 
-class CListOfMcollectionElementModelToCSetOfCCollectionElementMapper implements GeneratedMapper {
+class CListOfMcollectionElementModelToCSetOfCCollectionElementMapper1 implements GeneratedMapper {
 
-    CListOfMcollectionElementModelToCSetOfCCollectionElementMapper() {
+    CListOfMcollectionElementModelToCSetOfCCollectionElementMapper1() {
 
     }
 

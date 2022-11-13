@@ -19,21 +19,16 @@ import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "properties_overridden_mapping")
-public class PropertiesOverriddenMappingEntity extends BaseEntity {
+@Table(name = "mapper_compiled_code_metadata")
+public class MapperCompiledCodeMetadataEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String targetAssignPath;
-
-    private String sourceAssignExpression;
-
-    @Builder.Default
-    private Boolean ignoreField = false;
-
-    @Builder.Default
-    private Boolean ignoredAllMappingProblem = false;
-
+    private String fullPath;
+    private String fullClassName;
+    private String simpleClassName;
+    private String sessionGenerationTimestamp;
+    private String generatedCodeHash;
 }

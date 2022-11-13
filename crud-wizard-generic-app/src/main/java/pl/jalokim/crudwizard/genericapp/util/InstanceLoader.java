@@ -73,7 +73,7 @@ public class InstanceLoader {
             return (T) cachedInstance;
         }
 
-        Constructor<?>[] constructors = realClass.getConstructors();
+        Constructor<?>[] constructors = realClass.getDeclaredConstructors();
         String className = realClass.getCanonicalName();
         if (constructors.length != 1) {
             throw new IllegalArgumentException("Cannot create instance: " + className + " due to other number than one constructor");

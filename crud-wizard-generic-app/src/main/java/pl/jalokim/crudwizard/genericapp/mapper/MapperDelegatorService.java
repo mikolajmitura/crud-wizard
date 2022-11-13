@@ -1,15 +1,19 @@
 package pl.jalokim.crudwizard.genericapp.mapper;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType.GENERATED;
 import static pl.jalokim.utils.reflection.InvokableReflectionUtils.invokeMethod;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 
 @Service
+@RequiredArgsConstructor
 public class MapperDelegatorService {
 
     @SuppressWarnings({"PMD.ConfusingTernary"})
@@ -19,9 +23,12 @@ public class MapperDelegatorService {
 //            throw new UnsupportedOperationException("Mapper script has not supported yet!");
 //        } else
 
+        if (GENERATED.equals(mapperMetaModel.getMapperType())) {
+            return ((GeneratedMapper) mapperMetaModel.getMapperInstance())
+                .mainMap(mapperArgument);
+        }
         // TODO #1 how mapper should be invoked
         //  when is generated and when is provided as bean
-        //  when generated mapper should be put to class loader? In mapper, or during save to db?
         //  should be some mappers type for distinguish
         //      which is for query, for persistence and for final
         //      should be some defaults implementations which will be saved to db with which default mapper invoke

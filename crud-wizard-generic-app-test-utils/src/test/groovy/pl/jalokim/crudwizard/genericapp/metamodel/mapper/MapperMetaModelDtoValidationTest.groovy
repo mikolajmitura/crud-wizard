@@ -217,11 +217,11 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
         createInvalidConfigWithCompilationProblem()      | [
             errorEntry("",
                 Elements.of("compilation problems: ",
-                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper.java:31: " +
+                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper123.java:31: " +
                         "error: incompatible types: int cannot be converted to LocalDateTime",
                     "\t\tmap.put(\"generated\", ((java.time.LocalDateTime) 12323));",
                     "\t\t                                                ^",
-                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper.java:41: " +
+                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper123.java:41: " +
                         "error: incompatible types: int cannot be converted to LocalDateTime",
                     "\t\tmap.put(\"otherField\", ((java.time.LocalDateTime) 123));",
                     "\t\t                                                 ^").concatWithNewLines())

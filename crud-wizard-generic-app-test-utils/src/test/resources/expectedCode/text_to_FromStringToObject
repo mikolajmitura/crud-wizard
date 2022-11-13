@@ -7,9 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class CStringToCFromStringToObjectMapper implements GeneratedMapper {
+class CStringToCFromStringToObjectMapper1 implements GeneratedMapper {
 
-    CStringToCFromStringToObjectMapper() {
+    CStringToCFromStringToObjectMapper1() {
 
     }
 

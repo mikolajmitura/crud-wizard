@@ -4,27 +4,32 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createPersonMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSimpleDocumentMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createDocumentClassMetaDto
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.exampleClassMetaModelDtoWithExtension
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.simplePersonClassMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getFullClassName
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
 import org.mapstruct.factory.Mappers
+import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByAllArgsFieldsResolver
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.BySettersFieldsResolver
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryDto
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingEntity
 import pl.jalokim.utils.reflection.InvokableReflectionUtils
 import spock.lang.Specification
 
@@ -39,48 +44,50 @@ class MapperGenerateConfigurationMapperTest extends Specification {
 
     def "return expected MapperGenerateConfiguration object"() {
         given:
-        def rootMapperSourceMetaModelDto = createDocumentClassMetaDto()
+        def rootMapperSourceMetaModelDto = createDocumentClassMetaEntity()
         def rootMapperTargetMetaModelDto = exampleClassMetaModelDtoWithExtension()
         def mapperMethodSourceMetaModelDto = simplePersonClassMetaModel()
         def mapperMethodTargetMetaModelDto = extendedPersonClassMetaModel1()
-        def pathVariablesClassModel = ClassMetaModelDto.builder()
+        def pathVariablesClassModel = ClassMetaModel.builder()
             .name("pathParamsMeta")
             .fields([
-                createValidFieldMetaModelDto("usersIdVar", String),
-                createValidFieldMetaModelDto("ordersIdVar", Long)
+                createValidFieldMetaModel("usersIdVar", String),
+                createValidFieldMetaModel("ordersIdVar", Long)
             ])
             .build()
-        def requestParamsClassModel = ClassMetaModelDto.builder()
-                .name("somePersonApplication-queryParams")
-                .fields([
-                    createValidFieldMetaModelDto("lastContact", LocalDate),
-                    createValidFieldMetaModelDto("lastText", String),
-                    createValidFieldMetaModelDto("numberAsText", String)])
-                .build()
+        def requestParamsClassModel = ClassMetaModel.builder()
+            .name("somePersonApplication-queryParams")
+            .fields([
+                createValidFieldMetaModel("lastContact", LocalDate),
+                createValidFieldMetaModel("lastText", String),
+                createValidFieldMetaModel("numberAsText", String)])
+            .build()
 
         def rootMapperSourceMetaModel = createSimpleDocumentMetaModel()
         def rootMapperTargetMetaModel = createClassMetaModelWithParents()
         def mapperMethodSourceMetaModel = createPersonMetaModel()
         def mapperMethodTargetMetaModel = createSomePersonClassMetaModel()
 
-        classMetaModelMapper.toModelFromDto(rootMapperSourceMetaModelDto) >> rootMapperSourceMetaModel
-        classMetaModelMapper.toModelFromDto(rootMapperTargetMetaModelDto) >> rootMapperTargetMetaModel
-        classMetaModelMapper.toModelFromDto(mapperMethodSourceMetaModelDto) >> mapperMethodSourceMetaModel
-        classMetaModelMapper.toModelFromDto(mapperMethodTargetMetaModelDto) >> mapperMethodTargetMetaModel
 
-        def mapperGenerateConfigurationDto = createMapperGenerateConfigurationDto(rootMapperSourceMetaModelDto,
+        def mapperGenerateConfigurationEntity = createMapperGenerateConfigurationEntity(rootMapperSourceMetaModelDto,
             rootMapperTargetMetaModelDto, mapperMethodSourceMetaModelDto, mapperMethodTargetMetaModelDto)
 
+        def context = new MetaModelContext()
+        context.classMetaModels.put(1, rootMapperSourceMetaModel)
+        context.classMetaModels.put(2, rootMapperTargetMetaModel)
+        context.classMetaModels.put(3, mapperMethodSourceMetaModel)
+        context.classMetaModels.put(4, mapperMethodTargetMetaModel)
+
         when:
-        def result = testCase.mapConfiguration(mapperGenerateConfigurationDto,
-            pathVariablesClassModel, requestParamsClassModel)
+        def result = testCase.mapConfiguration(mapperGenerateConfigurationEntity,
+            pathVariablesClassModel, requestParamsClassModel, context)
 
         then:
         verifyAll(result) {
-            globalEnableAutoMapping == mapperGenerateConfigurationDto.globalEnableAutoMapping
-            globalIgnoreMappingProblems == mapperGenerateConfigurationDto.globalIgnoreMappingProblems
+            globalEnableAutoMapping == mapperGenerateConfigurationEntity.globalEnableAutoMapping
+            globalIgnoreMappingProblems == mapperGenerateConfigurationEntity.globalIgnoreMappingProblems
             verifyAll(fieldMetaResolverForRawTarget) {
-                fieldMetaResolverStrategyType == mapperGenerateConfigurationDto.fieldMetaResolverForRawTarget.fieldMetaResolverStrategyType
+                fieldMetaResolverStrategyType == mapperGenerateConfigurationEntity.fieldMetaResolverForRawTarget.fieldMetaResolverStrategyType
                 fieldMetaResolverForClass == Map.of(
                     SamplePersonDto, ByAllArgsFieldsResolver.INSTANCE,
                     SomeDto, BySettersFieldsResolver.INSTANCE
@@ -88,17 +95,17 @@ class MapperGenerateConfigurationMapperTest extends Specification {
             }
 
             verifyAll(fieldMetaResolverForRawSource) {
-                fieldMetaResolverStrategyType == mapperGenerateConfigurationDto.fieldMetaResolverForRawSource.fieldMetaResolverStrategyType
+                fieldMetaResolverStrategyType == mapperGenerateConfigurationEntity.fieldMetaResolverForRawSource.fieldMetaResolverStrategyType
                 fieldMetaResolverForClass == [:]
             }
 
             verifyAll(rootConfiguration) {
-                name == mapperGenerateConfigurationDto.rootConfiguration.name
+                name == mapperGenerateConfigurationEntity.rootConfiguration.name
                 sourceMetaModel == rootMapperSourceMetaModel
                 targetMetaModel == rootMapperTargetMetaModel
-                enableAutoMapping == mapperGenerateConfigurationDto.rootConfiguration.enableAutoMapping
-                ignoreMappingProblems == mapperGenerateConfigurationDto.rootConfiguration.ignoreMappingProblems
-                verifyAll (propertyOverriddenMapping) {
+                enableAutoMapping == mapperGenerateConfigurationEntity.rootConfiguration.enableAutoMapping
+                ignoreMappingProblems == mapperGenerateConfigurationEntity.rootConfiguration.ignoreMappingProblems
+                verifyAll(propertyOverriddenMapping) {
                     ignoredFields == ["person"]
                     !ignoreMappingProblem
                     mappingsByPropertyName.keySet() == ["document", "someField", "person"] as Set
@@ -137,9 +144,9 @@ class MapperGenerateConfigurationMapperTest extends Specification {
 
             mapperConfigurationByMethodName.size() == 1
 
-            def mapperConfigurationDto = mapperGenerateConfigurationDto.subMappersAsMethods[0]
+            def mapperConfigurationDto = mapperGenerateConfigurationEntity.subMappersAsMethods[0]
 
-            verifyAll (mapperConfigurationByMethodName[mapperConfigurationDto.name]) {
+            verifyAll(mapperConfigurationByMethodName[mapperConfigurationDto.name]) {
                 name == mapperConfigurationDto.name
                 sourceMetaModel == mapperMethodSourceMetaModel
                 targetMetaModel == mapperMethodTargetMetaModel
@@ -156,64 +163,64 @@ class MapperGenerateConfigurationMapperTest extends Specification {
         }
     }
 
-    private static MapperGenerateConfigurationDto createMapperGenerateConfigurationDto(ClassMetaModelDto rootMapperSourceMetaModel,
-        ClassMetaModelDto rootMapperTargetMetaModel, ClassMetaModelDto mapperMethodSourceMetaModel, ClassMetaModelDto mapperMethodTargetMetaModel) {
+    private static MapperGenerateConfigurationEntity createMapperGenerateConfigurationEntity(ClassMetaModelEntity rootMapperSourceMetaModel,
+        ClassMetaModelEntity rootMapperTargetMetaModel, ClassMetaModelEntity mapperMethodSourceMetaModel, ClassMetaModelEntity mapperMethodTargetMetaModel) {
 
-        MapperGenerateConfigurationDto.builder()
+        MapperGenerateConfigurationEntity.builder()
             .globalEnableAutoMapping(true)
             .globalIgnoreMappingProblems(false)
-            .fieldMetaResolverForRawTarget(FieldMetaResolverConfigurationDto.builder()
+            .fieldMetaResolverForRawTarget(FieldMetaResolverConfigurationEntity.builder()
                 .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.WRITE)
                 .fieldMetaResolverForClass([
-                    FieldMetaResolverForClassEntryDto.builder()
+                    FieldMetaResolverForClassEntryEntity.builder()
                         .className(SamplePersonDto.canonicalName)
                         .resolverClassName(ByAllArgsFieldsResolver.canonicalName)
                         .build(),
-                    FieldMetaResolverForClassEntryDto.builder()
+                    FieldMetaResolverForClassEntryEntity.builder()
                         .className(SomeDto.canonicalName)
                         .resolverClassName(BySettersFieldsResolver.canonicalName)
                         .build(),
                 ])
                 .build())
-            .fieldMetaResolverForRawSource(FieldMetaResolverConfigurationDto.builder()
+            .fieldMetaResolverForRawSource(FieldMetaResolverConfigurationEntity.builder()
                 .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
                 .fieldMetaResolverForClass([])
                 .build())
-            .rootConfiguration(MapperConfigurationDto.builder()
+            .rootConfiguration(MapperConfigurationEntity.builder()
                 .name(randomText())
                 .sourceMetaModel(rootMapperSourceMetaModel)
                 .targetMetaModel(rootMapperTargetMetaModel)
                 .enableAutoMapping(false)
                 .ignoreMappingProblems(true)
                 .propertyOverriddenMapping([
-                    PropertiesOverriddenMappingDto.builder()
+                    PropertiesOverriddenMappingEntity.builder()
                         .targetAssignPath("document.name")
                         .ignoreField(true)
                         .build(),
-                    PropertiesOverriddenMappingDto.builder()
+                    PropertiesOverriddenMappingEntity.builder()
                         .targetAssignPath("document.surname")
                         .ignoreField(false)
                         .build(),
-                    PropertiesOverriddenMappingDto.builder()
+                    PropertiesOverriddenMappingEntity.builder()
                         .targetAssignPath("document")
                         .ignoredAllMappingProblem(true)
                         .build(),
-                    PropertiesOverriddenMappingDto.builder()
+                    PropertiesOverriddenMappingEntity.builder()
                         .targetAssignPath("document.uuid")
                         .ignoreField(true)
                         .build(),
-                    PropertiesOverriddenMappingDto.builder()
+                    PropertiesOverriddenMappingEntity.builder()
                         .targetAssignPath("person")
                         .ignoreField(true)
                         .build(),
-                    PropertiesOverriddenMappingDto.builder()
+                    PropertiesOverriddenMappingEntity.builder()
                         .targetAssignPath("someField.next.andNext")
                         .sourceAssignExpression(randomText())
                         .build()
                 ])
                 .build())
             .subMappersAsMethods([
-                MapperConfigurationDto.builder()
+                MapperConfigurationEntity.builder()
                     .name(randomText())
                     .sourceMetaModel(mapperMethodSourceMetaModel)
                     .targetMetaModel(mapperMethodTargetMetaModel)
@@ -225,4 +232,116 @@ class MapperGenerateConfigurationMapperTest extends Specification {
             .build()
     }
 
+    static ClassMetaModelEntity createDocumentClassMetaEntity() {
+        ClassMetaModelEntity.builder()
+            .name("document")
+            .fields([
+                createField("id", Long, [isIdFieldType()]),
+                createField("type", Byte),
+                createField("enumField", createEnumMetaModel("ENUM1", "ENUM2")),
+                createField("value", String),
+                createField("validFrom", LocalDate),
+                createField("validTo", LocalDate),
+            ])
+            .build()
+    }
+
+    private static FieldMetaModelEntity createField(String fieldName, Class<?> fieldType,
+        List<AdditionalPropertyEntity> additionalProperties = []) {
+        FieldMetaModelEntity.builder()
+            .fieldName(fieldName)
+            .fieldType(createClassMetaModelEntityFromClass(fieldType))
+            .additionalProperties(additionalProperties)
+            .build()
+    }
+
+    private static FieldMetaModelEntity createField(String fieldName, ClassMetaModelEntity fieldType) {
+        FieldMetaModelEntity.builder()
+            .fieldName(fieldName)
+            .fieldType(fieldType)
+            .build()
+    }
+
+    private static ClassMetaModelEntity createClassMetaModelEntityFromClass(Class<?> metaModelClass) {
+        ClassMetaModelEntity.builder()
+            .className(metaModelClass.canonicalName)
+            .isGenericEnumType(false)
+            .build()
+    }
+
+    static ClassMetaModelEntity createEnumMetaModel(String... enumValues) {
+        ClassMetaModelEntity.builder()
+            .name("exampleEnum")
+            .isGenericEnumType(true)
+            .additionalProperties([
+                AdditionalPropertyEntity.builder()
+                    .name(ENUM_VALUES_PREFIX)
+                    .valueRealClassName(getFullClassName(enumValues))
+                    .rawJson(ObjectMapperConfig.objectToRawJson(enumValues))
+                    .build()])
+            .build()
+
+    }
+
+    static AdditionalPropertyEntity isIdFieldType() {
+        AdditionalPropertyEntity.builder()
+            .name(FieldMetaModel.IS_ID_FIELD)
+            .build()
+    }
+
+    static ClassMetaModelEntity exampleClassMetaModelDtoWithExtension() {
+        ClassMetaModelEntity.builder()
+            .name("modelWithParents")
+            .isGenericEnumType(false)
+            .extendsFromModels([
+                extendedPersonClassMetaModel1(), createClassMetaModelEntityFromClass(ExtendedSamplePersonDto)
+            ])
+            .fields([
+                createField("birthDate", Date)
+            ])
+            .build()
+    }
+
+    static ClassMetaModelEntity extendedPersonClassMetaModel1() {
+        def personMetaModel = simplePersonClassMetaModel().toBuilder().build()
+        personMetaModel.name = "somePersonApplication"
+        personMetaModel.getFields().addAll([
+            createField("documents", createListWithMetaModel(createDocumentClassMetaDto()))
+        ])
+        personMetaModel
+    }
+
+    static ClassMetaModelEntity simplePersonClassMetaModel() {
+        ClassMetaModelEntity.builder()
+            .name("person")
+            .isGenericEnumType(false)
+            .fields([
+                createField("id", Long, [isIdFieldType()]),
+                createField("name", String),
+                createField("surname", String),
+                createField("birthDate", LocalDate)
+            ])
+            .build()
+    }
+
+    static ClassMetaModelEntity createListWithMetaModel(ClassMetaModelEntity classMetaModelEntity) {
+        ClassMetaModelEntity.builder()
+            .className(List.canonicalName)
+            .genericTypes([classMetaModelEntity])
+            .build()
+    }
+
+    static ClassMetaModelEntity createDocumentClassMetaDto() {
+        ClassMetaModelEntity.builder()
+            .name("document")
+            .fields([
+                createField("id", Long, [isIdFieldType()]),
+                createField("type", Byte),
+                createField("enumField", createEnumMetaModel("ENUM1", "ENUM2")),
+                createField("value", String),
+                createField("validFrom", LocalDate),
+                createField("validTo", LocalDate),
+            ])
+            .build()
+    }
 }

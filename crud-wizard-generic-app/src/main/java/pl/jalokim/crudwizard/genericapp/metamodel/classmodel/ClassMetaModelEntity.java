@@ -31,7 +31,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditio
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity;
 
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data

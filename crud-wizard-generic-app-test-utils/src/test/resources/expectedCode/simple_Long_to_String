@@ -7,9 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class CLongToCStringMapper implements GeneratedMapper {
+class CLongToCStringMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
-    CLongToCStringMapper(org.springframework.core.convert.ConversionService conversionService) {
+    CLongToCStringMapper1(org.springframework.core.convert.ConversionService conversionService) {
 		this.conversionService = conversionService;
     }
 

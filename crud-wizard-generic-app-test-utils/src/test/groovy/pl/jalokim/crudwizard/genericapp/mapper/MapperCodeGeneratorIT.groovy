@@ -88,7 +88,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         }
 
         when:
-        def result = mapperGenerator.generateMapperCode(newMapperGenerateConfiguration)
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(newMapperGenerateConfiguration, 1)
+        def result = mapperGenerator.generateMapperCode(mapperCodeMetadata)
 
         then:
         saveMapperCodeToFile(result, sourceMetaModel, targetMetaModel)
@@ -638,7 +639,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             .build()
 
         when:
-        mapperGenerator.generateMapperCode(mapperGenerateConf)
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        mapperGenerator.generateMapperCode(mapperCodeMetadata)
 
         then:
         MapperGenerationException ex = thrown()
@@ -681,7 +683,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build())
 
         when:
-        mapperGenerator.generateMapperCode(mapperGenerateConf)
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        mapperGenerator.generateMapperCode(mapperCodeMetadata)
 
         then:
         MapperGenerationException ex = thrown()
@@ -714,7 +717,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             .build()
 
         when:
-        mapperGenerator.generateMapperCode(mapperGenerateConf)
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        mapperGenerator.generateMapperCode(mapperCodeMetadata)
 
         then:
         MapperGenerationException ex = thrown()
@@ -749,7 +753,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build())
 
         when:
-        mapperGenerator.generateMapperCode(mapperGenerateConf)
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        mapperGenerator.generateMapperCode(mapperCodeMetadata)
 
         then:
         MapperGenerationException ex = thrown()
@@ -788,7 +793,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build())
 
         when:
-        mapperGenerator.generateMapperCode(mapperGenerateConf)
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        mapperGenerator.generateMapperCode(mapperCodeMetadata)
 
         then:
         MapperGenerationException ex = thrown()
@@ -889,7 +895,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build())
 
         when:
-        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperCodeMetadata),
             sourceModel, targetModel)
 
         then:
@@ -1001,7 +1008,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             .build()
 
         when:
-        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperCodeMetadata),
             sourceClassMetaModel, targetClassMetaModel)
 
         then:
@@ -1138,7 +1146,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         mapperGenerateConf.addSubMapperConfiguration(otherMethod.getName(), otherMethod)
 
         when:
-        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperCodeMetadata),
             sourceClassMetaModel, targetClassMetaModel)
 
         then:
@@ -1220,7 +1229,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         mapperGenerateConf.addSubMapperConfiguration(otherMethod.getName(), otherMethod)
 
         when:
-        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperCodeMetadata),
             sourceClassMetaModel, targetClassMetaModel)
 
         then:
@@ -1307,7 +1317,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         mapperGenerateConf.addSubMapperConfiguration(otherMethod.getName(), otherMethod)
 
         when:
-        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperGenerateConf),
+        def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(mapperGenerateConf, 1)
+        saveMapperCodeToFile(mapperGenerator.generateMapperCode(mapperCodeMetadata),
             sourceClassMetaModel, targetClassMetaModel)
 
         then:
