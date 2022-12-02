@@ -8,6 +8,9 @@ public class StringToSomeEnum3ModelConverter implements ClassMetaModelConverter<
 
     @Override
     public String convert(String from) {
+        if (from.equals("3")) {
+            return "VAR3";
+        }
         return from;
     }
 

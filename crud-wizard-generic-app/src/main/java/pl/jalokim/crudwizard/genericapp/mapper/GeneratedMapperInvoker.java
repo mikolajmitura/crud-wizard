@@ -13,6 +13,7 @@ public class GeneratedMapperInvoker {
 
     private final MetaModelContextService metaModelContextService;
 
+    // TODO #1 here should be opportunity for invoke other mappers by name not only generated ones
     public Object mapWithMapper(String mapperName, GenericMapperArgument genericMapperArgument, Object mapFrom) {
 
         MetaModelContext metaModelContext = metaModelContextService.getMetaModelContext();

@@ -7,9 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
-class CSomePerson1ToMsomePerson1Mapper1 implements GeneratedMapper {
+class CSomePerson1ToMsomePerson1Mapper3 implements GeneratedMapper {
 		private final pl.jalokim.crudwizard.core.exception.handler.DummyService dummyService;
-    CSomePerson1ToMsomePerson1Mapper1(@org.springframework.beans.factory.annotation.Qualifier("dummyService")pl.jalokim.crudwizard.core.exception.handler.DummyService dummyService) {
+    CSomePerson1ToMsomePerson1Mapper3(@org.springframework.beans.factory.annotation.Qualifier("dummyService")pl.jalokim.crudwizard.core.exception.handler.DummyService dummyService) {
 		this.dummyService = dummyService;
     }
 

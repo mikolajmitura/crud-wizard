@@ -63,7 +63,6 @@ public class MapperMethodGenerator {
     public static final String ITERABLE_ELEMENT_NODE_NAME = "*";
 
     // TODO #1 mapper task orders
-    //  - generate few mappers code and compile it, put to classloader and map some values by them in MapperCodeGeneratorIT
     //  - MapperDelegatorService
     //  - implement use mapper with have input field other than GenericMapperArgument but raw object
     //  - full IT for create new endpoint with mapper with some overridden fields

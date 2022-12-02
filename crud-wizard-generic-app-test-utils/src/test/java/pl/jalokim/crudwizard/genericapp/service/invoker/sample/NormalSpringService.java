@@ -148,7 +148,9 @@ public class NormalSpringService {
     }
 
     public CollectionElement[] getCollectionElementArray(String someString, String otherString) {
-        return new CollectionElement[0];
+        return new CollectionElement[] {
+            new CollectionElement(someString, otherString, null, null)
+        };
     }
 
     public Map<String, Object> returnTranslatedHttpQuery(@RequestParam Map<String, Object> httpQueryTranslated) {
@@ -156,7 +158,7 @@ public class NormalSpringService {
     }
 
     public Long someMethodName(String stringArg, Long longArg) {
-        return 1L;
+        return (long) stringArg.length();
     }
 
     public String someMethodName(String stringArg1, String stringArg2) {
@@ -164,7 +166,7 @@ public class NormalSpringService {
     }
 
     public String getSomeString() {
-        return "someString";
+        return "someStringValue";
     }
 
     public SomeDocumentDto getSomeDocumentDto() {

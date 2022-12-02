@@ -13,11 +13,11 @@ import java.util.Map.Entry;
 import java.util.Map;
 import java.util.Set;
 
-class MmappingCollectionsModelToCMappingCollectionsMapper1 implements GeneratedMapper {
+class MmappingCollectionsModelToCMappingCollectionsMapper2 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
 		private final pl.jalokim.crudwizard.core.exception.handler.DummyService dummyService;
 		private final pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService normalSpringService;
-    MmappingCollectionsModelToCMappingCollectionsMapper1(org.springframework.core.convert.ConversionService conversionService,
+    MmappingCollectionsModelToCMappingCollectionsMapper2(org.springframework.core.convert.ConversionService conversionService,
 @org.springframework.beans.factory.annotation.Qualifier("dummyService")pl.jalokim.crudwizard.core.exception.handler.DummyService dummyService,
 @org.springframework.beans.factory.annotation.Qualifier("normalSpringService")pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService normalSpringService) {
 		this.conversionService = conversionService;

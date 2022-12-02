@@ -8,9 +8,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 import java.util.ArrayList;
 import java.util.List;
 
-class MotherWithElementsModelToCOtherWithElementsMapper1 implements GeneratedMapper {
+class MotherWithElementsModelToCOtherWithElementsMapper2 implements GeneratedMapper {
 
-    MotherWithElementsModelToCOtherWithElementsMapper1() {
+    MotherWithElementsModelToCOtherWithElementsMapper2() {
 
     }
 
@@ -82,7 +82,7 @@ class MotherWithElementsModelToCOtherWithElementsMapper1 implements GeneratedMap
         int initSize = sourceObject.size();
         List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> elements = new ArrayList<>(initSize);
         for (java.util.Map<java.lang.String, java.lang.Object> element : sourceObject) {
-            elements.add(((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) mapElements1(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) element))));
+            elements.add(((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) mapElements2(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) element))));
         }
 
 
@@ -148,9 +148,7 @@ class MotherWithElementsModelToCOtherWithElementsMapper1 implements GeneratedMap
 
 		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement(
 
-		((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field1"))
-			.orElse(null)),
+		((java.lang.String) null),
 
 		((java.lang.String) Optional.ofNullable(sourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field2"))
@@ -185,9 +183,7 @@ class MotherWithElementsModelToCOtherWithElementsMapper1 implements GeneratedMap
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field1"))
 			.orElse(null)),
 
-		((java.lang.String) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field2"))
-			.orElse(null)),
+		((java.lang.String) null),
 
 		((java.lang.Long) Optional.ofNullable(sourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field3"))
@@ -263,15 +259,15 @@ class MotherWithElementsModelToCOtherWithElementsMapper1 implements GeneratedMap
 
 		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement(
 
-		((java.lang.String) null),
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field1"))
+			.orElse(null)),
 
 		((java.lang.String) Optional.ofNullable(sourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field2"))
 			.orElse(null)),
 
-		((java.lang.Long) Optional.ofNullable(sourceObject)
-			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("field3"))
-			.orElse(null)),
+		((java.lang.Long) null),
 
 		((pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject) mapMnestedElementObjectModelToCNestedElementObject(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(sourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someObject"))

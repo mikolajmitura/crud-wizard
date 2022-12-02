@@ -171,16 +171,36 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
 
 
 
-		return new pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject(
+		pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject newObject = new pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject();
 
-		((pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto) mapMsomeOtherDtoModelToCSomeSimpleValueDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
+		newObject.setBirthDay(((java.time.LocalDate) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("birthDay"))
+			.orElse(null)));
+
+		newObject.setId(conversionService.convert(((java.lang.String) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
+			.orElse(null)), java.lang.Long.class));
+
+		newObject.setLastLogin(((java.time.LocalDateTime) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("lastLogin"))
+			.orElse(null)));
+
+		newObject.setName(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
+			.orElse(null)));
+
+		newObject.setSomeOtherDto(((pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto) mapMsomeOtherDtoModelToCSomeSimpleValueDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someOtherDto"))
-			.orElse(null)))),
+			.orElse(null)))));
 
-		((java.lang.String) Optional.ofNullable(argument2)
+		newObject.setSomeString(((java.lang.String) Optional.ofNullable(argument2)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString"))
-			.orElse(null))
-        );
+			.orElse(null)));
+
+		newObject.setSurname(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("surname"))
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) newObject;
     }
 
     @GeneratedMethod
@@ -193,16 +213,36 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
 
 
 
-		return new pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject(
+		pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject newObject = new pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject();
 
-		((pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto) mapMsomeOtherDtoModelToCSomeSimpleValueDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
+		newObject.setBirthDay(((java.time.LocalDate) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("birthDay"))
+			.orElse(null)));
+
+		newObject.setId(conversionService.convert(((java.lang.String) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
+			.orElse(null)), java.lang.Long.class));
+
+		newObject.setLastLogin(((java.time.LocalDateTime) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("lastLogin"))
+			.orElse(null)));
+
+		newObject.setName(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
+			.orElse(null)));
+
+		newObject.setSomeOtherDto(((pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto) mapMsomeOtherDtoModelToCSomeSimpleValueDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someOtherDto"))
-			.orElse(null)))),
+			.orElse(null)))));
 
-		((java.lang.String) Optional.ofNullable(argument0)
+		newObject.setSomeString(((java.lang.String) Optional.ofNullable(argument0)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString"))
-			.orElse(null))
-        );
+			.orElse(null)));
+
+		newObject.setSurname(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("surname"))
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) newObject;
     }
 
     @GeneratedMethod

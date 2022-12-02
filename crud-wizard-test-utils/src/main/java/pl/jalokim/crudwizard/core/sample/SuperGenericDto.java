@@ -2,9 +2,11 @@ package pl.jalokim.crudwizard.core.sample;
 
 import java.util.List;
 import java.util.Map;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+@EqualsAndHashCode
 public class SuperGenericDto<T, I, S> {
 
     @Getter

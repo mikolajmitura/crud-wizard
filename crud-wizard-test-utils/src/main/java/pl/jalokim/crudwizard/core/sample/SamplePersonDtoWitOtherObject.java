@@ -7,6 +7,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class SamplePersonDtoWitOtherObject extends SamplePersonDto {
 
-    private final SomeSimpleValueDto someOtherDto;
-    private final String someString;
+    private SomeSimpleValueDto someOtherDto;
+    private String someString;
 }
