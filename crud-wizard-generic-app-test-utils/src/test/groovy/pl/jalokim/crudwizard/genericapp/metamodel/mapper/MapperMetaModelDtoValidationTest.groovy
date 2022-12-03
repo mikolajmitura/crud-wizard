@@ -216,14 +216,22 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
 
         createInvalidConfigWithCompilationProblem()      | [
             errorEntry("",
-                Elements.of("compilation problems: ",
-                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper123.java:31: " +
-                        "error: incompatible types: int cannot be converted to LocalDateTime",
+                Elements.of(
+                    "compilation problems: ",
+
+                    changePathSeparators(
+                        "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper123.java:31: " +
+                        "error: incompatible types: int cannot be converted to LocalDateTime"),
+
                     "\t\tmap.put(\"generated\", ((java.time.LocalDateTime) 12323));",
+
                     "\t\t                                                ^",
-                    "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper123.java:41: " +
-                        "error: incompatible types: int cannot be converted to LocalDateTime",
+                    changePathSeparators(
+                        "target\\generatedMappers\\123\\pl\\jalokim\\crudwizard\\generated\\mapper\\MsourceDocumentToMtargetDocumentMapper123.java:41: " +
+                        "error: incompatible types: int cannot be converted to LocalDateTime"),
+
                     "\t\tmap.put(\"otherField\", ((java.time.LocalDateTime) 123));",
+
                     "\t\t                                                 ^").concatWithNewLines())
         ]
     }
@@ -458,5 +466,16 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
         Long someMapperMethod(String someObject) {
             0
         }
+    }
+
+    private static String changePathSeparators(String text) {
+        if (isWindows()) {
+            return text
+        }
+        text.replace("\\", "/")
+    }
+
+    static boolean isWindows() {
+        return System.getProperty("os.name").contains("Windows");
     }
 }
