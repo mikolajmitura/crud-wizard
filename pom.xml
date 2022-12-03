@@ -41,6 +41,7 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
         <coveralls.repo.token>SykbTJDEWWJbqjPCI0oaOD3bHmITaNdxu</coveralls.repo.token>
+        <spring-boot-starter.version>2.2.6.RELEASE</spring-boot-starter.version>
     </properties>
 
     <dependencies>
@@ -95,7 +96,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-parent</artifactId>
-                <version>2.2.6.RELEASE</version>
+                <version>${spring-boot-starter-parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
