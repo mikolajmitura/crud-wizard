@@ -476,6 +476,6 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
     }
 
     static boolean isWindows() {
-        return System.getProperty("os.name").contains("Windows");
+        return System.getProperty("os.name").contains("Windows")
     }
 }
