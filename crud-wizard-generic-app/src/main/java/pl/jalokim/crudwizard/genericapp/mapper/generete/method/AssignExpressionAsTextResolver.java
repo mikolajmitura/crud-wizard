@@ -64,9 +64,9 @@ public class AssignExpressionAsTextResolver {
 
     private boolean canIgnore(TargetFieldMetaData targetFieldMetaData, MapperConfiguration mapperConfiguration,
         MapperGenerateConfiguration mapperGenerateConfiguration) {
-        return mapperGenerateConfiguration.isGlobalIgnoreMappingProblems()
-            || mapperConfiguration.isIgnoreMappingProblems()
-            || targetFieldMetaData.getPropertiesOverriddenMappingForField().isIgnoreMappingProblem();
+        return mapperGenerateConfiguration.isGlobalIgnoreMappingProblems() ||
+            mapperConfiguration.isIgnoreMappingProblems() ||
+            targetFieldMetaData.getPropertiesOverriddenMappingForField().isIgnoreMappingProblem();
     }
 
     public static String getInMethodPartMessage(MapperMethodGeneratorArgument methodGeneratorArgument) {
@@ -84,6 +84,7 @@ public class AssignExpressionAsTextResolver {
         return " " + createMessagePlaceholder("mapper.not.found.assign.for.method", methodName);
     }
 
+    @SuppressWarnings("PMD.CognitiveComplexity")
     private String generateFetchValueForAssign(MapperMethodGeneratorArgument methodGeneratorArgument,
         ClassMetaModel sourceMetaModel, String fetchValueExpression,
         TargetFieldMetaData targetFieldMetaData, boolean suppressProblemWithFindConversion) {
@@ -105,8 +106,9 @@ public class AssignExpressionAsTextResolver {
                 String converterName = converterDefinition.getBeanName();
                 return String.format("((%s) genericObjectsConversionService.convert(\"%s\", %s))",
                     targetMetaModel.getJavaGenericTypeInfo(), converterName, fetchValueExpression);
-            } else if (isEnabledAutoMapping(mapperGenerateConfiguration, mapperConfiguration) &&sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass()
-                && conversionService.canConvert(sourceMetaModel.getRealClass(), targetMetaModel.getRealClass())) {
+            } else if (isEnabledAutoMapping(mapperGenerateConfiguration, mapperConfiguration) &&
+                sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass() &&
+                conversionService.canConvert(sourceMetaModel.getRealClass(), targetMetaModel.getRealClass())) {
                 mapperGeneratedCodeMetadata.addConstructorArgument(ConversionService.class);
                 return String.format("conversionService.convert(%s, %s.class)",
                     fetchValueExpression, targetMetaModel.getCanonicalNameOfRealClass());
@@ -135,13 +137,13 @@ public class AssignExpressionAsTextResolver {
     }
 
     private boolean whenConversionBetweenStringAndEnumMetaModel(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel) {
-        return (targetMetaModel.isGenericMetamodelEnum() && String.class.equals(sourceMetaModel.getRealClass()))
-            || (sourceMetaModel.isGenericMetamodelEnum() && String.class.equals(targetMetaModel.getRealClass()));
+        return targetMetaModel.isGenericMetamodelEnum() && String.class.equals(sourceMetaModel.getRealClass()) ||
+            sourceMetaModel.isGenericMetamodelEnum() && String.class.equals(targetMetaModel.getRealClass());
     }
 
     private boolean isTheSameTypeOrSubType(ClassMetaModel targetMetaModel, ClassMetaModel sourceMetaModel) {
-        return sourceMetaModel.getTypeDescription().equals(targetMetaModel.getTypeDescription())
-            || sourceMetaModel.isSubTypeOf(targetMetaModel);
+        return sourceMetaModel.getTypeDescription().equals(targetMetaModel.getTypeDescription()) ||
+            sourceMetaModel.isSubTypeOf(targetMetaModel);
     }
 
     private boolean isEnabledAutoMapping(MapperGenerateConfiguration mapperGenerateConfiguration, MapperConfiguration mapperConfiguration) {

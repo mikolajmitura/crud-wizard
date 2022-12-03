@@ -104,8 +104,8 @@ public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidato
             UrlPart newUrlPart = newUrlParts.get(i);
             UrlPart currentUrlPart = currentUrlParts.get(i);
 
-            boolean theSameUrlPart = newUrlPart.isPathVariable() && currentUrlPart.isPathVariable()
-                || newUrlPart.getOriginalValue().equals(currentUrlPart.getOriginalValue());
+            boolean theSameUrlPart = newUrlPart.isPathVariable() && currentUrlPart.isPathVariable() ||
+                newUrlPart.getOriginalValue().equals(currentUrlPart.getOriginalValue());
 
             if (!theSameUrlPart) {
                 break;

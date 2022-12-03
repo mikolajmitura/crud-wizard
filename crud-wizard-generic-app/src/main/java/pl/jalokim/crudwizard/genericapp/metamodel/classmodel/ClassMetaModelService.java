@@ -41,7 +41,7 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
     }
 
     @Override
-    @SuppressWarnings("PMD.CompareObjectsWithEquals")
+    @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.AvoidReassigningParameters"})
     public ClassMetaModelEntity save(ClassMetaModelEntity classMetaModelEntity) {
         var temporaryMetaModelContext = TemporaryModelContextHolder.getTemporaryMetaModelContext();
         ClassMetaModelDto fullDtoDefinition = temporaryMetaModelContext.getClassMetaModelDtoByName(classMetaModelEntity.getName());

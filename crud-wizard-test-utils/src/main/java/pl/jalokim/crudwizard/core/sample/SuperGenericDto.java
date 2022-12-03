@@ -18,6 +18,7 @@ public class SuperGenericDto<T, I, S> {
     @Setter
     private Map<String, Map<Long, S>> mapWithSType;
 
+    @SuppressWarnings("PMD.LinguisticNaming")
     public void getResults() {
     }
 

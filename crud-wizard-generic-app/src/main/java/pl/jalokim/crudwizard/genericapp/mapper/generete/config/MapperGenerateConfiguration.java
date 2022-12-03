@@ -20,8 +20,7 @@ public class MapperGenerateConfiguration {
     /**
      * by default disabled, should inform when have problem with some field, when cannot find conversion strategy for given field types.
      */
-    @Builder.Default
-    private boolean globalIgnoreMappingProblems = false;
+    private boolean globalIgnoreMappingProblems;
 
     @Builder.Default
     private FieldMetaResolverConfiguration fieldMetaResolverForRawTarget = WRITE_FIELD_RESOLVER_CONFIG;

@@ -22,6 +22,12 @@ public class SomeCustomAnnotationValidator implements BaseConstraintValidator<So
     }
 
     @Override
+    @SuppressWarnings({
+        "PMD.CognitiveComplexity",
+        "PMD.NPathComplexity",
+        "PMD.AvoidCatchingNPE",
+        "PMD.EmptyCatchBlock"
+    })
     public boolean isValidValue(Object object, ConstraintValidatorContext context) {
         if (object instanceof Long) {
             long value = (Long) object;

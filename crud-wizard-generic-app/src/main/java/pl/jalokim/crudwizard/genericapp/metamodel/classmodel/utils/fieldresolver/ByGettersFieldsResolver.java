@@ -17,7 +17,7 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 @Slf4j
 public class ByGettersFieldsResolver implements FieldMetaResolver {
 
-    public static ByGettersFieldsResolver INSTANCE = new ByGettersFieldsResolver();
+    public static final ByGettersFieldsResolver INSTANCE = new ByGettersFieldsResolver();
 
     @Override
     public List<FieldMetaModel> findDeclaredFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
@@ -47,7 +47,7 @@ public class ByGettersFieldsResolver implements FieldMetaResolver {
     }
 
     private boolean notReturnGroovyMetaClassMethod(Method method) {
-        return !method.getReturnType().getCanonicalName().equals("groovy.lang.MetaClass");
+        return !"groovy.lang.MetaClass".equals(method.getReturnType().getCanonicalName());
     }
 
     @Override

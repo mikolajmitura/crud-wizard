@@ -21,7 +21,7 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 
 public class ByBuilderFieldsResolver implements FieldMetaResolver {
 
-    public static ByBuilderFieldsResolver INSTANCE = new ByBuilderFieldsResolver();
+    public static final ByBuilderFieldsResolver INSTANCE = new ByBuilderFieldsResolver();
 
     @Override
     public List<FieldMetaModel> findDeclaredFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
@@ -68,22 +68,22 @@ public class ByBuilderFieldsResolver implements FieldMetaResolver {
     public List<FieldMetaModel> getAllAvailableFieldsForWrite(ClassMetaModel classMetaModel) {
         Class<?> rawClass = classMetaModel.getRealClassOrBasedOn();
 
-            if (hasSuperBuilderType(rawClass)) {
-                List<FieldMetaModel> fieldMetaModels = new ArrayList<>(classMetaModel.getFields());
-                ClassMetaModel currentModel = classMetaModel;
-                while (isNotEmpty(currentModel.getExtendsFromModels())) {
-                    ClassMetaModel superMetaModel = currentModel.getExtendsFromModels().get(0);
-                    if (hasSuperBuilderType(superMetaModel.getRealClassOrBasedOn())) {
-                        currentModel = superMetaModel;
-                        fieldMetaModels.addAll(currentModel.getFields());
-                    } else {
-                        break;
-                    }
+        if (hasSuperBuilderType(rawClass)) {
+            List<FieldMetaModel> fieldMetaModels = new ArrayList<>(classMetaModel.getFields());
+            ClassMetaModel currentModel = classMetaModel;
+            while (isNotEmpty(currentModel.getExtendsFromModels())) {
+                ClassMetaModel superMetaModel = currentModel.getExtendsFromModels().get(0);
+                if (hasSuperBuilderType(superMetaModel.getRealClassOrBasedOn())) {
+                    currentModel = superMetaModel;
+                    fieldMetaModels.addAll(currentModel.getFields());
+                } else {
+                    break;
                 }
-                return fieldMetaModels;
-            } else {
-                return classMetaModel.getFields();
             }
+            return fieldMetaModels;
+        } else {
+            return classMetaModel.getFields();
+        }
     }
 
     private boolean hasSuperBuilderType(Class<?> rawClass) {

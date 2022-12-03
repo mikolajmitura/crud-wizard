@@ -28,7 +28,8 @@ public class ValidatedInServiceInterceptor {
     private final ApplicationContext applicationContext;
 
     /**
-     * When some argument should be validated in some spring bean then method should be annotated with {@link org.springframework.validation.annotation.Validated}
+     * When some argument should be validated in some spring bean then method
+     * should be annotated with {@link org.springframework.validation.annotation.Validated}
      * And some parameter objects should be annotated with {@link org.springframework.validation.annotation.Validated}
      */
     @Around("@annotation(org.springframework.validation.annotation.Validated)")
@@ -100,6 +101,7 @@ public class ValidatedInServiceInterceptor {
         }
     }
 
+    @SuppressWarnings("PMD.CognitiveComplexity")
     public void invokeBeanAndMethod(Object instance, String methodName, Object methodArg, ValidationResult validationResult) {
         List<Method> allNotStaticMethods = MetadataReflectionUtils.getAllNotStaticMethods(instance.getClass());
 
@@ -114,17 +116,17 @@ public class ValidatedInServiceInterceptor {
             }
         } catch (ReflectionOperationException ex) {
             boolean foundAndInvoked = false;
-            if (validationResult != null) {
+            if (validationResult == null) {
                 for (Method allNotStaticMethod : allNotStaticMethods) {
-                    if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 1) {
-                        InvokableReflectionUtils.invokeMethod(instance, methodName, validationResult);
+                    if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 0) {
+                        InvokableReflectionUtils.invokeMethod(instance, methodName);
                         foundAndInvoked = true;
                     }
                 }
             } else {
                 for (Method allNotStaticMethod : allNotStaticMethods) {
-                    if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 0) {
-                        InvokableReflectionUtils.invokeMethod(instance, methodName);
+                    if (allNotStaticMethod.getName().equals(methodName) && allNotStaticMethod.getParameterTypes().length == 1) {
+                        InvokableReflectionUtils.invokeMethod(instance, methodName, validationResult);
                         foundAndInvoked = true;
                     }
                 }

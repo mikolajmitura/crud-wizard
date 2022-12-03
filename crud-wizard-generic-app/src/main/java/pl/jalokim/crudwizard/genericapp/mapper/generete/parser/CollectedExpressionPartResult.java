@@ -8,7 +8,7 @@ public class CollectedExpressionPartResult {
     String collectedText;
     char cutWithText;
 
-    public boolean isCutByEOF() {
+    public boolean isCutByEof() {
         return cutWithText == '\n';
     }
 }

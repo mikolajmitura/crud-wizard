@@ -28,7 +28,7 @@ class CastMetaModelSourceExpressionParser extends SourceExpressionParser {
         sourceExpressionParserContext.addClassMetaModelCast(classMetaModelMapperParser
             .parseClassMetaModel(castToMetaModel, mapperConfigurationParserContext));
 
-        ValueToAssignExpression assignExpression = parseWithOtherParser(InitSourceExpressionParser.class,
+        final ValueToAssignExpression assignExpression = parseWithOtherParser(InitSourceExpressionParser.class,
             mapperConfigurationParserContext, sourceExpressionParserContext);
 
         sourceExpressionParserContext.clearLastCastMetaModel();

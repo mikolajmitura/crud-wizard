@@ -5,6 +5,8 @@ import lombok.Getter;
 @Getter
 public class EntryMappingParseException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
+
     private final MapperContextEntryError mapperContextEntryError;
     private final ErrorSource errorType;
 

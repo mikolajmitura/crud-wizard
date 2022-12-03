@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MapperMetaModelEntityRepository extends JpaRepository<MapperMetaModelEntity, Long> {
 
-    @Query("select count(m) > 0 from MapperMetaModelEntity m where m.mapperBeanAndMethod.beanName = :beanName "
-        + "and m.mapperBeanAndMethod.className = :className "
-        + "and m.mapperBeanAndMethod.methodName = :methodName "
+    @Query("select count(m) > 0 from MapperMetaModelEntity m where m.mapperBeanAndMethod.beanName = :beanName " +
+        "and m.mapperBeanAndMethod.className = :className " +
+        "and m.mapperBeanAndMethod.methodName = :methodName "
     )
     boolean existsByBeanNameAndClassNameAndMethodName(String beanName, String className, String methodName);
 

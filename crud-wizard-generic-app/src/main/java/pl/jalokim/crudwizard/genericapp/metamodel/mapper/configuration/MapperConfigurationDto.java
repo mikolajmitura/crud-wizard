@@ -24,10 +24,10 @@ public class MapperConfigurationDto {
 
     @Valid
     @NotNull
-        // TODO #1 maybe better will that when
-        //  sourceMetaModel and targetMetaModel will be not provided by front but before validation
-        //  will be attached to mapper config when post, get mapper persist etc...
-        //  only will be provided by front for inner method
+    // TODO #1 maybe better will that when
+    //  sourceMetaModel and targetMetaModel will be not provided by front but before validation
+    //  will be attached to mapper config when post, get mapper persist etc...
+    //  only will be provided by front for inner method
     ClassMetaModelDto sourceMetaModel;
 
     @Valid

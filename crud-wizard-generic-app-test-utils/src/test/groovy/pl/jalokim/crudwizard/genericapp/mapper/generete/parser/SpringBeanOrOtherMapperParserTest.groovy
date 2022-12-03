@@ -64,7 +64,6 @@ class SpringBeanOrOtherMapperParserTest extends BaseSourceExpressionParserTestSp
         "@normalSpringService.getSomeDocumentDto().documentData"       | _
         "@normalSpringService . getSomeDocumentDto() .documentData"    | _
         " @  normalSpringService.getSomeDocumentDto(). documentData  " | _
-
     }
 
     @Unroll
@@ -112,7 +111,6 @@ class SpringBeanOrOtherMapperParserTest extends BaseSourceExpressionParserTestSp
         expression                                                                                 | _
         "@normalSpringService.getSomeDocumentDtoById(someDocument.createdBy.id).documentData"      | _
         "@normalSpringService.getSomeDocumentDtoById ( someDocument.createdBy. id) . documentData" | _
-
     }
 
     @Unroll

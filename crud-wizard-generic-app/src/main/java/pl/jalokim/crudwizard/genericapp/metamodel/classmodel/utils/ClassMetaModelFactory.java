@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
@@ -17,6 +18,14 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
+@UtilityClass
+@SuppressWarnings({
+    "PMD.UseUtilityClass",
+    "PMD.CognitiveComplexity",
+    "PMD.NPathComplexity",
+    "PMD.CollapsibleIfStatements",
+    "PMD.AvoidDeeplyNestedIfStmts",
+})
 public class ClassMetaModelFactory {
 
     private static final Map<Class<?>, Map<FieldMetaResolver, ClassMetaModel>> RESOLVED_CLASS_META_MODELS_BY_CLASS = new ConcurrentHashMap<>();
@@ -50,15 +59,15 @@ public class ClassMetaModelFactory {
         return classMetaModel;
     }
 
+    public static ClassMetaModel createNotGenericClassMetaModel(TypeMetadata typeMetadata,
+        FieldMetaResolverConfiguration fieldMetaResolverConfig, String fieldName, TypeMetadata fieldDeclaredIn) {
+        return createClassMetaModelFor(typeMetadata, fieldMetaResolverConfig, fieldName, fieldDeclaredIn, false);
+    }
+
     public static ClassMetaModel createClassMetaModelFor(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfig,
         boolean createAsGenericModel) {
 
         return createClassMetaModelFor(typeMetadata, fieldMetaResolverConfig, null, null, createAsGenericModel);
-    }
-
-    public static ClassMetaModel createNotGenericClassMetaModel(TypeMetadata typeMetadata,
-        FieldMetaResolverConfiguration fieldMetaResolverConfig, String fieldName, TypeMetadata fieldDeclaredIn) {
-        return createClassMetaModelFor(typeMetadata, fieldMetaResolverConfig, fieldName, fieldDeclaredIn, false);
     }
 
     public static ClassMetaModel createClassMetaModelFor(TypeMetadata typeMetadata,
@@ -91,8 +100,8 @@ public class ClassMetaModelFactory {
             storeInCache(realRawClass, fieldMetaResolver, classMetaModel);
         }
 
-        if (typeMetadata.isSimpleType() || typeMetadata.rawClassIsComingFromJavaApi()
-            || typeMetadata.isHavingElementsType() || typeMetadata.isEnumType()) {
+        if (typeMetadata.isSimpleType() || typeMetadata.rawClassIsComingFromJavaApi() ||
+            typeMetadata.isHavingElementsType() || typeMetadata.isEnumType()) {
             classMetaModel.setRealClass(realRawClass);
             classMetaModel.setClassName(realRawClass.getCanonicalName());
         } else {
@@ -121,8 +130,8 @@ public class ClassMetaModelFactory {
 
         if (!typeMetadata.isSimpleType() && fieldMetaResolver != null) {
             List<FieldMetaModel> fieldMetaModels = List.of();
-            if (!typeMetadata.getRawType().equals(Object.class)
-                && !typeMetadata.rawClassIsComingFromJavaApi()) {
+            if (!typeMetadata.getRawType().equals(Object.class) &&
+                !typeMetadata.rawClassIsComingFromJavaApi()) {
                 fieldMetaModels = fieldMetaResolver.findDeclaredFields(typeMetadata, fieldMetaResolverConfig);
             }
             classMetaModel.setFields(fieldMetaModels);

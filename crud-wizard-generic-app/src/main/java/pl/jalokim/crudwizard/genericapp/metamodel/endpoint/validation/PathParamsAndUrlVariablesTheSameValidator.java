@@ -54,8 +54,8 @@ public class PathParamsAndUrlVariablesTheSameValidator
                 .map(FieldMetaModelDto::getFieldType)
                 .map(ClassMetaModelDto::getClassName)
                 .allMatch(className -> nonNull(className) && (
-                    String.class.getCanonicalName().equals(className)
-                        || Long.class.getCanonicalName().equals(className))
+                    String.class.getCanonicalName().equals(className) ||
+                        Long.class.getCanonicalName().equals(className))
                 );
 
             if (!allHaveClassName) {

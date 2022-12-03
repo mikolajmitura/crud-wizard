@@ -10,11 +10,13 @@ import static pl.jalokim.utils.reflection.InvokableReflectionUtils.newInstance;
 
 import java.util.Map;
 import java.util.Optional;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
+@UtilityClass
 public class FieldMetaResolverFactory {
 
     private static final Map<String, FieldMetaResolver> FIELD_META_RESOLVER_BY_CLASS_NAME = Map.of(

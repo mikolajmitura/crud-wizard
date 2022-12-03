@@ -4,6 +4,7 @@ import lombok.Getter;
 
 public class SomeClassWithPrivateFields {
 
+    @SuppressWarnings("PMD.UnusedPrivateField")
     private Long id;
 
     @Getter

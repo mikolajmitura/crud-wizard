@@ -1,7 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements;
 
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
+@UtilityClass
 public class IterableTemplateForMappingResolver {
 
     public static IterableTemplateForMapping findIterableTemplateForMappingFor(ClassMetaModel classMetaModel) {

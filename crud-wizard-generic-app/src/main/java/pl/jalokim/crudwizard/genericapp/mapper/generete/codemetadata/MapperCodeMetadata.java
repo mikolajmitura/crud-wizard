@@ -133,8 +133,8 @@ public class MapperCodeMetadata {
     public List<MethodMetadataMapperConfig> findMatchNotGeneratedMethod(ClassMetaModel targetClassMetaModel, ClassMetaModel sourceClassMetaModel) {
         return elements(otherMethodsFromConfig)
             .filter(methodCodeMetadata ->
-                    methodCodeMetadata.getArgumentClassMetaModel().isTheSameMetaModel(sourceClassMetaModel)
-                    && methodCodeMetadata.getReturnClassMetaModel().isTheSameMetaModel(targetClassMetaModel)
+                    methodCodeMetadata.getArgumentClassMetaModel().isTheSameMetaModel(sourceClassMetaModel) &&
+                        methodCodeMetadata.getReturnClassMetaModel().isTheSameMetaModel(targetClassMetaModel)
             )
             .asList();
     }
@@ -144,6 +144,4 @@ public class MapperCodeMetadata {
             .filter(method -> method.getMethodName().equals(innerMethodName))
             .getFirstOrNull();
     }
-
-
 }

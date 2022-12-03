@@ -1,6 +1,10 @@
 package pl.jalokim.crudwizard.core.sample;
 
-public class SomeAllArgConstructor extends SomeSuperAllArgConstructor{
+import lombok.EqualsAndHashCode;
+
+@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField", "PMD.UnusedFormalParameter"})
+@EqualsAndHashCode
+public class SomeAllArgConstructor extends SomeSuperAllArgConstructor {
 
     private final String taste;
 

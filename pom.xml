@@ -32,7 +32,7 @@
         <commons-csv.version>1.8</commons-csv.version>
 
         <mapstruct.version>1.4.2.Final</mapstruct.version>
-        <java-utils.version>4.0.1-SNAPSHOT</java-utils.version>
+        <java-utils.version>4.0.1</java-utils.version>
         <swagger.version>2.9.2</swagger.version>
 
         <!-- spring-boot-starter-test does not support new version of junit so is set to 4.13-->

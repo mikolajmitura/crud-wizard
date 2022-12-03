@@ -8,9 +8,11 @@ import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
+@UtilityClass
 public class TableMetadataExtractor {
 
     public static String getTableNameFromEntity(Class<?> entityClass) {

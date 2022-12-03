@@ -52,8 +52,8 @@ public class EndpointMetaModelContextNode {
         if (currentEndpointMetaModel == null) {
             endpointsByHttpMethod.put(endpointMetaModel.getHttpMethod(), endpointMetaModel);
         } else {
-            throw new IllegalStateException("Already exists endpoint with method: " + endpointMetaModel.getHttpMethod()
-                + " and URL: " + getRawUrl() + ", problematic URL: " + endpointMetaModel.getUrlMetamodel().getRawUrl()
+            throw new IllegalStateException("Already exists endpoint with method: " + endpointMetaModel.getHttpMethod() +
+                " and URL: " + getRawUrl() + ", problematic URL: " + endpointMetaModel.getUrlMetamodel().getRawUrl()
             );
         }
     }

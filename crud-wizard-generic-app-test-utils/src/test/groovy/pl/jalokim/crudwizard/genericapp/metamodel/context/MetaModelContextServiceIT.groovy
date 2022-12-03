@@ -26,7 +26,7 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 
-class BeanAndMethodMetaModelMetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecification {
+class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecification {
 
     @Autowired
     private ApiTagSamples apiTagSamples
@@ -102,7 +102,9 @@ class BeanAndMethodMetaModelMetaModelContextServiceIT extends GenericAppWithRelo
 
             /* assert additional validators */
             def allValidators = validatorMetaModels.objectsById.values()
-            def notNullValidatorModel = allValidators.find { it.realClass == NotNullValidator}
+            def notNullValidatorModel = allValidators.find {
+                it.realClass == NotNullValidator
+            }
             def documentValueSizeValidatorModel = findSizeValidator(allValidators, 5, 25)
             def additionalPersonNameSizeValidatorModel = findSizeValidator(allValidators, 2, 20)
             def additionalPersonSurnameSizeValidatorModel = findSizeValidator(allValidators, 2, 30)
@@ -164,7 +166,8 @@ class BeanAndMethodMetaModelMetaModelContextServiceIT extends GenericAppWithRelo
                 methodMetaModel.methodName == "mapToTarget"
             }
 
-            serviceMetaModels.objectsById.values()*.serviceBeanAndMethod.className as Set == serviceMetaModelService.findAllMetaModels()*.serviceBeanAndMethod.className as Set
+            serviceMetaModels.objectsById.values()*.serviceBeanAndMethod.className as Set ==
+                serviceMetaModelService.findAllMetaModels()*.serviceBeanAndMethod.className as Set
             verifyAll(defaultServiceMetaModel) {
                 id == defaultBeansService.getDefaultGenericServiceId()
                 serviceInstance == genericServiceBean
@@ -265,7 +268,7 @@ class BeanAndMethodMetaModelMetaModelContextServiceIT extends GenericAppWithRelo
             it.realClass == classToFind && it.simpleRawClass
         }
         verifyAll(foundClassMetaModel) {
-            realClass ==  classToFind
+            realClass == classToFind
             simpleRawClass
             validators.isEmpty()
             genericTypes.isEmpty()

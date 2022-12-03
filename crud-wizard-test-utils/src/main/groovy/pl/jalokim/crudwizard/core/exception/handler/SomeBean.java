@@ -11,6 +11,7 @@ import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 @Value
 @Builder
 @AllArgsConstructor
+@SuppressWarnings("PMD.AvoidFieldNameMatchingTypeName")
 public class SomeBean {
 
     @NotNull(groups = UpdateContext.class)

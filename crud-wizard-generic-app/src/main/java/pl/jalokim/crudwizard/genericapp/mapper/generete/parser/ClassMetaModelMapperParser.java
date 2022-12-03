@@ -14,12 +14,13 @@ public class ClassMetaModelMapperParser {
 
     private final MetaModelContextService metaModelContextService;
 
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public ClassMetaModel parseClassMetaModel(String text, MapperConfigurationParserContext parserContext) {
         text = text.trim();
         String[] textParts = text.split("_");
         String metaModelType = textParts[0];
         String modeModelName = textParts[1];
-        if (metaModelType.equals("c")) {
+        if ("c".equals(metaModelType)) {
             try {
                 Class<?> realClass = ClassUtils.loadRealClass(modeModelName);
                 return ClassMetaModel.builder()
@@ -28,7 +29,7 @@ public class ClassMetaModelMapperParser {
             } catch (Exception ex) {
                 parserContext.throwParseException(createMessagePlaceholder("mapper.parser.class.not.found", modeModelName));
             }
-        } else if (metaModelType.equals("m")) {
+        } else if ("m".equals(metaModelType)) {
             ClassMetaModel classMetaModelByName = metaModelContextService.getClassMetaModelByName(modeModelName);
             if (classMetaModelByName == null) {
                 parserContext.throwParseException(createMessagePlaceholder("mapper.parser.meta.model.not.found", modeModelName));

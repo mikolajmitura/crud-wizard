@@ -33,6 +33,7 @@ public class ClassLoaderService {
     }
 
     @SneakyThrows
+    @SuppressWarnings("PMD.CloseResource")
     public void createNewClassLoader(String classLoaderName) {
         File classLoaderPath = new File(compiledCodeRootPathProvider.getCompiledCodeRootPath() + "/" + classLoaderName);
         URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { classLoaderPath.toURI().toURL() });

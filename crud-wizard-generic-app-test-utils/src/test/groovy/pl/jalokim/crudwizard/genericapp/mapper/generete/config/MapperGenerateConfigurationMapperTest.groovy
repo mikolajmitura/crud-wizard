@@ -68,7 +68,6 @@ class MapperGenerateConfigurationMapperTest extends Specification {
         def mapperMethodSourceMetaModel = createPersonMetaModel()
         def mapperMethodTargetMetaModel = createSomePersonClassMetaModel()
 
-
         def mapperGenerateConfigurationEntity = createMapperGenerateConfigurationEntity(rootMapperSourceMetaModelDto,
             rootMapperTargetMetaModelDto, mapperMethodSourceMetaModelDto, mapperMethodTargetMetaModelDto)
 
@@ -280,7 +279,6 @@ class MapperGenerateConfigurationMapperTest extends Specification {
                     .rawJson(ObjectMapperConfig.objectToRawJson(enumValues))
                     .build()])
             .build()
-
     }
 
     static AdditionalPropertyEntity isIdFieldType() {

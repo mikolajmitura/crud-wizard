@@ -60,8 +60,8 @@ public class DataStorageResultsJoinCorrectnessValidator
             .map(ClassUtils::loadRealClass)
             .orElse(null);
 
-        if (HttpMethod.GET.equals(httpMethod) && endpointResponseClass != null
-            && (isCollectionType(endpointResponseClass) || MetadataReflectionUtils.isTypeOf(endpointResponseClass, Page.class))) {
+        if (HttpMethod.GET.equals(httpMethod) && endpointResponseClass != null &&
+            (isCollectionType(endpointResponseClass) || MetadataReflectionUtils.isTypeOf(endpointResponseClass, Page.class))) {
             List<DataStorageConnectorMetaModelDto> dataStorageConnectors = elements(endpointMetaModelDto.getDataStorageConnectors()).asList();
             List<DataStorageResultsJoinerDto> dataStorageResultsJoiners = elements(endpointMetaModelDto.getDataStorageResultsJoiners()).asList();
 
@@ -73,10 +73,10 @@ public class DataStorageResultsJoinCorrectnessValidator
 
             Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName = new HashMap<>();
 
-            return expectedNumberOfJoinersDueToDsConnectors(context, numberOfConnectors, numberOfJoiners)
-                && namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto)
-                && allJoinerCorrectlyConnected(dataStorageResultsJoiners, context)
-                && allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
+            return expectedNumberOfJoinersDueToDsConnectors(context, numberOfConnectors, numberOfJoiners) &&
+                namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto) &&
+                allJoinerCorrectlyConnected(dataStorageResultsJoiners, context) &&
+                allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
         }
         return true;
     }

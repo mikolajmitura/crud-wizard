@@ -453,6 +453,8 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
     }
 
     static class SomeMapper {
+
+        @SuppressWarnings("UnusedMethodParameter")
         Long someMapperMethod(String someObject) {
             0
         }

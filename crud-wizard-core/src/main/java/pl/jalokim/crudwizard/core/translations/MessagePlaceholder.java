@@ -32,8 +32,9 @@ public class MessagePlaceholder {
     String errorCode;
     Map<String, Object> rawArgumentsByName;
 
+    @Override
     public String toString() {
-     return translateMessage();
+        return translateMessage();
     }
 
     /**
@@ -103,6 +104,7 @@ public class MessagePlaceholder {
 
     /**
      * placeholder which should be translated at frontend side
+     *
      * @param textToWrap value to wrap
      * @return it returns F#[$textToWrap]#
      */
@@ -112,6 +114,7 @@ public class MessagePlaceholder {
 
     /**
      * placeholder for enum which should be translated at frontend side
+     *
      * @param enumToWrap value to wrap
      * @return it returns F_Enum#[$enumType.$textToWrap]#
      */

@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
 
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
@@ -10,6 +11,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
+@UtilityClass
 public class ClassMetaModelUtils {
 
     public static FieldMetaModel getRequiredFieldFromClassModel(ClassMetaModel genericClassMetaModel,
@@ -28,10 +30,10 @@ public class ClassMetaModelUtils {
 
     public static ClassMetaModel classMetaModelFromType(JavaTypeMetaModel javaTypeMetaModel) {
         TypeMetadata typeMetadata;
-        if (javaTypeMetaModel.getOriginalType() != null) {
-            typeMetadata = MetadataReflectionUtils.getTypeMetadataFromType(javaTypeMetaModel.getOriginalType());
-        } else {
+        if (javaTypeMetaModel.getOriginalType() == null) {
             typeMetadata = MetadataReflectionUtils.getTypeMetadataFromClass(javaTypeMetaModel.getRawClass());
+        } else {
+            typeMetadata = MetadataReflectionUtils.getTypeMetadataFromType(javaTypeMetaModel.getOriginalType());
         }
         return ClassMetaModelFactory.createClassMetaModelFor(typeMetadata, READ_FIELD_RESOLVER_CONFIG, false);
     }

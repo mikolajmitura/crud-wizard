@@ -23,8 +23,8 @@ public class ClassMetaModelForMapperHelper {
             typeInfoParts.add("M" + classMetaModel.getName());
         }
         if (classMetaModel.getRealClass() != null) {
-            typeInfoParts.add("C" + classMetaModel.getRealClass().getSimpleName()
-                + concatGenericTypes(classMetaModel.getGenericTypes()));
+            typeInfoParts.add("C" + classMetaModel.getRealClass().getSimpleName() +
+                concatGenericTypes(classMetaModel.getGenericTypes()));
         }
         return elements(typeInfoParts).asConcatText("_")
             .replaceAll("\\[]", "Array");

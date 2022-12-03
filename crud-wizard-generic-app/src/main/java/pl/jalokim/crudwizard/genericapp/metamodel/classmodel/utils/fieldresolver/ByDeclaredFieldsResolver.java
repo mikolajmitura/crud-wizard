@@ -13,7 +13,7 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 
 public class ByDeclaredFieldsResolver implements FieldMetaResolver {
 
-    public static ByDeclaredFieldsResolver INSTANCE = new ByDeclaredFieldsResolver();
+    public static final ByDeclaredFieldsResolver INSTANCE = new ByDeclaredFieldsResolver();
 
     @Override
     public List<FieldMetaModel> findDeclaredFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
@@ -25,7 +25,7 @@ public class ByDeclaredFieldsResolver implements FieldMetaResolver {
     }
 
     private boolean isNotGroovyMetaClass(Field field) {
-        return !field.getType().getCanonicalName().equals("groovy.lang.MetaClass");
+        return !"groovy.lang.MetaClass".equals(field.getType().getCanonicalName());
     }
 
     @Override
@@ -39,6 +39,4 @@ public class ByDeclaredFieldsResolver implements FieldMetaResolver {
             .fieldType(createNotGenericClassMetaModel(typeMetadata.getMetaForField(field), fieldMetaResolverConfiguration, field.getName(), typeMetadata))
             .build();
     }
-
-
 }

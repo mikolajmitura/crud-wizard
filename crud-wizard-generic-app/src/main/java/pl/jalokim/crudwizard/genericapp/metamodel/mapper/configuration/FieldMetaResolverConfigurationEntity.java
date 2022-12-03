@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseEntity;
 
-
 @Entity
 @Builder
 @NoArgsConstructor(access = AccessLevel.PUBLIC)

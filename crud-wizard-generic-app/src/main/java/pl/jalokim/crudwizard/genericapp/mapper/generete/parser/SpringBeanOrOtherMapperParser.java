@@ -7,6 +7,7 @@ import static pl.jalokim.utils.string.StringUtils.concatElements;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @Component
+@Slf4j
 class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
 
     private final MetaModelContextService metaModelContextService;
@@ -51,6 +53,7 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
         }
     }
 
+    @SuppressWarnings("PMD.PreserveStackTrace")
     private BySpringBeanMethodAssignExpression createBySpringBeanMethodAssignExpression(MapperConfigurationParserContext mapperConfigurationParserContext,
         SourceExpressionParserContext sourceExpressionParserContext, String beanOrMapperName) {
 
@@ -68,6 +71,29 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
         String methodName = methodNamePartResult.getCollectedText().trim();
         List<ValueToAssignExpression> methodArguments = new ArrayList<>();
         List<Class<?>> methodArgumentsClasses = new ArrayList<>();
+
+        parseMethodArguments(mapperConfigurationParserContext, sourceExpressionParserContext,
+            methodArguments, methodArgumentsClasses);
+
+        Class<?> sourceRawBeanClass = ClassUtils.loadRealClass(foundBean.getClass().getCanonicalName());
+        try {
+            sourceExpressionParserContext.moveToNextCharIfExists();
+            MetadataReflectionUtils.getMethod(foundBean, methodName, methodArgumentsClasses);
+            return new BySpringBeanMethodAssignExpression(sourceRawBeanClass, beanOrMapperName, methodName, methodArguments);
+        } catch (Exception ex) {
+            log.debug("unexpected exception", ex);
+            throw mapperConfigurationParserContext.createParseException(createMessagePlaceholder("cannot.find.method.with.arguments",
+                Map.of(
+                    "methodName", methodName,
+                    "classesTypes", concatElements(methodArgumentsClasses, Class::getCanonicalName, ", "),
+                    "givenClass", sourceRawBeanClass.getCanonicalName()
+                )));
+        }
+    }
+
+    private void parseMethodArguments(MapperConfigurationParserContext mapperConfigurationParserContext,
+        SourceExpressionParserContext sourceExpressionParserContext, List<ValueToAssignExpression> methodArguments,
+        List<Class<?>> methodArgumentsClasses) {
 
         char currentChar = sourceExpressionParserContext.getCurrentChar();
 
@@ -101,24 +127,12 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
                         .translateMessage());
             }
         }
-
-        Class<?> sourceRawBeanClass = ClassUtils.loadRealClass(foundBean.getClass().getCanonicalName());
-        try {
-            sourceExpressionParserContext.moveToNextCharIfExists();
-            MetadataReflectionUtils.getMethod(foundBean, methodName, methodArgumentsClasses);
-            return new BySpringBeanMethodAssignExpression(sourceRawBeanClass, beanOrMapperName, methodName, methodArguments);
-        } catch (Exception ex) {
-            throw mapperConfigurationParserContext.createParseException(createMessagePlaceholder("cannot.find.method.with.arguments",
-                Map.of(
-                    "methodName", methodName,
-                    "classesTypes", concatElements(methodArgumentsClasses, Class::getCanonicalName, ", "),
-                    "givenClass", sourceRawBeanClass.getCanonicalName()
-                )));
-        }
     }
 
+    @SuppressWarnings("PMD.PrematureDeclaration")
     private ByMapperNameAssignExpression createByMapperNameAssignExpression(MapperConfigurationParserContext mapperConfigurationParserContext,
         SourceExpressionParserContext sourceExpressionParserContext, String beanOrMapperName) {
+
         sourceExpressionParserContext.skipSpaces();
         MetaModelContext metaModelContext = metaModelContextService.getMetaModelContext();
         MapperMetaModel mapperMetaModelByName = metaModelContext.getMapperMetaModels().getMapperMetaModelByName(beanOrMapperName);
@@ -131,9 +145,6 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
             mapperConfigurationParserContext.throwParseException("expected.mapper.argument", beanOrMapperName);
             return null;
         }
-
-        ClassMetaModel targetClassMetaModel = mapperMetaModelByName.getTargetClassMetaModel();
-
 
         ClassMetaModel sourceClassMetaModelOfMapper = mapperMetaModelByName.getSourceClassMetaModel();
         ClassMetaModel returnClassModelOfExpression = generateCodeMetadataFor(valueExpression, mapperConfigurationParserContext).getReturnClassModel();
@@ -151,6 +162,7 @@ class SpringBeanOrOtherMapperParser extends SourceExpressionParser {
         sourceExpressionParserContext.skipSpaces();
         sourceExpressionParserContext.currentCharIs(')');
         sourceExpressionParserContext.moveToNextCharIfExists();
+        ClassMetaModel targetClassMetaModel = mapperMetaModelByName.getTargetClassMetaModel();
         return new ByMapperNameAssignExpression(targetClassMetaModel, valueExpression, beanOrMapperName);
     }
 }

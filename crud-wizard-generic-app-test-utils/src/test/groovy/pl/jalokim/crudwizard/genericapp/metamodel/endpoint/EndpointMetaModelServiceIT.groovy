@@ -1514,7 +1514,6 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             "like above but with errors"
     }
 
-
     def "use mapper name created earlier in other endpoint"() {
         given:
         def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
@@ -1706,10 +1705,10 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             def personDtoClassEntity = classMetaModelRepository.getOne(personDtoClassMetaModel.id)
             def personEntityClassEntity = classMetaModelRepository.getOne(personEntityClassMetaModel.id)
             personDtoClassEntity.getFields().find {
-                it.fieldName = 'code'
+                it.fieldName == 'code'
             }.fieldName = "newCode"
             personEntityClassEntity.getFields().find {
-                it.fieldName = 'code'
+                it.fieldName == 'code'
             }.fieldName = "newCode"
             return
         }
@@ -1829,7 +1828,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         assert found.size() == 1
     }
 
-    private static ClassMetaModelDto PERSON_METAMODEL = ClassMetaModelDto.builder()
+    private static final PERSON_METAMODEL = ClassMetaModelDto.builder()
         .name("person")
         .fields([
             createIdFieldType("id", Long),
@@ -1838,11 +1837,11 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         ])
         .build()
 
-    private static ClassMetaModelDto LIST_OF_PERSON_METAMODEL = createClassMetaModelDtoWithGenerics(List, PERSON_METAMODEL)
+    private static final LIST_OF_PERSON_METAMODEL = createClassMetaModelDtoWithGenerics(List, PERSON_METAMODEL)
 
-    private static ClassMetaModelDto PAGE_OF_PERSON_METAMODEL = createClassMetaModelDtoWithGenerics(Page, PERSON_METAMODEL)
+    private static final PAGE_OF_PERSON_METAMODEL = createClassMetaModelDtoWithGenerics(Page, PERSON_METAMODEL)
 
-    private static ClassMetaModelDto PERSON_METAMODEL_DS = ClassMetaModelDto.builder()
+    private static final PERSON_METAMODEL_DS = ClassMetaModelDto.builder()
         .name("person_ds")
         .fields([
             createIdFieldType("id", String),
@@ -1852,16 +1851,16 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         ])
         .build()
 
-    private static ClassMetaModelDto GENERIC_ENUM = createEnumMetaModel("VAL1", "VAL2")
+    private static final GENERIC_ENUM = createEnumMetaModel("VAL1", "VAL2")
 
-    private static ClassMetaModelDto REAL_DTO = createClassMetaModelDtoFromClass(SomeRawDto)
+    private static final REAL_DTO = createClassMetaModelDtoFromClass(SomeRawDto)
 
-    private static BeanAndMethodDto DEFAULT_GENERIC_SERVICE_BEAN = BeanAndMethodDto.builder()
+    private static final DEFAULT_GENERIC_SERVICE_BEAN = BeanAndMethodDto.builder()
         .className(DefaultGenericService.canonicalName)
         .methodName("saveOrReadFromDataStorages")
         .build()
 
-    private static BeanAndMethodDto DEFAULT_GENERIC_MAPPER_BEAN = BeanAndMethodDto.builder()
+    private static final DEFAULT_GENERIC_MAPPER_BEAN = BeanAndMethodDto.builder()
         .className(DefaultGenericMapper.canonicalName)
         .methodName("mapToTarget")
         .build()

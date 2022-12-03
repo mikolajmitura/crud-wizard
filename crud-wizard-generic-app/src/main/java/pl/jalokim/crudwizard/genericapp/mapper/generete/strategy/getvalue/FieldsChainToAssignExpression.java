@@ -48,12 +48,12 @@ public class FieldsChainToAssignExpression implements ValueToAssignExpression {
 
     @Override
     public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
-        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
 
-        String valueExpressionAsText = valueExpression != null ? valueExpression :
-            parentValueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata).getFullValueExpression();
+        String valueExpressionAsText = valueExpression == null ?
+            parentValueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata).getFullValueExpression() : valueExpression;
 
-        StringBuilder invokeChain = new StringBuilder(String.format("Optional.ofNullable(%s)", valueExpressionAsText));
+        StringBuilder invokeChain = new StringBuilder(1024);
+        invokeChain.append(String.format("Optional.ofNullable(%s)", valueExpressionAsText));
 
         ClassMetaModel currentClassMetaModel = sourceMetaModel;
         for (FieldMetaModel fieldMeta : fieldChains) {
@@ -84,6 +84,7 @@ public class FieldsChainToAssignExpression implements ValueToAssignExpression {
 
         invokeChain.append(GeneratedLineUtils.wrapWithNextLineWith3Tabs(".orElse(null)"));
 
+        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
         returnCodeMetadata.setValueGettingCode(invokeChain.toString());
         returnCodeMetadata.setReturnClassModel(elements(fieldChains).getLast().getFieldType());
 

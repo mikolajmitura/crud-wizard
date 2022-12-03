@@ -15,7 +15,7 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 
 public class BySettersFieldsResolver implements FieldMetaResolver {
 
-    public static BySettersFieldsResolver INSTANCE = new BySettersFieldsResolver();
+    public static final BySettersFieldsResolver INSTANCE = new BySettersFieldsResolver();
 
     @Override
     public List<FieldMetaModel> findDeclaredFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {

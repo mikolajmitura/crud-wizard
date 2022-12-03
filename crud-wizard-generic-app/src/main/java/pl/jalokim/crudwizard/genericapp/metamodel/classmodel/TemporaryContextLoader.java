@@ -16,7 +16,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextH
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper;
-import pl.jalokim.utils.collection.Elements;
 
 @Component
 @RequiredArgsConstructor
@@ -46,7 +45,7 @@ public class TemporaryContextLoader {
                 updateOrCreateClassMetaModelInContext(connector.getClassMetaModelInDataStorage())
             );
 
-        Elements.elements(createEndpointMetaModelDto.getDataStorageConnectors())
+        elements(createEndpointMetaModelDto.getDataStorageConnectors())
             .forEach(dataStorageConnectorMetaModelDto -> {
                 updateOrCreateMapperMetaModelInContext(dataStorageConnectorMetaModelDto.getMapperMetaModelForQuery());
                 updateOrCreateMapperMetaModelInContext(dataStorageConnectorMetaModelDto.getMapperMetaModelForPersist());

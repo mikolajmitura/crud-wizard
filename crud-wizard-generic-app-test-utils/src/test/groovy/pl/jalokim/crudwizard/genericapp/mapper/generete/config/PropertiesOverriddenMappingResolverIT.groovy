@@ -82,10 +82,8 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
                 new MappingEntryModel("otherObject2.someLocalDateTime",
                     "((m_personaDataModel) \$mappingContext['personalData']).exampleLocalDateTime"),
 
-
                 new MappingEntryModel("someNumber",
                     "j((Long) pathVariables.get(\"someLong\") + (Long) requestParams.get(\"anotherLong\"))"),
-
             ],
             [
                 otherMapperMethod : [
@@ -101,7 +99,6 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
 
         def multiSourceExampleModel = mapperGenerateConfiguration.getRootConfiguration().getSourceMetaModel()
         def someObjectField = multiSourceExampleModel.getRequiredFieldByName("someObject")
-        def otherObjectModel = multiSourceExampleModel.getRequiredFieldByName("otherObject1").getFieldType()
 
         then:
         def rootMapperConf = mapperGenerateConfiguration.getRootConfiguration()
@@ -432,28 +429,28 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
             .build()
     }
 
-    private static ClassMetaModel PATH_VARIABLES_MODEL = ClassMetaModel.builder()
+    private static final PATH_VARIABLES_MODEL = ClassMetaModel.builder()
         .name("pathVariablesModel")
         .fields([
             createValidFieldMetaModel("someLong", Integer)
         ])
         .build()
 
-    private static ClassMetaModel REQUEST_PARAMS_MODEL = ClassMetaModel.builder()
+    private static final REQUEST_PARAMS_MODEL = ClassMetaModel.builder()
         .name("requestParamsModel")
         .fields([
             createValidFieldMetaModel("someInt", Integer)
         ])
         .build()
 
-    private static ClassMetaModel PERSONAL_DATA_MODEL = ClassMetaModel.builder()
+    private static final PERSONAL_DATA_MODEL = ClassMetaModel.builder()
         .name("personaDataModel")
         .fields([
             createValidFieldMetaModel("exampleLocalDateTime", String)
         ])
         .build()
 
-    private static ClassMetaModel SOME_ENTRY_MODEL = ClassMetaModel.builder()
+    private static final SOME_ENTRY_MODEL = ClassMetaModel.builder()
         .name("someEntryModel")
         .fields([
             createValidFieldMetaModel("entryId", String),
@@ -469,7 +466,7 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
         ])
         .build()
 
-    private static ClassMetaModel OTHER_OBJECT_MODEL = ClassMetaModel.builder()
+    private static final OTHER_OBJECT_MODEL = ClassMetaModel.builder()
         .name("otherObjectModel")
         .fields([
             createValidFieldMetaModel("field1", String),

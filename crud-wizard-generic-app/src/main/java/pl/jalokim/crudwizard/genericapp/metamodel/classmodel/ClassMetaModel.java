@@ -43,6 +43,7 @@ import pl.jalokim.utils.string.StringUtils;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder(toBuilder = true)
 @Slf4j
+@SuppressWarnings("PMD.GodClass")
 public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
@@ -91,8 +92,8 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     public FieldMetaModel getFieldByName(String fieldName) {
-        if (parentMetamodelCacheContext == null || parentMetamodelCacheContext.getFieldMetaModels() == null
-            || parentMetamodelCacheContext.getFieldsByName() == null) {
+        if (parentMetamodelCacheContext == null || parentMetamodelCacheContext.getFieldMetaModels() == null ||
+            parentMetamodelCacheContext.getFieldsByName() == null) {
             fetchAllFields();
         }
 
@@ -277,6 +278,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return Map.class.getCanonicalName() + "<" + String.class.getCanonicalName() + ", " + Object.class.getCanonicalName() + ">";
     }
 
+    @SuppressWarnings({"PMD.ConfusingTernary", "PMD.CognitiveComplexity"})
     public boolean isSubTypeOf(ClassMetaModel expectedParent) {
         if (hasRealClass() && expectedParent.hasRealClass()) {
             if (!hasGenericTypes() && !expectedParent.hasGenericTypes()) {
@@ -292,11 +294,11 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         allExtendsOf.add(this);
 
         for (ClassMetaModel classMetaModel : allExtendsOf) {
-            if (expectedParent.hasRealClass() && classMetaModel.hasRealClass()
-                && expectedParent.getRealClass().equals(classMetaModel.getRealClass())) {
+            if (expectedParent.hasRealClass() && classMetaModel.hasRealClass() &&
+                expectedParent.getRealClass().equals(classMetaModel.getRealClass())) {
                 return true;
-            } else if (expectedParent.isGenericModel() && classMetaModel.isGenericModel()
-                && expectedParent.getName().equals(classMetaModel.getName())) {
+            } else if (expectedParent.isGenericModel() && classMetaModel.isGenericModel() &&
+                expectedParent.getName().equals(classMetaModel.getName())) {
                 return true;
             }
         }
@@ -329,6 +331,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         }
     }
 
+    @SuppressWarnings("PMD.CollapsibleIfStatements")
     public boolean isTheSameMetaModel(ClassMetaModel otherClassMetaModel) {
         if (otherClassMetaModel == null) {
             return false;
@@ -341,8 +344,8 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         }
 
         if (realClass != null) {
-            return Objects.equals(realClass, otherClassMetaModel.getRealClass())
-                && hasTheSameElementsWithTheSameOrder(genericTypes, otherClassMetaModel.genericTypes);
+            return Objects.equals(realClass, otherClassMetaModel.getRealClass()) &&
+                hasTheSameElementsWithTheSameOrder(genericTypes, otherClassMetaModel.genericTypes);
         }
 
         return Objects.equals(name, otherClassMetaModel.getName());

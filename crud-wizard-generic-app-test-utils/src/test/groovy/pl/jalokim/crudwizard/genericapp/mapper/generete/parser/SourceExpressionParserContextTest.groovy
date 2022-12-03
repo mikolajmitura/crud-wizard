@@ -72,7 +72,7 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
 
         then:
         collectedResult2.collectedText == 'gfa)h'
-        collectedResult2.cutByEOF
+        collectedResult2.cutByEof
         sourceExpressionParserContext.currentChar == 'h' as char
 
         then:
@@ -86,7 +86,7 @@ class SourceExpressionParserContextTest extends UnitTestSpec {
         def collectedResult3 = sourceExpressionParserContext.collectTextUntilFieldExpressionIsFinished()
         collectedResult3.collectedText == 'gfa'
         collectedResult3.cutWithText == ')' as char
-        !collectedResult3.cutByEOF
+        !collectedResult3.cutByEof
         sourceExpressionParserContext.currentCharIs('h' as char)
         sourceExpressionParserContext.isLastCurrentChar()
         sourceExpressionParserContext.moveToNextCharIfExists()

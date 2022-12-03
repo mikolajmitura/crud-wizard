@@ -79,30 +79,38 @@ public class SimpleTargetAssignResolver {
                 );
             } else if (foundAssignExpressionsForField.size() == 1) {
 
-                ValueToAssignExpression valueToAssignExpression = foundAssignExpressionsForField.get(0);
-                ValueToAssignCodeMetadata valueToAssignCodeMetadata = valueToAssignExpression
-                    .generateCodeMetadata(methodGeneratorArgument.getMapperGeneratedCodeMetadata());
-                ClassMetaModel sourceClassModel = valueToAssignCodeMetadata.getReturnClassModel();
+                assignProperExpression(methodGeneratorArgument, assignExpressionForFieldReference, targetFieldMetaData,
+                    foundAssignExpressionsForField, fieldName, targetFieldClassMetaModel, currentPath);
+            }
+        }
+    }
 
-                if (!sourceClassModel.isTheSameMetaModel(targetFieldClassMetaModel)
-                    && sourceClassModel.isEnumTypeOrJavaEnum()
-                    && targetFieldClassMetaModel.isEnumTypeOrJavaEnum()) {
+    private void assignProperExpression(MapperMethodGeneratorArgument methodGeneratorArgument,
+        AtomicReference<ValueToAssignExpression> assignExpressionForFieldReference,
+        TargetFieldMetaData targetFieldMetaData, List<ValueToAssignExpression> foundAssignExpressionsForField, String fieldName,
+        ClassMetaModel targetFieldClassMetaModel, ObjectNodePath currentPath) {
 
-                    assignExpressionForFieldReference.set(createAsEnumAssign(methodGeneratorArgument,
-                        targetFieldClassMetaModel, sourceClassModel, valueToAssignExpression, targetFieldMetaData));
-                } else {
-                    assignExpressionForFieldReference.set(valueToAssignExpression);
-                    if (!canConvert(sourceClassModel, targetFieldClassMetaModel)) {
-                        if (String.class.equals(sourceClassModel.getRealClass()) && targetFieldClassMetaModel.isGenericMetamodelEnum()) {
-                            assignExpressionForFieldReference.set(new BySpringBeanMethodAssignExpression(EnumClassMetaModelValidator.class,
-                                "enumClassMetaModelValidator", "getEnumValueWhenIsValid",
-                                List.of(new RawJavaCodeAssignExpression(STRING_MODEL, wrapTextWith(targetFieldClassMetaModel.getName(), "\"")),
-                                    valueToAssignExpression,
-                                    new RawJavaCodeAssignExpression(STRING_MODEL, wrapTextWith(currentPath.nextNode(fieldName).getFullPath(), "\"")))
-                            ));
-                        }
-                    }
-                }
+        ValueToAssignExpression valueToAssignExpression = foundAssignExpressionsForField.get(0);
+        ValueToAssignCodeMetadata valueToAssignCodeMetadata = valueToAssignExpression
+            .generateCodeMetadata(methodGeneratorArgument.getMapperGeneratedCodeMetadata());
+        ClassMetaModel sourceClassModel = valueToAssignCodeMetadata.getReturnClassModel();
+
+        if (!sourceClassModel.isTheSameMetaModel(targetFieldClassMetaModel) &&
+            sourceClassModel.isEnumTypeOrJavaEnum() &&
+            targetFieldClassMetaModel.isEnumTypeOrJavaEnum()) {
+
+            assignExpressionForFieldReference.set(createAsEnumAssign(methodGeneratorArgument,
+                targetFieldClassMetaModel, sourceClassModel, valueToAssignExpression, targetFieldMetaData));
+        } else {
+            assignExpressionForFieldReference.set(valueToAssignExpression);
+            if (!canConvert(sourceClassModel, targetFieldClassMetaModel) &&
+                String.class.equals(sourceClassModel.getRealClass()) && targetFieldClassMetaModel.isGenericMetamodelEnum()) {
+                assignExpressionForFieldReference.set(new BySpringBeanMethodAssignExpression(EnumClassMetaModelValidator.class,
+                    "enumClassMetaModelValidator", "getEnumValueWhenIsValid",
+                    List.of(new RawJavaCodeAssignExpression(STRING_MODEL, wrapTextWith(targetFieldClassMetaModel.getName(), "\"")),
+                        valueToAssignExpression,
+                        new RawJavaCodeAssignExpression(STRING_MODEL, wrapTextWith(currentPath.nextNode(fieldName).getFullPath(), "\"")))
+                ));
             }
         }
     }

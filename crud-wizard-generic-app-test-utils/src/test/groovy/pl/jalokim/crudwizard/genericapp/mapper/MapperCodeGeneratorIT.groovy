@@ -1530,11 +1530,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
     }
 
     private static List<String> getSortedMessages(MapperGenerationException mapperGenerationException) {
-        mapperGenerationException.messagePlaceholders
-            .collect {
-                it.translateMessage()
-            }
-            .sort()
+        mapperGenerationException.messagePlaceholders*.translateMessage().sort()
     }
 
     private static Iterator<String> getSortedMessagesIterator(MapperGenerationException mapperGenerationException) {

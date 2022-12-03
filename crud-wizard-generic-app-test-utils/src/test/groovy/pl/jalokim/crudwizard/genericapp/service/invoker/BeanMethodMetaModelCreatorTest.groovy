@@ -37,7 +37,6 @@ class BeanMethodMetaModelCreatorTest extends Specification {
 
         then:
         verifyAll(resultMethodMetaModel) {
-            methodName == methodName
             originalMethod == findMethodByName(NormalSpringService, methodName)
             verifyAll(methodSignatureMetaModel) {
                 !returnType.isGenericType()
@@ -81,7 +80,6 @@ class BeanMethodMetaModelCreatorTest extends Specification {
 
         then:
         verifyAll(resultMethodMetaModel) {
-            methodName == methodName
             originalMethod == findMethodByName(MapGenericService, methodName)
             verifyAll(methodSignatureMetaModel) {
                 returnType.isGenericType()

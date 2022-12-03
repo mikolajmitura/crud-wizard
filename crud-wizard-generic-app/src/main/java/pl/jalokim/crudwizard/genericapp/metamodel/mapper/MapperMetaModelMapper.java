@@ -103,8 +103,8 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
 
             if (mapperBeanAndMethod != null) {
                 BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeanProvider.getAllGenericMapperBeans())
-                    .filter(mapperBean -> (mapperBeanAndMethod.getBeanName() == null || mapperBean.getBeanName().equals(mapperBeanAndMethod.getBeanName()))
-                        && mapperBean.getClassName().equals(mapperBeanAndMethod.getClassName())
+                    .filter(mapperBean -> (mapperBeanAndMethod.getBeanName() == null || mapperBean.getBeanName().equals(mapperBeanAndMethod.getBeanName())) &&
+                        mapperBean.getClassName().equals(mapperBeanAndMethod.getClassName())
                     )
                     .getFirstOrNull();
 
@@ -135,14 +135,94 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
 
     public MapperMetaModel toModelFromDto(MapperMetaModelDto mapperMetaModelDto) {
 
-        TemporaryMetaModelContext temporaryMetaModelContext = getTemporaryMetaModelContext();
-
         if (mapperMetaModelDto == null) {
             return null;
         }
 
+        MapperMetaModel mapperMetaModel = createMapperMetaModel(mapperMetaModelDto);
+
+        if (mapperMetaModel != null && MetaModelState.FOR_INITIALIZE.equals(mapperMetaModel.getState())) {
+
+            BeanAndMethodDto mapperBeanAndMethod = mapperMetaModelDto.getMapperBeanAndMethod();
+
+            if (mapperBeanAndMethod != null) {
+                mapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(
+                    mapperBeanAndMethod.getMethodName(), mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getBeanName()));
+            }
+
+            Optional.ofNullable(mapperMetaModelDto.getMapperGenerateConfiguration())
+                .map(MapperGenerateConfigurationDto::getRootConfiguration)
+                .ifPresent(rootConfiguration -> {
+                    mapperMetaModel.setSourceClassMetaModel(
+                        classMetaModelMapper.toModelFromDto(rootConfiguration.getSourceMetaModel()));
+                    mapperMetaModel.setTargetClassMetaModel(
+                        classMetaModelMapper.toModelFromDto(rootConfiguration.getTargetMetaModel()));
+                });
+
+            populateFieldsWhenBeanAndMethod(mapperMetaModelDto, mapperMetaModel);
+
+            mapperMetaModel.setState(INITIALIZED);
+        }
+
+        return mapperMetaModel;
+    }
+
+    private void populateFieldsWhenBeanAndMethod(MapperMetaModelDto mapperMetaModelDto, MapperMetaModel mapperMetaModel) {
+        Optional.ofNullable(mapperMetaModelDto.getMapperBeanAndMethod())
+            .ifPresent(beanAndMethodDto -> {
+                if (beanAndMethodDto.getClassName() != null && beanAndMethodDto.getMethodName() != null) {
+                    try {
+                        Class<?> realClass = ClassUtils.loadRealClass(beanAndMethodDto.getClassName());
+                        Object mapperInstance = instanceLoader.createInstanceOrGetBean(beanAndMethodDto.getClassName(), beanAndMethodDto.getBeanName());
+                        Method mapperMethod = findMethodByName(realClass, beanAndMethodDto.getMethodName());
+
+                        mapperMetaModel.setMapperInstance(mapperInstance);
+                        mapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator
+                            .createBeanMethodMetaModel(mapperMethod, realClass, beanAndMethodDto.getBeanName()));
+
+                        MethodSignatureMetaModel methodSignatureMetaModel = methodSignatureMetaModelResolver.getMethodSignatureMetaModel(beanAndMethodDto);
+
+                        mapperMetaModel.setSourceClassMetaModel(findMapperInputMetaModel(methodSignatureMetaModel));
+                        mapperMetaModel.setTargetClassMetaModel(methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(beanAndMethodDto));
+
+                    } catch (Exception exception) {
+                        log.warn("unexpected exception", exception);
+                    }
+                }
+            });
+    }
+
+    private ClassMetaModel findMapperInputMetaModel(MethodSignatureMetaModel methodSignatureMetaModel) {
+        ClassMetaModel foundMapperInputMetamodel = null;
+        for (MethodArgumentMetaModel methodArgument : methodSignatureMetaModel.getMethodArguments()) {
+            var methodArgumentPredicates = getCommonExpectedArgsTypeAndOther(MAPPER_EXPECTED_ARGS_TYPE);
+
+            List<ExpectedMethodArgument> possibleInputOfMapperPredicates = methodArgumentPredicates.stream()
+                .filter(ExpectedMethodArgument::isArgumentCanBeInputOfMapper)
+                .collect(Collectors.toList());
+
+            ClassMetaModel argumentClassMetaModel = classMetaModelFromType(methodArgument.getArgumentType());
+
+            List<ExpectedMethodArgument> cannotBeInputOfMapperPredicates = methodArgumentPredicates.stream()
+                .filter(predicate -> !predicate.isArgumentCanBeInputOfMapper())
+                .collect(Collectors.toList());
+
+            boolean resolvedAsMapperInput = isResolvedAsMapperInput(methodArgument, possibleInputOfMapperPredicates, argumentClassMetaModel);
+            boolean resolvedAsOtherThanInputMapper = isResolvedAsOtherThanInputMapper(methodArgument,
+                cannotBeInputOfMapperPredicates, argumentClassMetaModel);
+
+            if (resolvedAsMapperInput && !resolvedAsOtherThanInputMapper) {
+                foundMapperInputMetamodel = argumentClassMetaModel;
+                break;
+            }
+        }
+        return foundMapperInputMetamodel;
+    }
+
+    private MapperMetaModel createMapperMetaModel(MapperMetaModelDto mapperMetaModelDto) {
         MapperMetaModel mapperMetaModel = null;
 
+        TemporaryMetaModelContext temporaryMetaModelContext = getTemporaryMetaModelContext();
         if (MetaModelDtoType.BY_ID.equals(mapperMetaModelDto.getMetamodelDtoType())) {
             mapperMetaModel = temporaryMetaModelContext.findMapperMetaModelById(mapperMetaModelDto.getId());
             if (mapperMetaModel == null) {
@@ -167,94 +247,24 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
             }
             mapperMetaModel.setState(MetaModelState.FOR_INITIALIZE);
         }
-
-        if (mapperMetaModel != null && MetaModelState.FOR_INITIALIZE.equals(mapperMetaModel.getState())) {
-
-            BeanAndMethodDto mapperBeanAndMethod = mapperMetaModelDto.getMapperBeanAndMethod();
-
-            if (mapperBeanAndMethod != null) {
-                mapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(
-                    mapperBeanAndMethod.getMethodName(), mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getBeanName()));
-            }
-
-            MapperMetaModel finalMapperMetaModel = mapperMetaModel;
-            Optional.ofNullable(mapperMetaModelDto.getMapperGenerateConfiguration())
-                .map(MapperGenerateConfigurationDto::getRootConfiguration)
-                .ifPresent(rootConfiguration -> {
-                    finalMapperMetaModel.setSourceClassMetaModel(
-                        classMetaModelMapper.toModelFromDto(rootConfiguration.getSourceMetaModel()));
-                    finalMapperMetaModel.setTargetClassMetaModel(
-                        classMetaModelMapper.toModelFromDto(rootConfiguration.getTargetMetaModel()));
-                });
-
-            Optional.ofNullable(mapperMetaModelDto.getMapperBeanAndMethod())
-                .ifPresent(beanAndMethodDto -> {
-                    if (beanAndMethodDto.getClassName() != null && beanAndMethodDto.getMethodName() != null) {
-                        try {
-                            Class<?> realClass = ClassUtils.loadRealClass(beanAndMethodDto.getClassName());
-                            Object mapperInstance = instanceLoader.createInstanceOrGetBean(beanAndMethodDto.getClassName(), beanAndMethodDto.getBeanName());
-                            Method mapperMethod = findMethodByName(realClass, beanAndMethodDto.getMethodName());
-
-                            finalMapperMetaModel.setMapperInstance(mapperInstance);
-                            finalMapperMetaModel.setMethodMetaModel(beanMethodMetaModelCreator
-                                .createBeanMethodMetaModel(mapperMethod, realClass, beanAndMethodDto.getBeanName()));
-
-                            MethodSignatureMetaModel methodSignatureMetaModel = methodSignatureMetaModelResolver.getMethodSignatureMetaModel(beanAndMethodDto);
-
-                            ClassMetaModel foundMapperInputMetamodel = null;
-                            for (MethodArgumentMetaModel methodArgument : methodSignatureMetaModel.getMethodArguments()) {
-                                var methodArgumentPredicates = getCommonExpectedArgsTypeAndOther(MAPPER_EXPECTED_ARGS_TYPE);
-
-                                List<ExpectedMethodArgument> canBeInputOfMapperPredicates = methodArgumentPredicates.stream()
-                                    .filter(ExpectedMethodArgument::isArgumentCanBeInputOfMapper)
-                                    .collect(Collectors.toList());
-
-                                ClassMetaModel argumentClassMetaModel = classMetaModelFromType(methodArgument.getArgumentType());
-
-                                List<ExpectedMethodArgument> cannotBeInputOfMapperPredicates = methodArgumentPredicates.stream()
-                                    .filter(predicate -> !predicate.isArgumentCanBeInputOfMapper())
-                                    .collect(Collectors.toList());
-
-                                boolean resolvedAsMapperInput = isResolvedAsMapperInput(methodArgument, canBeInputOfMapperPredicates, argumentClassMetaModel);
-                                boolean resolvedAsOtherThanInputMapper = isResolvedAsOtherThanInputMapper(methodArgument,
-                                    cannotBeInputOfMapperPredicates, argumentClassMetaModel);
-
-                                if (resolvedAsMapperInput && !resolvedAsOtherThanInputMapper) {
-                                    foundMapperInputMetamodel = argumentClassMetaModel;
-                                    break;
-                                }
-                            }
-
-                            finalMapperMetaModel.setSourceClassMetaModel(foundMapperInputMetamodel);
-                            finalMapperMetaModel.setTargetClassMetaModel(methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(beanAndMethodDto));
-
-                        } catch (Exception exception) {
-                            log.warn("unexpected exception", exception);
-                        }
-                    }
-                });
-
-            mapperMetaModel.setState(INITIALIZED);
-        }
-
         return mapperMetaModel;
     }
 
     private boolean isResolvedAsMapperInput(MethodArgumentMetaModel methodArgument,
-        List<ExpectedMethodArgument> canBeInputOfMapperPredicates, ClassMetaModel argumentClassMetaModel) {
+        List<ExpectedMethodArgument> possibleInputOfMapperPredicates, ClassMetaModel argumentClassMetaModel) {
         boolean resolvedAsMapperInput = true;
 
-        for (ExpectedMethodArgument canBeInputOfMapperPredicate : canBeInputOfMapperPredicates) {
+        for (ExpectedMethodArgument possibleInputOfMapperPredicate : possibleInputOfMapperPredicates) {
             resolvedAsMapperInput = true;
-            if (canBeInputOfMapperPredicate.getIsAnnotatedWith() != null) {
+            if (possibleInputOfMapperPredicate.getAnnotatedWith() != null) {
                 resolvedAsMapperInput = elements(methodArgument.getAnnotations())
                     .map(Annotation::annotationType)
                     .asList()
-                    .contains(canBeInputOfMapperPredicate.getIsAnnotatedWith());
+                    .contains(possibleInputOfMapperPredicate.getAnnotatedWith());
             }
 
-            resolvedAsMapperInput = resolvedAsMapperInput && canBeInputOfMapperPredicate.getTypePredicates().stream()
-                .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getIsSubTypeOf()));
+            resolvedAsMapperInput = resolvedAsMapperInput && possibleInputOfMapperPredicate.getTypePredicates().stream()
+                .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getSubTypeOf()));
 
         }
         return resolvedAsMapperInput;
@@ -266,17 +276,17 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
         boolean resolvedAsOtherThanInputMapper = false;
 
         for (ExpectedMethodArgument predicate : predicates) {
-            if (predicate.getIsAnnotatedWith() != null) {
+            if (predicate.getAnnotatedWith() == null) {
+                resolvedAsOtherThanInputMapper = true;
+            } else {
                 resolvedAsOtherThanInputMapper = elements(methodArgument.getAnnotations())
                     .map(Annotation::annotationType)
                     .asList()
-                    .contains(predicate.getIsAnnotatedWith());
-            } else {
-                resolvedAsOtherThanInputMapper = true;
+                    .contains(predicate.getAnnotatedWith());
             }
 
             resolvedAsOtherThanInputMapper = resolvedAsOtherThanInputMapper && predicate.getTypePredicates().stream()
-                .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getIsSubTypeOf()));
+                .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getSubTypeOf()));
 
             if (resolvedAsOtherThanInputMapper) {
                 break;

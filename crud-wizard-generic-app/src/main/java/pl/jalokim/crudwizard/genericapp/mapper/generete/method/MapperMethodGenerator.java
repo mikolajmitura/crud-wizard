@@ -58,6 +58,7 @@ import pl.jalokim.utils.template.TemplateAsText;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.GodClass")
 public class MapperMethodGenerator {
 
     public static final String ITERABLE_ELEMENT_NODE_NAME = "*";
@@ -102,8 +103,8 @@ public class MapperMethodGenerator {
             .asList();
 
         WritePropertyStrategy writePropertyStrategy = instanceLoader.createInstanceOrGetBean(WriteToMapStrategy.class);
-        if (targetMetaModel.hasRealClass() && !targetMetaModel.isSimpleType()
-            && !targetMetaModel.isGenericModel() && !targetMetaModel.isArrayOrCollection()) {
+        if (targetMetaModel.hasRealClass() && !targetMetaModel.isSimpleType() &&
+            !targetMetaModel.isGenericModel() && !targetMetaModel.isArrayOrCollection()) {
             writePropertyStrategy = createWritePropertyStrategy(targetMetaModel);
             targetMetaModel = createNotGenericClassMetaModel(targetMetaModel, mapperGenerateConfiguration.getFieldMetaResolverForRawTarget());
         }
@@ -156,19 +157,16 @@ public class MapperMethodGenerator {
     private void generateMapperMethodLinesForNotSimpleType(MapperMethodGeneratorArgument methodGeneratorArgument,
         MethodCodeMetadataBuilder methodBuilder, WritePropertyStrategy writePropertyStrategy, TargetFieldMetaData returnMethodMetaData) {
 
-        ClassMetaModel targetMetaModel = methodGeneratorArgument.getTargetMetaModel();
-        PropertiesOverriddenMapping propertiesOverriddenMapping = methodGeneratorArgument.getPropertiesOverriddenMapping();
-        MapperGenerateConfiguration mapperGenerateConfiguration = methodGeneratorArgument.getMapperGenerateConfiguration();
-        ObjectNodePath currentPath = methodGeneratorArgument.getCurrentPath();
-
         if (tryAssignToObjectWhenExistsOneCurrentNodeMapping(methodGeneratorArgument, methodBuilder, returnMethodMetaData)) {
             return;
         }
 
+        ClassMetaModel targetMetaModel = methodGeneratorArgument.getTargetMetaModel();
         methodBuilder
             .nextMappingCodeLine(wrapWithNextLineWith2Tabs(writePropertyStrategy.generateInitLine(targetMetaModel)))
             .writePropertyStrategy(writePropertyStrategy);
 
+        MapperGenerateConfiguration mapperGenerateConfiguration = methodGeneratorArgument.getMapperGenerateConfiguration();
         var allTargetFields = extractAllTargetFields(writePropertyStrategy, targetMetaModel, mapperGenerateConfiguration);
 
         for (FieldMetaModel targetFieldMetaModel : allTargetFields) {
@@ -176,6 +174,8 @@ public class MapperMethodGenerator {
             String fieldName = targetFieldMetaModel.getFieldName();
             ClassMetaModel classMetaModel = targetFieldMetaModel.getFieldType();
 
+            PropertiesOverriddenMapping propertiesOverriddenMapping = methodGeneratorArgument.getPropertiesOverriddenMapping();
+            ObjectNodePath currentPath = methodGeneratorArgument.getCurrentPath();
             TargetFieldMetaData targetFieldMetaData = TargetFieldMetaData.builder()
                 .fieldName(fieldName)
                 .fieldNameNodePath(currentPath.nextNode(fieldName))
@@ -388,9 +388,9 @@ public class MapperMethodGenerator {
             .propertiesOverriddenMappingForField(getPropertiesOverriddenMapping(propertiesOverriddenMapping, ITERABLE_ELEMENT_NODE_NAME))
             .build();
 
-        methodGeneratorArgument = methodGeneratorArgument.createForNextMethod(List.of(methodArgument), targetFieldMetaData);
+        MapperMethodGeneratorArgument newMethodGeneratorArgument = methodGeneratorArgument.createForNextMethod(List.of(methodArgument), targetFieldMetaData);
 
-        String expressionForAssignWhenExists = tryGetMappingAssignExpression(methodGeneratorArgument,
+        String expressionForAssignWhenExists = tryGetMappingAssignExpression(newMethodGeneratorArgument,
             targetFieldMetaData, methodArgumentsForMappingNotSimpleTypes);
 
         if (expressionForAssignWhenExists == null) {
@@ -427,9 +427,6 @@ public class MapperMethodGenerator {
         ClassMetaModel targetFieldClassMetaModel = targetFieldMetaData.getTargetFieldClassMetaModel();
         PropertiesOverriddenMapping propertiesOverriddenMappingForField = targetFieldMetaData.getPropertiesOverriddenMappingForField();
 
-        List<MapperArgumentMethodModel> nextMapperMethodArguments = convertAssignExpressionsToMethodArguments(
-            mapperGeneratedCodeMetadata, methodArgumentsExpressions);
-
         if (methodArgumentsExpressions.size() == 1) {
 
             var methodArgumentCodeMetaData = methodArgumentsExpressions.get(0).generateCodeMetadata(mapperGeneratedCodeMetadata);
@@ -457,15 +454,17 @@ public class MapperMethodGenerator {
                             .asConcatText(", "))
                 );
                 return;
-            } else if (isEnabledAutoMapping(mapperGenerateConfiguration, mapperConfiguration)
-                && canConvertByConversionService(methodArgumentCodeMetaData.getReturnClassModel(), targetFieldClassMetaModel) ) {
+            } else if (isEnabledAutoMapping(mapperGenerateConfiguration, mapperConfiguration) &&
+                canConvertByConversionService(methodArgumentCodeMetaData.getReturnClassModel(), targetFieldClassMetaModel)) {
                 assignExpressionForFieldReference.set(methodArgumentsExpressions.get(0));
             }
         }
 
-        boolean canGenerateNestedMethod = (containsNestedMappings(propertiesOverriddenMappingForField) || isNotEmpty(methodArgumentsExpressions));
+        boolean canGenerateNestedMethod = containsNestedMappings(propertiesOverriddenMappingForField) || isNotEmpty(methodArgumentsExpressions);
         if (assignExpressionForFieldReference.get() == null && canGenerateNestedMethod) {
 
+            List<MapperArgumentMethodModel> nextMapperMethodArguments = convertAssignExpressionsToMethodArguments(
+                mapperGeneratedCodeMetadata, methodArgumentsExpressions);
             MethodCodeMetadata generatedNewMethodMeta = createMethodCodeMetadata(
                 methodGeneratorArgument.createForNextMethod(nextMapperMethodArguments, targetFieldMetaData));
 
@@ -487,8 +486,9 @@ public class MapperMethodGenerator {
 
     static MethodCodeMetadata getGeneratedNewMethodOrGetCreatedEarlier(MapperCodeMetadata mapperGeneratedCodeMetadata,
         MethodCodeMetadata parentMethodCodeMetadata,
-        MethodCodeMetadata generatedNewMethodMeta) {
+        MethodCodeMetadata generatedNewMethodMetaParam) {
 
+        MethodCodeMetadata generatedNewMethodMeta = generatedNewMethodMetaParam;
         if (parentMethodCodeMetadata != null) {
             parentMethodCodeMetadata.addChildMethod(generatedNewMethodMeta);
         }
@@ -496,14 +496,14 @@ public class MapperMethodGenerator {
         MethodCodeMetadata foundMethodByTheSameCode = mapperGeneratedCodeMetadata.getMethodWhenExistsWithTheSameCode(generatedNewMethodMeta);
         boolean shouldAddAsNewMethod = false;
 
-        if (foundMethodByTheSameCode != null) {
+        if (foundMethodByTheSameCode == null) {
+            shouldAddAsNewMethod = true;
+        } else {
             if (foundMethodByTheSameCode.hasTheSameChildMethods(generatedNewMethodMeta)) {
                 generatedNewMethodMeta = foundMethodByTheSameCode;
             } else {
                 shouldAddAsNewMethod = true;
             }
-        } else {
-            shouldAddAsNewMethod = true;
         }
 
         if (shouldAddAsNewMethod) {
@@ -517,8 +517,8 @@ public class MapperMethodGenerator {
 
     private boolean canConvertByConversionService(ClassMetaModel sourceMetaModel, ClassMetaModel targetMetaModel) {
         var converterDefinition = genericObjectsConversionService.findConverterDefinition(sourceMetaModel, targetMetaModel);
-        return converterDefinition != null || (sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass()
-            && conversionService.canConvert(sourceMetaModel.getRealClass(), targetMetaModel.getRealClass()));
+        return converterDefinition != null || sourceMetaModel.hasRealClass() && targetMetaModel.hasRealClass() &&
+            conversionService.canConvert(sourceMetaModel.getRealClass(), targetMetaModel.getRealClass());
     }
 
     private boolean isEnabledAutoMapping(MapperGenerateConfiguration mapperGenerateConfiguration, MapperConfiguration mapperConfiguration) {

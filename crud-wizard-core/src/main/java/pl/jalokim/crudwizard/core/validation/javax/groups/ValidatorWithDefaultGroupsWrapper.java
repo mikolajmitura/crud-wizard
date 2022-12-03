@@ -25,7 +25,7 @@ public class ValidatorWithDefaultGroupsWrapper implements Validator {
         if (groupsAsList.contains(WithoutDefaultGroup.class) && groups.length > 1) {
 
             Class<?>[] onlyGivenGroups = Elements.elements(groupsAsList)
-                .filter(group -> group != (WithoutDefaultGroup.class))
+                .filter(group -> group != WithoutDefaultGroup.class)
                 .asArray(new Class<?>[]{});
 
             return new HashSet<>(delegated.validate(object, onlyGivenGroups));

@@ -39,8 +39,8 @@ public abstract class ServiceMetaModelMapper extends AdditionalPropertyMapper<Se
             String methodName = serviceMethod.getMethodName();
 
             BeanInstanceMetaModel beanInstanceMetaModel = elements(genericBeansProvider.getAllGenericServiceBeans())
-                .filter(serviceBean -> (beanName == null || serviceBean.getBeanName().equals(beanName))
-                    && serviceBean.getClassName().equals(className))
+                .filter(serviceBean -> (beanName == null || serviceBean.getBeanName().equals(beanName)) &&
+                    serviceBean.getClassName().equals(className))
                 .findFirst()
                 .orElseGet(() -> genericBeansProvider.loadBeanInstanceFromSpringContext(className, beanName, methodName));
 
@@ -48,10 +48,9 @@ public abstract class ServiceMetaModelMapper extends AdditionalPropertyMapper<Se
                 .filter(methodMetaModel -> methodMetaModel.getMethodName().equals(methodName))
                 .getFirst();
 
-            serviceMetaModelBuilder
+            serviceMetaModelBuilder = serviceMetaModelBuilder
                 .serviceInstance(beanInstanceMetaModel.getBeanInstance())
-                .serviceBeanAndMethod(beanMethodMetaModel)
-                .build();
+                .serviceBeanAndMethod(beanMethodMetaModel);
         }
 
         return serviceMetaModelBuilder.build();

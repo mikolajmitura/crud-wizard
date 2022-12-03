@@ -18,6 +18,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Value;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,7 @@ import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 
 @Slf4j
+@UtilityClass
 public class ExpectedMethodArgumentConfig {
 
     private static final ClassMetaModelsPredicate METHOD_ARG_IS_SIMPLE_TYPE = (
@@ -60,8 +62,8 @@ public class ExpectedMethodArgumentConfig {
                     methodArgumentMetaModel,
                     methodArgClassMetaModel,
                     inputTypeOfMapperOrService) ->
-                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestHeader.class).name())
-                        || StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestHeader.class).value())
+                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestHeader.class).name()) ||
+                        StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestHeader.class).value())
             )),
         argAnnotatedAndAsMetaModels(RequestParam.class,
             newTypePredicate(MAP_STRING_OBJECT_MODEL),
@@ -70,8 +72,8 @@ public class ExpectedMethodArgumentConfig {
                     methodArgumentMetaModel,
                     methodArgClassMetaModel,
                     inputTypeOfMapperOrService) ->
-                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestParam.class).name())
-                        || StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestParam.class).value())
+                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestParam.class).name()) ||
+                        StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(RequestParam.class).value())
             )),
         argAnnotatedAndAsMetaModels(PathVariable.class,
             newTypePredicate(OBJECT_MODEL, METHOD_ARG_IS_SIMPLE_TYPE,
@@ -79,8 +81,8 @@ public class ExpectedMethodArgumentConfig {
                     methodArgumentMetaModel,
                     methodArgClassMetaModel,
                     inputTypeOfMapperOrService) ->
-                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(PathVariable.class).name())
-                        || StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(PathVariable.class).value())))
+                    StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(PathVariable.class).name()) ||
+                        StringUtils.isNotBlank(methodArgumentMetaModel.getParameter().getAnnotation(PathVariable.class).value())))
     );
 
     public static final List<ExpectedMethodArgument> SERVICE_EXPECTED_ARGS_TYPE = List.of(
@@ -116,6 +118,7 @@ public class ExpectedMethodArgumentConfig {
             .build();
     }
 
+    @SuppressWarnings({"PMD.AvoidReassigningParameters", "PMD.CognitiveComplexity"})
     private static boolean expectedTypeForRequestBody(ClassMetaModel methodArgClassMetaModel,
         ClassMetaModel inputTypeOfMapperOrService, int genericTypeNestingLevel) {
 
@@ -133,10 +136,10 @@ public class ExpectedMethodArgumentConfig {
             log.debug("when inputTypeOfMapperOrService is generic meta model, methodArgClassMetaModel is a String when, result: {}", result);
             return result;
         } else if (inputTypeOfMapperOrService.isGenericModel()) {
-            boolean result = methodArgClassMetaModel.isTheSameMetaModel(MAP_STRING_OBJECT_MODEL)
-                || (!methodArgClassMetaModel.isSimpleType()
-                && !methodArgClassMetaModel.isCollectionType()
-                && !methodArgClassMetaModel.isMapType());
+            boolean result = methodArgClassMetaModel.isTheSameMetaModel(MAP_STRING_OBJECT_MODEL) ||
+                !methodArgClassMetaModel.isSimpleType() &&
+                    !methodArgClassMetaModel.isCollectionType() &&
+                    !methodArgClassMetaModel.isMapType();
             log.debug("methodArgClassMetaModel is generic object, not simple, not map<String,Object>, not collection and not map, result: {}", result);
             return result;
         } else if (inputTypeOfMapperOrService.isSimpleType()) {
@@ -144,8 +147,8 @@ public class ExpectedMethodArgumentConfig {
             log.debug("methodArgClassMetaModel is simple, result: {}", result);
             return result;
         } else if (inputTypeOfMapperOrService.isCollectionType()) {
-            boolean result = methodArgClassMetaModel.isCollectionType()
-                && expectedTypeForRequestBody(
+            boolean result = methodArgClassMetaModel.isCollectionType() &&
+                expectedTypeForRequestBody(
                 methodArgClassMetaModel.getGenericTypes().get(0),
                 inputTypeOfMapperOrService.getGenericTypes().get(0),
                 ++genericTypeNestingLevel
@@ -153,8 +156,8 @@ public class ExpectedMethodArgumentConfig {
             log.debug("methodArgClassMetaModel is collection, result: {}", result);
             return result;
         } else if (inputTypeOfMapperOrService.isMapType()) {
-            boolean result = methodArgClassMetaModel.isMapType()
-                && expectedTypeForRequestBody(
+            boolean result = methodArgClassMetaModel.isMapType() &&
+                expectedTypeForRequestBody(
                 methodArgClassMetaModel.getGenericTypes().get(0),
                 inputTypeOfMapperOrService.getGenericTypes().get(0),
                 ++genericTypeNestingLevel
@@ -167,9 +170,9 @@ public class ExpectedMethodArgumentConfig {
             return result;
         }
 
-        boolean result = !methodArgClassMetaModel.isSimpleType()
-            && !methodArgClassMetaModel.isCollectionType()
-            && !methodArgClassMetaModel.isMapType();
+        boolean result = !methodArgClassMetaModel.isSimpleType() &&
+            !methodArgClassMetaModel.isCollectionType() &&
+            !methodArgClassMetaModel.isMapType();
         log.debug("methodArgClassMetaModel is not simple, not collection, not map, result: {}", result);
         return result;
     }
@@ -186,15 +189,15 @@ public class ExpectedMethodArgumentConfig {
             log.debug("expectedInputTypeOfMapper is generic enum but methodArgClassMetaModel is type of String, result: {}", result);
             return result;
         } else if (expectedInputTypeOfMapper.isGenericModel()) {
-            boolean result = methodArgClassMetaModel.isTheSameMetaModel(MAP_STRING_OBJECT_MODEL)
-                || MAP_STRING_OBJECT_MODEL.isSubTypeOf(methodArgClassMetaModel);
-            log.debug("expectedInputTypeOfMapper is generic metamodel but methodArgClassMetaModel is type of Map<String, Object> "
-                + "or Map is sub type of methodArgClassMetaModel, result: {}", result);
+            boolean result = methodArgClassMetaModel.isTheSameMetaModel(MAP_STRING_OBJECT_MODEL) ||
+                MAP_STRING_OBJECT_MODEL.isSubTypeOf(methodArgClassMetaModel);
+            log.debug("expectedInputTypeOfMapper is generic metamodel but methodArgClassMetaModel is type of Map<String, Object> " +
+                "or Map is sub type of methodArgClassMetaModel, result: {}", result);
             return result;
         } else if (expectedInputTypeOfMapper.hasGenericTypes()) {
 
-            boolean result = methodArgClassMetaModel.hasGenericTypes()
-                && expectedInputTypeOfMapper.getGenericTypes().size() == methodArgClassMetaModel.getGenericTypes().size();
+            boolean result = methodArgClassMetaModel.hasGenericTypes() &&
+                expectedInputTypeOfMapper.getGenericTypes().size() == methodArgClassMetaModel.getGenericTypes().size();
 
             log.debug("methodArgClassMetaModel has generic types and the same size like expectedInputTypeOfMapper, result: {}", result);
 
@@ -202,9 +205,8 @@ public class ExpectedMethodArgumentConfig {
             if (result) {
                 var methodGenericTypes = methodArgClassMetaModel.getGenericTypes();
                 var expectedGenericTypes = expectedInputTypeOfMapper.getGenericTypes();
-                elements(methodGenericTypes).forEachWithIndex((index, methodArgumentType) -> {
-                        matchAll.set(matchAll.get() && canBeAssignAsMapperArgument(methodArgumentType, (expectedGenericTypes.get(index))));
-                    }
+                elements(methodGenericTypes).forEachWithIndex((index, methodArgumentType) ->
+                        matchAll.set(matchAll.get() && canBeAssignAsMapperArgument(methodArgumentType, expectedGenericTypes.get(index)))
                 );
             }
             log.debug("generic types of expectedInputTypeOfMapper and methodArgClassMetaModel are the same, result: {}", matchAll);
@@ -223,14 +225,13 @@ public class ExpectedMethodArgumentConfig {
 
         @Builder.Default
         List<TypePredicate> typePredicates = new ArrayList<>();
-        Class<? extends Annotation> isAnnotatedWith;
+        Class<? extends Annotation> annotatedWith;
 
         /**
          * Can be input of mapper only when one of typePredicates is passed and
          * when is annotated with isAnnotatedWith
          */
-        @Builder.Default
-        boolean argumentCanBeInputOfMapper = false;
+        boolean argumentCanBeInputOfMapper;
     }
 
     @Builder
@@ -239,7 +240,7 @@ public class ExpectedMethodArgumentConfig {
     public static class TypePredicate {
 
         @NotNull
-        ClassMetaModel isSubTypeOf;
+        ClassMetaModel subTypeOf;
         @Builder.Default
         List<ClassMetaModelsPredicate> predicatesOfModel = List.of();
 
@@ -251,7 +252,7 @@ public class ExpectedMethodArgumentConfig {
 
         static TypePredicate newTypePredicate(ClassMetaModel isSubTypeOf, ClassMetaModelsPredicate... predicateOfType) {
             return TypePredicate.builder()
-                .isSubTypeOf(isSubTypeOf)
+                .subTypeOf(isSubTypeOf)
                 .predicatesOfModel(elements(predicateOfType).asList())
                 .build();
         }
@@ -263,7 +264,7 @@ public class ExpectedMethodArgumentConfig {
 
     private static ExpectedMethodArgument argAnnotatedAndAsMetaModels(Class<? extends Annotation> isAnnotatedWith, TypePredicate... typePredicates) {
         return ExpectedMethodArgument.builder()
-            .isAnnotatedWith(isAnnotatedWith)
+            .annotatedWith(isAnnotatedWith)
             .typePredicates(elements(typePredicates).asList())
             .build();
     }

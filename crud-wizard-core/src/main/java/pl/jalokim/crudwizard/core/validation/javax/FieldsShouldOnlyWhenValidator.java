@@ -15,12 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.validation.ConstraintValidatorContext;
-import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.crudwizard.core.validation.javax.inner.ExpectedFieldStatePredicates;
 import pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator;
 import pl.jalokim.crudwizard.core.validation.javax.inner.ValidationFieldConfiguration;
-import pl.jalokim.utils.collection.Elements;
 
 public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWithDynamicMessage<WhenFieldIsInStateThenOthersShould, Object> {
 
@@ -104,8 +102,8 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
     }
 
     private boolean parentWhenAreTheSameLikeInChildWhen(WhenFieldIsInStateThenOthersShould parent, FieldShouldWhenOther child) {
-        return parent.whenField().equals(child.whenField())
-            && parent.is().equals(child.is())
-            && elements(parent.fieldValues()).asSet().equals(elements(child.otherFieldValues()).asSet());
+        return parent.whenField().equals(child.whenField()) &&
+            parent.is().equals(child.is()) &&
+            elements(parent.fieldValues()).asSet().equals(elements(child.otherFieldValues()).asSet());
     }
 }

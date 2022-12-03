@@ -10,7 +10,6 @@ import java.util.Optional;
 import lombok.Builder;
 import lombok.Data;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
-import pl.jalokim.utils.collection.CollectionUtils;
 
 @Data
 @Builder
@@ -25,8 +24,7 @@ public class PropertiesOverriddenMapping {
     /**
      * by default disabled, should inform when have problem with some field, when cannot find conversion strategy for given field types.
      */
-    @Builder.Default
-    private boolean ignoreMappingProblem = false;
+    private boolean ignoreMappingProblem;
 
     @Builder.Default
     private List<ValueToAssignExpression> valueMappingStrategy = new ArrayList<>();
@@ -38,8 +36,8 @@ public class PropertiesOverriddenMapping {
         if (propertyOverriddenMapping == null) {
             return false;
         }
-        return isNotEmpty(propertyOverriddenMapping.getValueMappingStrategy())
-            || !propertyOverriddenMapping.getMappingsByPropertyName().isEmpty();
+        return isNotEmpty(propertyOverriddenMapping.getValueMappingStrategy()) ||
+            !propertyOverriddenMapping.getMappingsByPropertyName().isEmpty();
     }
 
     public static List<ValueToAssignExpression> findOverriddenMappingStrategiesForCurrentNode(PropertiesOverriddenMapping propertiesOverriddenMapping) {

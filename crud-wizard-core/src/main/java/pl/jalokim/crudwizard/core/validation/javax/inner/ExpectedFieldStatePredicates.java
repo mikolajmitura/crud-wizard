@@ -146,17 +146,17 @@ public class ExpectedFieldStatePredicates {
             Map<?, ?> map = castObject(fieldMeta);
             return map.size() <= parseToBigIntegerNumber(fieldMeta, dependValuesMeta).longValue();
         }
-        if (fieldMeta.getValue() instanceof Integer
-            || fieldMeta.getValue() instanceof Long
-            || fieldMeta.getValue() instanceof Byte
-            || fieldMeta.getValue() instanceof BigInteger
-            || fieldMeta.getValue() instanceof Short) {
+        if (fieldMeta.getValue() instanceof Integer ||
+            fieldMeta.getValue() instanceof Long ||
+            fieldMeta.getValue() instanceof Byte ||
+            fieldMeta.getValue() instanceof BigInteger ||
+            fieldMeta.getValue() instanceof Short) {
             return new BigInteger(fieldMeta.getValue().toString())
                 .compareTo(parseToBigIntegerNumber(fieldMeta, dependValuesMeta)) <= 0;
         }
-        if (fieldMeta.getValue() instanceof Double
-            || fieldMeta.getValue() instanceof Float
-            || fieldMeta.getValue() instanceof BigDecimal) {
+        if (fieldMeta.getValue() instanceof Double ||
+            fieldMeta.getValue() instanceof Float ||
+            fieldMeta.getValue() instanceof BigDecimal) {
             return new BigDecimal(fieldMeta.getValue().toString())
                 .compareTo(parseToNumber(dependValuesMeta.getValues())) <= 0;
         }
@@ -182,17 +182,17 @@ public class ExpectedFieldStatePredicates {
             Map<?, ?> map = castObject(fieldMeta);
             return map.size() >= parseToBigIntegerNumber(fieldMeta, dependValuesMeta).longValue();
         }
-        if (fieldMeta.getValue() instanceof Integer
-            || fieldMeta.getValue() instanceof Long
-            || fieldMeta.getValue() instanceof Byte
-            || fieldMeta.getValue() instanceof BigInteger
-            || fieldMeta.getValue() instanceof Short) {
+        if (fieldMeta.getValue() instanceof Integer ||
+            fieldMeta.getValue() instanceof Long ||
+            fieldMeta.getValue() instanceof Byte ||
+            fieldMeta.getValue() instanceof BigInteger ||
+            fieldMeta.getValue() instanceof Short) {
             return new BigInteger(fieldMeta.getValue().toString())
                 .compareTo(parseToBigIntegerNumber(fieldMeta, dependValuesMeta)) >= 0;
         }
-        if (fieldMeta.getValue() instanceof Double
-            || fieldMeta.getValue() instanceof Float
-            || fieldMeta.getValue() instanceof BigDecimal) {
+        if (fieldMeta.getValue() instanceof Double ||
+            fieldMeta.getValue() instanceof Float ||
+            fieldMeta.getValue() instanceof BigDecimal) {
             return new BigDecimal(fieldMeta.getValue().toString())
                 .compareTo(parseToNumber(dependValuesMeta.getValues())) >= 0;
         }

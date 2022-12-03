@@ -51,15 +51,15 @@ public class DefaultGenericMapper {
         Map<String, Object> resultsFrom = (Map<String, Object>) mapperArgument.getSourceObject();
         if (resultsFrom.values().size() == 1) {
             return Elements.elements(resultsFrom.values())
-                .filter(value -> mapperArgument.getTargetMetaModel().getRealClass() == null
-                    || MetadataReflectionUtils.isTypeOf(value, mapperArgument.getTargetMetaModel().getRealClass()))
+                .filter(value -> mapperArgument.getTargetMetaModel().getRealClass() == null ||
+                    MetadataReflectionUtils.isTypeOf(value, mapperArgument.getTargetMetaModel().getRealClass()))
                 .findFirst()
                 .orElseThrow(() -> {
                     Object foundValue = resultsFrom.values().iterator().next();
-                    return new IllegalArgumentException("expected class: "
-                        + mapperArgument.getTargetMetaModel().getRealClass().getCanonicalName()
-                        + " as endpoint type but given was value: " + foundValue
-                        + " with type: " + getFullClassName(foundValue));
+                    return new IllegalArgumentException("expected class: " +
+                        mapperArgument.getTargetMetaModel().getRealClass().getCanonicalName() +
+                        " as endpoint type but given was value: " + foundValue +
+                        " with type: " + getFullClassName(foundValue));
                 });
         }
         return resultsFrom;

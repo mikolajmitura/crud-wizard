@@ -17,8 +17,7 @@ public class MapperConfiguration {
     private ClassMetaModel targetMetaModel;
 
     /**
-     * disable auto mapping, by default is enabled.
-     * When is disabled then finding of conversion between types then no attempt will be made.
+     * disable auto mapping, by default is enabled. When is disabled then finding of conversion between types then no attempt will be made.
      */
     @Builder.Default
     private boolean enableAutoMapping = true;
@@ -27,7 +26,7 @@ public class MapperConfiguration {
      * by default disabled, should inform when have problem with some field, when cannot find conversion strategy for given field types.
      */
     @Builder.Default
-    private boolean ignoreMappingProblems = false;
+    private boolean ignoreMappingProblems;
 
     @Builder.Default
     private PropertiesOverriddenMapping propertyOverriddenMapping = PropertiesOverriddenMapping.builder().build();

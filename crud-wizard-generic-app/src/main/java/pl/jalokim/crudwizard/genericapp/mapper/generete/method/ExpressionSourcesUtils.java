@@ -9,6 +9,7 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
@@ -19,6 +20,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueT
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 
+@UtilityClass
 class ExpressionSourcesUtils {
 
     static List<MapperArgumentMethodModel> convertAssignExpressionsToMethodArguments(MapperCodeMetadata mapperGeneratedCodeMetadata,
@@ -55,8 +57,8 @@ class ExpressionSourcesUtils {
             targetFieldMetaData.getPropertiesOverriddenMappingForField())) {
 
             methodArgumentsExpressions.addAll(elements(methodGeneratorArgument.getMapperMethodArguments())
-            .map(argument -> new RawJavaCodeAssignExpression(argument.getArgumentType(), argument.getArgumentName()))
-            .asList());
+                .map(argument -> new RawJavaCodeAssignExpression(argument.getArgumentType(), argument.getArgumentName()))
+                .asList());
         }
         return methodArgumentsExpressions;
     }

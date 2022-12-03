@@ -19,6 +19,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
+import pl.jalokim.utils.collection.CollectionUtils;
 import ru.vyarus.java.generics.resolver.GenericsResolver;
 import ru.vyarus.java.generics.resolver.context.GenericsContext;
 import ru.vyarus.java.generics.resolver.context.MethodGenericsContext;
@@ -105,12 +106,11 @@ public class MethodSignatureMetaModelResolver {
 
                 List<Type> types = elements(parameterizedType.getActualTypeArguments()).asList();
                 String genericParts = "";
-                if (types.size() > 0) {
+                if (CollectionUtils.isNotEmpty(types)) {
                     genericParts = "<" + elements(types)
                         .map(TypeWrapper::new)
                         .map(TypeWrapper::getTypeName)
-                        .asConcatText(", ")
-                        +">";
+                        .asConcatText(", ") + ">";
                 }
 
                 return new TypeWrapper(parameterizedType.getRawType()).getTypeName() + genericParts;

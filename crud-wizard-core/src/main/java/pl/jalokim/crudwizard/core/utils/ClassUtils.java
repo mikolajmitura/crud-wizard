@@ -17,6 +17,10 @@ public class ClassUtils {
             .orElse(null);
     }
 
+    public static Class<?> loadRealClass(Class<?> classProxiedByCglib) {
+        return loadRealClass(clearCglibClassName(classProxiedByCglib.getCanonicalName()));
+    }
+
     public static boolean checkThatClassExists(String nullableClassName) {
         return Optional.ofNullable(nullableClassName)
             .map(ClassUtils::clearCglibClassName)
@@ -28,10 +32,6 @@ public class ClassUtils {
                     return false;
                 }
             }).orElse(false);
-    }
-
-    public static Class<?> loadRealClass(Class<?> classProxiedByCglib) {
-        return loadRealClass(clearCglibClassName(classProxiedByCglib.getCanonicalName()));
     }
 
     public static String clearCglibClassName(String className) {

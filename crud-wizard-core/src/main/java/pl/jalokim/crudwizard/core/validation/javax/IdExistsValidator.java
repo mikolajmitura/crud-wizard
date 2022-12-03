@@ -35,8 +35,7 @@ public class IdExistsValidator implements BaseConstraintValidator<IdExists, Obje
     }
 
     private Integer fetchSqlCountValue(Object idValue, String idColumnName) {
-        Object wrappedValue = idValue instanceof String ?
-            StringUtils.wrap((String) idValue, '\'') : idValue;
+        Object wrappedValue = idValue instanceof String ? StringUtils.wrap((String) idValue, '\'') : idValue;
 
         return jdbcTemplate.queryForObject(String.format(SELECT_FORMAT,
             idColumnName, tableName, idColumnName, wrappedValue), Integer.class);

@@ -92,8 +92,8 @@ public class RawEntityObjectTranslator {
 
     private FieldMetaModel getFieldByName(ObjectNodePath objectNodePath, ClassMetaModel classMetaModel, String fieldName) {
         return Optional.ofNullable(classMetaModel.getFieldByName(asLowerCamel(fieldName)))
-            .orElseThrow(() -> new TechnicalException("Cannot find field with name: '" + fieldName + "' in path: '" + objectNodePath.getFullPath()
-                + "' available fields: " + classMetaModel.getFieldNames() + " in named class meta model: '" + classMetaModel.getName() + "'"));
+            .orElseThrow(() -> new TechnicalException("Cannot find field with name: '" + fieldName + "' in path: '" + objectNodePath.getFullPath() +
+                "' available fields: " + classMetaModel.getFieldNames() + " in named class meta model: '" + classMetaModel.getName() + "'"));
     }
 
     private Object convertObjectBasedOnRealClass(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {

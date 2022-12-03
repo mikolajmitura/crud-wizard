@@ -22,8 +22,8 @@ public class UniqueMapperNamesValidator implements BaseConstraintValidator<Uniqu
             MapperConfigurationDto rootConfiguration = mapperGenerateConfiguration.getRootConfiguration();
 
             AtomicBoolean isValid = new AtomicBoolean(true);
-            if (mapperGenerateConfiguration.getRootConfiguration() != null
-                && !Objects.equals(mapperMetaModelDto.getMapperName(), rootConfiguration.getName())) {
+            if (mapperGenerateConfiguration.getRootConfiguration() != null &&
+                !Objects.equals(mapperMetaModelDto.getMapperName(), rootConfiguration.getName())) {
                 isValid.set(false);
                 customMessage(context, createMessagePlaceholder("UniqueMapperNamesValidator.root.names.should.be.the.same",
                     wrapAsExternalPlaceholder("mapperGenerateConfiguration.rootConfiguration.name")), "name");
@@ -42,7 +42,7 @@ public class UniqueMapperNamesValidator implements BaseConstraintValidator<Uniqu
                                 .addNextProperty("mapperGenerateConfiguration")
                                 .addNextPropertyAndIndex("subMappersAsMethods", index)
                                 .build()
-                            );
+                        );
                     }
                 });
 

@@ -5,17 +5,19 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldr
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategy;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
 
+@UtilityClass
 public class TargetClassMetaModelUtils {
 
     static boolean isElementsType(ClassMetaModel targetFieldClassMetaModel) {
-        return targetFieldClassMetaModel.isMapType() || targetFieldClassMetaModel.isListType()
-            || targetFieldClassMetaModel.isSetType() || targetFieldClassMetaModel.isArrayType();
+        return targetFieldClassMetaModel.isMapType() || targetFieldClassMetaModel.isListType() ||
+            targetFieldClassMetaModel.isSetType() || targetFieldClassMetaModel.isArrayType();
     }
 
     static List<FieldMetaModel> extractAllTargetFields(WritePropertyStrategy writePropertyStrategy, ClassMetaModel targetMetaModel,

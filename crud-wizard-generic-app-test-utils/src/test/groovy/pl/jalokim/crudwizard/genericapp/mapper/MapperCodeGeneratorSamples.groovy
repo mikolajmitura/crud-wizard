@@ -53,12 +53,6 @@ import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringServi
 
 class MapperCodeGeneratorSamples {
 
-    static void main(String[] args) {
-        MapperCodeGeneratorSamples.getFields().each {
-            println it.name
-        }
-    }
-
     public static final MapperGenerateConfiguration EMPTY_CONFIG = MapperGenerateConfiguration.builder()
         .rootConfiguration(MapperConfiguration.builder().build())
         .build()
@@ -498,7 +492,7 @@ class MapperCodeGeneratorSamples {
                 .build())
             .build())
 
-    public static final def PERSON_META_MODEL_AS_METAMODEL = [
+    public static final PERSON_META_MODEL_AS_METAMODEL = [
         id       : 1L,
         name     : "someName",
         surname  : "surName",
@@ -711,7 +705,7 @@ class MapperCodeGeneratorSamples {
         someMetaData: null
     ]
 
-    static ClassMetaModel SOME_DOCUMENT_MODEL1 = ClassMetaModel.builder()
+    static final ClassMetaModel SOME_DOCUMENT_MODEL1 = ClassMetaModel.builder()
         .name("someDocument1")
         .fields([
             createValidFieldMetaModel("id", Long),
@@ -807,7 +801,7 @@ class MapperCodeGeneratorSamples {
         18L
     )
 
-    static ClassMetaModel SOME_CONTACT_MODEL1 = ClassMetaModel.builder()
+    static final ClassMetaModel SOME_CONTACT_MODEL1 = ClassMetaModel.builder()
         .name("someContact1")
         .fields([
             createValidFieldMetaModel("type", Long),
@@ -815,7 +809,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static ClassMetaModel SOME_METADATA1 = ClassMetaModel.builder()
+    static final ClassMetaModel SOME_METADATA1 = ClassMetaModel.builder()
         .name("someMetaData1")
         .fields([
             createValidFieldMetaModel("key", Long),
@@ -823,7 +817,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static ClassMetaModel SOME_PERSON_MODEL1 = ClassMetaModel.builder()
+    static final ClassMetaModel SOME_PERSON_MODEL1 = ClassMetaModel.builder()
         .name("somePerson1")
         .fields([
             createValidFieldMetaModel("id", Long),
@@ -837,7 +831,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static MapperGenerateConfiguration MAPPING_PERSON_1_CONFIG = withMapperConfigurations(
+    static final MapperGenerateConfiguration MAPPING_PERSON_1_CONFIG = withMapperConfigurations(
         MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
@@ -918,7 +912,7 @@ class MapperCodeGeneratorSamples {
             .build()
     )
 
-    static MapperGenerateConfiguration SOME_PERSON_MODEL1_FEW_IGNORED = withMapperConfigurations(
+    static final MapperGenerateConfiguration SOME_PERSON_MODEL1_FEW_IGNORED = withMapperConfigurations(
         MapperConfiguration.builder()
             .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
                 .mappingsByPropertyName([
@@ -937,7 +931,7 @@ class MapperCodeGeneratorSamples {
             .build()
     )
 
-    static ClassMetaModel NESTED_ELEMENT_OBJECT_MODEL = ClassMetaModel.builder()
+    static final ClassMetaModel NESTED_ELEMENT_OBJECT_MODEL = ClassMetaModel.builder()
         .name("nestedElementObjectModel")
         .fields([
             createValidFieldMetaModel("name", String),
@@ -945,7 +939,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static ClassMetaModel COLLECTION_ELEMENT_MODEL = ClassMetaModel.builder()
+    static final ClassMetaModel COLLECTION_ELEMENT_MODEL = ClassMetaModel.builder()
         .name("collectionElementModel")
         .fields([
             createValidFieldMetaModel("field1", String),
@@ -955,7 +949,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static ClassMetaModel OTHER_ELEMENT_COLLECTION_MODEL = ClassMetaModel.builder()
+    static final ClassMetaModel OTHER_ELEMENT_COLLECTION_MODEL = ClassMetaModel.builder()
         .name("otherElementCollectionModel")
         .fields([
             createValidFieldMetaModel("othElemField1", String),
@@ -963,7 +957,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static ClassMetaModel MAPPING_COLLECTIONS_MODEL = ClassMetaModel.builder()
+    static final ClassMetaModel MAPPING_COLLECTIONS_MODEL = ClassMetaModel.builder()
         .name("mappingCollectionsModel")
         .fields([
             createValidFieldMetaModel("strings", ClassMetaModel.builder()
@@ -1007,19 +1001,19 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static SOME_ENUM1_METAMODEL = createValidEnumMetaModel("someEnum1Model",
+    static final SOME_ENUM1_METAMODEL = createValidEnumMetaModel("someEnum1Model",
         "VAL1", "VAL2", "VAL3", "OTH", "UNKNOWN"
     )
 
-    static SOME_ENUM2_METAMODEL = createValidEnumMetaModel("someEnum2Model",
+    static final SOME_ENUM2_METAMODEL = createValidEnumMetaModel("someEnum2Model",
         "VAL1", "VAL2", "OTH1", "UNKNOWN"
     )
 
-    static SOME_ENUM3_METAMODEL = createValidEnumMetaModel("someEnum3Model",
+    static final SOME_ENUM3_METAMODEL = createValidEnumMetaModel("someEnum3Model",
         "VAL1", "VAL2", "VAR3"
     )
 
-    static METAMODEL_WITH_ENUMS1 = ClassMetaModel.builder()
+    static final METAMODEL_WITH_ENUMS1 = ClassMetaModel.builder()
         .name("metamodelWithEnums1")
         .fields([
             createValidFieldMetaModel("enum1", modelFromClass(SomeEnum1)),
@@ -1034,7 +1028,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static METAMODEL_WITH_ENUMS2 = ClassMetaModel.builder()
+    static final METAMODEL_WITH_ENUMS2 = ClassMetaModel.builder()
         .name("metamodelWithEnums2")
         .fields([
             createValidFieldMetaModel("enum1", SOME_ENUM1_METAMODEL),
@@ -1049,7 +1043,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static METAMODEL_WITH_ENUMS3 = ClassMetaModel.builder()
+    static final METAMODEL_WITH_ENUMS3 = ClassMetaModel.builder()
         .name("metamodelWithEnums2")
         .fields([
             createValidFieldMetaModel("spec1enum", SOME_ENUM1_METAMODEL),
@@ -1057,7 +1051,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static METAMODEL_WITH_ENUMS4 = ClassMetaModel.builder()
+    static final METAMODEL_WITH_ENUMS4 = ClassMetaModel.builder()
         .name("metamodelWithEnums2")
         .fields([
             createValidFieldMetaModel("spec1enum", modelFromClass(SomeEnum3)),
@@ -1065,7 +1059,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static OTHER_WITH_ELEMENTS_MODEL = ClassMetaModel.builder()
+    static final OTHER_WITH_ELEMENTS_MODEL = ClassMetaModel.builder()
         .name("otherWithElementsModel")
         .fields([
             createValidFieldMetaModel("elements1", ClassMetaModel.builder()
@@ -1085,8 +1079,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-
-    static INSIDE_COLLECTION_ELEMENT = ClassMetaModel.builder()
+    static final INSIDE_COLLECTION_ELEMENT = ClassMetaModel.builder()
         .name("INSIDE_COLLECTION_ELEMENT")
         .fields([
             createValidFieldMetaModel("id", Long),
@@ -1095,7 +1088,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static NESTED_NOT_FOUND_MODEL = ClassMetaModel.builder()
+    static final NESTED_NOT_FOUND_MODEL = ClassMetaModel.builder()
         .name("NESTED_NOT_FOUND_MODEL")
         .fields([
             createValidFieldMetaModel("surname", String),
@@ -1103,7 +1096,7 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static OBJECT_FOR_NOT_FOND_MAPPINGS_MODEL = ClassMetaModel.builder()
+    static final OBJECT_FOR_NOT_FOND_MAPPINGS_MODEL = ClassMetaModel.builder()
         .name("OBJECT_FOR_NOT_FOND_MAPPINGS_MODEL")
         .fields([
             createValidFieldMetaModel("someText", String),
@@ -1120,17 +1113,17 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    static EXAMPLE_ENUM_MODEL = createValidEnumMetaModel("exampleEnum",
+    static final EXAMPLE_ENUM_MODEL = createValidEnumMetaModel("exampleEnum",
         "ONE", "TWO", "UNKNOWN")
 
-    static OTHER_OBJECT_WITH_ENUM_MODEL = ClassMetaModel.builder()
+    static final OTHER_OBJECT_WITH_ENUM_MODEL = ClassMetaModel.builder()
         .name("OTHER_OBJECT_WITH_ENUM")
         .fields([
             createValidFieldMetaModel("otherEnum", EXAMPLE_ENUM_MODEL)
         ])
         .build()
 
-    static MODEL_WITH_ENUM = ClassMetaModel.builder()
+    static final MODEL_WITH_ENUM = ClassMetaModel.builder()
         .name("MODEL_WITH_ENUM")
         .fields([
             createValidFieldMetaModel("someEnum", EXAMPLE_ENUM_MODEL),
@@ -1138,21 +1131,21 @@ class MapperCodeGeneratorSamples {
         ])
         .build()
 
-    public static final def DTO_WITH_BUILDER_MDL = [
+    public static final DTO_WITH_BUILDER_MDL = [
         test1    : "field1",
         name     : "nameVal",
         testLong1: 11L,
         someId   : 55L,
     ]
 
-    public static final def DTO_WITH_SUPER_BUILDER_MDL = [
+    public static final DTO_WITH_SUPER_BUILDER_MDL = [
         someString1     : "123",
         someLong1       : 11L,
         superStringField: "superStringFieldVal",
         localDateTime1  : LocalDateTime.of(2022, 11, 17, 22, 04, 10),
     ]
 
-    public static final def SOME_DTO_WITH_SETTERS_MDL = [
+    public static final SOME_DTO_WITH_SETTERS_MDL = [
         someString2: "someString2",
         someLong2  : 12L,
         id         : 1,
@@ -1172,7 +1165,7 @@ class MapperCodeGeneratorSamples {
         lastLogin: LocalDateTime.of(LocalDate.of(2022, 11, 12), LocalTime.of(19, 59)),
     )
 
-    public static final def HAS_SAMPLE_PERSON_MDL_1 = [
+    public static final HAS_SAMPLE_PERSON_MDL_1 = [
         someId         : "13",
         samplePersonDto: [
             personId  : 12L,
@@ -1253,14 +1246,14 @@ class MapperCodeGeneratorSamples {
             .build(),
     )
 
-    static SomeDtoWithSimpleSuperBuilder DTO_WITH_SUPER_BUILDER_CLS = SomeDtoWithSimpleSuperBuilder.builder()
+    static final SomeDtoWithSimpleSuperBuilder DTO_WITH_SUPER_BUILDER_CLS = SomeDtoWithSimpleSuperBuilder.builder()
         .someString1("123")
         .someLong1(11L)
         .superStringField("superStringFieldVal")
         .localDateTime1(LocalDateTime.of(2022, 11, 17, 22, 04, 10))
         .build()
 
-    static SomeDtoWithBuilder DTO_WITH_BUILDER_CLS = SomeDtoWithBuilder.builder()
+    static final SomeDtoWithBuilder DTO_WITH_BUILDER_CLS = SomeDtoWithBuilder.builder()
         .test1("field1")
         .testLong1(11L)
         .build()
@@ -1385,7 +1378,7 @@ class MapperCodeGeneratorSamples {
         stringToEnumMetaModelByCrudWizardServiceConversion: "3",
     )
 
-    public static final def METAMODEL_WITH_ENUMS2_MDL = [
+    public static final METAMODEL_WITH_ENUMS2_MDL = [
         enum1                                             : "VAL1",
         enum2                                             : SomeEnum2.OTH2,
         enum3                                             : SomeEnum2.OTH2,
@@ -1795,7 +1788,7 @@ class MapperCodeGeneratorSamples {
         ]
     ])
 
-    public static final def LIST_OF_ELEMENTS_CLS = [new CollectionElement(
+    public static final LIST_OF_ELEMENTS_CLS = [new CollectionElement(
         "field1_1",
         "field2_1",
         1L,
@@ -1835,7 +1828,7 @@ class MapperCodeGeneratorSamples {
         ]
     ])
 
-    public static final def LIST_SET_ELEMENT_SAMPLE = [[new CollectionElement(
+    public static final LIST_SET_ELEMENT_SAMPLE = [[new CollectionElement(
         "field1_1",
         "field2_1",
         1L,

@@ -74,6 +74,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
 })
 @EnumValuesInAdditionalProperties
 @ExistFullDefinitionInTempContextByName
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String ID = "id";

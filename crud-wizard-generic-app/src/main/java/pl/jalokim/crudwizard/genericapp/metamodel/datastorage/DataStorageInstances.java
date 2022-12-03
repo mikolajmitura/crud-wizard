@@ -37,8 +37,8 @@ public class DataStorageInstances {
 
     public DataStorage findDataStorageOrCreate(DataStorageMetaModelEntity dataStorageMetaModelEntity) {
         return elements(dataStorages)
-            .filter(dataStorage -> dataStorage.getClassName().equals(dataStorageMetaModelEntity.getClassName())
-                && dataStorage.getName().equals(dataStorageMetaModelEntity.getName()))
+            .filter(dataStorage -> dataStorage.getClassName().equals(dataStorageMetaModelEntity.getClassName()) &&
+                dataStorage.getName().equals(dataStorageMetaModelEntity.getName()))
             .findFirst()
             .orElseGet(() -> {
                 List<AdditionalPropertyEntity> additionalProperties = dataStorageMetaModelEntity.getAdditionalProperties();

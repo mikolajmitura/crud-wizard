@@ -13,8 +13,8 @@ public class ArrayTemplateForMapping implements IterableTemplateForMapping {
 
     @Override
     public String generateIterableType(List<ClassMetaModel> genericTypesOfIterable, MapperCodeMetadata mapperCodeMetadata) {
-        return "        int index = 0;" + System.lineSeparator()
-            + "        " + contactGenerics(genericTypesOfIterable) + "[]";
+        return "        int index = 0;" + System.lineSeparator() +
+            "        " + contactGenerics(genericTypesOfIterable) + "[]";
     }
 
     @Override
@@ -29,7 +29,7 @@ public class ArrayTemplateForMapping implements IterableTemplateForMapping {
 
     @Override
     public boolean canMapFromSource(ClassMetaModel sourceClassMetaModel) {
-        return sourceClassMetaModel.isListType() || sourceClassMetaModel.isSetType()
-            || sourceClassMetaModel.isArrayType() || !sourceClassMetaModel.isMapType();
+        return sourceClassMetaModel.isListType() || sourceClassMetaModel.isSetType() ||
+            sourceClassMetaModel.isArrayType() || !sourceClassMetaModel.isMapType();
     }
 }

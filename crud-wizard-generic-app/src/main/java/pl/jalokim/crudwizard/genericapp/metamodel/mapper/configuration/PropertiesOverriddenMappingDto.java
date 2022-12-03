@@ -30,9 +30,7 @@ public class PropertiesOverriddenMappingDto {
     @Size(max = 100)
     String sourceAssignExpression;
 
-    @Builder.Default
-    boolean ignoreField = false;
+    boolean ignoreField;
 
-    @Builder.Default
-    boolean ignoredAllMappingProblem = false;
+    boolean ignoredAllMappingProblem;
 }

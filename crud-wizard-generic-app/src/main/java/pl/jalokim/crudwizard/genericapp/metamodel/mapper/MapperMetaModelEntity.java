@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,6 +49,7 @@ public class MapperMetaModelEntity extends WithAdditionalPropertiesEntity {
     @AttributeOverride(name = "methodName", column = @Column(name = "method_name"))
     private BeanAndMethodEntity mapperBeanAndMethod;
 
+    @Enumerated(EnumType.STRING)
     private MapperType mapperType;
 
     @ElementCollection

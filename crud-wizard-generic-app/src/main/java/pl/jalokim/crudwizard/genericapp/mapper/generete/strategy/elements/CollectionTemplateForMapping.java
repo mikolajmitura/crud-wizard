@@ -17,7 +17,7 @@ public abstract class CollectionTemplateForMapping implements IterableTemplateFo
 
     @Override
     public boolean canMapFromSource(ClassMetaModel sourceClassMetaModel) {
-        return sourceClassMetaModel.isListType() || sourceClassMetaModel.isSetType()
-            || sourceClassMetaModel.isArrayType() || !sourceClassMetaModel.isMapType();
+        return sourceClassMetaModel.isListType() || sourceClassMetaModel.isSetType() ||
+            sourceClassMetaModel.isArrayType() || !sourceClassMetaModel.isMapType();
     }
 }

@@ -24,8 +24,12 @@ public class SourceExpressionParserContext {
     private final MapperConfiguration mapperConfiguration;
     private final ClassMetaModel targetFieldClassMetaModel;
 
-    private int currentCharIndex = 0;
+    private int currentCharIndex;
     private final List<ClassMetaModel> castMetaModels = new ArrayList<>();
+
+    @Getter
+    @Setter
+    public ValueToAssignExpression earlierValueToAssignExpression;
 
     public SourceExpressionParserContext(String currentWholeExpression,
         MapperConfigurationParserContext mapperConfigurationParserContext,
@@ -36,10 +40,6 @@ public class SourceExpressionParserContext {
         this.mapperConfiguration = mapperConfiguration;
         this.targetFieldClassMetaModel = targetFieldClassMetaModel;
     }
-
-    @Getter
-    @Setter
-    public ValueToAssignExpression earlierValueToAssignExpression;
 
     public CollectedExpressionPartResult collectTextUntilAnyChars(char... untilChars) {
         Set<Character> untilCharsSet = new HashSet<>();
@@ -63,8 +63,9 @@ public class SourceExpressionParserContext {
         }
     }
 
+    @SuppressWarnings("PMD.AvoidArrayLoops")
     public CollectedExpressionPartResult collectTextUntilFieldExpressionIsFinished(char... untilChars) {
-        char[] charsWhichMeansExpressionFinish = new char[]{'.', ')', ','};
+        char[] charsWhichMeansExpressionFinish = {'.', ')', ','};
         char[] newChars = new char[charsWhichMeansExpressionFinish.length + untilChars.length];
 
         System.arraycopy(charsWhichMeansExpressionFinish, 0,
@@ -157,10 +158,10 @@ public class SourceExpressionParserContext {
     }
 
     public void moveToNextCharIfExists() {
-        if (!isLastCurrentChar() && !isReadAll()) {
-            moveToNextChar();
-        } else {
+        if (isLastCurrentChar() || isReadAll()) {
             currentCharIndex++;
+        } else {
+            moveToNextChar();
         }
     }
 
@@ -175,7 +176,7 @@ public class SourceExpressionParserContext {
     }
 
     public boolean isLastCurrentChar() {
-        return (currentWholeExpression.length() == 0 && currentCharIndex == 0) || currentWholeExpression.length() - 1 == currentCharIndex;
+        return currentWholeExpression.length() == 0 && currentCharIndex == 0 || currentWholeExpression.length() - 1 == currentCharIndex;
     }
 
     public boolean isReadAll() {

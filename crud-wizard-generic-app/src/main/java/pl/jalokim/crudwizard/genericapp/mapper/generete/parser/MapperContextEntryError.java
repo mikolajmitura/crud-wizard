@@ -13,6 +13,7 @@ public class MapperContextEntryError {
 
     String errorReason;
 
+    @Override
     public String toString() {
         return getMessageWithoutEntryIndex();
     }

@@ -58,10 +58,10 @@ public class EnumsMapperMethodGenerator {
             if (!enumEntriesMapping.getIgnoredSourceEnum().contains(sourceEnumValue)) {
                 EnumTypeMetaData targetEnumTypeMetaData;
                 String foundOverriddenTargetEnumValue = overriddenEnumMappings.get(sourceEnumValue);
-                if (foundOverriddenTargetEnumValue != null) {
-                    targetEnumTypeMetaData = allTargetEnums.get(foundOverriddenTargetEnumValue);
-                } else {
+                if (foundOverriddenTargetEnumValue == null) {
                     targetEnumTypeMetaData = allTargetEnums.get(sourceEnumValue);
+                } else {
+                    targetEnumTypeMetaData = allTargetEnums.get(foundOverriddenTargetEnumValue);
                 }
                 if (targetEnumTypeMetaData == null) {
                     methodGeneratorArgument.getMapperGeneratedCodeMetadata().addError(

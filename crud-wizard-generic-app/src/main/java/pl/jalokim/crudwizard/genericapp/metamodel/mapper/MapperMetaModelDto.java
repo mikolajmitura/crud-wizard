@@ -3,8 +3,14 @@ package pl.jalokim.crudwizard.genericapp.metamodel.mapper;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.EQUAL_TO_ANY;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.BEAN_OR_CLASS_NAME;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.GENERATED;
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.ID;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.MAPPER_BEAN_AND_METHOD;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.MAPPER_GENERATE_CONFIGURATION;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.MAPPER_SCRIPT;
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.MAPPER_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto.SCRIPT;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -33,38 +39,38 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 @Jacksonized
 @SuperBuilder(toBuilder = true)
 @WhenFieldIsInStateThenOthersShould(whenField = ID, is = NULL, thenOthersShould = {
-    @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_TYPE, should = NOT_NULL, whenField = ID, is = NULL),
+    @FieldShouldWhenOther(field = MAPPER_TYPE, should = NOT_NULL, whenField = ID, is = NULL),
 })
-@WhenFieldIsInStateThenOthersShould(whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, fieldValues = "BEAN_OR_CLASS_NAME",
+@WhenFieldIsInStateThenOthersShould(whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, fieldValues = BEAN_OR_CLASS_NAME,
     thenOthersShould = {
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_BEAN_AND_METHOD, should = NOT_NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "BEAN_OR_CLASS_NAME"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "BEAN_OR_CLASS_NAME"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_GENERATE_CONFIGURATION, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "BEAN_OR_CLASS_NAME"),
+        @FieldShouldWhenOther(field = MAPPER_BEAN_AND_METHOD, should = NOT_NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = BEAN_OR_CLASS_NAME),
+        @FieldShouldWhenOther(field = MAPPER_SCRIPT, should = NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = BEAN_OR_CLASS_NAME),
+        @FieldShouldWhenOther(field = MAPPER_GENERATE_CONFIGURATION, should = NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = BEAN_OR_CLASS_NAME),
     })
-@WhenFieldIsInStateThenOthersShould(whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, fieldValues = "SCRIPT",
+@WhenFieldIsInStateThenOthersShould(whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, fieldValues = SCRIPT,
     thenOthersShould = {
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NOT_NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
+        @FieldShouldWhenOther(field = MAPPER_SCRIPT, should = NOT_NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = SCRIPT),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_NAME, should = NOT_NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_BEAN_AND_METHOD, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_GENERATE_CONFIGURATION, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "SCRIPT"),
+            is = EQUAL_TO_ANY, otherFieldValues = SCRIPT),
+        @FieldShouldWhenOther(field = MAPPER_BEAN_AND_METHOD, should = NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = SCRIPT),
+        @FieldShouldWhenOther(field = MAPPER_GENERATE_CONFIGURATION, should = NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = SCRIPT),
     })
-@WhenFieldIsInStateThenOthersShould(whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, fieldValues = "GENERATED",
+@WhenFieldIsInStateThenOthersShould(whenField = MAPPER_TYPE, is = EQUAL_TO_ANY, fieldValues = GENERATED,
     thenOthersShould = {
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_GENERATE_CONFIGURATION, should = NOT_NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
+        @FieldShouldWhenOther(field = MAPPER_GENERATE_CONFIGURATION, should = NOT_NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = GENERATED),
         @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_NAME, should = NOT_NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_BEAN_AND_METHOD, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
-        @FieldShouldWhenOther(field = MapperMetaModelDto.MAPPER_SCRIPT, should = NULL, whenField = MAPPER_TYPE,
-            is = EQUAL_TO_ANY, otherFieldValues = "GENERATED"),
+            is = EQUAL_TO_ANY, otherFieldValues = GENERATED),
+        @FieldShouldWhenOther(field = MAPPER_BEAN_AND_METHOD, should = NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = GENERATED),
+        @FieldShouldWhenOther(field = MAPPER_SCRIPT, should = NULL, whenField = MAPPER_TYPE,
+            is = EQUAL_TO_ANY, otherFieldValues = GENERATED),
     })
 @UniqueMapperNames
 @MapperGenerateConfigCheck
@@ -76,6 +82,9 @@ public class MapperMetaModelDto extends WithAdditionalPropertiesDto {
     public static final String MAPPER_NAME = "mapperName";
     public static final String MAPPER_BEAN_AND_METHOD = "mapperBeanAndMethod";
     public static final String MAPPER_GENERATE_CONFIGURATION = "mapperGenerateConfiguration";
+    public static final String GENERATED = "GENERATED";
+    public static final String SCRIPT = "SCRIPT";
+    public static final String BEAN_OR_CLASS_NAME = "BEAN_OR_CLASS_NAME";
 
     Long id;
 

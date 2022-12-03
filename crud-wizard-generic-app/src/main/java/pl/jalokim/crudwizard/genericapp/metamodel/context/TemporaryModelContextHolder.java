@@ -1,7 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
 import java.util.Objects;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class TemporaryModelContextHolder {
 
     private static final ThreadLocal<TemporaryMetaModelContext> TEMPORARY_META_MODEL_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();

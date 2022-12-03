@@ -409,7 +409,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                     createMapperMetaModelDto(PersonToThirdDbMapper.class, "personToThirdDbMapperCreate"))
             ])
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
-                .classMetaModel(createClassMetaModelDtoWithGenerics(Map, 
+                .classMetaModel(createClassMetaModelDtoWithGenerics(Map,
                     createClassMetaModelDtoFromClass(String),
                     createClassMetaModelDtoFromClass(Object)))
                 .mapperMetaModel(createMapperMetaModelDto(CreatePersonFinalMapper.class, "returnIdFromDefaultDs"))

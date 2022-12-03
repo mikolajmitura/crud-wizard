@@ -42,10 +42,8 @@ class BySpringBeanMethodAssignExpressionTest extends Specification {
 
         then:
         verifyAll(result) {
-
             returnClassModel.realClass == Long
             valueGettingCode == "normalSpringService.someMethodName(((java.lang.String) someCode1), ((java.lang.Long) someCode2))"
-
         }
 
         verifyAll(mapperGeneratedCodeMetadata) {

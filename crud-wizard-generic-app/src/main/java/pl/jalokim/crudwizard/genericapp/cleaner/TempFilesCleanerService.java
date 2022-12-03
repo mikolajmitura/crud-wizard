@@ -57,7 +57,7 @@ public class TempFilesCleanerService {
         List<Path> foundFolders = FileUtils.listOfFilesRecursively(compiledCodeRootPathProvider.getCompiledCodeRootPath(), Files::isDirectory);
 
         for (Path currentPath : foundFolders) {
-           if(isNotRootDir(currentPath) && Files.exists(currentPath)) {
+            if (isNotRootDir(currentPath) && Files.exists(currentPath)) {
                 List<Path> filesInFolder = FileUtils.listOfFilesRecursively(currentPath, Files::isRegularFile);
                 if (CollectionUtils.isEmpty(filesInFolder)) {
                     log.info("delete directory: {}", currentPath);

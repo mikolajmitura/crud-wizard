@@ -4,9 +4,11 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createM
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
 
 import java.util.Map;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 
+@UtilityClass
 public class InnerMethodByNameExtractor {
 
     public static MapperConfiguration getMapperConfiguration(MapperConfigurationParserContext mapperConfigurationParserContext,

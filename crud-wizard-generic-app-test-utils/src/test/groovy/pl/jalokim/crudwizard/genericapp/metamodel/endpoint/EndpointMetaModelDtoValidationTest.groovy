@@ -655,7 +655,6 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
     }
 
     private ServiceMetaModel createDefaultService() {
-
         def method = getMethod(DefaultGenericService, "saveOrReadFromDataStorages", GenericServiceArgument)
         def defaultGenericServiceInstance = new DefaultGenericService(null, null, null, null, null)
 

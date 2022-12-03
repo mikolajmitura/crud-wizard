@@ -14,7 +14,7 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 
 public class ByAllArgsFieldsResolver implements FieldMetaResolver {
 
-    public static ByAllArgsFieldsResolver INSTANCE = new ByAllArgsFieldsResolver();
+    public static final ByAllArgsFieldsResolver INSTANCE = new ByAllArgsFieldsResolver();
 
     @Override
     public List<FieldMetaModel> findDeclaredFields(TypeMetadata typeMetadata,
@@ -33,8 +33,8 @@ public class ByAllArgsFieldsResolver implements FieldMetaResolver {
                 })
                 .asList();
         }
-        throw new IllegalArgumentException("given class " + typeMetadata.getRawType()
-            + " should have one constructor with max number of arguments");
+        throw new IllegalArgumentException("given class " + typeMetadata.getRawType() +
+            " should have one constructor with max number of arguments");
     }
 
     @Override

@@ -137,8 +137,8 @@ public class GenericValidator {
                         .map(Class::getCanonicalName)
                         .asConcatText(", ");
 
-                    String message = String.format("Cannot validate object with type: %s "
-                            + "with validator with class: %s which can validate types: %s",
+                    String message = String.format("Cannot validate object with type: %s " +
+                            "with validator with class: %s which can validate types: %s",
                         metaModelRealClass.getCanonicalName(),
                         dataValidator.getClass().getCanonicalName(),
                         typesToValidateAsText

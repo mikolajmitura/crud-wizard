@@ -39,6 +39,5 @@ class FieldMetaResolverFactoryTest extends UnitTestSpec {
         then:
         TechnicalException ex = thrown()
         ex.message == translatePlaceholder("cannot.find.field.resolver.strategy", ReflectionUtils.getCanonicalName())
-
     }
 }

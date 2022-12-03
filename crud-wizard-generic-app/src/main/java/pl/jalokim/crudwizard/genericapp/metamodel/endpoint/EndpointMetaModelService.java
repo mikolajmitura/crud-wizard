@@ -88,13 +88,12 @@ public class EndpointMetaModelService {
             endpointMetaModelEntity.setQueryArguments(classMetaModelService.saveNewOrLoadById(endpointMetaModelEntity.getQueryArguments()));
             endpointMetaModelEntity.setPathParams(classMetaModelService.saveNewOrLoadById(endpointMetaModelEntity.getPathParams()));
 
-            EndpointMetaModelEntity newEndpoint = endpointMetaModelRepository.save(endpointMetaModelEntity);
-            var newEndpointId = newEndpoint.getId();
-
             classLoaderService.createNewClassLoader(getSessionTimeStamp().toString());
             classMetaModelEntitySaveContext.clearSaveContext();
             clearTemporaryMetaModelContext();
 
+            EndpointMetaModelEntity newEndpoint = endpointMetaModelRepository.save(endpointMetaModelEntity);
+            var newEndpointId = newEndpoint.getId();
             applicationEventPublisher.publishEvent(new MetaModelContextRefreshEvent(createNewEndpointReason(newEndpointId),
                 timeProvider.getCurrentOffsetDateTime()));
             return newEndpointId;

@@ -16,6 +16,6 @@ public class ListTemplateForMapping extends CollectionTemplateForMapping {
     @Override
     public String generateIterableType(List<ClassMetaModel> genericTypesOfIterable, MapperCodeMetadata mapperCodeMetadata) {
         mapperCodeMetadata.addImport(List.class);
-        return "        List<" + contactGenerics(genericTypesOfIterable) +">";
+        return "        List<" + contactGenerics(genericTypesOfIterable) + ">";
     }
 }

@@ -78,6 +78,7 @@ public class DummyService {
             ));
     }
 
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     public void dummyMethodThrowingRawException() throws Exception {
         throw new Exception("raw exception message");
     }

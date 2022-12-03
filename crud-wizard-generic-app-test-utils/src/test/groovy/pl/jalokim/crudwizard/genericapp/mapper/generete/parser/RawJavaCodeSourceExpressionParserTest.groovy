@@ -111,7 +111,6 @@ class RawJavaCodeSourceExpressionParserTest extends BaseSourceExpressionParserTe
         "@normalSpringService.getSomeDocumentDtoById ( ((c_java.lang.Long) j(someMap.get(\"someKey\"))))" | _
     }
 
-
     @Unroll
     def "return expected exception when expression is invalid"() {
         given:

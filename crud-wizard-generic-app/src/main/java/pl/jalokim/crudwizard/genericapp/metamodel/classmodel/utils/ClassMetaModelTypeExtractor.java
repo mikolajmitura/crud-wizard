@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createM
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getFieldFromClassModel;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,12 +27,12 @@ public class ClassMetaModelTypeExtractor {
 
     private final ClassMetaModelMapper classMetaModelMapper;
 
+    @SuppressFBWarnings("NP_NULL_PARAM_DEREF")
     public Optional<ClassMetaModel> getTypeByPath(ClassMetaModelDto classMetaModelDto, String path) {
-        List<String> pathParts = Elements.bySplitText(path, "\\.").asList();
 
         ClassMetaModel currentClassMetadata = classMetaModelMapper.toModelFromDto(classMetaModelDto);
-
         String currentPath = "";
+        List<String> pathParts = Elements.bySplitText(path, "\\.").asList();
         for (String pathPart : pathParts) {
             if (currentClassMetadata != null && currentClassMetadata.isSimpleType()) {
                 throw new TechnicalException(createMessagePlaceholder("ClassMetaModelTypeExtractor.not.expected.any.field",

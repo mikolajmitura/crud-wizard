@@ -52,6 +52,7 @@ abstract class SourceExpressionParser {
             .mainParse(mapperConfigurationParserContext, sourceExpressionParserContext);
     }
 
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     String validateVariableAndGet(String variable, MapperConfigurationParserContext mapperConfigurationParserContext) {
         variable = variable.trim();
         if (StringUtils.isBlank(variable)) {

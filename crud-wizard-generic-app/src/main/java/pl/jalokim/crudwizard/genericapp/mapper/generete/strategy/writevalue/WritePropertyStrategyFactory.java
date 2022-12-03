@@ -5,9 +5,11 @@ import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasBuilderMethod;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasOneConstructorMaxArgNumbers;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasOnlyDefaultConstructor;
 
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
+@UtilityClass
 public class WritePropertyStrategyFactory {
 
     public static WritePropertyStrategy createWritePropertyStrategy(ClassMetaModel classMetaModel) {

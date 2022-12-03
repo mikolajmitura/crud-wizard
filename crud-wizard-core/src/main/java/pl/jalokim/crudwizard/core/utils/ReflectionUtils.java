@@ -36,21 +36,21 @@ public class ReflectionUtils {
     }
 
     public static boolean methodReturnsNonVoidAndHasArgumentsSize(Method method, int argumentsNumber) {
-        return method.getParameterCount() == argumentsNumber
-            && !method.getReturnType().equals(void.class)
-            && !method.getReturnType().equals(Void.class);
+        return method.getParameterCount() == argumentsNumber &&
+            !method.getReturnType().equals(void.class) &&
+            !method.getReturnType().equals(Void.class);
     }
 
     public static boolean methodReturnsVoidAndHasArgumentsSize(Method method, int argumentsNumber) {
-        return method.getParameterCount() == argumentsNumber
-            && (method.getReturnType().equals(void.class) || method.getReturnType().equals(Void.class));
+        return method.getParameterCount() == argumentsNumber &&
+            (method.getReturnType().equals(void.class) || method.getReturnType().equals(Void.class));
     }
 
     public static boolean hasBuilderMethod(Class<?> someClass) {
         try {
             Method builderMethod = someClass.getDeclaredMethod("builder");
-            return methodReturnsNonVoidAndHasArgumentsSize(builderMethod, 0)
-                && isStaticMethod(builderMethod) && isPublicMethod(builderMethod);
+            return methodReturnsNonVoidAndHasArgumentsSize(builderMethod, 0) &&
+                isStaticMethod(builderMethod) && isPublicMethod(builderMethod);
         } catch (NoSuchMethodException e) {
             return false;
         }

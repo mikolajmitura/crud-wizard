@@ -10,6 +10,8 @@ import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 
 public class MapperGenerationException extends ApplicationException {
 
+    private static final long serialVersionUID = 1L;
+
     @Getter
     private final List<MessagePlaceholder> messagePlaceholders;
 

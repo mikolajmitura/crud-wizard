@@ -11,6 +11,7 @@ import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.springframework.stereotype.Component;
 import pl.jalokim.utils.collection.CollectionUtils;
@@ -23,24 +24,25 @@ public class CodeCompiler {
 
     private final CompiledCodeRootPathProvider compiledCodeRootPathProvider;
 
+    @SneakyThrows
     public CompiledCodeMetadataDto compileCodeAndReturnMetaData(String className, String packageName, String sourceCode, Long sessionTimeStamp) {
         String compiledCodeRootPath = compiledCodeRootPathProvider.getCompiledCodeRootPath();
         File sourceFile = new File(StringUtils.concatElements("/", compiledCodeRootPath, sessionTimeStamp.toString(),
             packageName.replace(".", "/"), className + ".java"));
         boolean createdFolder = sourceFile.getParentFile().mkdirs();
-        if (!createdFolder) {
-            if (!Files.exists(sourceFile.getParentFile().toPath())) {
-                throw new IllegalStateException("cannot create directory with path: " + sourceFile.getParentFile());
-            }
+        if (!createdFolder && !Files.exists(sourceFile.getParentFile().toPath())) {
+            throw new IllegalStateException("cannot create directory with path: " + sourceFile.getParentFile());
         }
         writeToFile(sourceFile, sourceCode);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        ByteArrayOutputStream errorOutPutStream = new ByteArrayOutputStream();
-        int compileResult = compiler.run(null, null, errorOutPutStream, sourceFile.getPath());
-        if (compileResult != 0) {
-            String errorsContent = errorOutPutStream.toString(StandardCharsets.UTF_8);
-            validateResults(errorsContent);
+        try (ByteArrayOutputStream errorOutPutStream = new ByteArrayOutputStream()) {
+            int compileResult = compiler.run(null, null, errorOutPutStream, sourceFile.getPath());
+            if (compileResult != 0) {
+                String errorsContent = errorOutPutStream.toString(StandardCharsets.UTF_8);
+                validateResults(errorsContent);
+            }
         }
+
         return CompiledCodeMetadataDto.builder()
             .fullPath(sourceFile.toString().replaceAll("\\.java", ".class"))
             .fullClassName(packageName + "." + className)

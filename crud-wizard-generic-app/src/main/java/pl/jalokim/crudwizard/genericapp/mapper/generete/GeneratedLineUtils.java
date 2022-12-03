@@ -1,5 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class GeneratedLineUtils {
 
     public static String wrapWithNextLineWith3Tabs(String textToFormat, Object... args) {

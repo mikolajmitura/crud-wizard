@@ -99,10 +99,10 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     private List<AdditionalPropertyEntity> additionalProperties;
 
     public boolean shouldBeSimpleRawClass() {
-        return isNotBlank(getClassName())
-            && isEmpty(elements(getFields()))
-            && isEmpty(elements(getGenericTypes()))
-            && isEmpty(elements(getExtendsFromModels()))
-            && isEmpty(elements(getValidators()));
+        return isNotBlank(getClassName()) &&
+            isEmpty(elements(getFields())) &&
+            isEmpty(elements(getGenericTypes())) &&
+            isEmpty(elements(getExtendsFromModels())) &&
+            isEmpty(elements(getValidators()));
     }
 }

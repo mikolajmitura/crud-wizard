@@ -23,11 +23,13 @@ public class MetaContextTestLoader {
 
     public void reload() {
         metaModelContextService.getMetaModelContext()
-            .getDataStorages().fetchAll().forEach( it-> {
-            if (it.getDataStorage() instanceof InMemoryDataStorage) {
-                ((InMemoryDataStorage) it.getDataStorage()).clear();
-            }
-        });
+            .getDataStorages()
+            .fetchAll()
+            .forEach(it -> {
+                if (it.getDataStorage() instanceof InMemoryDataStorage) {
+                    ((InMemoryDataStorage) it.getDataStorage()).clear();
+                }
+            });
 
         dataStorageInstances.getDataStorages().clear();
         dataStorageInstances.getDataStorages().addAll(defaultDataStorages);

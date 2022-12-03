@@ -32,13 +32,13 @@ public class PropertiesOverriddenMappingResolver {
 
         MapperConfigurationParserContext parserContext = new MapperConfigurationParserContext(applicationContext, mapperGenerateConfiguration);
 
-        var fieldMetaResolverForRawTarget =  mapperGenerateConfiguration.getFieldMetaResolverForRawTarget();
+        var fieldMetaResolverForRawTarget = mapperGenerateConfiguration.getFieldMetaResolverForRawTarget();
 
         parserContext.setCurrentMapperConfiguration(mapperGenerateConfiguration.getRootConfiguration());
         elements(rootMapperMappingEntries)
-           .forEachWithIndex((entryIndex, mappingEntry) ->
-                   parseMappingEntry(parserContext, mappingEntry,
-                        entryIndex, fieldMetaResolverForRawTarget));
+            .forEachWithIndex((entryIndex, mappingEntry) ->
+                parseMappingEntry(parserContext, mappingEntry,
+                    entryIndex, fieldMetaResolverForRawTarget));
 
         mappingEntriesByMethodName.forEach(
             (methodName, mappingEntries) -> {

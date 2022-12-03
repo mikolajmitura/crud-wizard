@@ -74,52 +74,62 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
                 return false;
             }
 
-            MapperConfigurationDto mapperConfigurationDto = mapperGenerateConfigurationDto.getRootConfiguration();
-            MapperConfiguration mapperConfiguration = mapperGenerateConfiguration.getRootConfiguration();
-
-            validateSourceExpression(mapperGenerateConfiguration, isValid,
-                mapperConfigurationDto, mapperConfiguration, context,
-                PropertyPath.builder()
-                    .addNextProperty("mapperGenerateConfiguration")
-                    .addNextProperty("rootConfiguration"));
-
-            if (isNotEmpty(mapperGenerateConfigurationDto.getSubMappersAsMethods())) {
-
-                elements(mapperGenerateConfigurationDto.getSubMappersAsMethods())
-                    .forEachWithIndex((index, mapperMethodConfigDto) -> {
-
-                        MapperConfiguration mapperMethodConfig = mapperGenerateConfiguration.getMapperConfigurationByMethodName(
-                            mapperMethodConfigDto.getName());
-
-                        validateSourceExpression(mapperGenerateConfiguration, isValid,
-                            mapperMethodConfigDto, mapperMethodConfig, context,
-                            PropertyPath.builder()
-                                .addNextProperty("mapperGenerateConfiguration")
-                                .addNextPropertyAndIndex("subMappersAsMethods", index));
-                    });
-            }
-
-            if (isValid.get()) {
-                try {
-                    Long sessionTimeStamp = getSessionTimeStamp();
-                    MapperCodeMetadata mapperCodeMetadata = mapperCodeGenerator.generateMapperCodeMetadata(mapperGenerateConfiguration, sessionTimeStamp);
-                    var generatedMapperCode = mapperCodeGenerator.generateMapperCode(mapperCodeMetadata);
-                    var compiledCodeMetadata = codeCompiler.compileCodeAndReturnMetaData(mapperCodeMetadata.getMapperClassName(),
-                        GENERATED_MAPPER_PACKAGE, generatedMapperCode, sessionTimeStamp);
-                    log.info("compiled code for: {} for mapper: {}", mapperCodeMetadata.getMapperClassName(), mapperMetaModelDto.getMapperName());
-                    mapperGenerateConfigurationDto.setMapperCompiledCodeMetadata(compiledCodeMetadata);
-                } catch (MapperGenerationException ex) {
-                    isValid.set(false);
-                    ex.getMessagePlaceholders().forEach(entry -> customMessage(context, entry));
-                } catch (Exception exception) {
-                    log.error("unexpected exceptions occurred during validation: ", exception);
-                    isValid.set(false);
-                    customMessage(context, Optional.ofNullable(exception.getMessage()).orElse(exception.getClass().getName()));
-                }
-            }
+            validate(mapperMetaModelDto, context, mapperGenerateConfigurationDto, isValid, mapperGenerateConfiguration);
         }
 
         return isValid.get();
+    }
+
+    private void validate(MapperMetaModelDto mapperMetaModelDto, ConstraintValidatorContext context,
+        MapperGenerateConfigurationDto mapperGenerateConfigurationDto, AtomicBoolean isValid, MapperGenerateConfiguration mapperGenerateConfiguration) {
+        MapperConfigurationDto mapperConfigurationDto = mapperGenerateConfigurationDto.getRootConfiguration();
+        MapperConfiguration mapperConfiguration = mapperGenerateConfiguration.getRootConfiguration();
+
+        validateSourceExpression(mapperGenerateConfiguration, isValid,
+            mapperConfigurationDto, mapperConfiguration, context,
+            PropertyPath.builder()
+                .addNextProperty("mapperGenerateConfiguration")
+                .addNextProperty("rootConfiguration"));
+
+        if (isNotEmpty(mapperGenerateConfigurationDto.getSubMappersAsMethods())) {
+
+            elements(mapperGenerateConfigurationDto.getSubMappersAsMethods())
+                .forEachWithIndex((index, mapperMethodConfigDto) -> {
+
+                    MapperConfiguration mapperMethodConfig = mapperGenerateConfiguration.getMapperConfigurationByMethodName(
+                        mapperMethodConfigDto.getName());
+
+                    validateSourceExpression(mapperGenerateConfiguration, isValid,
+                        mapperMethodConfigDto, mapperMethodConfig, context,
+                        PropertyPath.builder()
+                            .addNextProperty("mapperGenerateConfiguration")
+                            .addNextPropertyAndIndex("subMappersAsMethods", index));
+                });
+        }
+
+        if (isValid.get()) {
+            tryGenerateCodeAndValidate(mapperMetaModelDto, context, mapperGenerateConfigurationDto, isValid, mapperGenerateConfiguration);
+        }
+    }
+
+    private void tryGenerateCodeAndValidate(MapperMetaModelDto mapperMetaModelDto, ConstraintValidatorContext context,
+        MapperGenerateConfigurationDto mapperGenerateConfigurationDto, AtomicBoolean isValid, MapperGenerateConfiguration mapperGenerateConfiguration) {
+        try {
+            Long sessionTimeStamp = getSessionTimeStamp();
+            MapperCodeMetadata mapperCodeMetadata = mapperCodeGenerator.generateMapperCodeMetadata(mapperGenerateConfiguration, sessionTimeStamp);
+            var generatedMapperCode = mapperCodeGenerator.generateMapperCode(mapperCodeMetadata);
+            var compiledCodeMetadata = codeCompiler.compileCodeAndReturnMetaData(mapperCodeMetadata.getMapperClassName(),
+                GENERATED_MAPPER_PACKAGE, generatedMapperCode, sessionTimeStamp);
+            log.info("compiled code for: {} for mapper: {}", mapperCodeMetadata.getMapperClassName(), mapperMetaModelDto.getMapperName());
+            mapperGenerateConfigurationDto.setMapperCompiledCodeMetadata(compiledCodeMetadata);
+        } catch (MapperGenerationException ex) {
+            isValid.set(false);
+            ex.getMessagePlaceholders().forEach(entry -> customMessage(context, entry));
+        } catch (Exception exception) {
+            log.error("unexpected exceptions occurred during validation: ", exception);
+            isValid.set(false);
+            customMessage(context, Optional.ofNullable(exception.getMessage()).orElse(exception.getClass().getName()));
+        }
     }
 
     private ClassMetaModel findClassMetaModelForDto(ClassMetaModelDto classMetaModelDto) {

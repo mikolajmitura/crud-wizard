@@ -51,7 +51,6 @@ public class InMemoryDataStorage implements DataStorage {
         return entityBag.saveEntity(idObject, fieldWithId, entity);
     }
 
-
     @Override
     public Optional<Object> getOptionalEntityById(ClassMetaModel classMetaModel, Object idObject) {
         return Optional.ofNullable(entitiesByName.get(classMetaModel.getName()))

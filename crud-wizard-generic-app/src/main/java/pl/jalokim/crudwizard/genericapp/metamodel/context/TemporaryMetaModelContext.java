@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.lang3.RandomUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
@@ -14,6 +15,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 
+@EqualsAndHashCode(callSuper = true)
 public class TemporaryMetaModelContext extends MetaModelContext {
 
     private final ObjectCache<String, ClassMetaModel> classMetaModelsByName = new ObjectCache<>();
