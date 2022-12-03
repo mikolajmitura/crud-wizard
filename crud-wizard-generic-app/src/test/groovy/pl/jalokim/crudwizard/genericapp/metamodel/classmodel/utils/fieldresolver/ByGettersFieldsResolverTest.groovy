@@ -6,9 +6,8 @@ import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadat
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
 import pl.jalokim.utils.reflection.TypeMetadata
-import spock.lang.Specification
 
-class ByGettersFieldsResolverTest extends Specification {
+class ByGettersFieldsResolverTest extends FieldsResolverSpecification {
 
     ByGettersFieldsResolver testCase = new ByGettersFieldsResolver()
 

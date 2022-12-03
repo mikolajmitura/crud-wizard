@@ -6,9 +6,8 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassM
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.core.sample.SomeMiddleGenericDto
 import pl.jalokim.crudwizard.core.sample.SuperGenericDto
-import spock.lang.Specification
 
-class ClassMetaModelFactoryTest extends Specification {
+class ClassMetaModelFactoryTest extends FieldsResolverSpecification {
 
     def "return expected ClassMetaModel from SomeDto"() {
         when:

@@ -9,10 +9,9 @@ import pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSuperBuilder
 import pl.jalokim.crudwizard.core.sample.SuperDtoWithSuperBuilder
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
-import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.utils.reflection.TypeMetadata
 
-class ByBuilderFieldsResolverTest extends UnitTestSpec {
+class ByBuilderFieldsResolverTest extends FieldsResolverSpecification {
 
     ByBuilderFieldsResolver testCase = new ByBuilderFieldsResolver()
 

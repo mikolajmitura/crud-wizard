@@ -8,9 +8,8 @@ import pl.jalokim.crudwizard.core.sample.SomeAllArgConstructor
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
 import pl.jalokim.crudwizard.core.sample.SomeSuperAllArgConstructor
 import pl.jalokim.utils.reflection.TypeMetadata
-import spock.lang.Specification
 
-class ByAllArgsFieldsResolverTest extends Specification {
+class ByAllArgsFieldsResolverTest extends FieldsResolverSpecification {
 
     ByAllArgsFieldsResolver testCase = new ByAllArgsFieldsResolver()
 

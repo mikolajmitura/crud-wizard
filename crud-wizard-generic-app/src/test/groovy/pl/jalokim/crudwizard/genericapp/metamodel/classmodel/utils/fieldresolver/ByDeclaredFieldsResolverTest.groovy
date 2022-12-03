@@ -5,9 +5,8 @@ import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadat
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.utils.reflection.TypeMetadata
-import spock.lang.Specification
 
-class ByDeclaredFieldsResolverTest extends Specification {
+class ByDeclaredFieldsResolverTest extends FieldsResolverSpecification {
 
     ByDeclaredFieldsResolver testCase = new ByDeclaredFieldsResolver()
 

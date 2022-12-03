@@ -22,9 +22,9 @@ class WritePropertyStrategyFactoryTest extends Specification {
         result.getClass() == expectedStrategyClass
 
         where:
-        givenClass               | expectedStrategyClass
-        SomeSimpleValueDto.class | WriteByAllConstructorArgsStrategy.class
+        givenClass                    | expectedStrategyClass
+        SomeSimpleValueDto.class      | WriteByAllConstructorArgsStrategy.class
         SomeDtoWithSuperBuilder.class | WriteByBuilderStrategy.class
-        SomeDtoWithSetters.class | WriteBySettersStrategy.class
+        SomeDtoWithSetters.class      | WriteBySettersStrategy.class
     }
 }

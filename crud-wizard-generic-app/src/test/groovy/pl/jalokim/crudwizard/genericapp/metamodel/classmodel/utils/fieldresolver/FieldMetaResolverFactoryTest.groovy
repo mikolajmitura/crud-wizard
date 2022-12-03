@@ -9,10 +9,9 @@ import pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
 import pl.jalokim.crudwizard.core.sample.SuperDtoWithSuperBuilder
 import pl.jalokim.crudwizard.core.utils.ReflectionUtils
-import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 
-class FieldMetaResolverFactoryTest extends UnitTestSpec {
+class FieldMetaResolverFactoryTest extends FieldsResolverSpecification {
 
     @Unroll
     def "return expected #expectedFieldMetaResolver for given class: #givenClass and #strategyType"() {
