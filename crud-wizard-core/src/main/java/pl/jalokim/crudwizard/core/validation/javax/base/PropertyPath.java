@@ -29,6 +29,12 @@ public class PropertyPath {
 
         List<PropertyPathPart> propertyParts = new ArrayList<>();
 
+        public PropertyPathBuilder copy() {
+            PropertyPathBuilder propertyPathBuilder = new PropertyPathBuilder();
+            propertyPathBuilder.propertyParts.addAll(propertyParts);
+            return propertyPathBuilder;
+        }
+
         /**
          * Add name of next node property.
          */

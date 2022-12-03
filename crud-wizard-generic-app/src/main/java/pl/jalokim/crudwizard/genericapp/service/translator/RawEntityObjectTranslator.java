@@ -16,15 +16,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 
@@ -37,7 +37,8 @@ public class RawEntityObjectTranslator {
      * To add some custom deserializers and serializers inject ObjectMapper and add custom configuration to it.
      */
     private final JsonObjectMapper jsonObjectMapper;
-    private final DefaultClassesConfig defaultClassesConfig;
+    private final DefaultSubClassesForAbstractClassesConfig defaultClassesConfig;
+    private final EnumClassMetaModelValidator enumClassMetaModelValidator;
 
     public <T> T translateToRealObjects(@Nullable JsonNode jsonNode, @Nullable ClassMetaModel nullableClassMetaModel) {
         if (jsonNode == null) {
@@ -67,17 +68,11 @@ public class RawEntityObjectTranslator {
     }
 
     private Object convertObjectBasedOnMetaData(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {
-        if (classMetaModel.isGenericEnumType()) {
+        if (classMetaModel.isGenericMetamodelEnum()) {
             TextNode textNode = jsonObjectMapper.castObjectTo(objectNodePath, jsonNode, TextNode.class);
-            String textValue = textNode.textValue();
-            List<String> enumValues = classMetaModel.getEnumClassMetaModel().getEnumValues();
-            if (enumValues.contains(textValue)) {
-                return textNode.textValue();
-            }  else  {
-                throw new TechnicalException("invalid enum value : '" +  textValue + "' in path: " + objectNodePath.getFullPath()
-                    + " available enum values: " + elements(enumValues).asConcatText(", "));
-            }
-
+            return enumClassMetaModelValidator.getEnumValueWhenIsValid(classMetaModel.getName(),
+                textNode.textValue(),
+                objectNodePath.getFullPath());
         } else {
             if (jsonNode instanceof NullNode) {
                 return null;
@@ -97,8 +92,8 @@ public class RawEntityObjectTranslator {
 
     private FieldMetaModel getFieldByName(ObjectNodePath objectNodePath, ClassMetaModel classMetaModel, String fieldName) {
         return Optional.ofNullable(classMetaModel.getFieldByName(asLowerCamel(fieldName)))
-            .orElseThrow(() -> new TechnicalException("Cannot find field with name: '" + fieldName + "' in path: '" + objectNodePath.getFullPath()
-                + "' available fields: " + classMetaModel.getFieldNames() + " in named class meta model: '" + classMetaModel.getName() + "'"));
+            .orElseThrow(() -> new TechnicalException("Cannot find field with name: '" + fieldName + "' in path: '" + objectNodePath.getFullPath() +
+                "' available fields: " + classMetaModel.getFieldNames() + " in named class meta model: '" + classMetaModel.getName() + "'"));
     }
 
     private Object convertObjectBasedOnRealClass(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {

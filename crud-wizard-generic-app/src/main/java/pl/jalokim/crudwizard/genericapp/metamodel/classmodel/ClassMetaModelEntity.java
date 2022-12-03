@@ -31,7 +31,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditio
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity;
 
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Data
@@ -48,6 +48,8 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     private String name;
 
     private String className;
+
+    private String basedOnClass;
 
     /**
      * when true then does it mean that this meta model is like generic enum metamodel
@@ -97,10 +99,10 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     private List<AdditionalPropertyEntity> additionalProperties;
 
     public boolean shouldBeSimpleRawClass() {
-        return isNotBlank(getClassName())
-            && isEmpty(elements(getFields()))
-            && isEmpty(elements(getGenericTypes()))
-            && isEmpty(elements(getExtendsFromModels()))
-            && isEmpty(elements(getValidators()));
+        return isNotBlank(getClassName()) &&
+            isEmpty(elements(getFields())) &&
+            isEmpty(elements(getGenericTypes())) &&
+            isEmpty(elements(getExtendsFromModels())) &&
+            isEmpty(elements(getValidators()));
     }
 }

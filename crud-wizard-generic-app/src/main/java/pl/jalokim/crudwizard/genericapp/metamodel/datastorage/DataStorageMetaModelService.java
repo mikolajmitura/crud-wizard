@@ -3,7 +3,6 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import java.util.List;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 

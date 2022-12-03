@@ -4,6 +4,7 @@ import static java.util.Optional.ofNullable;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.joinWithComma;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId;
 import static pl.jalokim.utils.collection.CollectionUtils.addWhenNotExist;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isCollectionType;
@@ -22,13 +23,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
@@ -38,7 +40,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaM
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDto;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
-import pl.jalokim.utils.reflection.TypeMetadata;
 
 @Component
 @RequiredArgsConstructor
@@ -59,8 +60,8 @@ public class DataStorageResultsJoinCorrectnessValidator
             .map(ClassUtils::loadRealClass)
             .orElse(null);
 
-        if (HttpMethod.GET.equals(httpMethod) && endpointResponseClass != null
-            && (isCollectionType(endpointResponseClass) || MetadataReflectionUtils.isTypeOf(endpointResponseClass, Page.class))) {
+        if (HttpMethod.GET.equals(httpMethod) && endpointResponseClass != null &&
+            (isCollectionType(endpointResponseClass) || MetadataReflectionUtils.isTypeOf(endpointResponseClass, Page.class))) {
             List<DataStorageConnectorMetaModelDto> dataStorageConnectors = elements(endpointMetaModelDto.getDataStorageConnectors()).asList();
             List<DataStorageResultsJoinerDto> dataStorageResultsJoiners = elements(endpointMetaModelDto.getDataStorageResultsJoiners()).asList();
 
@@ -72,10 +73,10 @@ public class DataStorageResultsJoinCorrectnessValidator
 
             Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName = new HashMap<>();
 
-            return expectedNumberOfJoinersDueToDsConnectors(context, numberOfConnectors, numberOfJoiners)
-                && namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto)
-                && allJoinerCorrectlyConnected(dataStorageResultsJoiners, context)
-                && allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
+            return expectedNumberOfJoinersDueToDsConnectors(context, numberOfConnectors, numberOfJoiners) &&
+                namesAreCorrect(dataStorageConnectors, dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName, endpointMetaModelDto) &&
+                allJoinerCorrectlyConnected(dataStorageResultsJoiners, context) &&
+                allPathsCorrectAndTypeMatched(dataStorageResultsJoiners, context, classMetaModelDtoByDsQueryName);
         }
         return true;
     }
@@ -223,16 +224,16 @@ public class DataStorageResultsJoinCorrectnessValidator
         AtomicBoolean allPathsCorrect = new AtomicBoolean(true);
         elements(dataStorageResultsJoiners).forEachWithIndex((index, joinEntry) -> {
 
-            Optional<TypeMetadata> leftJoinType = getTypeByPath(context, classMetaModelDtoByDsQueryName, allPathsCorrect,
+            Optional<ClassMetaModel> leftJoinType = getTypeByPath(context, classMetaModelDtoByDsQueryName, allPathsCorrect,
                 joinEntry.getLeftNameOfQueryResult(), joinEntry.getLeftPath(), index, "leftPath");
 
-            Optional<TypeMetadata> rightJoinType = getTypeByPath(context, classMetaModelDtoByDsQueryName, allPathsCorrect,
+            Optional<ClassMetaModel> rightJoinType = getTypeByPath(context, classMetaModelDtoByDsQueryName, allPathsCorrect,
                 joinEntry.getRightNameOfQueryResult(), joinEntry.getRightPath(), index, "rightPath");
 
             if (leftJoinType.isPresent() && rightJoinType.isPresent() && !leftJoinType.get().equals(rightJoinType.get())) {
                 customMessage(context, createMessagePlaceholder(DataStorageResultsJoinCorrectness.class, "notTheSameTypesForJoin",
-                    Map.of("leftType", leftJoinType.get().getCanonicalName(),
-                        "rightType", rightJoinType.get().getCanonicalName())),
+                    Map.of("leftType", leftJoinType.get().getTypeDescription(),
+                        "rightType", rightJoinType.get().getTypeDescription())),
                     PropertyPath.builder()
                         .addNextPropertyAndIndex(DATA_STORAGE_RESULTS_JOINERS, index)
                         .build());
@@ -242,7 +243,7 @@ public class DataStorageResultsJoinCorrectnessValidator
         return allPathsCorrect.get();
     }
 
-    private Optional<TypeMetadata> getTypeByPath(ConstraintValidatorContext context, Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName,
+    private Optional<ClassMetaModel> getTypeByPath(ConstraintValidatorContext context, Map<String, ClassMetaModelDto> classMetaModelDtoByDsQueryName,
         AtomicBoolean allPathsCorrect, String nameOfQueryResult, String joinPath, Integer joinerIndex, String pathFieldName) {
 
         ClassMetaModelDto classMetaModelDto = classMetaModelDtoByDsQueryName.get(nameOfQueryResult);
@@ -270,8 +271,6 @@ public class DataStorageResultsJoinCorrectnessValidator
     }
 
     private ClassMetaModelDto createClassMetaModelDtoWithId(Long id) {
-        return ClassMetaModelDto.builder()
-            .id(id)
-            .build();
+        return buildClassMetaModelDtoWithId(id);
     }
 }

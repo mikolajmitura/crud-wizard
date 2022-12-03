@@ -1,0 +1,3 @@
+        int initSize = ${initSizeCalculateExpression};
+${elementsType} elements = ${initElements};
+${populateElements}

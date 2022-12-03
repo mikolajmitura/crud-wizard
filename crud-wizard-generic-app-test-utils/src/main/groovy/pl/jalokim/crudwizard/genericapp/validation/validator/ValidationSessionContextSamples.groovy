@@ -2,9 +2,9 @@ package pl.jalokim.crudwizard.genericapp.validation.validator
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModelSamples
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext
 
 class ValidationSessionContextSamples {

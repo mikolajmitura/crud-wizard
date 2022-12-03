@@ -7,7 +7,7 @@ import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
 import java.lang.reflect.Method;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.BeanMethodMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
 
 @Component
 @RequiredArgsConstructor
@@ -15,18 +15,20 @@ public class BeanMethodMetaModelCreator {
 
     private final MethodSignatureMetaModelResolver methodSignatureMetaModelResolver;
 
-    public BeanMethodMetaModel createBeanMethodMetaModel(String methodName, String className) {
+    public BeanAndMethodMetaModel createBeanMethodMetaModel(String methodName, String className, String beanName) {
         Class<?> realClass = loadRealClass(className);
         Method method = findMethodByName(realClass, methodName);
-        return createBeanMethodMetaModel(method, realClass);
+        return createBeanMethodMetaModel(method, realClass, beanName);
     }
 
-    public BeanMethodMetaModel createBeanMethodMetaModel(Method method, Class<?> instanceClass) {
+    public BeanAndMethodMetaModel createBeanMethodMetaModel(Method method, Class<?> instanceClass, String beanName) {
         Class<?> realClass = loadRealClass(clearCglibClassName(instanceClass.getCanonicalName()));
 
-        return BeanMethodMetaModel.builder()
+        return BeanAndMethodMetaModel.builder()
+            .className(instanceClass.getCanonicalName())
+            .beanName(beanName)
             .originalMethod(method)
-            .name(method.getName())
+            .methodName(method.getName())
             .methodSignatureMetaModel(methodSignatureMetaModelResolver.resolveMethodSignature(method, realClass))
             .build();
     }

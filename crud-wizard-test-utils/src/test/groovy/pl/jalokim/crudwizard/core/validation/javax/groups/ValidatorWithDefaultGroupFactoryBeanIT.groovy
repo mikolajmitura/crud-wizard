@@ -66,7 +66,7 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
         response.andExpect(status().isOk())
     }
 
-    def "should not pass validation update"() {
+    def "should not pass validation update with UpdateContext and default validation group"() {
         given:
 
         def input = SomeBean.builder()
@@ -82,5 +82,22 @@ class ValidatorWithDefaultGroupFactoryBeanIT extends DummyBaseIntegrationControl
         jsonResponse['errors'].size() == 2
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('id', notNullMessage()))
         assertThat(jsonResponse, ErrorResponseMatcher.hasError('name', notNullMessage()))
+    }
+
+    def "should not pass validation update only with UpdateContext when added WithoutDefaultGroup"() {
+        given:
+
+        def input = SomeBean.builder()
+            .surName("surName")
+            .optional("optinal")
+            .build()
+
+        when:
+        def response = operationsOnRestController.performWithJsonContent(post("/test/update-without-default-group"), input)
+        then:
+        response.andExpect(status().isBadRequest())
+        def jsonResponse = operationsOnRestController.extractResponseAsJson(response)
+        jsonResponse['errors'].size() == 1
+        assertThat(jsonResponse, ErrorResponseMatcher.hasError('id', notNullMessage()))
     }
 }

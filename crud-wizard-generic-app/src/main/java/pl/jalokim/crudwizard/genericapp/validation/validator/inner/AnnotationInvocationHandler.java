@@ -17,8 +17,8 @@ public class AnnotationInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) {
         Object returnValue = returnValueByMethodName.get(method.getName());
         if (returnValue == null) {
-            throw new IllegalArgumentException("Cannot invoke method: " + method.getName() + " at class: " + targetAnnotationType.getCanonicalName()
-                + " due to cannot find return value for that method available: " + returnValueByMethodName);
+            throw new IllegalArgumentException("Cannot invoke method: " + method.getName() + " at class: " + targetAnnotationType.getCanonicalName() +
+                " due to cannot find return value for that method available: " + returnValueByMethodName);
         }
         return returnValue;
     }

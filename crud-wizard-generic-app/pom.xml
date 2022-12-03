@@ -33,12 +33,6 @@
             <groupId>pl.jalokim.crudwizard</groupId>
             <artifactId>crud-wizard-test-utils</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>pl.jalokim.crudwizard.datastorage</groupId>
-            <artifactId>in-memory-data-storage</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

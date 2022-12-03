@@ -1,13 +1,13 @@
 package pl.jalokim.crudwizard.genericapp.validation.generic
 
 import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBodyTranslated
-import static pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel.empty
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelWithParents
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator
+import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel.empty
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidSizeMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notBlankMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
@@ -21,11 +21,11 @@ import static pl.jalokim.utils.test.DataFakerHelper.randomText
 import java.time.Period
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
 import pl.jalokim.crudwizard.core.exception.CustomValidationException
-import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModelSamples
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel
 import pl.jalokim.crudwizard.genericapp.validation.validator.FieldShouldWhenOtherValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec

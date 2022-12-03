@@ -1,0 +1,3 @@
+        for (${sourceElementType} element : ${sourceIterables}) {
+            ${populateIterable};
+        }

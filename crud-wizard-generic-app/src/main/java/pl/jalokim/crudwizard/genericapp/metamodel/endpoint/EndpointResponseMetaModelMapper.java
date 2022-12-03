@@ -7,11 +7,14 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.metamodels.EndpointResponseMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
 public abstract class EndpointResponseMetaModelMapper
@@ -41,4 +44,12 @@ public abstract class EndpointResponseMetaModelMapper
     @Mapping(target = "mapperMetaModel", ignore = true)
     @Mapping(target = "queryProvider", ignore = true)
     public abstract EndpointResponseMetaModel toMetaModel(EndpointResponseMetaModelEntity endpointResponseMetaModelEntity);
+
+    // TODO #53 remove this after impl
+    @Mapping(target = "mapperScript", ignore = true)
+    @Mapping(target = "metamodelDtoType", ignore = true)
+    public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
+
+    @Mapping(target = "classMetaModelDtoType", ignore = true)
+    public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 }

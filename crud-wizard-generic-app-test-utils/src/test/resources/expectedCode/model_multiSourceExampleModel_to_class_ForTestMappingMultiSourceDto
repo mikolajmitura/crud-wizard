@@ -1,0 +1,317 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1 implements GeneratedMapper {
+		private final org.springframework.core.convert.ConversionService conversionService;
+		private final pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker;
+    MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1(org.springframework.core.convert.ConversionService conversionService,
+pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker) {
+		this.conversionService = conversionService;
+		this.generatedMapperInvoker = generatedMapperInvoker;
+    }
+
+    @Override
+    public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		return new pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto(
+
+		((pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) mapMpersonPart1ModelAndMpersonPart2ModelToCSamplePersonDtoWitOtherObject(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someObject"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("personPart1"))
+			.orElse(null)), ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someObject"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("personPart2"))
+			.orElse(null)))),
+
+		((pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) mapMmultiSourceExampleModelAndMpersonPart2ModelAndMotherPersonPart3ModelToCSamplePersonDtoWitOtherObject(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) sourceObject), ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("otherPersonPart2"))
+			.orElse(null)), ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("otherPersonPart3"))
+			.orElse(null)))),
+
+		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto) mapToCDocumentHolderDto(genericMapperArgument)),
+
+		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto) mapToCDocumentHolderDto(genericMapperArgument)),
+
+		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto) mapToCDocumentHolderDto_1(genericMapperArgument)),
+
+		((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject) mapCTestCurrentNodeObjectInModelToCTestCurrentNodeObject(genericMapperArgument, ((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel) Optional.ofNullable(((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("testCurrentNodeObjectWrapper"))
+			.orElse(null)))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("testCurrentNodeObject"))
+			.orElse(null)))),
+
+		((java.lang.String) Optional.ofNullable(((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("testCurrentNodeObjectWrapper"))
+			.orElse(null)))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("simpleCurrentNodeTest"))
+			.orElse(null))
+        );
+    }
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject mapCTestCurrentNodeObjectInModelToCTestCurrentNodeObject(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject newObject = new pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject();
+
+		newObject.setUuid(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel) value).getUuid())
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject) newObject;
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.InnerDocumentDto mapMdocumentDataP1ModelAndMdocumentDataP1ModelToCInnerDocumentDto(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+
+
+		return new pl.jalokim.crudwizard.core.sample.InnerDocumentDto(
+
+		((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("serialNumber"))
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("signedBy"))
+			.orElse(null)),
+
+		((java.lang.Long) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("docId"))
+			.orElse(null))
+        );
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.SomeDocumentDto mapMdocumentDataPart1ModelAndMdocumentDataP1ModelToCSomeDocumentDto(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+
+
+		return new pl.jalokim.crudwizard.core.sample.SomeDocumentDto(
+
+		((pl.jalokim.crudwizard.core.sample.InnerDocumentDto) mapMdocumentDataP1ModelAndMdocumentDataP1ModelToCInnerDocumentDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentData"))
+			.orElse(null)), ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentData"))
+			.orElse(null)))),
+
+		((java.lang.Long) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart2"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("mainDocId"))
+			.orElse(null))
+        );
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.SomeDocumentDto mapMdocumentDataPart1ModelAndMdocumentDataP1ModelToCSomeDocumentDto_1(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+
+
+		return new pl.jalokim.crudwizard.core.sample.SomeDocumentDto(
+
+		((pl.jalokim.crudwizard.core.sample.InnerDocumentDto) mapMdocumentDataP1ModelAndMdocumentDataP1ModelToCInnerDocumentDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentData"))
+			.orElse(null)), ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentData"))
+			.orElse(null)))),
+
+		conversionService.convert(((java.lang.String) generatedMapperInvoker.mapWithMapper("fromLocalDateToStringMapper", genericMapperArgument, ((java.time.LocalDateTime) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart1"))
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("localDateTime66"))
+			.orElse(null)))), java.lang.Long.class)
+        );
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject mapMmultiSourceExampleModelAndMpersonPart2ModelAndMotherPersonPart3ModelToCSamplePersonDtoWitOtherObject(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1, java.util.Map<java.lang.String, java.lang.Object> argument2) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+
+
+		pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject newObject = new pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject();
+
+		newObject.setBirthDay(((java.time.LocalDate) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("birthDay"))
+			.orElse(null)));
+
+		newObject.setId(conversionService.convert(((java.lang.String) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
+			.orElse(null)), java.lang.Long.class));
+
+		newObject.setLastLogin(((java.time.LocalDateTime) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("lastLogin"))
+			.orElse(null)));
+
+		newObject.setName(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
+			.orElse(null)));
+
+		newObject.setSomeOtherDto(((pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto) mapMsomeOtherDtoModelToCSomeSimpleValueDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someOtherDto"))
+			.orElse(null)))));
+
+		newObject.setSomeString(((java.lang.String) Optional.ofNullable(argument2)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString"))
+			.orElse(null)));
+
+		newObject.setSurname(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("surname"))
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) newObject;
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject mapMpersonPart1ModelAndMpersonPart2ModelToCSamplePersonDtoWitOtherObject(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+
+
+		pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject newObject = new pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject();
+
+		newObject.setBirthDay(((java.time.LocalDate) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("birthDay"))
+			.orElse(null)));
+
+		newObject.setId(conversionService.convert(((java.lang.String) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
+			.orElse(null)), java.lang.Long.class));
+
+		newObject.setLastLogin(((java.time.LocalDateTime) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("lastLogin"))
+			.orElse(null)));
+
+		newObject.setName(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
+			.orElse(null)));
+
+		newObject.setSomeOtherDto(((pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto) mapMsomeOtherDtoModelToCSomeSimpleValueDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(argument1)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someOtherDto"))
+			.orElse(null)))));
+
+		newObject.setSomeString(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString"))
+			.orElse(null)));
+
+		newObject.setSurname(((java.lang.String) Optional.ofNullable(argument0)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("surname"))
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) newObject;
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto mapMsomeOtherDtoModelToCSomeSimpleValueDto(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		return new pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto(
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString3"))
+			.orElse(null)),
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someLong3"))
+			.orElse(null)),
+
+		((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someDataTime3"))
+			.orElse(null))
+        );
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto mapToCDocumentHolderDto(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+
+
+		return new pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto(
+
+		((pl.jalokim.crudwizard.core.sample.SomeDocumentDto) mapMdocumentDataPart1ModelAndMdocumentDataP1ModelToCSomeDocumentDto(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart1"))
+			.orElse(null)), ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart2"))
+			.orElse(null))))
+        );
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto mapToCDocumentHolderDto_1(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+
+
+		return new pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto(
+
+		((pl.jalokim.crudwizard.core.sample.SomeDocumentDto) mapMdocumentDataPart1ModelAndMdocumentDataP1ModelToCSomeDocumentDto_1(genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart1"))
+			.orElse(null)), ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart2"))
+			.orElse(null))))
+        );
+    }
+
+}

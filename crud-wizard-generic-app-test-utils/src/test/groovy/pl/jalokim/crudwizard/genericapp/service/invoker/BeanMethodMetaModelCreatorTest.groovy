@@ -13,8 +13,8 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import pl.jalokim.crudwizard.core.exception.TechnicalException
-import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.MapGenericService
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
@@ -33,11 +33,10 @@ class BeanMethodMetaModelCreatorTest extends Specification {
 
         when:
         def resultMethodMetaModel = testCase.createBeanMethodMetaModel(methodName,
-            NormalSpringService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4')
+            NormalSpringService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4', null)
 
         then:
         verifyAll(resultMethodMetaModel) {
-            name == methodName
             originalMethod == findMethodByName(NormalSpringService, methodName)
             verifyAll(methodSignatureMetaModel) {
                 !returnType.isGenericType()
@@ -58,7 +57,7 @@ class BeanMethodMetaModelCreatorTest extends Specification {
                 verifyAll(methodArguments[3]) {
                     annotations*.annotationType() as Set == [RequestHeader] as Set
                     argumentType.rawClass == Map
-                    argumentType.originalType.toString() == "Map<String, Object>"
+                    argumentType.originalType.toString() == "java.util.Map<java.lang.String, java.lang.Object>"
                     MapType mapType = ((MapType) argumentType.jacksonJavaType)
                     mapType.keyType.toString() == "[simple type, class java.lang.String]"
                     mapType.contentType.toString() == "[simple type, class java.lang.Object]"
@@ -77,21 +76,20 @@ class BeanMethodMetaModelCreatorTest extends Specification {
 
         when:
         def resultMethodMetaModel = testCase.createBeanMethodMetaModel(methodName,
-            MapGenericService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4')
+            MapGenericService.canonicalName + '$$EnhancerBySpringCGLIB$$mv59dfg4', null)
 
         then:
         verifyAll(resultMethodMetaModel) {
-            name == methodName
             originalMethod == findMethodByName(MapGenericService, methodName)
             verifyAll(methodSignatureMetaModel) {
                 returnType.isGenericType()
                 !returnType.isRawClass()
                 returnType.rawClass == MapGenericService.SomeGenericValue
-                returnType.originalType.toString() == "MapGenericService.SomeGenericValue<Long, Double>"
+                returnType.originalType.toString() == 'pl.jalokim.crudwizard.genericapp.service.invoker.sample.MapGenericService$SomeGenericValue<java.lang.Long, java.lang.Double>'
                 returnType.jacksonJavaType.toString() == "[simple type, class $MapGenericService.canonicalName\$SomeGenericValue<$Long.canonicalName,$Double.canonicalName>]"
                 verifyAll(methodArguments[0]) {
                     annotations*.annotationType() as Set == [Validated, RequestBody] as Set
-                    argumentType.originalType.toString() == "Map<Long, List<String>>"
+                    argumentType.originalType.toString() == "java.util.Map<java.lang.Long, java.util.List<java.lang.String>>"
                 }
                 verifyAll(methodArguments[1]) {
                     annotations*.annotationType() as Set == [PathParam] as Set
@@ -111,7 +109,7 @@ class BeanMethodMetaModelCreatorTest extends Specification {
             .join(System.lineSeparator())
 
         when:
-        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName)
+        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName, null)
 
         then:
         TechnicalException ex = thrown()
@@ -123,7 +121,7 @@ class BeanMethodMetaModelCreatorTest extends Specification {
         def methodName = "notExistMethodName"
 
         when:
-        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName)
+        testCase.createBeanMethodMetaModel(methodName, NormalSpringService.canonicalName, null)
 
         then:
         TechnicalException ex = thrown()

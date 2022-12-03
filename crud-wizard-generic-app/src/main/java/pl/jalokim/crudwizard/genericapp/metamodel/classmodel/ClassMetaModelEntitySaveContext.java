@@ -1,138 +1,115 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
-import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
 @Component
+@RequiredArgsConstructor
 public class ClassMetaModelEntitySaveContext {
 
-    private final ThreadLocal<Map<String, ClassMetaModelEntity>> alreadySavedClassMetaModelByName = new ThreadLocal<>();
+    private final ThreadLocal<SavedEntities> alreadySavedClassMetaModelByName = new ThreadLocal<>();
+    private final ValidatorMetaModelService validatorMetaModelService;
+    private final ClassMetaModelRepository classMetaModelRepository;
+    private final ClassMetaModelMapper classMetaModelMapper;
 
     public void clearSaveContext() {
         alreadySavedClassMetaModelByName.set(null);
     }
 
     public void setupContext() {
-        alreadySavedClassMetaModelByName.set(new HashMap<>());
+        alreadySavedClassMetaModelByName.set(new SavedEntities(
+            validatorMetaModelService,
+            classMetaModelRepository,
+            classMetaModelMapper));
     }
 
-    public ClassMetaModelEntity findEntityWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
-        if (classMetaModelEntity.getName() != null) {
-            ClassMetaModelEntity currentClassMetaModelEntityInContext = alreadySavedClassMetaModelByName.get().get(classMetaModelEntity.getName());
-            if (currentClassMetaModelEntityInContext != null) {
-                validateClassMetaModelContents(classMetaModelEntity, currentClassMetaModelEntityInContext);
-                return currentClassMetaModelEntityInContext;
+    public SavedEntities getSavedEntities() {
+        return alreadySavedClassMetaModelByName.get();
+    }
+
+    public ClassMetaModelEntity findFullySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
+        return getSavedEntities().findFullySavedWhenNameTheSame(classMetaModelEntity);
+    }
+
+    public ClassMetaModelEntity findPartiallySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
+        return getSavedEntities().findPartiallySavedWhenNameTheSame(classMetaModelEntity);
+    }
+
+    public void putFullySavedToContext(ClassMetaModelEntity savedClassMetaModelEntity) {
+        getSavedEntities().putFullySavedToContext(savedClassMetaModelEntity);
+    }
+
+    public void putPartiallySavedToContext(ClassMetaModelDto classMetaModelDto) {
+        getSavedEntities().putPartiallySavedToContext(classMetaModelDto);
+    }
+
+    public void putDuringInitializationEntity(ClassMetaModelEntity classMetaModelEntity) {
+        getSavedEntities().putDuringInitializationEntity(classMetaModelEntity);
+    }
+
+    public boolean isDuringFullSave(ClassMetaModelEntity classMetaModelEntity) {
+        return getSavedEntities().isDuringFullSave(classMetaModelEntity);
+    }
+
+    @RequiredArgsConstructor
+    public static class SavedEntities {
+
+        private final ValidatorMetaModelService validatorMetaModelService;
+        private final ClassMetaModelRepository classMetaModelRepository;
+        private final ClassMetaModelMapper classMetaModelMapper;
+        private final Map<String, ClassMetaModelEntity> partiallyEntitiesSaved = new HashMap<>();
+        private final Map<String, ClassMetaModelEntity> duringFullSaveEntities = new HashMap<>();
+        private final Map<String, ClassMetaModelEntity> fullyEntitiesSaved = new HashMap<>();
+
+        public void putFullySavedToContext(ClassMetaModelEntity savedClassMetaModelEntity) {
+            if (savedClassMetaModelEntity.getName() != null) {
+                Objects.requireNonNull(savedClassMetaModelEntity.getId(), "entity should have assigned id already");
+                fullyEntitiesSaved.put(savedClassMetaModelEntity.getName(), savedClassMetaModelEntity);
             }
         }
-        return classMetaModelEntity;
-    }
 
-    private void validateClassMetaModelContents(ClassMetaModelEntity classMetaModelEntity, ClassMetaModelEntity currentClassMetaModelEntityInContext) {
-        if (!theSameContent(classMetaModelEntity, currentClassMetaModelEntityInContext)) {
-            throw new TechnicalException(getMessage("class.metamodel.the.same.name.but.other.content",
-                classMetaModelEntity.getName()));
-        }
-    }
+        public void putPartiallySavedToContext(ClassMetaModelDto classMetaModelDto) {
 
-    public void putToContext(ClassMetaModelEntity savedClassMetaModelEntity) {
-        if (savedClassMetaModelEntity.getName() != null) {
-            alreadySavedClassMetaModelByName.get().put(savedClassMetaModelEntity.getName(), savedClassMetaModelEntity);
-        }
-    }
-
-    public boolean theSameContent(ClassMetaModelEntity leftClassModel, ClassMetaModelEntity rightClassModel) {
-        return areTheSameClassMetaModels(List.of(leftClassModel), List.of(rightClassModel));
-    }
-
-    private boolean areTheSameClassMetaModels(List<ClassMetaModelEntity> left, List<ClassMetaModelEntity> right) {
-        return listsAreTheSame(left, right,
-            List.of(
-                ClassMetaModelEntity::getName,
-                ClassMetaModelEntity::getClassName,
-                ClassMetaModelEntity::getIsGenericEnumType,
-                ClassMetaModelEntity::getSimpleRawClass),
-            (leftClassModel, rightClassModel) ->
-                areTheSameClassMetaModels(leftClassModel.getGenericTypes(), rightClassModel.getGenericTypes()),
-            (leftClassModel, rightClassModel) ->
-                listsAreTheSame(leftClassModel.getFields(), rightClassModel.getFields(),
-                    List.of(FieldMetaModelEntity::getFieldName),
-                    (leftFieldClassModel, rightFieldClassModel) ->
-                        areTheSameValidators(leftFieldClassModel.getValidators(), rightFieldClassModel.getValidators()),
-                    (leftFieldClassModel, rightFieldClassModel) ->
-                        areTheSameAdditionalProperties(leftFieldClassModel.getAdditionalProperties(), rightFieldClassModel.getAdditionalProperties())),
-            (leftClassModel, rightClassModel) ->
-                areTheSameValidators(leftClassModel.getValidators(), rightClassModel.getValidators()),
-            (leftClassModel, rightClassModel) ->
-                areTheSameClassMetaModels(leftClassModel.getExtendsFromModels(), rightClassModel.getExtendsFromModels()),
-            (leftClassModel, rightClassModel) ->
-                areTheSameAdditionalProperties(leftClassModel.getAdditionalProperties(), rightClassModel.getAdditionalProperties())
-        );
-    }
-
-    private boolean areTheSameValidators(List<ValidatorMetaModelEntity> left, List<ValidatorMetaModelEntity> right) {
-        return listsAreTheSame(left, right,
-            List.of(
-                ValidatorMetaModelEntity::getClassName,
-                ValidatorMetaModelEntity::getValidatorName,
-                ValidatorMetaModelEntity::getValidatorScript,
-                ValidatorMetaModelEntity::getParametrized,
-                ValidatorMetaModelEntity::getNamePlaceholder,
-                ValidatorMetaModelEntity::getMessagePlaceholder),
-            (leftValidator, rightValidator) ->
-                areTheSameAdditionalProperties(leftValidator.getAdditionalProperties(), rightValidator.getAdditionalProperties()));
-    }
-
-    private boolean areTheSameAdditionalProperties(List<AdditionalPropertyEntity> left, List<AdditionalPropertyEntity> right) {
-        return listsAreTheSame(left, right,
-            List.of(
-                AdditionalPropertyEntity::getName,
-                AdditionalPropertyEntity::getValueRealClassName,
-                AdditionalPropertyEntity::getRawJson
-            ));
-    }
-
-    @SafeVarargs
-    private <T> boolean listsAreTheSame(List<T> left, List<T> right, List<Function<T, Object>> getters,
-        BiPredicate<T, T>... predicates) {
-        if (left == null && right == null) {
-            return true;
-        }
-
-        if (left != null && right != null) {
-            if (left.size() != right.size()) {
-                return false;
+            if (classMetaModelDto.getName() != null && !partiallyEntitiesSaved.containsKey(classMetaModelDto.getName())) {
+                ClassMetaModelEntity classMetaModelEntity = classMetaModelMapper.toSimpleEntity(classMetaModelDto, false);
+                validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntity.getValidators());
+                ClassMetaModelEntity savedClassMetaModelEntity = classMetaModelRepository.save(classMetaModelEntity);
+                partiallyEntitiesSaved.put(savedClassMetaModelEntity.getName(), savedClassMetaModelEntity);
             }
+        }
 
-            boolean areEquals = true;
-
-            for (int index = 0; index < left.size(); index++) {
-                T leftElement = left.get(index);
-                T rightElement = right.get(index);
-                areEquals = valuesByFieldsAreTheSame(areEquals, getters, leftElement, rightElement);
-
-                for (BiPredicate<T, T> predicate : predicates) {
-                    areEquals = areEquals && predicate.test(leftElement, rightElement);
+        public ClassMetaModelEntity findFullySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
+            if (classMetaModelEntity.getName() != null) {
+                ClassMetaModelEntity currentClassMetaModelEntityInContext = fullyEntitiesSaved.get(classMetaModelEntity.getName());
+                if (currentClassMetaModelEntityInContext != null) {
+                    return currentClassMetaModelEntityInContext;
                 }
-
             }
-            return areEquals;
+            return classMetaModelEntity;
         }
 
-        return false;
-    }
+        public ClassMetaModelEntity findPartiallySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
+            if (classMetaModelEntity.getName() != null) {
+                ClassMetaModelEntity currentClassMetaModelEntityInContext = partiallyEntitiesSaved.get(classMetaModelEntity.getName());
+                if (currentClassMetaModelEntityInContext != null) {
+                    return currentClassMetaModelEntityInContext;
+                }
+            }
+            return classMetaModelEntity;
+        }
 
-    private <T> boolean valuesByFieldsAreTheSame(boolean areEquals, List<Function<T, Object>> getters, T leftElement, T rightElement) {
-        return areEquals && getters.stream()
-            .allMatch(getter -> Objects.equals(getter.apply(leftElement), getter.apply(rightElement)));
+        public void putDuringInitializationEntity(ClassMetaModelEntity classMetaModelEntity) {
+            if (classMetaModelEntity.getName() != null && !duringFullSaveEntities.containsKey(classMetaModelEntity.getName())) {
+                duringFullSaveEntities.put(classMetaModelEntity.getName(), classMetaModelEntity);
+            }
+        }
+
+        public boolean isDuringFullSave(ClassMetaModelEntity classMetaModelEntity) {
+            return classMetaModelEntity.getName() != null && duringFullSaveEntities.containsKey(classMetaModelEntity.getName());
+        }
     }
 }

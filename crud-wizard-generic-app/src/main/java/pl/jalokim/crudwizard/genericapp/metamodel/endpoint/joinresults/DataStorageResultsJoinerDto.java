@@ -1,14 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
 
 @Data
 @Builder(toBuilder = true)
@@ -19,15 +20,24 @@ public class DataStorageResultsJoinerDto {
 
     Long id;
 
-    @NotNull
+    @NotEmpty
+    @Size(min = 3, max = 100)
     String leftNameOfQueryResult;
-    @NotNull
+
+    @NotEmpty
+    @Size(min = 1, max = 250)
     String leftPath;
-    @NotNull
+
+    @NotEmpty
     @ClassExists(expectedOfType = ObjectsJoinerVerifier.class)
+    @Size(min = 3, max = 250)
     String joinerVerifierClassName;
-    @NotNull
+
+    @NotEmpty
+    @Size(min = 3, max = 100)
     String rightNameOfQueryResult;
-    @NotNull
+
+    @NotEmpty
+    @Size(min = 1, max = 250)
     String rightPath;
 }

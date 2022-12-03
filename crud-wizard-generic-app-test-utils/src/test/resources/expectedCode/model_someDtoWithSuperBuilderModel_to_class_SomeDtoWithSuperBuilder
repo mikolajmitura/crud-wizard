@@ -1,0 +1,49 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class MsomeDtoWithSuperBuilderModelToCSomeDtoWithSimpleSuperBuilderMapper1 implements GeneratedMapper {
+
+    MsomeDtoWithSuperBuilderModelToCSomeDtoWithSimpleSuperBuilderMapper1() {
+
+    }
+
+    @Override
+    public pl.jalokim.crudwizard.core.sample.SomeDtoWithSimpleSuperBuilder mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		return pl.jalokim.crudwizard.core.sample.SomeDtoWithSimpleSuperBuilder.builder()
+
+		.localDateTime1(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("localDateTime1"))
+			.orElse(null)))
+
+		.someLong1(((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someLong1"))
+			.orElse(null)))
+
+		.someString1(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString1"))
+			.orElse(null)))
+
+		.superStringField(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("superStringField"))
+			.orElse(null)))
+        .build();
+    }
+
+}

@@ -1,0 +1,34 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class CFromStringToObjectToCStringMapper1 implements GeneratedMapper {
+
+    CFromStringToObjectToCStringMapper1() {
+
+    }
+
+    @Override
+    public java.lang.String mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        return ((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.FromStringToObject) value).getSourceText())
+			.orElse(null));
+    }
+
+}

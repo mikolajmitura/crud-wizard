@@ -1,0 +1,12 @@
+${isGenerated}
+    public ${methodReturnType} ${methodName}(GenericMapperArgument genericMapperArgument${methodArguments}) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+${earlierNullReturnExpression}
+${mappingsCode}
+        ${lastLine};
+    }

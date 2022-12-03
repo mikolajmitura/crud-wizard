@@ -3,7 +3,7 @@ package pl.jalokim.crudwizard.genericapp.validation.validator;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_BLANK_MESSAGE_PROPERTY;
 
 import java.util.Map;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 import pl.jalokim.utils.string.StringUtils;
 

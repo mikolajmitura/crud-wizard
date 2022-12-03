@@ -1,0 +1,53 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class CSamplePersonDtoToMpersonMapper1 implements GeneratedMapper {
+
+    CSamplePersonDtoToMpersonMapper1() {
+
+    }
+
+    @Override
+    public java.util.Map<java.lang.String, java.lang.Object> mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		Map<String, Object> map = new java.util.HashMap<>();
+
+		map.put("birthDay", ((java.time.LocalDate) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.SamplePersonDto) value).getBirthDay())
+			.orElse(null)));
+
+		map.put("id", ((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.SamplePersonDto) value).getId())
+			.orElse(null)));
+
+		map.put("lastLogin", ((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.SamplePersonDto) value).getLastLogin())
+			.orElse(null)));
+
+		map.put("name", ((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.SamplePersonDto) value).getName())
+			.orElse(null)));
+
+		map.put("surname", ((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.core.sample.SamplePersonDto) value).getSurname())
+			.orElse(null)));
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
+    }
+
+}

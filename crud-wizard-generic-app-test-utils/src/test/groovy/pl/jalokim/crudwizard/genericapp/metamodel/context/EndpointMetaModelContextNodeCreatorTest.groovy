@@ -5,7 +5,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextSamples.newEndpointMetaModel
 
 import org.springframework.http.HttpMethod
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel
 import spock.lang.Specification
 
 class EndpointMetaModelContextNodeCreatorTest extends Specification {

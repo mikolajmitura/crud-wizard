@@ -32,6 +32,11 @@ public class MessagePlaceholder {
     String errorCode;
     Map<String, Object> rawArgumentsByName;
 
+    @Override
+    public String toString() {
+        return translateMessage();
+    }
+
     /**
      * Will create MessagePlaceholder for message key which as prefix has canonical class name + propertySuffix and all given placeholderArgs will try wrap as
      * placeholder or try translate:
@@ -89,8 +94,17 @@ public class MessagePlaceholder {
         return createMessagePlaceholder(propertyKey, Map.of(placeholderKey, placeholderValue));
     }
 
+    public static String translatePlaceholder(String propertyKey, Object... placeholderArgs) {
+        return createMessagePlaceholder(propertyKey, placeholderArgs).translateMessage();
+    }
+
+    public static String translatePlaceholder(String propertyKey, Map<String, Object> placeholderArgs) {
+        return createMessagePlaceholder(propertyKey, placeholderArgs).translateMessage();
+    }
+
     /**
      * placeholder which should be translated at frontend side
+     *
      * @param textToWrap value to wrap
      * @return it returns F#[$textToWrap]#
      */
@@ -100,6 +114,7 @@ public class MessagePlaceholder {
 
     /**
      * placeholder for enum which should be translated at frontend side
+     *
      * @param enumToWrap value to wrap
      * @return it returns F_Enum#[$enumType.$textToWrap]#
      */

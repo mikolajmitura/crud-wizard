@@ -1,15 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.rest.samples.mapper;
 
-import static pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery.buildSelectFromAndWhere;
-import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.isEqualsTo;
 import static pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage.DEFAULT_DS_NAME;
+import static pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery.buildSelectFromAndWhere;
+import static pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression.isEqualsTo;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
-import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.utils.ValueExtractorFromPath;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
 
@@ -19,7 +19,7 @@ public class PersonToSecondDbMapper {
     private final MetaModelContextService metaModelContextService;
 
     @SuppressWarnings("unchecked")
-    Object personToSecondDbMapperCreate(GenericMapperArgument genericMapperArgument) {
+    Map<String, Object> personToSecondDbMapperCreate(GenericMapperArgument genericMapperArgument) {
         DataStorage secondDb = metaModelContextService.getDataStorageByName("second-db");
         List<Object> foundEntities = secondDb.findEntities(buildSelectFromAndWhere(
             metaModelContextService.getClassMetaModelByName("personSecondDb"),

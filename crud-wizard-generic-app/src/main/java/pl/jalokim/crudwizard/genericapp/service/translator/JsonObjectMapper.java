@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 
 @Component
 @RequiredArgsConstructor
@@ -57,16 +57,16 @@ public class JsonObjectMapper {
         try {
             return (T) targetClass.cast(sourceObject);
         } catch (ClassCastException ex) {
-            throw new TechnicalException("Cannot cast from: " + sourceObject.getClass().getCanonicalName()
-                + " to " + targetClass.getCanonicalName() + inJsonPath(objectNodePath)
-                + " invalid json part: " + asJsonValue(objectNodePath, sourceObject), ex);
+            throw new TechnicalException("Cannot cast from: " + sourceObject.getClass().getCanonicalName() +
+                " to " + targetClass.getCanonicalName() + inJsonPath(objectNodePath) +
+                " invalid json part: " + asJsonValue(objectNodePath, sourceObject), ex);
         }
     }
 
     public static TechnicalException cannotConvertException(ObjectNodePath objectNodePath, Class<?> targetClass, String jsonValue, JsonProcessingException e) {
-        return new TechnicalException("Cannot convert from value: '" + jsonValue
-            + "' to class " + targetClass.getCanonicalName()
-            + inJsonPath(objectNodePath), e);
+        return new TechnicalException("Cannot convert from value: '" + jsonValue +
+            "' to class " + targetClass.getCanonicalName() +
+            inJsonPath(objectNodePath), e);
     }
 
     public String asJsonValue(ObjectNodePath objectNodePath, Object sourceObject) {

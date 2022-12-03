@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -23,22 +25,43 @@ import pl.jalokim.utils.reflection.TypeMetadata;
 @SuppressWarnings("unchecked")
 public class InstanceLoader {
 
+    private static final AtomicReference<InstanceLoader> INSTANCE_LOADER = new AtomicReference<>();
+
     private final ApplicationContext applicationContext;
     private final Map<Class<?>, Object> notSpringBeanInstancesByClass = new ConcurrentHashMap<>();
 
+    @PostConstruct
+    public void init() {
+        INSTANCE_LOADER.set(this);
+    }
+
+    public static InstanceLoader getInstance() {
+        return INSTANCE_LOADER.get();
+    }
+
     public <T> T createInstanceOrGetBean(String className) {
+        return createInstanceOrGetBean(className, null);
+    }
+
+    public <T> T createInstanceOrGetBean(String className, String beanName) {
         Class<?> realClass = ClassUtils.loadRealClass(className);
-        return createInstanceOrGetBean(realClass);
+        return createInstanceOrGetBean(realClass, beanName);
     }
 
     public <T> T createInstanceOrGetBean(Class<?> realClass) {
-        return (T) tryLoadAsSpringBean(realClass)
+        return createInstanceOrGetBean(realClass, null);
+    }
+
+    public <T> T createInstanceOrGetBean(Class<?> realClass, String beanName) {
+        return (T) tryLoadAsSpringBean(realClass, beanName)
             .orElseGet(() -> tryGetOrCreateNotSpringInstance(realClass));
     }
 
-    private <T> Optional<T> tryLoadAsSpringBean(Class<?> realClass) {
+    private <T> Optional<T> tryLoadAsSpringBean(Class<?> realClass, String nullableBeanName) {
         try {
-            return Optional.of((T) applicationContext.getBean(realClass));
+            return Optional.ofNullable(nullableBeanName)
+                .map(beanName -> (T) applicationContext.getBean(beanName, realClass))
+                .or(() -> Optional.of((T) applicationContext.getBean(realClass)));
         } catch (BeansException ex) {
             return Optional.empty();
         }
@@ -50,7 +73,7 @@ public class InstanceLoader {
             return (T) cachedInstance;
         }
 
-        Constructor<?>[] constructors = realClass.getConstructors();
+        Constructor<?>[] constructors = realClass.getDeclaredConstructors();
         String className = realClass.getCanonicalName();
         if (constructors.length != 1) {
             throw new IllegalArgumentException("Cannot create instance: " + className + " due to other number than one constructor");

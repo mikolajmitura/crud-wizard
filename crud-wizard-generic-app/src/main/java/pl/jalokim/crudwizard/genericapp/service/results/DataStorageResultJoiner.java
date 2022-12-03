@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.Value;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageResultsJoinerMetaModel;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageResultsJoinerMetaModel;
 
 @Component
 @SuppressWarnings({
@@ -27,8 +27,7 @@ public class DataStorageResultJoiner {
             String leftQueryName = dsResultsJoiner.getLeftNameOfQueryResult();
             String rightQueryName = dsResultsJoiner.getRightNameOfQueryResult();
 
-            if (!joinedResultContext.alreadyInContext(leftQueryName)
-                && !joinedResultContext.alreadyInContext(rightQueryName)) {
+            if (!joinedResultContext.alreadyInContext(leftQueryName) && !joinedResultContext.alreadyInContext(rightQueryName)) {
 
                 List<Object> leftDataStorageResults = queriesResults.get(leftQueryName);
                 joinedResultContext.createNewGroup(leftQueryName, leftDataStorageResults);
@@ -38,12 +37,10 @@ public class DataStorageResultJoiner {
                     QueryNameWithPath.of(dsResultsJoiner.getRightPath(), rightQueryName),
                     dsResultsJoiner.getJoinerVerifierInstance(), queriesResults);
 
-            } else if (joinedResultContext.alreadyInContext(leftQueryName)
-                && joinedResultContext.alreadyInContext(rightQueryName)) {
+            } else if (joinedResultContext.alreadyInContext(leftQueryName) && joinedResultContext.alreadyInContext(rightQueryName)) {
                 joinResultsWhenBothSidesExistsInContext(joinedResultContext, dsResultsJoiner);
 
-            } else if (joinedResultContext.alreadyInContext(leftQueryName)
-                && !joinedResultContext.alreadyInContext(rightQueryName)) {
+            } else if (joinedResultContext.alreadyInContext(leftQueryName) && !joinedResultContext.alreadyInContext(rightQueryName)) {
                 joinResultsFromGroupWithDsQueryResults(joinedResultContext,
                     QueryNameWithPath.of(dsResultsJoiner.getLeftPath(), leftQueryName),
                     QueryNameWithPath.of(dsResultsJoiner.getRightPath(), rightQueryName),

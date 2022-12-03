@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.url
 
-import static pl.jalokim.crudwizard.core.metamodels.url.UrlPart.normalUrlPart
-import static pl.jalokim.crudwizard.core.metamodels.url.UrlPart.variableUrlPart
+import static UrlPart.normalUrlPart
+import static UrlPart.variableUrlPart
 
 import spock.lang.Specification
 import spock.lang.Unroll

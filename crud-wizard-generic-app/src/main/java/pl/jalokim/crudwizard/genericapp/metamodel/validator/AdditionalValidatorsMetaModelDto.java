@@ -4,6 +4,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class AdditionalValidatorsMetaModelDto {
     private Long id;
 
     @NotBlank
+    @Size(min = 1, max = 250)
     private String fullPropertyPath;
 
     @NotEmpty

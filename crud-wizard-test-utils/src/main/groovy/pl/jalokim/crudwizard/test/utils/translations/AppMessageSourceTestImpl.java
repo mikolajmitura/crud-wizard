@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.test.utils.translations;
 
 import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_CONCRETE_MESSAGE_PROPERTY_KEY;
 import static pl.jalokim.crudwizard.core.exception.EntityNotFoundException.EXCEPTION_DEFAULT_MESSAGE_PROPERTY_KEY;
+import static pl.jalokim.crudwizard.core.translations.AppMessageSource.buildPropertyKey;
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.APPLICATION_TRANSLATIONS_PATH;
@@ -32,6 +33,7 @@ import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
 import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
 import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource;
 import pl.jalokim.crudwizard.core.translations.TestAppMessageSourceHolder;
+import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
@@ -159,6 +161,20 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
         );
     }
 
+    public static String fieldShouldWithoutWhenMessage(ExpectedFieldState should) {
+        return fieldShouldWithoutWhenMessage(should, List.of());
+    }
+
+    public static String fieldShouldWithoutWhenMessage(ExpectedFieldState should, List<String> fieldValues) {
+        return getAppMessageSource().getMessage(
+            buildPropertyKey(FieldShouldWhenOther.class, "messageWithoutWhen"),
+            Map.of(
+                "should", getAppMessageSource().getMessageByEnumWithPrefix("shouldBe", should),
+                "fieldValues", fieldValues.isEmpty() ? Constants.EMPTY : joinValues(fieldValues)
+            )
+        );
+    }
+
     public static String whenFieldIsInStateThenOthersShould(String whenField, ExpectedFieldState is, String nestedMessage) {
         return whenFieldIsInStateThenOthersShould(whenField, is, List.of(), nestedMessage);
     }
@@ -170,6 +186,15 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
                 "whenField", wrapAsExternalPlaceholder(whenField),
                 "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
                 "fieldValues", fieldValues.isEmpty() ? Constants.EMPTY : joinValues(fieldValues)));
+    }
+
+    public static String classNotExistsMessage() {
+        return classNotExistsMessage(Object.class);
+    }
+
+    public static String classNotExistsMessage(Class<?> typeOf) {
+        return messageForValidator(ClassExists.class,
+            Map.of("expectedOfType" , typeOf.getCanonicalName()));
     }
 
     private static String joinValues(List<String> list) {

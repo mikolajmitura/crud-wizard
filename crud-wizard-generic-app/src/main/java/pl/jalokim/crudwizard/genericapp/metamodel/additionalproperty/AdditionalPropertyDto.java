@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,9 +20,11 @@ public class AdditionalPropertyDto {
     Long id;
 
     @NotNull
+    @Size(min = 3, max = 100)
     String name;
 
     @ClassExists
+    @Size(min = 3, max = 250)
     String valueRealClassName;
 
     String rawJson;

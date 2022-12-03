@@ -7,7 +7,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 
 public class GetByIdFromFewDsMapper {
 
-    Object mapPersonsResultsToOne(GenericMapperArgument genericMapperArgument) {
+    Map<String, Object> mapPersonsResultsToOne(GenericMapperArgument genericMapperArgument) {
         Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
         return Map.of(
             "firstDb", mappingContext.get(DEFAULT_DS_NAME),

@@ -1,7 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 
 public abstract class AdditionalPropertyMapper<D, E, M> implements BaseMapper<D, E, M> {
@@ -21,4 +20,7 @@ public abstract class AdditionalPropertyMapper<D, E, M> implements BaseMapper<D,
         return rawAdditionalPropertyMapper.additionalPropertyToModel(additionalPropertyEntity);
     }
 
+    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyDto additionalPropertyDto) {
+        return rawAdditionalPropertyMapper.additionalPropertyToModel(additionalPropertyDto);
+    }
 }

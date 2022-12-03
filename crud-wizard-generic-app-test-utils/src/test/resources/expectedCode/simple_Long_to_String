@@ -1,0 +1,32 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class CLongToCStringMapper1 implements GeneratedMapper {
+		private final org.springframework.core.convert.ConversionService conversionService;
+    CLongToCStringMapper1(org.springframework.core.convert.ConversionService conversionService) {
+		this.conversionService = conversionService;
+    }
+
+    @Override
+    public java.lang.String mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        return conversionService.convert(((java.lang.Long) sourceObject), java.lang.String.class);
+    }
+
+}

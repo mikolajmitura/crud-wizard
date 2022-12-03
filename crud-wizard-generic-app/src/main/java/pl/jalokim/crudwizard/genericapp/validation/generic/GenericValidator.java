@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.genericapp.groovy.GroovyScriptInvoker;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 import pl.jalokim.crudwizard.genericapp.validation.ValidatorModelContext;
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
@@ -50,7 +50,7 @@ public class GenericValidator {
         Object objectToValidate = propertyPathMetaModel.getObjectToValidate();
 
         Class<?> metaModelRealClass = classMetaModel.getRealClass() == null ? Map.class : classMetaModel.getRealClass();
-        if (objectToValidate != null && !classMetaModel.isGenericEnumType() && !isTypeOf(objectToValidate, metaModelRealClass)) {
+        if (objectToValidate != null && !classMetaModel.isGenericMetamodelEnum() && !isTypeOf(objectToValidate, metaModelRealClass)) {
             String messageFormat = "Expected metamodel class: %s, but give was: %s, field path: %s";
             throw new IllegalStateException(String.format(messageFormat,
                 metaModelRealClass.getCanonicalName(),
@@ -137,8 +137,8 @@ public class GenericValidator {
                         .map(Class::getCanonicalName)
                         .asConcatText(", ");
 
-                    String message = String.format("Cannot validate object with type: %s "
-                            + "with validator with class: %s which can validate types: %s",
+                    String message = String.format("Cannot validate object with type: %s " +
+                            "with validator with class: %s which can validate types: %s",
                         metaModelRealClass.getCanonicalName(),
                         dataValidator.getClass().getCanonicalName(),
                         typesToValidateAsText

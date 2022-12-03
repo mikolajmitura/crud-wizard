@@ -1,25 +1,25 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context
 
-import static pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel.PLACEHOLDER_PREFIX
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel.PLACEHOLDER_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
 
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel
-import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
 import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
@@ -102,7 +102,9 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
 
             /* assert additional validators */
             def allValidators = validatorMetaModels.objectsById.values()
-            def notNullValidatorModel = allValidators.find { it.realClass == NotNullValidator}
+            def notNullValidatorModel = allValidators.find {
+                it.realClass == NotNullValidator
+            }
             def documentValueSizeValidatorModel = findSizeValidator(allValidators, 5, 25)
             def additionalPersonNameSizeValidatorModel = findSizeValidator(allValidators, 2, 20)
             def additionalPersonSurnameSizeValidatorModel = findSizeValidator(allValidators, 2, 30)
@@ -151,25 +153,30 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
                 realClass == Long
             }
 
-            mapperMetaModels.objectsById.values()*.className as Set == mapperMetaModelService.findAllMetaModels()*.className as Set
+            mapperMetaModels.objectsById.values()*.methodMetaModel.className as Set == mapperMetaModelService
+                .findAllMetaModels(reloadedContext)*.methodMetaModel.className as Set
             verifyAll(defaultMapperMetaModel) {
                 id == defaultBeansService.getDefaultGenericMapperId()
                 mapperInstance == genericMapperBean
-                className == DefaultGenericMapper.canonicalName
-                beanName == "defaultGenericMapper"
-                methodName == "mapToTarget"
-                methodMetaModel.name == "mapToTarget"
-                mapperScript == null
+                verifyAll(methodMetaModel) {
+                    className == DefaultGenericMapper.canonicalName
+                    beanName == "defaultGenericMapper"
+                    methodName == "mapToTarget"
+                }
+                methodMetaModel.methodName == "mapToTarget"
             }
 
-            serviceMetaModels.objectsById.values()*.className as Set == serviceMetaModelService.findAllMetaModels()*.className as Set
+            serviceMetaModels.objectsById.values()*.serviceBeanAndMethod.className as Set ==
+                serviceMetaModelService.findAllMetaModels()*.serviceBeanAndMethod.className as Set
             verifyAll(defaultServiceMetaModel) {
                 id == defaultBeansService.getDefaultGenericServiceId()
                 serviceInstance == genericServiceBean
-                className == DefaultGenericService.canonicalName
-                beanName == "defaultGenericService"
-                methodName == "saveOrReadFromDataStorages"
-                methodMetaModel.name == "saveOrReadFromDataStorages"
+                verifyAll(serviceBeanAndMethod) {
+                    className == DefaultGenericService.canonicalName
+                    beanName == "defaultGenericService"
+                    methodName == "saveOrReadFromDataStorages"
+                    originalMethod.name == "saveOrReadFromDataStorages"
+                }
                 serviceScript == null
             }
 
@@ -177,7 +184,7 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
             verifyAll(defaultDataStorageConnectorMetaModels[0]) {
                 dataStorageMetaModel == defaultDataStorageMetaModel
                 mapperMetaModelForQuery == defaultMapperMetaModel
-                mapperMetaModelForReturn == defaultMapperMetaModel
+                mapperMetaModelForPersist == defaultMapperMetaModel
                 classMetaModelInDataStorage == null
             }
 
@@ -261,7 +268,7 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
             it.realClass == classToFind && it.simpleRawClass
         }
         verifyAll(foundClassMetaModel) {
-            realClass ==  classToFind
+            realClass == classToFind
             simpleRawClass
             validators.isEmpty()
             genericTypes.isEmpty()
@@ -271,5 +278,5 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
         foundClassMetaModel
     }
 
-    // TODO #3 to implement load context with custom service, mapper, data storage connectors, should verify only them not all objectsById fields.ApiTagSamples
+    // TODO  to implement load context with custom service, mapper, data storage connectors, should verify only them not all objectsById fields.ApiTagSamples
 }

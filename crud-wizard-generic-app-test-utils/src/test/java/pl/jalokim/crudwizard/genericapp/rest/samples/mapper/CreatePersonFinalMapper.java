@@ -7,7 +7,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 
 public class CreatePersonFinalMapper {
 
-    public Object returnIdFromDefaultDs(GenericMapperArgument genericMapperArgument) {
+    public Map<String, Object> returnIdFromDefaultDs(GenericMapperArgument genericMapperArgument) {
         return Map.of("personId", genericMapperArgument.getMappingContext().get(DEFAULT_DS_NAME),
             "personDocumentUUID", genericMapperArgument.getMappingContext().get("third-db")) ;
     }

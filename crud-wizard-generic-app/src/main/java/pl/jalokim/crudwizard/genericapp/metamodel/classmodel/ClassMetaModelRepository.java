@@ -8,7 +8,7 @@ import pl.jalokim.crudwizard.core.jpa.BaseRepository;
 @Repository
 public interface ClassMetaModelRepository extends BaseRepository<ClassMetaModelEntity> {
 
-    @Query("from ClassMetaModelEntity c "
-        + "where c.className = :className and c.simpleRawClass = true")
+    @Query("from ClassMetaModelEntity c " +
+        "where c.className = :className and c.simpleRawClass = true")
     Optional<ClassMetaModelEntity> findByRawClassName(String className);
 }

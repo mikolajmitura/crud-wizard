@@ -2,10 +2,10 @@ package pl.jalokim.crudwizard.genericapp.validation.generic;
 
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
 @Value

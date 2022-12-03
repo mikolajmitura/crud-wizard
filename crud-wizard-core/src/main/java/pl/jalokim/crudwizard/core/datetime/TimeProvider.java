@@ -11,4 +11,6 @@ public interface TimeProvider {
     LocalDate getCurrentDate();
 
     YearMonth getCurrentYearMonth();
+
+    Long getCurrentTimestamp();
 }

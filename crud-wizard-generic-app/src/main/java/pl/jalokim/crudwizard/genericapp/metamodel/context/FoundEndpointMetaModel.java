@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 
 @Value
 @Builder(toBuilder = true)

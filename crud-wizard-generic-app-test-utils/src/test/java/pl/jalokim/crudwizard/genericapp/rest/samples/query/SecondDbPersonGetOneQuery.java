@@ -1,10 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.rest.samples.query;
 
-import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.isEqualsTo;
+import static pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression.isEqualsTo;
 
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryArguments;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryArguments;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryProvider;
 
 public class SecondDbPersonGetOneQuery implements DataStorageQueryProvider {
 

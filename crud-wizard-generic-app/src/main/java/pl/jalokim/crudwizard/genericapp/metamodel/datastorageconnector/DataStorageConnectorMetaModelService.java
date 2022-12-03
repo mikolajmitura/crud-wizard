@@ -4,7 +4,6 @@ import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
@@ -26,8 +25,8 @@ public class DataStorageConnectorMetaModelService {
         dataStorageConnectorMetaModelEntity.setDataStorageMetaModel(dataStorageMetaModelService.saveNewOrLoadById(
             dataStorageConnectorMetaModelEntity.getDataStorageMetaModel()));
 
-        dataStorageConnectorMetaModelEntity.setMapperMetaModelForReturn(mapperMetaModelService.saveNewOrLoadById(
-            dataStorageConnectorMetaModelEntity.getMapperMetaModelForReturn()));
+        dataStorageConnectorMetaModelEntity.setMapperMetaModelForPersist(mapperMetaModelService.saveNewOrLoadById(
+            dataStorageConnectorMetaModelEntity.getMapperMetaModelForPersist()));
 
         dataStorageConnectorMetaModelEntity.setMapperMetaModelForQuery(mapperMetaModelService.saveNewOrLoadById(
             dataStorageConnectorMetaModelEntity.getMapperMetaModelForQuery()));

@@ -3,9 +3,9 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
-import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 
 @MetamodelService
 public class ServiceMetaModelService extends BaseService<ServiceMetaModelEntity, ServiceMetaModelRepository> {
@@ -25,8 +25,9 @@ public class ServiceMetaModelService extends BaseService<ServiceMetaModelEntity,
     }
 
     public boolean exists(ServiceMetaModelDto serviceMetaModelDto) {
-        return repository.existsByBeanNameAndClassNameAndMethodName(serviceMetaModelDto.getBeanName(),
-            serviceMetaModelDto.getClassName(), serviceMetaModelDto.getMethodName());
+        BeanAndMethodDto serviceMethod = serviceMetaModelDto.getServiceBeanAndMethod();
+        return repository.existsByBeanNameAndClassNameAndMethodName(serviceMethod.getBeanName(),
+            serviceMethod.getClassName(), serviceMethod.getMethodName());
     }
 
     public Long createNewAndGetId(ServiceMetaModelDto serviceMetaModelDto) {

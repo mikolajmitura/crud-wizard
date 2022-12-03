@@ -24,7 +24,7 @@ public class MessageSourceFactory {
     }
 
     public static MessageSourceProvider createCommonMessageSourceProvider() {
-        // TODO inject here validation message from hibernate validation to support locale etc
+        // TODO #4 inject here validation message from hibernate validation to support locale etc
         return createMessageSourceProvider(CORE_APPLICATION_TRANSLATIONS);
     }
 

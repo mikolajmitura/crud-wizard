@@ -3,16 +3,17 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL;
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL;
 
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import pl.jalokim.crudwizard.core.datastorage.DataStorage;
 import pl.jalokim.crudwizard.core.validation.javax.ClassExists;
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther;
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.validation.VerifyThatCanCreateDataStorage;
 
@@ -28,9 +29,11 @@ public class DataStorageMetaModelDto extends WithAdditionalPropertiesDto {
     Long id;
 
     @UniqueValue(entityClass = DataStorageMetaModelEntity.class)
+    @Size(min = 3, max = 100)
     String name;
 
     @ClassExists(expectedOfType = DataStorage.class)
     @VerifyThatCanCreateDataStorage
+    @Size(min = 3, max = 250)
     String className;
 }

@@ -6,16 +6,18 @@ import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadat
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import lombok.Getter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.datastorage.DataStorageFactory;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
 
 @Component
 public class DataStorageInstances {
 
+    @Getter
     private final List<DataStorage> dataStorages;
     private final Map<Class<?>, DataStorageFactory<?>> factoryByType;
     private final ApplicationContext applicationContext;
@@ -35,8 +37,8 @@ public class DataStorageInstances {
 
     public DataStorage findDataStorageOrCreate(DataStorageMetaModelEntity dataStorageMetaModelEntity) {
         return elements(dataStorages)
-            .filter(dataStorage -> dataStorage.getClassName().equals(dataStorageMetaModelEntity.getClassName())
-                && dataStorage.getName().equals(dataStorageMetaModelEntity.getName()))
+            .filter(dataStorage -> dataStorage.getClassName().equals(dataStorageMetaModelEntity.getClassName()) &&
+                dataStorage.getName().equals(dataStorageMetaModelEntity.getName()))
             .findFirst()
             .orElseGet(() -> {
                 List<AdditionalPropertyEntity> additionalProperties = dataStorageMetaModelEntity.getAdditionalProperties();

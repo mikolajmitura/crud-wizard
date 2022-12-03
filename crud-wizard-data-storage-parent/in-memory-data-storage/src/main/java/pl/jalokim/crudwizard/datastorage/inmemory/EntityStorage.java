@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 
 @Value
 public class EntityStorage {

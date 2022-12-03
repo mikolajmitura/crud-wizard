@@ -11,14 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
-import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
-import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel;
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.inmemory.InMemoryDsQueryRunner;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 
 @RequiredArgsConstructor
 public class InMemoryDataStorage implements DataStorage {
@@ -46,19 +45,10 @@ public class InMemoryDataStorage implements DataStorage {
             entitiesByName.put(classMetaModel.getName(), entityBag);
         }
 
-        FieldMetaModel fieldWithId = findIdFieldMetaModel(classMetaModel);
+        FieldMetaModel fieldWithId = classMetaModel.getIdFieldMetaModel();
 
         Object idObject = getFieldValue(entity, fieldWithId.getFieldName());
         return entityBag.saveEntity(idObject, fieldWithId, entity);
-    }
-
-    private FieldMetaModel findIdFieldMetaModel(ClassMetaModel classMetaModel) {
-        return elements(classMetaModel.fetchAllFields())
-            .filter(field -> field.getAdditionalProperties().stream()
-                .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
-            .findFirst()
-            .orElseThrow(() -> new TechnicalException("Cannot find field annotated as 'is_id_field' for classMetaModel with id: "
-                + classMetaModel.getId() + " and name: " + classMetaModel.getName()));
     }
 
     @Override
@@ -105,7 +95,7 @@ public class InMemoryDataStorage implements DataStorage {
     @Override
     public void delete(DataStorageQuery query) {
         ClassMetaModel classMetaModel = query.getSelectFrom();
-        FieldMetaModel fieldWithId = findIdFieldMetaModel(classMetaModel);
+        FieldMetaModel fieldWithId = classMetaModel.getIdFieldMetaModel();
         findEntities(query).forEach(entry -> {
             Object idObject = getFieldValue(entry, fieldWithId.getFieldName());
             deleteEntity(classMetaModel, idObject);

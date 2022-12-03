@@ -1,0 +1,115 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+import java.util.HashSet;
+import java.util.Set;
+
+class CListAsListGenericType1ToCListAsListGenericType2Mapper1 implements GeneratedMapper {
+
+    CListAsListGenericType1ToCListAsListGenericType2Mapper1() {
+
+    }
+
+    @Override
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2 mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2(
+
+		((java.util.Set<pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[]>) mapCListOfCListOfCCollectionElementToCSetOfCNestedCollectionElementArrayOfCNestedCollectionElement(genericMapperArgument, ((java.util.List<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>>) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType1) value).getSomeList())
+			.orElse(null))))
+        );
+    }
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement mapCCollectionElementToCNestedCollectionElement(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+
+		return new pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement(
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) value).getField1())
+			.orElse(null)),
+
+		((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) value).getField2())
+			.orElse(null)),
+
+		((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) value).getField3())
+			.orElse(null)),
+
+		((pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject) Optional.ofNullable(sourceObject)
+			.map(value -> ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) value).getSomeObject())
+			.orElse(null))
+        );
+    }
+
+    @GeneratedMethod
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[] mapCListOfCCollectionElementToCNestedCollectionElementArrayOfCNestedCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        int initSize = sourceObject.size();
+        int index = 0;
+        pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[] elements = new pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[initSize];
+        for (pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement element : sourceObject) {
+            elements[index++] = ((pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement) mapCCollectionElementToCNestedCollectionElement(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement) element)));
+        }
+
+
+        return elements;
+    }
+
+    @GeneratedMethod
+    public java.util.Set<pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[]> mapCListOfCListOfCCollectionElementToCSetOfCNestedCollectionElementArrayOfCNestedCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>> sourceObject) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        int initSize = sourceObject.size();
+        Set<pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[]> elements = new HashSet<>(initSize);
+        for (java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> element : sourceObject) {
+            elements.add(((pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[]) mapCListOfCCollectionElementToCNestedCollectionElementArrayOfCNestedCollectionElement(genericMapperArgument, ((java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>) element))));
+        }
+
+
+        return elements;
+    }
+
+}

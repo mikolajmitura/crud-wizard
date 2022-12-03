@@ -1,15 +1,15 @@
 package pl.jalokim.crudwizard.datastorage.inmemory
 
 import org.springframework.data.domain.Sort
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery
-import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
-import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner
-import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryOrderByTranslator
-import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryWhereExpressionTranslator
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
-import pl.jalokim.crudwizard.core.metamodels.FieldMetaModel
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery
+import pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression
+import pl.jalokim.crudwizard.genericapp.datastorage.query.inmemory.InMemoryDsQueryRunner
+import pl.jalokim.crudwizard.genericapp.datastorage.query.inmemory.InMemoryOrderByTranslator
+import pl.jalokim.crudwizard.genericapp.datastorage.query.inmemory.InMemoryWhereExpressionTranslator
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
 import pl.jalokim.utils.test.DataFakerHelper
 import spock.lang.Specification
 

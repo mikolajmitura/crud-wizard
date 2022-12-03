@@ -10,7 +10,7 @@ import pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRow;
 
 public class FinalMapperForFewDs {
 
-    Object mapResults(GenericMapperArgument genericMapperArgument) {
+    Map<String, Object> mapResults(GenericMapperArgument genericMapperArgument) {
 
         JoinedResultsRow joinedResultsRow = (JoinedResultsRow) genericMapperArgument.getSourceObject();
         var firstDsResult = joinedResultsRow.get(InMemoryDataStorage.DEFAULT_DS_NAME);

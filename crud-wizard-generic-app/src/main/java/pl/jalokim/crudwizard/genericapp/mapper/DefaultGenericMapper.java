@@ -21,8 +21,8 @@ public class DefaultGenericMapper {
     @SuppressWarnings("unchecked")
     public Object mapToTarget(GenericMapperArgument mapperArgument) {
         if (mapperArgument.getTargetMetaModel() != null) {
-            if (mapperArgument.getTargetMetaModel().equals(mapperArgument.getSourceMetaModel())) {
-                // TODO should be deep copy.
+            if (mapperArgument.getTargetMetaModel().isTheSameMetaModel(mapperArgument.getSourceMetaModel())) {
+                // TODO #1 should be deep copy or just pass it???
                 return mapperArgument.getSourceObject();
             }
             // it returns list of maps where every map contains results from data storages.
@@ -41,7 +41,7 @@ public class DefaultGenericMapper {
             return mapperArgument.getSourceObject();
         }
 
-        // TODO should map from one meta model to another meta model.
+        // TODO #1 should map from one meta model to another meta model.
         // another is auto mapping the same fields with names and the same types or with auto conversion from one to another.
         throw new UnsupportedOperationException("Not supported mapping yet!");
     }
@@ -51,15 +51,15 @@ public class DefaultGenericMapper {
         Map<String, Object> resultsFrom = (Map<String, Object>) mapperArgument.getSourceObject();
         if (resultsFrom.values().size() == 1) {
             return Elements.elements(resultsFrom.values())
-                .filter(value -> mapperArgument.getTargetMetaModel().getRealClass() == null
-                    || MetadataReflectionUtils.isTypeOf(value, mapperArgument.getTargetMetaModel().getRealClass()))
+                .filter(value -> mapperArgument.getTargetMetaModel().getRealClass() == null ||
+                    MetadataReflectionUtils.isTypeOf(value, mapperArgument.getTargetMetaModel().getRealClass()))
                 .findFirst()
                 .orElseThrow(() -> {
                     Object foundValue = resultsFrom.values().iterator().next();
-                    return new IllegalArgumentException("expected class: "
-                        + mapperArgument.getTargetMetaModel().getRealClass().getCanonicalName()
-                        + " as endpoint type but given was value: " + foundValue
-                        + " with type: " + getFullClassName(foundValue));
+                    return new IllegalArgumentException("expected class: " +
+                        mapperArgument.getTargetMetaModel().getRealClass().getCanonicalName() +
+                        " as endpoint type but given was value: " + foundValue +
+                        " with type: " + getFullClassName(foundValue));
                 });
         }
         return resultsFrom;

@@ -12,12 +12,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import javax.validation.ConstraintValidatorContext;
-import pl.jalokim.crudwizard.core.metamodels.url.UrlMetamodel;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
 import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlMetamodel;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 
 public class PathParamsAndUrlVariablesTheSameValidator
@@ -54,8 +54,8 @@ public class PathParamsAndUrlVariablesTheSameValidator
                 .map(FieldMetaModelDto::getFieldType)
                 .map(ClassMetaModelDto::getClassName)
                 .allMatch(className -> nonNull(className) && (
-                    String.class.getCanonicalName().equals(className)
-                        || Long.class.getCanonicalName().equals(className))
+                    String.class.getCanonicalName().equals(className) ||
+                        Long.class.getCanonicalName().equals(className))
                 );
 
             if (!allHaveClassName) {

@@ -3,9 +3,9 @@ package pl.jalokim.crudwizard.datastorage.inmemory;
 import java.util.Map;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.datastorage.DataStorageFactory;
-import pl.jalokim.crudwizard.core.datastorage.query.inmemory.InMemoryDsQueryRunner;
 import pl.jalokim.crudwizard.datastorage.inmemory.generator.IdGenerators;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorageFactory;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.inmemory.InMemoryDsQueryRunner;
 
 @Component
 public class InMemoryDataStorageFactory implements DataStorageFactory<InMemoryDataStorage> {

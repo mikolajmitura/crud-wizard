@@ -10,6 +10,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,6 +25,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.BeansAndMethodsExists;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.DataStorageResultsJoinCorrectness;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.EndpointNotExistsAlready;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.PathParamsAndUrlVariablesTheSame;
@@ -50,6 +52,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidators
 @PathParamsAndUrlVariablesTheSame
 @EndpointNotExistsAlready
 @DataStorageResultsJoinCorrectness
+@BeansAndMethodsExists
 public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String HTTP_METHOD = "httpMethod";
@@ -62,6 +65,7 @@ public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
     ApiTagDto apiTag;
 
     @NotNull
+    @Size(min = 3, max = 250)
     String baseUrl;
 
     @NotNull
@@ -69,6 +73,7 @@ public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
 
     @NotNull
     @UniqueValue(entityClass = EndpointMetaModelEntity.class)
+    @Size(min = 3, max = 100)
     String operationName;
 
     @Valid

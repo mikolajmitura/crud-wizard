@@ -10,20 +10,23 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.datastorage.query.ObjectsJoinerVerifier;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalValidatorsMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageConnectorMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageResultsJoinerMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageResultsJoinerMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.PropertyPathResolver;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.utils.collection.CollectionUtils;
@@ -52,6 +55,14 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
     @Mapping(target = "urlMetamodel", ignore = true)
     @Mapping(target = "dataStorageConnectors", ignore = true)
     public abstract EndpointMetaModel toMetaModel(EndpointMetaModelEntity endpointMetaModelEntity);
+
+    // TODO #53 remove this after impl
+    @Mapping(target = "mapperScript", ignore = true)
+    @Mapping(target = "metamodelDtoType", ignore = true)
+    public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
+
+    @Mapping(target = "classMetaModelDtoType", ignore = true)
+    public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 
     public EndpointMetaModel toFullMetaModel(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {
         EndpointMetaModel endpointMetaModel = toMetaModel(endpointMetaModelEntity);

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto;
+import pl.jalokim.crudwizard.core.sample.SomeDocumentDto;
+import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
 
@@ -59,6 +61,7 @@ public class NormalSpringService {
             .body(false);
     }
 
+    @Validated
     public SamplePersonDto createSamplePersonDtoWithValidated(@RequestBody @Validated SamplePersonDto samplePersonDto) {
         return SamplePersonDto.builder()
             .id(1L)
@@ -67,6 +70,7 @@ public class NormalSpringService {
             .build();
     }
 
+    @Validated
     public Map<String, Object> returnAllInputs(@RequestBody @NotNull JsonNode jsonNode,
         @RequestBody @Validated SamplePersonDto samplePersonDto,
         @RequestBody TranslatedPayload jsonNodeTranslated,
@@ -143,8 +147,38 @@ public class NormalSpringService {
 
     }
 
+    public CollectionElement[] getCollectionElementArray(String someString, String otherString) {
+        return new CollectionElement[] {
+            new CollectionElement(someString, otherString, null, null)
+        };
+    }
+
     public Map<String, Object> returnTranslatedHttpQuery(@RequestParam Map<String, Object> httpQueryTranslated) {
         return httpQueryTranslated;
+    }
+
+    public Long someMethodName(String stringArg, Long longArg) {
+        return (long) stringArg.length();
+    }
+
+    public String someMethodName(String stringArg1, String stringArg2) {
+        return stringArg2;
+    }
+
+    public String getSomeString() {
+        return "someStringValue";
+    }
+
+    public SomeDocumentDto getSomeDocumentDto() {
+        return new SomeDocumentDto(null, 1L);
+    }
+
+    public SomeDocumentDto getSomeDocumentDtoById(Long id) {
+        return new SomeDocumentDto(null, id);
+    }
+
+    public SomeDocumentDto getSomeDocumentDtoById(Long id, String someText, String someText2) {
+        return new SomeDocumentDto(null, id);
     }
 
     public static class InvalidJavaBean {

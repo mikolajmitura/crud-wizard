@@ -20,7 +20,7 @@ class DataStorageConnectorMetaModelDtoSamples {
 
     static DataStorageConnectorMetaModelDto createSampleDataStorageConnectorDto(ClassMetaModelDto classMetaModelInDataStorage,
         DataStorageMetaModelDto dataStorageMetaModelDto,
-        MapperMetaModelDto mapperMetaModelForReturn = null,
+        MapperMetaModelDto mapperMetaModelForPersist = null,
         MapperMetaModelDto mapperMetaModelForQuery = null,
         QueryProviderDto queryProviderDto = null,
         String queryName = null) {
@@ -28,7 +28,7 @@ class DataStorageConnectorMetaModelDtoSamples {
         DataStorageConnectorMetaModelDto.builder()
             .classMetaModelInDataStorage(classMetaModelInDataStorage)
             .dataStorageMetaModel(dataStorageMetaModelDto)
-            .mapperMetaModelForReturn(mapperMetaModelForReturn)
+            .mapperMetaModelForPersist(mapperMetaModelForPersist)
             .mapperMetaModelForQuery(mapperMetaModelForQuery)
             .queryProvider(queryProviderDto)
             .nameOfQuery(queryName)

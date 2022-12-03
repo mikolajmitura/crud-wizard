@@ -4,10 +4,10 @@ import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 

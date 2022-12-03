@@ -11,11 +11,11 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ValueConstants
 import pl.jalokim.crudwizard.core.exception.TechnicalException
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel
-import pl.jalokim.crudwizard.core.metamodels.EndpointResponseMetaModel
-import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.utils.ReflectionUtils
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
@@ -196,8 +196,7 @@ class DelegatedServiceMethodInvokerTest extends Specification {
                     .build())
                 .serviceMetaModel(ServiceMetaModel.builder()
                     .serviceInstance(serviceInstance)
-                    .methodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel(methodName, serviceInstance.class.canonicalName))
-                    .methodName(methodName)
+                    .serviceBeanAndMethod(beanMethodMetaModelCreator.createBeanMethodMetaModel(methodName, serviceInstance.class.canonicalName, null))
                     .build())
                 .build())
             .build()

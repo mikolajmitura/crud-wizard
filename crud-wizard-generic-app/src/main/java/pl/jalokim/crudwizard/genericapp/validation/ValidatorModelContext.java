@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import pl.jalokim.crudwizard.core.exception.ErrorWithPlaceholders;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.PropertyPath;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 @Data

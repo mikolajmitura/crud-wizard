@@ -1,0 +1,3 @@
+        if (sourceObject == null) {
+            return null;
+        }

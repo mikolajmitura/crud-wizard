@@ -1,9 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.rest.samples.query;
 
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryArguments;
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryProvider;
-import pl.jalokim.crudwizard.core.datastorage.query.RealExpression;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryArguments;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryProvider;
+import pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression;
 
 public class FinalQueryProvider1 implements DataStorageQueryProvider {
 

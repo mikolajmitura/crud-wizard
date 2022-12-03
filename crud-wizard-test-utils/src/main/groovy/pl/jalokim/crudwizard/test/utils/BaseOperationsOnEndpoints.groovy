@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import pl.jalokim.crudwizard.core.rest.response.error.ErrorResponseDto
 
 abstract class BaseOperationsOnEndpoints<INPUT> extends RawOperationsOnEndpoints {
 
@@ -25,6 +26,18 @@ abstract class BaseOperationsOnEndpoints<INPUT> extends RawOperationsOnEndpoints
         def httpResponse = performWithJsonContent(MockMvcRequestBuilders.put(getEndpointUrl()), payload)
         httpResponse.andExpect(status().isBadRequest())
         extractResponseAsJson(httpResponse)
+    }
+
+    ErrorResponseDto notSuccessCreateGetErrors(INPUT payload) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.post(getEndpointUrl()), payload)
+        httpResponse.andExpect(status().isBadRequest())
+        extractErrorResponseDto(httpResponse)
+    }
+
+    ErrorResponseDto notSuccessUpdateGetErrors(INPUT payload) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.put(getEndpointUrl()), payload)
+        httpResponse.andExpect(status().isBadRequest())
+        extractErrorResponseDto(httpResponse)
     }
 
     def <T> T getById(Long id, Class<T> returnClass) {

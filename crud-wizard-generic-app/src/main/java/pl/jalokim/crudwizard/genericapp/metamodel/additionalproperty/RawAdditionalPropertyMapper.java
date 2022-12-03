@@ -3,7 +3,6 @@ package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.rawJsonToObject;
 
 import org.mapstruct.Mapper;
-import pl.jalokim.crudwizard.core.metamodels.AdditionalPropertyMetaModel;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
@@ -34,6 +33,16 @@ public abstract class RawAdditionalPropertyMapper {
             .valueRealClassName(valueRealClassName)
             .rawJson(additionalPropertyEntity.getRawJson())
             .valueAsObject(rawJsonToObject(additionalPropertyEntity.getRawJson(), valueRealClassName))
+            .build();
+    }
+
+    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyDto additionalPropertyDto) {
+        String valueRealClassName = additionalPropertyDto.getValueRealClassName();
+        return AdditionalPropertyMetaModel.builder()
+            .name(additionalPropertyDto.getName())
+            .valueRealClassName(valueRealClassName)
+            .rawJson(additionalPropertyDto.getRawJson())
+            .valueAsObject(rawJsonToObject(additionalPropertyDto.getRawJson(), valueRealClassName))
             .build();
     }
 }

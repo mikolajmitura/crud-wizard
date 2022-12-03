@@ -2,10 +2,13 @@ package pl.jalokim.crudwizard.genericapp.rest
 
 import static org.springframework.http.HttpMethod.PUT
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import static pl.jalokim.crudwizard.core.datastorage.query.RealExpression.isEqualsTo
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntryWithErrorCode
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage
+import static pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression.isEqualsTo
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithGenerics
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createHttpQueryParamsClassMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createIgnoredForQueryFieldMetaModelDto
@@ -18,7 +21,6 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorage
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageQuerySamples.createDsQuery
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDtoSamples.createQueryProviderDto
-import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidEndpointResponseMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetListOfPerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetPageOfPerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
@@ -43,11 +45,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
-import pl.jalokim.crudwizard.core.datastorage.DataStorage
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
@@ -55,6 +57,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDto
 import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.CreatePersonFinalMapper
@@ -93,10 +96,17 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("createSamplePersonDtoWithValidated")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("createSamplePersonDtoWithValidated")
+                    .build())
                 .build())
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(SamplePersonDto))
+                .successHttpCode(201)
+                .build()
+            )
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
 
@@ -119,10 +129,17 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("createSamplePersonDtoWithValidated")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("createSamplePersonDtoWithValidated")
+                    .build())
                 .build())
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(SamplePersonDto))
+                .successHttpCode(201)
+                .build()
+            )
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
         def name = DataFakerHelper.randomText()
@@ -167,9 +184,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
-                .classMetaModel(ClassMetaModelDto.builder()
-                    .id(personMetaModel.id)
-                    .build())
+                .classMetaModel(buildClassMetaModelDtoWithId(personMetaModel.id))
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createGetByIdPersonEndpoint)
@@ -186,11 +201,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def createUpdateByIdPersonEndpoint = EndpointMetaModelDto.builder()
             .baseUrl("users/{userId}")
             .operationName("updateUser")
-            .payloadMetamodel(ClassMetaModelDto.builder()
-                .id(personMetaModel.id)
-                .build())
+            .payloadMetamodel(buildClassMetaModelDtoWithId(personMetaModel.id))
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
-            .httpMethod(HttpMethod.PUT)
+            .httpMethod(PUT)
             .payloadMetamodelAdditionalValidators([
                 AdditionalValidatorsMetaModelDto.builder()
                     .fullPropertyPath("id")
@@ -324,9 +337,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def person7Id = rawOperationsOnEndpoints.postAndReturnLong("/users", payloadPerson7)
 
         when:
-        def firstPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size : 2, page : 0])
-        def secondPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size : 2, page : 1])
-        def fourthPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size : 2, page : 3])
+        def firstPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size: 2, page: 0])
+        def secondPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size: 2, page: 1])
+        def fourthPageOfPerson = rawOperationsOnEndpoints.getPageObObjects("/domain/person/by-page?sort=name,desc&sort=surname,desc", [size: 2, page: 3])
 
         then:
         firstPageOfPerson.totalElements == 7
@@ -340,7 +353,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         secondPageOfPerson.content.size() == 2
 
         def expectedIdsOrder = [person4Id, person2Id]
-        [payloadPerson4, payloadPerson2].eachWithIndex { payloadPerson, index ->
+        [payloadPerson4, payloadPerson2].eachWithIndex {payloadPerson, index ->
             def personFromResponse = secondPageOfPerson.content[index]
             verifyAll(personFromResponse) {
                 id == expectedIdsOrder[index]
@@ -396,7 +409,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                     createMapperMetaModelDto(PersonToThirdDbMapper.class, "personToThirdDbMapperCreate"))
             ])
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
-                .classMetaModel(createClassMetaModelDtoFromClass(Long))
+                .classMetaModel(createClassMetaModelDtoWithGenerics(Map,
+                    createClassMetaModelDtoFromClass(String),
+                    createClassMetaModelDtoFromClass(Object)))
                 .mapperMetaModel(createMapperMetaModelDto(CreatePersonFinalMapper.class, "returnIdFromDefaultDs"))
                 .build())
             .build()
@@ -422,7 +437,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def secondDataStorageModelDto = createDataStorageMetaModelDtoWithId(metaModelContextService.getDataStorageMetaModelByName(secondDbName).getId())
         def thirdDataStorageModelDto = createDataStorageMetaModelDtoWithId(metaModelContextService.getDataStorageMetaModelByName(thirdDbName).getId())
 
-        def personClassModel = metaModelContextService.getClassMetaModelByName("person")
+        def personClassModel = metaModelContextService.getClassMetaModelByName("simple-person")
         def personSecondDbClassModel = metaModelContextService.getClassMetaModelByName("personSecondDb")
         def personDocumentDbClassModel = metaModelContextService.getClassMetaModelByName("personDocumentDb")
 
@@ -432,7 +447,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         personEntryNumberIn1Db == 1
         personEntryNumberIn2Db == 1
         personEntryNumberIn3Db == 1
-        def uuidForPersonIn2Db = secondDataStorage.findEntities(createDsQuery(personSecondDbClassModel)).find { it }.uuid
+        def uuidForPersonIn2Db = secondDataStorage.findEntities(createDsQuery(personSecondDbClassModel)).find {
+            it
+        }.uuid
 
         and: 'get via REST by id'
         def createGetByIdPersonEndpoint = EndpointMetaModelDto.builder()
@@ -442,7 +459,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .httpMethod(HttpMethod.GET)
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
+                    .name("queryArguments1")
                     .fields([createValidFieldMetaModelDto("thirdDbId", String)])
                     .build())
             .pathParams(ClassMetaModelDto.builder()
@@ -527,11 +544,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             ])
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
                     .fields([createValidFieldMetaModelDto("thirdDbId", String)])
                     .build())
             .pathParams(ClassMetaModelDto.builder()
-                .name("pathParams")
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .build()
@@ -577,11 +592,9 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .operationName("deletePersonById")
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
                     .fields([createValidFieldMetaModelDto("thirdDbId", String)])
                     .build())
             .pathParams(ClassMetaModelDto.builder()
-                .name("pathParams")
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .dataStorageConnectors([
@@ -634,7 +647,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .operationName("getNormalListOfPeople")
             .queryArguments(
                 ClassMetaModelDto.builder()
-                    .name("queryArguments")
+                    .name("queryArguments2")
                     .fields([
                         createValidFieldMetaModelDto("name", String),
                         createValidFieldMetaModelDto("surname", String),
@@ -657,17 +670,17 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
                 .classMetaModel(createListWithMetaModel(ClassMetaModelDto.builder()
-                        .name("personResultEntry")
-                        .fields([
-                            createValidFieldMetaModelDto("uuid2", String),
-                            createValidFieldMetaModelDto("uuid3", String),
-                            createValidFieldMetaModelDto("name", String),
-                            createValidFieldMetaModelDto("lastname", String),
-                            createValidFieldMetaModelDto("documentValue", String),
-                            createValidFieldMetaModelDto("documentType", Byte),
-                            createValidFieldMetaModelDto("personId", Long),
-                        ])
-                        .build()
+                    .name("personResultEntry")
+                    .fields([
+                        createValidFieldMetaModelDto("uuid2", String),
+                        createValidFieldMetaModelDto("uuid3", String),
+                        createValidFieldMetaModelDto("name", String),
+                        createValidFieldMetaModelDto("lastname", String),
+                        createValidFieldMetaModelDto("documentValue", String),
+                        createValidFieldMetaModelDto("documentType", Byte),
+                        createValidFieldMetaModelDto("personId", Long),
+                    ])
+                    .build()
                 ))
                 .build())
             .build()
@@ -710,7 +723,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                     .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
                     .classMetaModel(createListWithMetaModel(createClassMetaModelDtoWithId(personResultEntriesClassId)))
                     .queryProvider(createQueryProviderDto(FinalQueryProviderForPersonResultEntry))
-                .build()
+                    .build()
             )
             .build()
 
@@ -839,7 +852,8 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         then:
         httpResponse.andExpect(status().isBadRequest())
         def errorResponse = extractErrorResponseDto(httpResponse)
-        errorResponse.message == "invalid enum value : 'invalid enum' in path: documents[0].enumField available enum values: ENUM1, ENUM2"
+        errorResponse.message == getMessage("mapping.invalid.enum.value",
+            'invalid enum', 'documents[0].enumField', "ENUM1, ENUM2", "exampleEnum")
     }
 
     def "invoke endpoint with default generic service, mappers, use default data storage with failure"() {
@@ -865,9 +879,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("validationContextAsArg")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("validationContextAsArg")
+                    .build())
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -888,9 +904,11 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         given:
         def createEndpointMetaModelDto = createValidPostWithSimplePerson().toBuilder()
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("validationContextAsArg")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("validationContextAsArg")
+                    .build())
                 .build())
             .build()
         endpointMetaModelService.createNewEndpoint(createEndpointMetaModelDto)
@@ -916,11 +934,14 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .operationName(randomText())
             .queryArguments(createHttpQueryParamsClassMetaModelDto())
             .serviceMetaModel(ServiceMetaModelDto.builder()
-                .className(NormalSpringService.canonicalName)
-                .beanName("normalSpringService")
-                .methodName("returnTranslatedHttpQuery")
+                .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                    .className(NormalSpringService.canonicalName)
+                    .beanName("normalSpringService")
+                    .methodName("returnTranslatedHttpQuery")
+                    .build())
                 .build())
-            .responseMetaModel(createValidEndpointResponseMetaModelDto().toBuilder()
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(Object))
                 .successHttpCode(200)
                 .build())
             .build()

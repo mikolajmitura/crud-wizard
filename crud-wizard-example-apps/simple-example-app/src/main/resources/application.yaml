@@ -16,7 +16,6 @@ crud.wizard:
       username: postgres
       password: postgres
 
-
 spring:
   jpa:
     database-platform: #empty (detected at runtime) do not remove this line
@@ -27,5 +26,3 @@ spring:
         jdbc.lob.non_contextual_creation: true
         physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
-
-

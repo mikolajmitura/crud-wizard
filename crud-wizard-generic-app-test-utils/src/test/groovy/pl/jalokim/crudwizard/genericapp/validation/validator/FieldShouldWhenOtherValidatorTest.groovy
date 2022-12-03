@@ -6,10 +6,10 @@ import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintVal
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.errorsFromViolationException
 
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
 import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
 import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 

@@ -1,0 +1,42 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class MsomeEnum1ModelToCSomeEnum1Mapper1 implements GeneratedMapper {
+
+    MsomeEnum1ModelToCSomeEnum1Mapper1() {
+
+    }
+
+    @Override
+    public pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1 mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+        return ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1) mapMsomeEnum1ModelToCSomeEnum1(genericMapperArgument, ((String) sourceObject)));
+    }
+    private pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1 mapMsomeEnum1ModelToCSomeEnum1(GenericMapperArgument genericMapperArgument, String sourceObject) {
+        switch(sourceObject) {
+			case "OTH": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1.OTH;
+			case "VAL1": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1.VAL1;
+			case "VAL2": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1.VAL2;
+			case "VAL3": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1.VAL3;
+			case "UNKNOWN": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1.UNKNOWN;
+          default: return null;
+        }
+    }
+
+}

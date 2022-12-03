@@ -3,27 +3,30 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeCreator.loadEndpointNodes;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getFromContext;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext.getListFromContext;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
+import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.isTemporaryContextExists;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import pl.jalokim.crudwizard.core.datastorage.DataStorage;
-import pl.jalokim.crudwizard.core.metamodels.ApiTagMetamodel;
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.DataStorageMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MapperMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModel;
+import org.springframework.context.ApplicationEventPublisher;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
+import pl.jalokim.crudwizard.genericapp.cleaner.TempDirCleanEvent;
+import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
+import pl.jalokim.crudwizard.genericapp.mapper.MappersModelsCache;
+import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagMetamodel;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService;
@@ -32,7 +35,7 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 @MetamodelService
 @RequiredArgsConstructor
 @Slf4j
-public class MetaModelContextService implements ApplicationRunner {
+public class MetaModelContextService {
 
     public AtomicReference<MetaModelContext> metaModelContextReference = new AtomicReference<>();
 
@@ -46,14 +49,17 @@ public class MetaModelContextService implements ApplicationRunner {
     private final DataStorageConnectorMetaModelService dataStorageConnectorMetaModelService;
     private final EndpointMetaModelService endpointMetaModelService;
     private final InstanceLoader instanceLoader;
-
-    @Override
-    public void run(ApplicationArguments args) {
-        reloadAll();
-    }
+    private final ApplicationEventPublisher publisher;
 
     public synchronized void reloadAll() {
         defaultBeansService.saveAllDefaultMetaModels();
+        MetaModelContext metaModelContext = loadNewMetaModelContext();
+        metaModelContextReference.set(metaModelContext);
+        log.info("Reloaded meta model context");
+        publisher.publishEvent(new TempDirCleanEvent("after reload"));
+    }
+
+    public MetaModelContext loadNewMetaModelContext() {
         MetaModelContext metaModelContext = new MetaModelContext();
         loadDataStorages(metaModelContext);
         loadApiTags(metaModelContext);
@@ -65,8 +71,7 @@ public class MetaModelContextService implements ApplicationRunner {
         loadDefaultDataStorageConnectorsMetaModel(metaModelContext);
         loadEndpointMetaModels(metaModelContext);
         loadEndpointNodes(metaModelContext);
-        metaModelContextReference.set(metaModelContext);
-        log.info("Reloaded meta model context");
+        return metaModelContext;
     }
 
     private void loadDefaultQueryProvider(MetaModelContext metaModelContext) {
@@ -104,7 +109,7 @@ public class MetaModelContextService implements ApplicationRunner {
 
     private void loadClassMetaModels(MetaModelContext metaModelContext) {
         var classMetaModels = new ModelsCache<ClassMetaModel>();
-        for (var classMetaModel : classMetaModelService.findAllSwallowModels(metaModelContext)) {
+        for (var classMetaModel : classMetaModelService.findSimpleModels(metaModelContext)) {
             classMetaModels.put(classMetaModel.getId(), classMetaModel);
         }
         metaModelContext.setClassMetaModels(classMetaModels);
@@ -135,15 +140,19 @@ public class MetaModelContextService implements ApplicationRunner {
     }
 
     private void loadMapperMetaModels(MetaModelContext metaModelContext) {
-        var mapperMetaModels = new ModelsCache<MapperMetaModel>();
+        var mapperMetaModels = new MappersModelsCache();
         var defaultGenericMapperId = defaultBeansService.getDefaultGenericMapperId();
-        for (var mapperMetaModel : mapperMetaModelService.findAllMetaModels()) {
+        for (var mapperMetaModel : mapperMetaModelService.findAllMetaModels(metaModelContext)) {
             mapperMetaModels.put(mapperMetaModel.getId(), mapperMetaModel);
             if (mapperMetaModel.getId().equals(defaultGenericMapperId)) {
                 metaModelContext.setDefaultMapperMetaModel(mapperMetaModel);
             }
+            Optional.ofNullable(mapperMetaModel.getMapperName())
+                .ifPresent(mapperName -> mapperMetaModels.setMapperModelWithName(mapperName, mapperMetaModel));
         }
+
         metaModelContext.setMapperMetaModels(mapperMetaModels);
+        mapperMetaModelService.updateGeneratedMappers(metaModelContext);
     }
 
     private void loadServiceMetaModels(MetaModelContext metaModelContext) {
@@ -173,6 +182,9 @@ public class MetaModelContextService implements ApplicationRunner {
     }
 
     public MetaModelContext getMetaModelContext() {
+        if (isTemporaryContextExists()) {
+            return getTemporaryMetaModelContext();
+        }
         return metaModelContextReference.get();
     }
 

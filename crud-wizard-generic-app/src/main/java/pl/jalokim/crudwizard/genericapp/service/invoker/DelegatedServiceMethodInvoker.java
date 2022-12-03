@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.core.metamodels.EndpointMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.EndpointResponseMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.JavaTypeMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.MethodArgumentMetaModel;
-import pl.jalokim.crudwizard.core.metamodels.ServiceMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
@@ -66,7 +66,7 @@ public class DelegatedServiceMethodInvoker {
      *
      * by type HttpServletResponse from {@link GenericServiceArgument.response}
      *
-     * by type JsonNode from urlPathParams from {@link GenericServiceArgument.requestBody}
+     * by type JsonNode from {@link GenericServiceArgument.requestBody}
      *
      * by type TranslatedPayload from {@link GenericServiceArgument.requestBodyTranslated}
      *
@@ -110,13 +110,13 @@ public class DelegatedServiceMethodInvoker {
         EndpointMetaModel endpointMetaModel = genericServiceArgument.getEndpointMetaModel();
         ServiceMetaModel serviceMetaModel = endpointMetaModel.getServiceMetaModel();
         List<Object> methodArguments = collectMethodArguments(genericServiceArgument, serviceMetaModel);
-        Method originalMethod = serviceMetaModel.getMethodMetaModel().getOriginalMethod();
+        Method originalMethod = serviceMetaModel.getServiceBeanAndMethod().getOriginalMethod();
         Object result = invokeMethod(serviceMetaModel.getServiceInstance(), originalMethod, methodArguments.toArray());
         return resolveReturnObject(result, endpointMetaModel);
     }
 
     private List<Object> collectMethodArguments(GenericServiceArgument genericServiceArgument, ServiceMetaModel serviceMetaModel) {
-        var methodMetaModel = serviceMetaModel.getMethodMetaModel();
+        var methodMetaModel = serviceMetaModel.getServiceBeanAndMethod();
         var methodSignatureMetaModel = methodMetaModel.getMethodSignatureMetaModel();
         List<Object> methodArguments = new ArrayList<>();
         for (int parameterIndex = 0; parameterIndex < methodSignatureMetaModel.getMethodArguments().size(); parameterIndex++) {
@@ -340,7 +340,7 @@ public class DelegatedServiceMethodInvoker {
 
     private String atIndexInMethod(int parameterIndex, GenericServiceArgument genericServiceArgument) {
         var method = genericServiceArgument.getEndpointMetaModel().getServiceMetaModel()
-            .getMethodMetaModel().getOriginalMethod();
+            .getServiceBeanAndMethod().getOriginalMethod();
         int realIndex = parameterIndex + 1;
         return String.format("at index: %s%nin class: %s%nwith method name: %s%nin method : %s",
             realIndex, method.getDeclaringClass().getCanonicalName(), method.getName(), method);

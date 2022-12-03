@@ -1,0 +1,114 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class MmetamodelWithEnums1ToMmetamodelWithEnums2Mapper1 implements GeneratedMapper {
+		private final org.springframework.core.convert.ConversionService conversionService;
+		private final pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator enumClassMetaModelValidator;
+		private final pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService genericObjectsConversionService;
+    MmetamodelWithEnums1ToMmetamodelWithEnums2Mapper1(org.springframework.core.convert.ConversionService conversionService,
+@org.springframework.beans.factory.annotation.Qualifier("enumClassMetaModelValidator")pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator enumClassMetaModelValidator,
+pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService genericObjectsConversionService) {
+		this.conversionService = conversionService;
+		this.enumClassMetaModelValidator = enumClassMetaModelValidator;
+		this.genericObjectsConversionService = genericObjectsConversionService;
+    }
+
+    @Override
+    public java.util.Map<java.lang.String, java.lang.Object> mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		Map<String, Object> map = new java.util.HashMap<>();
+
+		map.put("enum1", ((String) mapFromEnumToEnumMetaModel(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("enum1"))
+			.orElse(null)))));
+
+		map.put("enum2", ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2) mapFromEnumToEnum(genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("enum2"))
+			.orElse(null)))));
+
+		map.put("enum3", ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2) mapFromEnumMetaModelToEnum(genericMapperArgument, ((String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("enum3"))
+			.orElse(null)))));
+
+		map.put("enum4", ((String) mapFromEnumMetaModelToEnumMetaModel(genericMapperArgument, ((String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("enum4"))
+			.orElse(null)))));
+
+		map.put("metamodelOfEnumToString", ((String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("metamodelOfEnumToString"))
+			.orElse(null)));
+
+		map.put("stringToEnumByCrudWizardServiceConversion", ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2) genericObjectsConversionService.convert("stringToSomeEnum2Converter", ((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("stringToEnumByCrudWizardServiceConversion"))
+			.orElse(null)))));
+
+		map.put("stringToEnumByNativeSpringConversions", conversionService.convert(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("stringToEnumByNativeSpringConversions"))
+			.orElse(null)), pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1.class));
+
+		map.put("stringToEnumMetaModelByCrudWizardServiceConversion", ((String) genericObjectsConversionService.convert("stringToSomeEnum3ModelConverter", ((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("stringToEnumMetaModelByCrudWizardServiceConversion"))
+			.orElse(null)))));
+
+		map.put("stringToMetamodelOfEnum", ((java.lang.String) enumClassMetaModelValidator.getEnumValueWhenIsValid(((java.lang.String) "someEnum2Model"), ((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("stringToMetamodelOfEnum"))
+			.orElse(null)), ((java.lang.String) "stringToMetamodelOfEnum"))));
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
+    }
+    private pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2 mapFromEnumMetaModelToEnum(GenericMapperArgument genericMapperArgument, String sourceObject) {
+        switch(sourceObject) {
+			case "VAL1": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.VAL1;
+			case "VAL2": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.OTH2;
+          default: return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.UNKNOWN;
+        }
+    }
+
+    private String mapFromEnumMetaModelToEnumMetaModel(GenericMapperArgument genericMapperArgument, String sourceObject) {
+        switch(sourceObject) {
+			case "OTH": return "OTH1";
+			case "VAL1": return "VAL1";
+			case "VAL2": return "VAL2";
+			case "UNKNOWN": return "UNKNOWN";
+          default: throw new IllegalArgumentException(sourceObject);
+        }
+    }
+
+    private pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2 mapFromEnumToEnum(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1 sourceObject) {
+        switch(sourceObject) {
+			case OTH: return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.OTH1;
+			case VAL1: return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.VAL1;
+			case VAL2: return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.VAL2;
+			case VAL3: return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.OTH2;
+			case UNKNOWN: return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.UNKNOWN;
+          default: return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2.UNKNOWN;
+        }
+    }
+
+    private String mapFromEnumToEnumMetaModel(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1 sourceObject) {
+        switch(sourceObject) {
+			case OTH: return "OTH";
+			case VAL1: return "VAL1";
+			case VAL2: return "VAL2";
+			case VAL3: return "VAL3";
+			case UNKNOWN: return "VAL1";
+          default: throw new IllegalArgumentException("cannot map enum with value: " + sourceObject);
+        }
+    }
+
+}

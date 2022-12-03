@@ -7,6 +7,7 @@ import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.crea
 import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createRequestBodyTranslated
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidEnumMetaModel
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -20,13 +21,23 @@ import com.fasterxml.jackson.databind.node.TextNode
 import java.time.LocalDate
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumClassMetaModelValidator
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
 import spock.lang.Specification
 
 class RawEntityObjectTranslatorTest extends Specification {
 
+    private MetaModelContextService metaModelContextService = Mock()
     private ObjectMapper objectMapper = createObjectMapper()
     private JsonObjectMapper jsonObjectMapper = new JsonObjectMapper(objectMapper)
-    private RawEntityObjectTranslator testCase = new RawEntityObjectTranslator(jsonObjectMapper, new DefaultClassesConfig())
+    private EnumClassMetaModelValidator enumClassMetaModelValidator = new EnumClassMetaModelValidator(metaModelContextService)
+    private RawEntityObjectTranslator testCase = new RawEntityObjectTranslator(jsonObjectMapper,
+        new DefaultSubClassesForAbstractClassesConfig(), enumClassMetaModelValidator)
+
+    def setup() {
+        metaModelContextService.getClassMetaModelByName("customEnumType") >>
+            createValidEnumMetaModel("customEnumType", "ENUM1", "ENUM2")
+    }
 
     def "should translate to expected raw object entity"() {
         given:

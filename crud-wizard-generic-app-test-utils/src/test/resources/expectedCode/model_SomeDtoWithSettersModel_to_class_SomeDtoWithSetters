@@ -1,0 +1,61 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class MsomeDtoWithSettersModeToCSomeDtoWithSettersMapper1 implements GeneratedMapper {
+		private final org.springframework.core.convert.ConversionService conversionService;
+    MsomeDtoWithSettersModeToCSomeDtoWithSettersMapper1(org.springframework.core.convert.ConversionService conversionService) {
+		this.conversionService = conversionService;
+    }
+
+    @Override
+    public pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters newObject = new pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters();
+
+		newObject.setBirthDay(conversionService.convert(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("birthDay"))
+			.orElse(null)), java.time.LocalDate.class));
+
+		newObject.setId(conversionService.convert(((java.lang.Integer) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
+			.orElse(null)), java.lang.Long.class));
+
+		newObject.setLastLogin(((java.time.LocalDateTime) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("lastLogin"))
+			.orElse(null)));
+
+		newObject.setName(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
+			.orElse(null)));
+
+		newObject.setSomeLong2(((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someLong2"))
+			.orElse(null)));
+
+		newObject.setSomeString2(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("someString2"))
+			.orElse(null)));
+
+		newObject.setSurname(((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("surname"))
+			.orElse(null)));
+        return (pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters) newObject;
+    }
+
+}

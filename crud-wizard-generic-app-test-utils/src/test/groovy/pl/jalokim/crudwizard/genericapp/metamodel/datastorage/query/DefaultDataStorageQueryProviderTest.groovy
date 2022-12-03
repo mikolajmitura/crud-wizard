@@ -1,16 +1,16 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query
 
-import static pl.jalokim.crudwizard.core.datastorage.query.ExpressionArgument.buildForPath
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createHttpQueryParamsForPerson
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
+import static pl.jalokim.crudwizard.genericapp.datastorage.query.ExpressionArgument.buildForPath
 
 import org.springframework.data.domain.Sort
-import pl.jalokim.crudwizard.core.datastorage.query.AbstractExpression
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQuery
-import pl.jalokim.crudwizard.core.datastorage.query.DataStorageQueryArguments
-import pl.jalokim.crudwizard.core.datastorage.query.EmptyExpression
-import pl.jalokim.crudwizard.core.datastorage.query.RealExpression
-import pl.jalokim.crudwizard.core.metamodels.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.datastorage.query.AbstractExpression
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQuery
+import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryArguments
+import pl.jalokim.crudwizard.genericapp.datastorage.query.EmptyExpression
+import pl.jalokim.crudwizard.genericapp.datastorage.query.RealExpression
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import spock.lang.Specification
 import spock.lang.Unroll
 

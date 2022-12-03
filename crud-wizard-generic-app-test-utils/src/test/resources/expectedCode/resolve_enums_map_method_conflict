@@ -1,0 +1,60 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+
+
+class MmetamodelWithEnums2ToMmetamodelWithEnums2Mapper1 implements GeneratedMapper {
+
+    MmetamodelWithEnums2ToMmetamodelWithEnums2Mapper1() {
+
+    }
+
+    @Override
+    public java.util.Map<java.lang.String, java.lang.Object> mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		Map<String, Object> map = new java.util.HashMap<>();
+
+		map.put("spec1enum", ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3) spec1enumMap(genericMapperArgument, ((String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("spec1enum"))
+			.orElse(null)))));
+
+		map.put("spec2enum", ((pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3) spec2enumMap(genericMapperArgument, ((String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("spec2enum"))
+			.orElse(null)))));
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
+    }
+    private pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3 spec1enumMap(GenericMapperArgument genericMapperArgument, String sourceObject) {
+        switch(sourceObject) {
+			case "OTH": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.SPEC1;
+			case "VAL1": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.VAL1;
+			case "VAL2": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.VAL2;
+			case "VAL3": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.VAL3;
+          default: return null;
+        }
+    }
+
+    private pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3 spec2enumMap(GenericMapperArgument genericMapperArgument, String sourceObject) {
+        switch(sourceObject) {
+			case "OTH": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.SPEC2;
+			case "VAL1": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.VAL1;
+			case "VAL2": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.VAL2;
+			case "VAL3": return pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3.VAL3;
+          default: return null;
+        }
+    }
+
+}
