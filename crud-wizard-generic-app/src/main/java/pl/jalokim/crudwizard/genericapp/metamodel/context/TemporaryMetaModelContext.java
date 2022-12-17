@@ -40,7 +40,10 @@ public class TemporaryMetaModelContext extends MetaModelContext {
         setEndpointMetaModels(metaModelContext.getEndpointMetaModels());
         setEndpointMetaModelContextNode(metaModelContext.getEndpointMetaModelContextNode());
         setDefaultServiceMetaModel(metaModelContext.getDefaultServiceMetaModel());
-        setDefaultMapperMetaModel(metaModelContext.getDefaultMapperMetaModel());
+        setDefaultPersistMapperMetaModel(metaModelContext.getDefaultPersistMapperMetaModel());
+        setDefaultQueryMapperMetaModel(metaModelContext.getDefaultQueryMapperMetaModel());
+        setDefaultFinalMapperMetaModel(metaModelContext.getDefaultFinalMapperMetaModel());
+        setDefaultExtractIdMapperMetaModel(metaModelContext.getDefaultExtractIdMapperMetaModel());
         setDefaultDataStorageMetaModel(metaModelContext.getDefaultDataStorageMetaModel());
         setDefaultDataStorageQueryProvider(metaModelContext.getDefaultDataStorageQueryProvider());
         setDefaultDataStorageConnectorMetaModels(metaModelContext.getDefaultDataStorageConnectorMetaModels());

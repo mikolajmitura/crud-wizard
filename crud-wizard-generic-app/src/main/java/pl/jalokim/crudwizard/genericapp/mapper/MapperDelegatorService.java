@@ -1,11 +1,13 @@
 package pl.jalokim.crudwizard.genericapp.mapper;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType.BEAN_OR_CLASS_NAME;
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType.GENERATED;
 import static pl.jalokim.utils.reflection.InvokableReflectionUtils.invokeMethod;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.BaseGenericMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
@@ -26,15 +28,12 @@ public class MapperDelegatorService {
         if (GENERATED.equals(mapperMetaModel.getMapperType())) {
             return ((GeneratedMapper) mapperMetaModel.getMapperInstance())
                 .mainMap(mapperArgument);
+        } else if (BEAN_OR_CLASS_NAME.equals(mapperMetaModel.getMapperType())) {
+            if (mapperMetaModel.getMapperInstance() instanceof BaseGenericMapper) {
+                return ((BaseGenericMapper) mapperMetaModel.getMapperInstance())
+                    .mapToTarget(mapperArgument);
+            }
         }
-        // TODO #1 how mapper should be invoked
-        //  when is generated and when is provided as bean
-        //  should be some mappers type for distinguish
-        //      which is for query, for persistence and for final
-        //      should be some defaults implementations which will be saved to db with which default mapper invoke
-        //      already logic of that is in DefaultGenericMapper which is not good due to fact that GenericMapperArgument
-        //      always should have source and target type defined
-
         // TODO #1 mapper_delegator should delegate to mapper arguments as expected in BeansAndMethodsExistsValidator:
         //  for normal mapper COMMON_EXPECTED_ARGS_TYPE + MAPPER_EXPECTED_ARGS_TYPE
         //  for final result mapper when data source only one then COMMON_EXPECTED_ARGS_TYPE + MAPPER_EXPECTED_ARGS_TYPE

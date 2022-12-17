@@ -43,12 +43,12 @@ public abstract class DataStorageConnectorMetaModelMapper
             .mapperMetaModelForPersist(ofNullable(getFromContextByEntity(
                 metaModelContext::getMapperMetaModels,
                 dataStorageConnectorEntity::getMapperMetaModelForPersist))
-                .orElse(metaModelContext.getDefaultMapperMetaModel())
+                .orElse(metaModelContext.getDefaultPersistMapperMetaModel())
             )
             .mapperMetaModelForQuery(ofNullable(getFromContextByEntity(
                 metaModelContext::getMapperMetaModels,
                 dataStorageConnectorEntity::getMapperMetaModelForQuery))
-                .orElse(metaModelContext.getDefaultMapperMetaModel())
+                .orElse(metaModelContext.getDefaultQueryMapperMetaModel())
             )
             .classMetaModelInDataStorage(
                 getFromContextByEntity(

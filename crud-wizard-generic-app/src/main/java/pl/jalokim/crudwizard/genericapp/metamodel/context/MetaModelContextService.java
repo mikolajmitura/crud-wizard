@@ -6,8 +6,11 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.isTemporaryContextExists;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,6 +28,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaMod
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
@@ -139,17 +143,31 @@ public class MetaModelContextService {
             });
     }
 
+
+
     private void loadMapperMetaModels(MetaModelContext metaModelContext) {
         var mapperMetaModels = new MappersModelsCache();
-        var defaultGenericMapperId = defaultBeansService.getDefaultGenericMapperId();
+
+        Map<Supplier<Long>, Consumer<MapperMetaModel>> mapperSetterByDefaultMapperId = Map.of(
+            defaultBeansService::getDefaultPersistMapperId, metaModelContext::setDefaultPersistMapperMetaModel,
+            defaultBeansService::getDefaultQueryMapperId, metaModelContext::setDefaultQueryMapperMetaModel,
+            defaultBeansService::getDefaultFinalJoinedRowMapperId, metaModelContext::setDefaultFinalMapperMetaModel,
+            defaultBeansService::getDefaultFinalGetIdAfterSaveMapperId, metaModelContext::setDefaultExtractIdMapperMetaModel
+        );
+
         for (var mapperMetaModel : mapperMetaModelService.findAllMetaModels(metaModelContext)) {
             mapperMetaModels.put(mapperMetaModel.getId(), mapperMetaModel);
-            if (mapperMetaModel.getId().equals(defaultGenericMapperId)) {
-                metaModelContext.setDefaultMapperMetaModel(mapperMetaModel);
-            }
             Optional.ofNullable(mapperMetaModel.getMapperName())
                 .ifPresent(mapperName -> mapperMetaModels.setMapperModelWithName(mapperName, mapperMetaModel));
         }
+
+        mapperSetterByDefaultMapperId.forEach((getter, setter ) -> {
+            Consumer<MapperMetaModel> mapperMetaModelConsumer = mapperSetterByDefaultMapperId.get(getter);
+            Long mapperId = getter.get();
+            if (mapperMetaModelConsumer != null) {
+                mapperMetaModelConsumer.accept(mapperMetaModels.findById(mapperId));
+            }
+        });
 
         metaModelContext.setMapperMetaModels(mapperMetaModels);
         mapperMetaModelService.updateGeneratedMappers(metaModelContext);

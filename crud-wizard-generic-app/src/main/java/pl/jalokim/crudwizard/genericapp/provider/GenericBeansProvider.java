@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import pl.jalokim.crudwizard.genericapp.config.GenericMapper;
 import pl.jalokim.crudwizard.genericapp.config.GenericMethod;
 import pl.jalokim.crudwizard.genericapp.config.GenericService;
 import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
@@ -24,20 +23,11 @@ import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 @RequiredArgsConstructor
 public class GenericBeansProvider {
 
-    private final AtomicReference<List<BeanInstanceMetaModel>> allGenericMapperBeansReference = new AtomicReference<>();
     private final AtomicReference<List<BeanInstanceMetaModel>> allGenericServiceBeansReference = new AtomicReference<>();
 
     private final ApplicationContext applicationContext;
     private final InstanceLoader instanceLoader;
     private final BeanMethodMetaModelCreator beanMethodMetaModelCreator;
-
-    public List<BeanInstanceMetaModel> getAllGenericMapperBeans() {
-        return Optional.ofNullable(allGenericMapperBeansReference.get())
-            .orElseGet(() -> {
-                allGenericMapperBeansReference.set(findAllGenericBeans(GenericMapper.class));
-                return allGenericMapperBeansReference.get();
-            });
-    }
 
     public List<BeanInstanceMetaModel> getAllGenericServiceBeans() {
         return Optional.ofNullable(allGenericServiceBeansReference.get())

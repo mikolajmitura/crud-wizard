@@ -6,7 +6,9 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaMo
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
-import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalGetIdAfterSaveMapper
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalJoinedRowOrDefaultMapper
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService
@@ -57,6 +59,12 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
 
     @Autowired
     private DefaultGenericMapper genericMapperBean
+
+    @Autowired
+    private DefaultFinalGetIdAfterSaveMapper defaultFinalGetIdAfterSaveMapper
+
+    @Autowired
+    private DefaultFinalJoinedRowOrDefaultMapper defaultFinalJoinedRowOrDefaultMapper
 
     @Autowired
     private DefaultGenericService genericServiceBean
@@ -155,12 +163,45 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
 
             mapperMetaModels.objectsById.values()*.methodMetaModel.className as Set == mapperMetaModelService
                 .findAllMetaModels(reloadedContext)*.methodMetaModel.className as Set
-            verifyAll(defaultMapperMetaModel) {
-                id == defaultBeansService.getDefaultGenericMapperId()
+            verifyAll(defaultPersistMapperMetaModel) {
+                id == defaultBeansService.getDefaultPersistMapperId()
                 mapperInstance == genericMapperBean
                 verifyAll(methodMetaModel) {
                     className == DefaultGenericMapper.canonicalName
                     beanName == "defaultGenericMapper"
+                    methodName == "mapToTarget"
+                }
+                methodMetaModel.methodName == "mapToTarget"
+            }
+
+            verifyAll(defaultQueryMapperMetaModel) {
+                id == defaultBeansService.getDefaultQueryMapperId()
+                mapperInstance == genericMapperBean
+                verifyAll(methodMetaModel) {
+                    className == DefaultGenericMapper.canonicalName
+                    beanName == "defaultGenericMapper"
+                    methodName == "mapToTarget"
+                }
+                methodMetaModel.methodName == "mapToTarget"
+            }
+
+            verifyAll(defaultFinalMapperMetaModel) {
+                id == defaultBeansService.getDefaultFinalJoinedRowMapperId()
+                mapperInstance == defaultFinalJoinedRowOrDefaultMapper
+                verifyAll(methodMetaModel) {
+                    className == DefaultFinalJoinedRowOrDefaultMapper.canonicalName
+                    beanName == "defaultFinalJoinedRowOrDefaultMapper"
+                    methodName == "mapToTarget"
+                }
+                methodMetaModel.methodName == "mapToTarget"
+            }
+
+            verifyAll(defaultExtractIdMapperMetaModel) {
+                id == defaultBeansService.getDefaultFinalGetIdAfterSaveMapperId()
+                mapperInstance == defaultFinalGetIdAfterSaveMapper
+                verifyAll(methodMetaModel) {
+                    className == DefaultFinalGetIdAfterSaveMapper.canonicalName
+                    beanName == "defaultFinalGetIdAfterSaveMapper"
                     methodName == "mapToTarget"
                 }
                 methodMetaModel.methodName == "mapToTarget"
@@ -183,8 +224,8 @@ class MetaModelContextServiceIT extends GenericAppWithReloadMetaContextSpecifica
             defaultDataStorageConnectorMetaModels*.id as Set == defaultBeansService.getDefaultDataStorageConnectorsId() as Set
             verifyAll(defaultDataStorageConnectorMetaModels[0]) {
                 dataStorageMetaModel == defaultDataStorageMetaModel
-                mapperMetaModelForQuery == defaultMapperMetaModel
-                mapperMetaModelForPersist == defaultMapperMetaModel
+                mapperMetaModelForQuery == defaultQueryMapperMetaModel
+                mapperMetaModelForPersist == defaultPersistMapperMetaModel
                 classMetaModelInDataStorage == null
             }
 

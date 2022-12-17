@@ -20,7 +20,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageR
 })
 public class DataStorageResultJoiner {
 
-    public List<JoinedResultsRow> getJoinedNodes(List<DataStorageResultsJoinerMetaModel> dataStorageResultsJoiners, Map<String, List<Object>> queriesResults) {
+    public List<JoinedResultsRow> getJoinedNodes(List<DataStorageResultsJoinerMetaModel> dataStorageResultsJoiners,
+        Map<String, List<Object>> queriesResults) {
+
         DataStorageJoinedResultContext joinedResultContext = new DataStorageJoinedResultContext();
 
         for (DataStorageResultsJoinerMetaModel dsResultsJoiner : dataStorageResultsJoiners) {

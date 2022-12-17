@@ -5,6 +5,7 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.transla
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.checkThatClassExists;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.clearCglibClassName;
+import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.MAP_STRING_OBJECT_MODEL;
@@ -43,8 +44,8 @@ import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath;
 import pl.jalokim.crudwizard.genericapp.config.GenericMethod;
 import pl.jalokim.crudwizard.genericapp.config.GenericService;
-import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.BaseGenericMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
@@ -598,7 +599,20 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
     }
 
     private boolean isNotDefaultGenericMapper(BeanAndMethodDto beanAndMethodDto) {
-        return !(beanAndMethodDto.getClassName().equals(DefaultGenericMapper.class.getCanonicalName()) &&
+        Class<?> loadedMapperClass = loadClassOrNull(beanAndMethodDto.getClassName());
+        if (loadedMapperClass == null) {
+            return true;
+        }
+
+        return !(MetadataReflectionUtils.isTypeOf(loadedMapperClass, BaseGenericMapper.class) &&
             "mapToTarget".equals(beanAndMethodDto.getMethodName()));
+    }
+
+    private Class<?> loadClassOrNull(String className) {
+        try {
+            return loadRealClass(className);
+        } catch (ReflectionOperationException ex) {
+            return null;
+        }
     }
 }

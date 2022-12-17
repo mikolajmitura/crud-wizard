@@ -1,15 +1,22 @@
 package pl.jalokim.crudwizard.genericapp.provider;
 
+import static com.google.common.base.CaseFormat.LOWER_CAMEL;
+import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson;
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.rawJsonToObject;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalGetIdAfterSaveMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalJoinedRowOrDefaultMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultGenericMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.configuration.DefaultConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.configuration.DefaultConfigurationRepository;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto;
@@ -28,10 +35,14 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelServic
 
 @MetamodelService
 @RequiredArgsConstructor
+@Slf4j
 public class DefaultBeansConfigService {
 
     private static final String DEFAULT_DATA_STORAGE_ID = "default-data-storage-id";
-    private static final String DEFAULT_GENERIC_MAPPER_ID = "default-generic-mapper-id";
+    private static final String DEFAULT_PERSIST_MAPPER_ID = "default-persist-mapper-id";
+    private static final String DEFAULT_QUERY_MAPPER_ID = "default-query-mapper-id";
+    private static final String DEFAULT_FINAL_MAPPER_ID = "default-final-mapper-id";
+    private static final String DEFAULT_FINAL_GET_ID_AFTER_SAVE_MAPPER_ID = "default-final-get-id-after-save-mapper-id";
     private static final String DEFAULT_GENERIC_SERVICE_ID = "default-data-service-id";
     private static final String DEFAULT_QUERY_PROVIDER_CLASS_NAME = "default-query-provider-class-name";
     private static final String DEFAULT_DATA_STORAGE_CONNECTORS_ID = "default-data-storage-connectors-id";
@@ -46,6 +57,13 @@ public class DefaultBeansConfigService {
     private final ServiceMetaModelService serviceMetaModelService;
     private final GenericBeansProvider genericBeanProvider;
 
+    private static final Map<String, Class<?>> DEFAULT_MAPPER_BY_CONFIG = Map.of(
+        DEFAULT_PERSIST_MAPPER_ID, DefaultGenericMapper.class,
+        DEFAULT_QUERY_MAPPER_ID, DefaultGenericMapper.class,
+        DEFAULT_FINAL_MAPPER_ID, DefaultFinalJoinedRowOrDefaultMapper.class,
+        DEFAULT_FINAL_GET_ID_AFTER_SAVE_MAPPER_ID, DefaultFinalGetIdAfterSaveMapper.class
+    );
+
     // TODO test another
     //  default generic service with @primary as default when db config is null
     //  default data storage with @primary as default when db config is null
@@ -57,7 +75,7 @@ public class DefaultBeansConfigService {
 
     public void saveAllDefaultMetaModels() {
         saveDefaultsDataStorage();
-        saveDefaultsGenericMapper();
+        saveDefaultsGenericMappers();
         saveDefaultQueryProvider();
         saveDefaultDataStorageConnectors();
         saveDefaultGenericService();
@@ -79,28 +97,27 @@ public class DefaultBeansConfigService {
         }
     }
 
-    private void saveDefaultsGenericMapper() {
-        genericBeanProvider.getAllGenericMapperBeans().forEach(genericMapperBean ->
-            genericMapperBean.getGenericMethodMetaModels().forEach(
-                methodMetaModel -> {
+    private void saveDefaultsGenericMappers() {
+        DEFAULT_MAPPER_BY_CONFIG.forEach((mapperConfigName, mapperClass) -> {
+            MapperMetaModelDto mapperMetaModelDto = MapperMetaModelDto.builder()
+                .mapperType(MapperType.BEAN_OR_CLASS_NAME)
+                .mapperBeanAndMethod(BeanAndMethodDto.builder()
+                    .beanName(UPPER_CAMEL.to(LOWER_CAMEL, mapperClass.getSimpleName()))
+                    .className(mapperClass.getCanonicalName())
+                    .methodName("mapToTarget")
+                    .build())
+                .build();
 
-                    MapperMetaModelDto mapperMetaModelDto = MapperMetaModelDto.builder()
-                        .mapperType(MapperType.BEAN_OR_CLASS_NAME)
-                        .mapperBeanAndMethod(BeanAndMethodDto.builder()
-                            .beanName(genericMapperBean.getBeanName())
-                            .className(genericMapperBean.getClassName())
-                            .methodName(methodMetaModel.getMethodName())
-                            .build())
-                        .build();
+            Long idForMapperModel = mapperMetaModelService.findIdForMapperModel(mapperMetaModelDto);
 
-                    if (!mapperMetaModelService.exists(mapperMetaModelDto)) {
-                        Long genericMapperId = mapperMetaModelService.createNewAndGetId(mapperMetaModelDto);
-                        var defaultGenericMapperId = getDefaultGenericMapperId();
-                        if (defaultGenericMapperId == null) {
-                            saveNewConfiguration(DEFAULT_GENERIC_MAPPER_ID, genericMapperId);
-                        }
-                    }
-                }));
+            if (idForMapperModel == null) {
+                idForMapperModel = mapperMetaModelService.createNewAndGetId(mapperMetaModelDto);
+            }
+            var defaultGenericMapperId = getDefaultMapperId(mapperConfigName);
+            if (defaultGenericMapperId == null) {
+                saveNewConfiguration(mapperConfigName, idForMapperModel);
+            }
+        });
     }
 
     private void saveDefaultDataStorageConnectors() {
@@ -109,8 +126,8 @@ public class DefaultBeansConfigService {
             Long[] newDefaultDataStorageConnectorsId = {
                 dataStorageConnectorMetaModelService.saveNewDataStorageConnector(DataStorageConnectorMetaModelEntity.builder()
                     .dataStorageMetaModel(dataStorageMetaModelRepository.getOne(getDefaultDataStorageId()))
-                    .mapperMetaModelForQuery(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))
-                    .mapperMetaModelForPersist(mapperMetaModelEntityRepository.getOne(getDefaultGenericMapperId()))
+                    .mapperMetaModelForQuery(mapperMetaModelEntityRepository.getOne(getDefaultMapperId(DEFAULT_QUERY_MAPPER_ID)))
+                    .mapperMetaModelForPersist(mapperMetaModelEntityRepository.getOne(getDefaultMapperId(DEFAULT_PERSIST_MAPPER_ID)))
                     .build())
                     .getId()
             };
@@ -125,8 +142,8 @@ public class DefaultBeansConfigService {
                     ServiceMetaModelDto serviceMetaModelDto = ServiceMetaModelDto.builder()
                         .serviceBeanAndMethod(BeanAndMethodDto.builder()
                             .beanName(genericMapperBean.getBeanName())
-                        .className(genericMapperBean.getClassName())
-                        .methodName(methodMetaModel.getMethodName())
+                            .className(genericMapperBean.getClassName())
+                            .methodName(methodMetaModel.getMethodName())
                             .build())
                         .build();
 
@@ -165,8 +182,24 @@ public class DefaultBeansConfigService {
         return getConfigForDefault(DEFAULT_DATA_STORAGE_ID, Long.class);
     }
 
-    public Long getDefaultGenericMapperId() {
-        return getConfigForDefault(DEFAULT_GENERIC_MAPPER_ID, Long.class);
+    public Long getDefaultMapperId(String configName) {
+        return getConfigForDefault(configName, Long.class);
+    }
+
+    public Long getDefaultPersistMapperId() {
+        return getDefaultMapperId(DEFAULT_PERSIST_MAPPER_ID);
+    }
+
+    public Long getDefaultQueryMapperId() {
+        return getDefaultMapperId(DEFAULT_QUERY_MAPPER_ID);
+    }
+
+    public Long getDefaultFinalJoinedRowMapperId() {
+        return getDefaultMapperId(DEFAULT_FINAL_MAPPER_ID);
+    }
+
+    public Long getDefaultFinalGetIdAfterSaveMapperId() {
+        return getDefaultMapperId(DEFAULT_FINAL_GET_ID_AFTER_SAVE_MAPPER_ID);
     }
 
     public List<Long> getDefaultDataStorageConnectorsId() {

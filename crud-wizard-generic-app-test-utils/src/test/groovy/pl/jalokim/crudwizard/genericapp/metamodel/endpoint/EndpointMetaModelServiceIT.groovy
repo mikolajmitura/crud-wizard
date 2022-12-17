@@ -42,8 +42,8 @@ import pl.jalokim.crudwizard.core.sample.PersonEvent
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue
 import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeRootPathProvider
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
-import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.mapper.instance.SomeTestMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
