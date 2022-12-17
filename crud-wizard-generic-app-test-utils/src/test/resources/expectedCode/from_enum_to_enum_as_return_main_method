@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1 to real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2
+**/
 class CSomeEnum1ToCSomeEnum2Mapper1 implements GeneratedMapper {
 
     CSomeEnum1ToCSomeEnum2Mapper1() {

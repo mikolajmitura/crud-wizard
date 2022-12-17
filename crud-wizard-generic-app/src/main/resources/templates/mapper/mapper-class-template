@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 ${imports}
 ${staticImports}
+/**
+mapping from ${sourceMetaModel} to ${targetMetaModel}
+**/
 class ${mapperClassName} implements GeneratedMapper {
 ${fields}
     ${mapperClassName}(${constructorArguments}) {

@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from real class: pl.jalokim.crudwizard.core.sample.FromStringToObject to real class: java.lang.String
+**/
 class CFromStringToObjectToCStringMapper1 implements GeneratedMapper {
 
     CFromStringToObjectToCStringMapper1() {

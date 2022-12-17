@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+mapping from real class: java.util.List<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>> to real class: java.util.Set<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>>
+**/
 class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper1 implements GeneratedMapper {
 
     CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapper1() {
@@ -31,6 +34,9 @@ class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapp
 
         return mapCListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElement(genericMapperArgument, ((java.util.List<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>>) sourceObject));
     }
+    /**
+    mapping from real class: java.util.List<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>> to real class: java.util.Set<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>>
+    **/
     @GeneratedMethod
     public java.util.Set<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>> mapCListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<java.util.List<java.util.Map<java.lang.String, java.lang.Object>>> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -53,6 +59,9 @@ class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapp
         return elements;
     }
 
+    /**
+    mapping from real class: java.util.List<java.util.Map<java.lang.String, java.lang.Object>> to real class: java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>
+    **/
     @GeneratedMethod
     public java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> mapCListOfMcollectionElementModelToCListOfCCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<java.util.Map<java.lang.String, java.lang.Object>> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -75,6 +84,9 @@ class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapp
         return elements;
     }
 
+    /**
+    mapping from genericModel name: collectionElementModel to real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement mapMcollectionElementModelToCCollectionElement(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -108,6 +120,9 @@ class CListOfCListOfMcollectionElementModelToCSetOfCListOfCCollectionElementMapp
         );
     }
 
+    /**
+    mapping from genericModel name: nestedElementObjectModel to real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.genericapp.mapper.conversion.NestedElementObject mapMnestedElementObjectModelToCNestedElementObject(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();

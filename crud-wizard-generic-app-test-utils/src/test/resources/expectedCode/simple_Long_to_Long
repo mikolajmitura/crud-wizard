@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from real class: java.lang.Long to real class: java.lang.Long
+**/
 class CLongToCLongMapper1 implements GeneratedMapper {
 
     CLongToCLongMapper1() {

@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from genericModel name: someDtoWithSettersMode to real class: pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
+**/
 class MsomeDtoWithSettersModeToCSomeDtoWithSettersMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
     MsomeDtoWithSettersModeToCSomeDtoWithSettersMapper1(org.springframework.core.convert.ConversionService conversionService) {

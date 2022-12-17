@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from real class: pl.jalokim.crudwizard.core.sample.SamplePersonDto to genericModel name: person
+**/
 class CSamplePersonDtoToMpersonMapper1 implements GeneratedMapper {
 
     CSamplePersonDtoToMpersonMapper1() {

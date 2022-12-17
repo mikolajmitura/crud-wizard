@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from genericModel name: metamodelWithEnums2 to genericModel name: metamodelWithEnums2
+**/
 class MmetamodelWithEnums2ToMmetamodelWithEnums2Mapper1 implements GeneratedMapper {
 
     MmetamodelWithEnums2ToMmetamodelWithEnums2Mapper1() {

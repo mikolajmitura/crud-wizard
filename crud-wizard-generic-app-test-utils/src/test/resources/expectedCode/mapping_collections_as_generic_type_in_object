@@ -8,6 +8,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+mapping from real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType1 to real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2
+**/
 class CListAsListGenericType1ToCListAsListGenericType2Mapper1 implements GeneratedMapper {
 
     CListAsListGenericType1ToCListAsListGenericType2Mapper1() {
@@ -34,6 +37,9 @@ class CListAsListGenericType1ToCListAsListGenericType2Mapper1 implements Generat
 			.orElse(null))))
         );
     }
+    /**
+    mapping from real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement to real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement mapCCollectionElementToCNestedCollectionElement(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -67,6 +73,9 @@ class CListAsListGenericType1ToCListAsListGenericType2Mapper1 implements Generat
         );
     }
 
+    /**
+    mapping from real class: java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> to real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[]
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[] mapCListOfCCollectionElementToCNestedCollectionElementArrayOfCNestedCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -90,6 +99,9 @@ class CListAsListGenericType1ToCListAsListGenericType2Mapper1 implements Generat
         return elements;
     }
 
+    /**
+    mapping from real class: java.util.List<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>> to real class: java.util.Set<pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[]>
+    **/
     @GeneratedMethod
     public java.util.Set<pl.jalokim.crudwizard.genericapp.mapper.conversion.ListAsListGenericType2.NestedCollectionElement[]> mapCListOfCListOfCCollectionElementToCSetOfCNestedCollectionElementArrayOfCNestedCollectionElement(GenericMapperArgument genericMapperArgument, java.util.List<java.util.List<pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement>> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
