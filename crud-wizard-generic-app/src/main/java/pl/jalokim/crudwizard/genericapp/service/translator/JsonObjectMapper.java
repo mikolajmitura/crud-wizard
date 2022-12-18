@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.lang.reflect.Type;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,17 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 @RequiredArgsConstructor
 public class JsonObjectMapper {
 
+    private static final AtomicReference<JsonObjectMapper> MAPPER_HOLDER = new AtomicReference<>();
+
     /**
      * To add some custom deserializers and serializers inject ObjectMapper and add custom configuration to it.
      */
     private final ObjectMapper objectMapper;
+
+    @PostConstruct
+    public void postConstruct() {
+        MAPPER_HOLDER.set(this);
+    }
 
     public Object convertToObject(ObjectNodePath objectNodePath, Object sourceObject, Class<?> targetClass) {
         String jsonValue = asJsonValue(objectNodePath, sourceObject);
@@ -100,5 +109,13 @@ public class JsonObjectMapper {
     public JavaType createJavaType(Type type, Class<?> contextClass) {
         TypeFactory typeFactory = this.objectMapper.getTypeFactory();
         return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
+    }
+
+    public static JsonObjectMapper getInstance() {
+        JsonObjectMapper jsonObjectMapper = MAPPER_HOLDER.get();
+        if (jsonObjectMapper == null) {
+            throw new IllegalStateException("MAPPER_HOLDER is have not initialized yet!");
+        }
+        return jsonObjectMapper;
     }
 }

@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.MethodParameterInfo;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
@@ -352,11 +352,4 @@ public class DelegatedServiceMethodInvoker {
             .findFirst();
     }
 
-    @Value
-    private static class MethodParameterInfo {
-
-        JavaTypeMetaModel argumentMetaModel;
-        int index;
-        String name;
-    }
 }

@@ -4,8 +4,8 @@ import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
 import static pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState.INITIALIZED;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.classMetaModelFromType;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
-import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.MAPPER_EXPECTED_ARGS_TYPE;
-import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.MAPPER_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.annotation.Annotation;
@@ -37,9 +37,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGen
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.ExpectedMethodArgument;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgument;
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
@@ -179,13 +179,13 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
         for (MethodArgumentMetaModel methodArgument : methodSignatureMetaModel.getMethodArguments()) {
             var methodArgumentPredicates = getCommonExpectedArgsTypeAndOther(MAPPER_EXPECTED_ARGS_TYPE);
 
-            List<ExpectedMethodArgument> possibleInputOfMapperPredicates = methodArgumentPredicates.stream()
-                .filter(ExpectedMethodArgument::isArgumentCanBeInputOfMapper)
+            List<GenericMethodArgument> possibleInputOfMapperPredicates = methodArgumentPredicates.stream()
+                .filter(GenericMethodArgument::isArgumentCanBeInputOfMapper)
                 .collect(Collectors.toList());
 
             ClassMetaModel argumentClassMetaModel = classMetaModelFromType(methodArgument.getArgumentType());
 
-            List<ExpectedMethodArgument> cannotBeInputOfMapperPredicates = methodArgumentPredicates.stream()
+            List<GenericMethodArgument> cannotBeInputOfMapperPredicates = methodArgumentPredicates.stream()
                 .filter(predicate -> !predicate.isArgumentCanBeInputOfMapper())
                 .collect(Collectors.toList());
 
@@ -233,10 +233,10 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
     }
 
     private boolean isResolvedAsMapperInput(MethodArgumentMetaModel methodArgument,
-        List<ExpectedMethodArgument> possibleInputOfMapperPredicates, ClassMetaModel argumentClassMetaModel) {
+        List<GenericMethodArgument> possibleInputOfMapperPredicates, ClassMetaModel argumentClassMetaModel) {
         boolean resolvedAsMapperInput = true;
 
-        for (ExpectedMethodArgument possibleInputOfMapperPredicate : possibleInputOfMapperPredicates) {
+        for (GenericMethodArgument possibleInputOfMapperPredicate : possibleInputOfMapperPredicates) {
             resolvedAsMapperInput = true;
             if (possibleInputOfMapperPredicate.getAnnotatedWith() != null) {
                 resolvedAsMapperInput = elements(methodArgument.getAnnotations())
@@ -245,7 +245,7 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
                     .contains(possibleInputOfMapperPredicate.getAnnotatedWith());
             }
 
-            resolvedAsMapperInput = resolvedAsMapperInput && possibleInputOfMapperPredicate.getTypePredicates().stream()
+            resolvedAsMapperInput = resolvedAsMapperInput && possibleInputOfMapperPredicate.getTypePredicatesAndDataExtractors().stream()
                 .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getSubTypeOf()));
 
         }
@@ -253,11 +253,11 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
     }
 
     private boolean isResolvedAsOtherThanInputMapper(MethodArgumentMetaModel methodArgument,
-        List<ExpectedMethodArgument> predicates, ClassMetaModel argumentClassMetaModel) {
+        List<GenericMethodArgument> predicates, ClassMetaModel argumentClassMetaModel) {
 
         boolean resolvedAsOtherThanInputMapper = false;
 
-        for (ExpectedMethodArgument predicate : predicates) {
+        for (GenericMethodArgument predicate : predicates) {
             if (predicate.getAnnotatedWith() == null) {
                 resolvedAsOtherThanInputMapper = true;
             } else {
@@ -267,7 +267,7 @@ public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<Map
                     .contains(predicate.getAnnotatedWith());
             }
 
-            resolvedAsOtherThanInputMapper = resolvedAsOtherThanInputMapper && predicate.getTypePredicates().stream()
+            resolvedAsOtherThanInputMapper = resolvedAsOtherThanInputMapper && predicate.getTypePredicatesAndDataExtractors().stream()
                 .anyMatch(typePredicate -> argumentClassMetaModel.isSubTypeOf(typePredicate.getSubTypeOf()));
 
             if (resolvedAsOtherThanInputMapper) {

@@ -488,6 +488,21 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     def "validation of service, mapper, bean name, mapper #testCase during post"() {
         given:
         def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto().toBuilder()
+            .baseUrl("/root/{rootId}/users")
+            .queryArguments(
+                ClassMetaModelDto.builder()
+                    .isGenericEnumType(false)
+                    .fields([
+                        createValidFieldMetaModelDto("requestParamName", String),
+                    ])
+                    .build()
+            )
+            .pathParams(ClassMetaModelDto.builder()
+                .isGenericEnumType(false)
+                .fields([
+                    createValidFieldMetaModelDto("rootId", Long),
+                ])
+                .build())
             .payloadMetamodel(payloadMetamodel)
             .serviceMetaModel(ServiceMetaModelDto.builder()
                 .serviceBeanAndMethod(serviceBean)

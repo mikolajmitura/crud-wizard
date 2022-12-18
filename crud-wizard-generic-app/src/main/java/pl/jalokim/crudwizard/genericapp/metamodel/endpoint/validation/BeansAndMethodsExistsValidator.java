@@ -11,10 +11,10 @@ import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintVal
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.MAP_STRING_OBJECT_MODEL;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.classMetaModelFromType;
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.BeansAndMethodsExistsValidator.InnerError.newError;
-import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.MAPPER_EXPECTED_ARGS_TYPE;
-import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.SERVICE_EXPECTED_ARGS_TYPE;
-import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.argAsTypes;
-import static pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.MAPPER_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.MAPPER_JOINED_RESULTS_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.SERVICE_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
 import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
@@ -44,7 +44,6 @@ import pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidator;
 import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath;
 import pl.jalokim.crudwizard.genericapp.config.GenericMethod;
 import pl.jalokim.crudwizard.genericapp.config.GenericService;
-import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 import pl.jalokim.crudwizard.genericapp.mapper.defaults.BaseGenericMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
@@ -58,10 +57,11 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaM
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.ExpectedMethodArgument;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.ExpectedMethodArgumentConfig.TypePredicate;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.EndpointQueryAndUrlMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgument;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.TypePredicateAndDataExtractor;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlMetamodel;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
@@ -106,15 +106,19 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
     public boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context) {
         ServiceMetaModelDto serviceMetaModel = endpointMetaModelDto.getServiceMetaModel();
         AtomicBoolean isValid = new AtomicBoolean(true);
-        validateServiceDefinition(endpointMetaModelDto, context, serviceMetaModel, isValid);
-        validateFinalResultMapper(endpointMetaModelDto, context, isValid);
-        validateMappersInDataStorageConnectors(endpointMetaModelDto, context, isValid);
+        EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel = EndpointQueryAndUrlMetaModel.builder()
+            .queryArgumentsModel(getClassMetaModelByDto(endpointMetaModelDto.getQueryArguments()))
+            .pathParamsModel(getClassMetaModelByDto(endpointMetaModelDto.getPathParams()))
+            .build();
+        validateServiceDefinition(endpointMetaModelDto, context, serviceMetaModel, isValid, endpointQueryAndUrlMetaModel);
+        validateFinalResultMapper(endpointMetaModelDto, context, isValid, endpointQueryAndUrlMetaModel);
+        validateMappersInDataStorageConnectors(endpointMetaModelDto, context, isValid, endpointQueryAndUrlMetaModel);
 
         return isValid.get();
     }
 
     private void validateMappersInDataStorageConnectors(EndpointMetaModelDto endpointMetaModelDto,
-        ConstraintValidatorContext context, AtomicBoolean isValid) {
+        ConstraintValidatorContext context, AtomicBoolean isValid, EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
 
         if (DefaultGenericService.class.equals(getRealClassForServiceBean(endpointMetaModelDto))) {
             elements(endpointMetaModelDto.getDataStorageConnectors())
@@ -144,11 +148,11 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
                         if (classMetaModelInDataStorage.hasIdField() && HttpMethod.GET.equals(endpointMetaModelDto.getHttpMethod())) {
                             validateMapperForQueryBeanAndMethod(endpointMetaModelDto, context, isValid,
-                                index, dataStorageConnector, classMetaModelInDataStorage);
+                                index, dataStorageConnector, classMetaModelInDataStorage, endpointQueryAndUrlMetaModel);
                         }
 
                         validateMapperForPersistBeanAndMethod(endpointMetaModelDto, context, isValid,
-                            index, dataStorageConnector, classMetaModelInDataStorage);
+                            index, dataStorageConnector, classMetaModelInDataStorage, endpointQueryAndUrlMetaModel);
                     }
                 });
         }
@@ -156,7 +160,8 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
     private void validateMapperForPersistBeanAndMethod(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context,
         AtomicBoolean isValid, Integer index,
-        DataStorageConnectorMetaModelDto dataStorageConnector, ClassMetaModel classMetaModelInDataStorage) {
+        DataStorageConnectorMetaModelDto dataStorageConnector, ClassMetaModel classMetaModelInDataStorage,
+        EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
 
         log.debug("validateMapperForPersistBeanAndMethod");
 
@@ -164,12 +169,13 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
         validateMapperBeanAndMethod(context, isValid, index, mapperMetaModelForPersist,
             getClassMetaModelByDto(endpointMetaModelDto.getPayloadMetamodel()),
-            classMetaModelInDataStorage, "mapperMetaModelForPersist");
+            classMetaModelInDataStorage, "mapperMetaModelForPersist", endpointQueryAndUrlMetaModel);
     }
 
     private void validateMapperForQueryBeanAndMethod(EndpointMetaModelDto endpointMetaModelDto,
         ConstraintValidatorContext context, AtomicBoolean isValid, Integer index,
-        DataStorageConnectorMetaModelDto dataStorageConnector, ClassMetaModel classMetaModelInDataStorage) {
+        DataStorageConnectorMetaModelDto dataStorageConnector, ClassMetaModel classMetaModelInDataStorage,
+        EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
 
         log.debug("validateMapperForQueryBeanAndMethod");
 
@@ -187,12 +193,12 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         ClassMetaModel expectedMethodReturnType = idFieldMetaModel.getFieldType();
 
         validateMapperBeanAndMethod(context, isValid, index, mapperMetaModelForQuery,
-            expectedMethodArgumentType, expectedMethodReturnType, "mapperMetaModelForQuery");
+            expectedMethodArgumentType, expectedMethodReturnType, "mapperMetaModelForQuery", endpointQueryAndUrlMetaModel);
     }
 
     private void validateMapperBeanAndMethod(ConstraintValidatorContext context, AtomicBoolean isValid,
         Integer index, MapperMetaModelDto mapperMetaModel, ClassMetaModel expectedMethodArgumentType,
-        ClassMetaModel expectedMethodReturnType, String mapperFieldName) {
+        ClassMetaModel expectedMethodReturnType, String mapperFieldName, EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
 
         BeanAndMethodDto mapperBeanAndMethod = Optional.ofNullable(mapperMetaModel)
             .map(MapperMetaModelDto::getMapperBeanAndMethod)
@@ -209,7 +215,8 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                     validateMethodArguments(innerErrors, mapperBeanAndMethod,
                         getCommonExpectedArgsTypeAndOther(MAPPER_EXPECTED_ARGS_TYPE),
                         MAPPERS,
-                        expectedMethodArgumentType
+                        expectedMethodArgumentType,
+                        endpointQueryAndUrlMetaModel
                     );
                 }
 
@@ -235,7 +242,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
     private void validateServiceDefinition(EndpointMetaModelDto endpointMetaModelDto,
         ConstraintValidatorContext context, ServiceMetaModelDto serviceMetaModel,
-        AtomicBoolean isValid) {
+        AtomicBoolean isValid, EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
 
         if (serviceMetaModel != null) {
             BeanAndMethodDto serviceBeanAndMethod = serviceMetaModel.getServiceBeanAndMethod();
@@ -246,7 +253,8 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                     validateMethodArguments(innerErrors, serviceBeanAndMethod,
                         getCommonExpectedArgsTypeAndOther(SERVICE_EXPECTED_ARGS_TYPE),
                         "BeansAndMethodsExistsValidator.service.type",
-                        getClassMetaModelByDto(endpointMetaModelDto.getPayloadMetamodel())
+                        getClassMetaModelByDto(endpointMetaModelDto.getPayloadMetamodel()),
+                        endpointQueryAndUrlMetaModel
                     );
 
                     validateNotGenericServiceMethodReturnType(innerErrors, endpointMetaModelDto);
@@ -268,7 +276,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
     }
 
     private void validateFinalResultMapper(EndpointMetaModelDto endpointMetaModelDto,
-        ConstraintValidatorContext context, AtomicBoolean isValid) {
+        ConstraintValidatorContext context, AtomicBoolean isValid, EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
 
         if (DefaultGenericService.class.equals(getRealClassForServiceBean(endpointMetaModelDto))) {
 
@@ -301,10 +309,10 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
                         if (dataStorageConnectors.size() > 1 && endpointReturnsListOrPage) {
                             validateMethodArguments(innerErrors, mapperBeanAndMethod,
-                                getCommonExpectedArgsTypeAndOther(List.of(
-                                    argAsTypes(GenericMapperArgument.class, JoinedResultsRow.class))),
+                                getCommonExpectedArgsTypeAndOther(MAPPER_JOINED_RESULTS_EXPECTED_ARGS_TYPE),
                                 MAPPERS,
-                                ClassMetaModelFactory.fromRawClass(JoinedResultsRow.class));
+                                ClassMetaModelFactory.fromRawClass(JoinedResultsRow.class),
+                                endpointQueryAndUrlMetaModel);
                         } else if (dataStorageConnectors.size() == 1) {
                             DataStorageConnectorMetaModelDto dataStorageConnectorMetaModelDto = dataStorageConnectors.get(0);
                             ClassMetaModel classModelInDataStorage = getClassMetaModelByDto(dataStorageConnectorMetaModelDto
@@ -314,7 +322,8 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                                 validateMethodArguments(innerErrors, mapperBeanAndMethod,
                                     getCommonExpectedArgsTypeAndOther(MAPPER_EXPECTED_ARGS_TYPE),
                                     MAPPERS,
-                                    classModelInDataStorage
+                                    classModelInDataStorage,
+                                    endpointQueryAndUrlMetaModel
                                 );
                             }
                         }
@@ -324,7 +333,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                         validateMethodArguments(innerErrors, mapperBeanAndMethod,
                             getCommonExpectedArgsTypeAndOther(MAPPER_EXPECTED_ARGS_TYPE),
                             MAPPERS,
-                            MAP_STRING_OBJECT_MODEL);
+                            MAP_STRING_OBJECT_MODEL, endpointQueryAndUrlMetaModel);
 
                         ClassMetaModel methodReturnClassModel = methodSignatureMetaModelResolver.getMethodReturnClassMetaModel(mapperBeanAndMethod);
                         validateMethodReturnType(innerErrors, methodReturnClassModel, expectedResponseClassModel);
@@ -368,9 +377,10 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
 
     private void validateMethodArguments(List<InnerError> results,
         BeanAndMethodDto beanAndMethodDto,
-        List<ExpectedMethodArgument> methodExpectedArguments,
+        List<GenericMethodArgument> methodExpectedArguments,
         String beanTypePropertyKey,
-        ClassMetaModel typeOfInputServiceOrMapper) {
+        ClassMetaModel typeOfInputServiceOrMapper,
+        EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
 
         try {
             log.debug("validateMethodArguments");
@@ -383,7 +393,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                 ClassMetaModel classMetaModelFromMethodArg = classMetaModelFromType(methodArgument.getArgumentType());
                 log.debug("classMetaModelFromMethodArg: {}", classMetaModelFromMethodArg.getTypeDescription());
                 boolean foundExpectedMethodArgType = foundExpectedMethodArgType(methodExpectedArguments,
-                    typeOfInputServiceOrMapper, methodArgument, classMetaModelFromMethodArg);
+                    typeOfInputServiceOrMapper, methodArgument, classMetaModelFromMethodArg, endpointQueryAndUrlMetaModel);
                 if (!foundExpectedMethodArgType) {
                     log.debug("validateMethodArguments not found foundExpectedMethodArgType");
                     results.add(newError("methodName",
@@ -399,13 +409,14 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
     }
 
     @SuppressWarnings("PMD.UnusedAssignment")
-    private boolean foundExpectedMethodArgType(List<ExpectedMethodArgument> methodExpectedArguments, ClassMetaModel typeOfInputServiceOrMapper,
-        MethodArgumentMetaModel methodArgument, ClassMetaModel classMetaModelFromMethodArg) {
+    private boolean foundExpectedMethodArgType(List<GenericMethodArgument> methodExpectedArguments, ClassMetaModel typeOfInputServiceOrMapper,
+        MethodArgumentMetaModel methodArgument, ClassMetaModel classMetaModelFromMethodArg, EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
+
         boolean foundExpectedMethodArgType = false;
-        for (ExpectedMethodArgument expectedMethodArgument : methodExpectedArguments) {
+        for (GenericMethodArgument expectedMethodArgument : methodExpectedArguments) {
 
             Class<?> annotatedWith = expectedMethodArgument.getAnnotatedWith();
-            List<TypePredicate> typePredicates = expectedMethodArgument.getTypePredicates();
+            List<TypePredicateAndDataExtractor> typePredicates = expectedMethodArgument.getTypePredicatesAndDataExtractors();
             log.debug("expectedMethodArgument isAnnotatedWith: {}", annotatedWith);
             log.debug("expectedMethodArgument typePredicates size: {}", typePredicates.size());
 
@@ -430,7 +441,8 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                                     predicateClass -> predicateClass.test(
                                         methodArgument,
                                         classMetaModelFromMethodArg,
-                                        typeOfInputServiceOrMapper
+                                        typeOfInputServiceOrMapper,
+                                        endpointQueryAndUrlMetaModel
                                     ));
 
                             log.debug("predicatesAllEmptyOrAllMatch: {}", predicatesAllEmptyOrAllMatch);
