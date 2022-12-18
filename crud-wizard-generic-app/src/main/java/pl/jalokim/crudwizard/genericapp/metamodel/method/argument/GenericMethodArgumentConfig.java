@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +44,8 @@ import pl.jalokim.utils.string.StringUtils;
 @UtilityClass
 public class GenericMethodArgumentConfig {
 
+    public static final Object NULL_REFERENCE = new Object();
+
     private static final ClassMetaModelsPredicate METHOD_ARG_IS_SIMPLE_TYPE = (
         methodArgumentMetaModel,
         methodArgClassMetaModel,
@@ -59,12 +60,14 @@ public class GenericMethodArgumentConfig {
             GenericMethodArgumentConfig::validateRequestBodyAnnotation,
             newTypePredicateAndDataProvide(JsonNode.class, GenericMethodArgumentProvider::getRequestBodyAsJsonNode),
             newTypePredicateAndDataProvide(TranslatedPayload.class, GenericMethodArgumentProvider::getTranslatedPayload),
+            newTypePredicateAndDataProvide(String.class, getJsonNodeAsString()),
             newTypePredicate(Object.class,
                 GenericMethodArgumentConfig::getRequestBody,
                 validateMethodSignatureMatchExpectedModels()
             )),
         argAnnotatedAndAsMetaModels(RequestHeader.class,
             null,
+            newTypePredicate(MAP_STRING_OBJECT_MODEL, GenericMethodArgumentConfig::resolveHeadersAsMap),
             newTypePredicate(MAP_STRING_STRING_MODEL, GenericMethodArgumentConfig::resolveHeadersAsMap),
             newTypePredicate(OBJECT_MODEL, GenericMethodArgumentConfig::resolveHeaderAsSimpleValue, METHOD_ARG_IS_SIMPLE_TYPE)
         ),
@@ -82,6 +85,12 @@ public class GenericMethodArgumentConfig {
                 METHOD_ARG_IS_SIMPLE_TYPE,
                 validatePathVariableFieldName()))
     );
+
+    private static Function<GenericMethodArgumentProvider, Object> getJsonNodeAsString() {
+        return genericMethodArgumentProvider -> Optional.ofNullable(genericMethodArgumentProvider.getRequestBodyAsJsonNode())
+            .map(JsonNode::toString)
+            .orElse(null);
+    }
 
     public static final List<GenericMethodArgument> SERVICE_EXPECTED_ARGS_TYPE = List.of(
         argAsTypes(
@@ -116,7 +125,7 @@ public class GenericMethodArgumentConfig {
             .asList();
     }
 
-    public static GenericMethodArgument argAsTypes(ClassAndDataExtractor... classAndDataExtractors) {
+    private static GenericMethodArgument argAsTypes(ClassAndDataExtractor... classAndDataExtractors) {
         return GenericMethodArgument.builder()
             .typePredicatesAndDataExtractors(
                 elements(classAndDataExtractors)
@@ -159,14 +168,19 @@ public class GenericMethodArgumentConfig {
         };
     }
 
-    private static void validateResolvedPathVariable(ResolvedValueForAnnotation resolvedValueForAnnotation) {
+    private static Object validateResolvedPathVariable(ResolvedValueForAnnotation resolvedValueForAnnotation) {
 
         PathVariable pathVariable = resolvedValueForAnnotation.getExpectedAnnotation();
         MethodParameterInfo methodParameterInfo = resolvedValueForAnnotation.getMethodParameterInfo();
         String pathVariableName = getFirstValue(pathVariable.name(), pathVariable.value(), methodParameterInfo.getName()).get();
-        if (resolvedValueForAnnotation.isValueNotResolved() && pathVariable.required()) {
-            throw new TechnicalException("Cannot find required path variable value with name: " + pathVariableName);
+        if (resolvedValueForAnnotation.isValueNotResolved()) {
+            if (pathVariable.required()) {
+                throw new TechnicalException("Cannot find required path variable value with name: " + pathVariableName);
+            } else {
+                return NULL_REFERENCE;
+            }
         }
+        return resolvedValueForAnnotation.getResolvedValue();
     }
 
     private static Boolean isValidFieldName(MethodArgumentMetaModel methodArgumentMetaModel,
@@ -183,13 +197,16 @@ public class GenericMethodArgumentConfig {
             .orElse(false);
     }
 
-    private static void validateRequestBodyAnnotation(ResolvedValueForAnnotation resolvedValueForAnnotation) {
+    private static Object validateRequestBodyAnnotation(ResolvedValueForAnnotation resolvedValueForAnnotation) {
         if (resolvedValueForAnnotation.isValueNotResolved()) {
             RequestBody requestBodyAnnotation = resolvedValueForAnnotation.getExpectedAnnotation();
             if (requestBodyAnnotation.required()) {
                 informAboutRequiredAnnotation(resolvedValueForAnnotation.getMethodParameterAndAnnotation());
+            } else {
+                return NULL_REFERENCE;
             }
         }
+        return resolvedValueForAnnotation.getResolvedValue();
     }
 
     @SuppressWarnings({"PMD.AvoidReassigningParameters", "PMD.CognitiveComplexity"})
@@ -298,7 +315,7 @@ public class GenericMethodArgumentConfig {
     }
 
     private static GenericMethodArgument argAnnotatedAndAsMetaModels(Class<? extends Annotation> isAnnotatedWith,
-        Consumer<ResolvedValueForAnnotation> resolvedValueValidator,
+        Function<ResolvedValueForAnnotation, Object> resolvedValueValidator,
         TypePredicateAndDataExtractor... typePredicates) {
         return GenericMethodArgument.builder()
             .annotatedWith(isAnnotatedWith)
@@ -349,8 +366,11 @@ public class GenericMethodArgumentConfig {
         MethodParameterAndAnnotation methodParameterAndAnnotation = argumentValueExtractMetaModel.getMethodParameterAndAnnotation();
         RequestHeader requestHeader = methodParameterAndAnnotation.getExpectedAnnotation();
         Map<String, String> headers = genericMethodArgumentProvider.getHeaders();
-        if (headers == null && requestHeader.required()) {
-            informAboutRequiredAnnotation(methodParameterAndAnnotation);
+        if (headers == null) {
+            if (requestHeader.required()) {
+                informAboutRequiredAnnotation(methodParameterAndAnnotation);
+            }
+            return NULL_REFERENCE;
         }
         return headers;
     }
@@ -372,11 +392,12 @@ public class GenericMethodArgumentConfig {
                     if (requestHeader.required()) {
                         throw new TechnicalException("Cannot find required header value with header name: " + headerName);
                     }
-                    return null;
+                    return NULL_REFERENCE;
                 } else {
                     return returnTheSameObjectOrMap(methodParameterInfo, headerValue);
                 }
-            });
+            })
+            .orElse(null);
     }
 
     private static Object resolveQueryParamsAsMap(ArgumentValueExtractMetaModel argumentValueExtractMetaModel) {
@@ -384,8 +405,11 @@ public class GenericMethodArgumentConfig {
         MethodParameterAndAnnotation methodParameterAndAnnotation = argumentValueExtractMetaModel.getMethodParameterAndAnnotation();
         RequestParam requestParam = methodParameterAndAnnotation.getExpectedAnnotation();
         Map<String, Object> httpQueryTranslated = genericMethodArgumentProvider.getHttpQueryTranslated();
-        if (httpQueryTranslated == null && requestParam.required()) {
-            informAboutRequiredAnnotation(methodParameterAndAnnotation);
+        if (httpQueryTranslated == null) {
+            if (requestParam.required()) {
+                informAboutRequiredAnnotation(methodParameterAndAnnotation);
+            }
+            return NULL_REFERENCE;
         }
         return httpQueryTranslated;
     }
@@ -398,18 +422,17 @@ public class GenericMethodArgumentConfig {
         Map<String, Object> httpQueryTranslated = genericMethodArgumentProvider.getHttpQueryTranslated();
         return getFirstValue(requestParam.name(), requestParam.value(), methodParameterInfo.getName())
             .map(requestParamName -> {
-
                 Object requestParamValue = httpQueryTranslated.get(requestParamName);
-
                 if (requestParamValue == null) {
                     if (requestParam.required()) {
                         throw new TechnicalException("Cannot find required http request parameter with name: " + requestParamName);
                     }
-                    return null;
+                    return NULL_REFERENCE;
                 } else {
                     return returnTheSameObjectOrMap(methodParameterInfo, requestParamValue);
                 }
-            });
+            })
+            .orElse(null);
     }
 
     private static Object resolvePathVariableAsSimpleValue(ArgumentValueExtractMetaModel argumentValueExtractMetaModel) {

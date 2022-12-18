@@ -1,8 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.method.argument;
 
-import lombok.Value;
+import lombok.Builder;
+import lombok.Getter;
 
-@Value
+@Builder
+@Getter
 public class ArgumentValueExtractMetaModel {
 
     GenericMethodArgumentProvider genericMethodArgumentProvider;

@@ -1,40 +1,42 @@
 package pl.jalokim.crudwizard.genericapp.service.invoker;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.classMetaModelFromType;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.NULL_REFERENCE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.SERVICE_EXPECTED_ARGS_TYPE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.TypePredicateAndDataExtractorResolver.findTypePredicateAndDataExtractor;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.InvokableReflectionUtils.invokeMethod;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.ArgumentValueExtractMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.EndpointQueryAndUrlMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgument;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericServiceArgumentMethodProvider;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.MethodParameterAndAnnotation;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.MethodParameterInfo;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.ResolvedValueForAnnotation;
+import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.TypePredicateAndDataExtractor;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
-import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
-import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
-import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
-import pl.jalokim.utils.string.StringUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -48,12 +50,6 @@ public class DelegatedServiceMethodInvoker {
         HttpMethod.PUT, HttpStatus.NO_CONTENT,
         HttpMethod.PATCH, HttpStatus.NO_CONTENT
     );
-
-    private static final List<Class<?>> REST_ANNOTATIONS = List.of(RequestHeader.class, RequestParam.class, RequestBody.class, PathVariable.class);
-
-    private static final Object NULL_REFERENCE = new Object();
-
-    private final JsonObjectMapper jsonObjectMapper;
 
     /**
      * arguments which can be resolved:
@@ -70,8 +66,8 @@ public class DelegatedServiceMethodInvoker {
      *
      * by type TranslatedPayload from {@link GenericServiceArgument.requestBodyTranslated}
      *
-     * by type ValidationSessionContext from {@link GenericServiceArgument.validationContext} for validation in service
-     * see {@link ValidationSessionContext} for usage of api, you can add validation message for some object node.
+     * by type ValidationSessionContext from {@link GenericServiceArgument.validationContext} for validation in service see {@link ValidationSessionContext} for
+     * usage of api, you can add validation message for some object node.
      *
      * by @RequestHeader as whole map {@link GenericServiceArgument.headers}
      *
@@ -116,40 +112,71 @@ public class DelegatedServiceMethodInvoker {
     }
 
     private List<Object> collectMethodArguments(GenericServiceArgument genericServiceArgument, ServiceMetaModel serviceMetaModel) {
+
+        EndpointMetaModel endpointMetaModel = genericServiceArgument.getEndpointMetaModel();
+        EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel = EndpointQueryAndUrlMetaModel.builder()
+            .queryArgumentsModel(endpointMetaModel.getQueryArguments())
+            .pathParamsModel(endpointMetaModel.getPathParams())
+            .build();
+
         var methodMetaModel = serviceMetaModel.getServiceBeanAndMethod();
         var methodSignatureMetaModel = methodMetaModel.getMethodSignatureMetaModel();
         List<Object> methodArguments = new ArrayList<>();
         for (int parameterIndex = 0; parameterIndex < methodSignatureMetaModel.getMethodArguments().size(); parameterIndex++) {
             var methodArgumentMetaModel = methodSignatureMetaModel.getMethodArguments().get(parameterIndex);
             var argumentType = methodArgumentMetaModel.getArgumentType();
-            Class<?> rawClassOfArgument = argumentType.getRawClass();
-            Object argumentToAdd;
             MethodParameterInfo methodParameterInfo = new MethodParameterInfo(argumentType, parameterIndex,
                 methodArgumentMetaModel.getParameter().getName());
 
-            if (EndpointMetaModel.class.isAssignableFrom(rawClassOfArgument)) {
-                argumentToAdd = genericServiceArgument.getEndpointMetaModel();
-            } else if (GenericServiceArgument.class.isAssignableFrom(rawClassOfArgument)) {
-                argumentToAdd = genericServiceArgument;
-            } else if (HttpServletRequest.class.isAssignableFrom(rawClassOfArgument)) {
-                argumentToAdd = genericServiceArgument.getRequest();
-            } else if (HttpServletResponse.class.isAssignableFrom(rawClassOfArgument)) {
-                argumentToAdd = genericServiceArgument.getResponse();
-            } else if (JsonNode.class.isAssignableFrom(rawClassOfArgument)) {
-                argumentToAdd = genericServiceArgument.getRequestBody();
-            } else if (TranslatedPayload.class.isAssignableFrom(rawClassOfArgument)) {
-                argumentToAdd = genericServiceArgument.getRequestBodyTranslated();
-            } else if (ValidationSessionContext.class.isAssignableFrom(rawClassOfArgument)) {
-                argumentToAdd = genericServiceArgument.getValidationContext();
-            } else {
-                Annotation firstRestAnnotation = getFirstRestAnnotation(methodArgumentMetaModel);
-                argumentToAdd = resolveArgumentObjectByAnnotation(genericServiceArgument, firstRestAnnotation, methodParameterInfo);
+            ClassMetaModel typeOfInputServiceOrMapper = endpointMetaModel.getPayloadMetamodel();
+            ClassMetaModel classMetaModelFromMethodArg = classMetaModelFromType(argumentType);
+
+            TypePredicateAndDataExtractor typePredicateAndDataExtractor = findTypePredicateAndDataExtractor(
+                getCommonExpectedArgsTypeAndOther(SERVICE_EXPECTED_ARGS_TYPE),
+                typeOfInputServiceOrMapper,
+                methodArgumentMetaModel,
+                classMetaModelFromMethodArg,
+                endpointQueryAndUrlMetaModel);
+
+            Object argumentToAdd = null;
+            if (typePredicateAndDataExtractor != null) {
+                MethodParameterAndAnnotation methodParameterAndAnnotation = createMethodParameterAndAnnotation(
+                    typePredicateAndDataExtractor, methodParameterInfo,
+                    methodMetaModel.getOriginalMethod(), methodArgumentMetaModel.getParameter());
+                argumentToAdd = typePredicateAndDataExtractor.getExtractDataFunction()
+                    .apply(ArgumentValueExtractMetaModel.builder()
+                        .genericMethodArgumentProvider(createDataProvider(genericServiceArgument))
+                        .methodParameterAndAnnotation(methodParameterAndAnnotation)
+                        .build());
+
+                GenericMethodArgument genericMethodArgument = typePredicateAndDataExtractor.getGenericMethodArgument();
+                Function<ResolvedValueForAnnotation, Object> resolvedValueValidator = genericMethodArgument.getResolvedValueValidator();
+                if (resolvedValueValidator != null) {
+                    argumentToAdd = resolvedValueValidator.apply(new ResolvedValueForAnnotation(
+                        methodParameterAndAnnotation.getAnnotation(),
+                        argumentToAdd,
+                        methodParameterAndAnnotation
+                    ));
+                }
             }
 
             addNewMethodArgumentValue(genericServiceArgument, methodArguments, methodParameterInfo,
                 methodArgumentMetaModel, argumentToAdd);
         }
         return methodArguments;
+    }
+
+    private MethodParameterAndAnnotation createMethodParameterAndAnnotation(TypePredicateAndDataExtractor typePredicateAndDataExtractor,
+        MethodParameterInfo methodParameterInfo, Method method, Parameter parameter) {
+
+        GenericMethodArgument genericMethodArgument = typePredicateAndDataExtractor.getGenericMethodArgument();
+        Class<? extends Annotation> annotatedWith = genericMethodArgument.getAnnotatedWith();
+        Annotation annotation = null;
+        if (annotatedWith != null) {
+            annotation = parameter.getAnnotation(annotatedWith);
+        }
+
+        return new MethodParameterAndAnnotation(annotation, methodParameterInfo, method);
     }
 
     private void addNewMethodArgumentValue(GenericServiceArgument genericServiceArgument, List<Object> methodArguments,
@@ -167,152 +194,6 @@ public class DelegatedServiceMethodInvoker {
                 methodArguments.add(argumentToAdd);
             }
         }
-    }
-
-    private static Annotation getFirstRestAnnotation(MethodArgumentMetaModel methodArgumentMetaModel) {
-        for (Annotation annotation : methodArgumentMetaModel.getAnnotations()) {
-            if (REST_ANNOTATIONS.contains(annotation.annotationType())) {
-                return annotation;
-            }
-        }
-        return null;
-    }
-
-    private Object resolveArgumentObjectByAnnotation(GenericServiceArgument genericServiceArgument, Annotation annotation,
-        MethodParameterInfo methodParameterInfo) {
-        if (annotation == null) {
-            return null;
-        }
-        AtomicReference<Object> returnObjectRef = new AtomicReference<>();
-        if (RequestHeader.class.isAssignableFrom(annotation.annotationType())) {
-            resolveValueForHeaders(genericServiceArgument, (RequestHeader) annotation, returnObjectRef, methodParameterInfo);
-        } else if (RequestParam.class.isAssignableFrom(annotation.annotationType())) {
-            resolveValueForQueryParams(genericServiceArgument, (RequestParam) annotation, returnObjectRef, methodParameterInfo);
-        } else if (RequestBody.class.isAssignableFrom(annotation.annotationType())) {
-            resolveValueForRequestBody(genericServiceArgument, (RequestBody) annotation, returnObjectRef, methodParameterInfo);
-        } else if (PathVariable.class.isAssignableFrom(annotation.annotationType())) {
-            resolveValuePathVariable(genericServiceArgument, (PathVariable) annotation, returnObjectRef, methodParameterInfo);
-        }
-        return returnObjectRef.get();
-    }
-
-    private void resolveValueForHeaders(GenericServiceArgument genericServiceArgument, RequestHeader requestHeader,
-        AtomicReference<Object> returnObjectRef, MethodParameterInfo methodParameterInfo) {
-        var argumentMetaModel = methodParameterInfo.getArgumentMetaModel();
-        getFirstValue(requestHeader.name(), requestHeader.value())
-            .ifPresentOrElse(headerName ->
-                    resolveHeaderValueByHeaderName(genericServiceArgument, requestHeader, returnObjectRef, argumentMetaModel, headerName),
-                () -> {
-                    if (Map.class.isAssignableFrom(argumentMetaModel.getRawClass())) {
-                        Map<String, String> headers = genericServiceArgument.getHeaders();
-                        if (headers == null && requestHeader.required()) {
-                            informAboutRequiredAnnotation(requestHeader, methodParameterInfo.getIndex(), genericServiceArgument);
-                        }
-                        returnObjectRef.set(headers);
-                    } else {
-                        resolveHeaderValueByHeaderName(genericServiceArgument, requestHeader,
-                            returnObjectRef, argumentMetaModel, methodParameterInfo.getName());
-                    }
-                });
-    }
-
-    private void resolveHeaderValueByHeaderName(GenericServiceArgument genericServiceArgument, RequestHeader requestHeader,
-        AtomicReference<Object> returnObjectRef,
-        JavaTypeMetaModel argumentMetaModel, String headerName) {
-        String headerValue = Optional.ofNullable(genericServiceArgument.getHeaders())
-            .map(headers -> headers.get(headerName))
-            .orElse(null);
-
-        if (headerValue == null) {
-            if (requestHeader.required()) {
-                throw new TechnicalException("Cannot find required header value with header name: " + headerName);
-            }
-            returnObjectRef.set(NULL_REFERENCE);
-        } else {
-            if (argumentMetaModel.getRawClass().isAssignableFrom(headerValue.getClass())) {
-                returnObjectRef.set(headerValue);
-            } else {
-                returnObjectRef.set(jsonObjectMapper.convertToObject(headerValue, argumentMetaModel));
-            }
-        }
-    }
-
-    private void resolveValueForQueryParams(GenericServiceArgument genericServiceArgument, RequestParam requestParam,
-        AtomicReference<Object> returnObjectRef, MethodParameterInfo methodParameterInfo) {
-        var argumentMetaModel = methodParameterInfo.getArgumentMetaModel();
-        getFirstValue(requestParam.name(), requestParam.value())
-            .ifPresentOrElse(requestParamName ->
-                    resolveQueryParamTypeByName(genericServiceArgument, requestParam, returnObjectRef, argumentMetaModel, requestParamName),
-                () -> {
-                    if (Map.class.isAssignableFrom(argumentMetaModel.getRawClass())) {
-                        Map<String, Object> httpQueryTranslated = genericServiceArgument.getHttpQueryTranslated();
-                        if (httpQueryTranslated == null && requestParam.required()) {
-                            informAboutRequiredAnnotation(requestParam, methodParameterInfo.getIndex(), genericServiceArgument);
-                        }
-                        returnObjectRef.set(httpQueryTranslated);
-                    } else {
-                        resolveQueryParamTypeByName(genericServiceArgument, requestParam, returnObjectRef, argumentMetaModel, methodParameterInfo.getName());
-                    }
-                });
-    }
-
-    private void resolveQueryParamTypeByName(GenericServiceArgument genericServiceArgument, RequestParam requestParam, AtomicReference<Object> returnObjectRef,
-        JavaTypeMetaModel argumentMetaModel, String requestParamName) {
-        Object requestParamValue = genericServiceArgument.getHttpQueryTranslated().get(requestParamName);
-        if (requestParamValue == null) {
-            if (requestParam.required()) {
-                throw new TechnicalException("Cannot find required http request parameter with name: " + requestParamName);
-            }
-            returnObjectRef.set(NULL_REFERENCE);
-        } else {
-            if (argumentMetaModel.getRawClass().isAssignableFrom(requestParamValue.getClass())) {
-                returnObjectRef.set(requestParamValue);
-            } else {
-                returnObjectRef.set(jsonObjectMapper.convertToObject(requestParamValue.toString(), argumentMetaModel));
-            }
-        }
-    }
-
-    private void resolveValueForRequestBody(GenericServiceArgument genericServiceArgument, RequestBody requestBody,
-        AtomicReference<Object> returnObjectRef, MethodParameterInfo methodParameterInfo) {
-        if (genericServiceArgument.getRequestBody() == null) {
-            if (requestBody.required()) {
-                informAboutRequiredAnnotation(requestBody, methodParameterInfo.getIndex(), genericServiceArgument);
-            } else {
-                returnObjectRef.set(NULL_REFERENCE);
-            }
-        } else {
-            Class<?> parameterClass = methodParameterInfo.getArgumentMetaModel().getRawClass();
-            if (JsonNode.class.isAssignableFrom(parameterClass)) {
-                returnObjectRef.set(genericServiceArgument.getRequestBody());
-            } else if (TranslatedPayload.class.isAssignableFrom(parameterClass)) {
-                returnObjectRef.set(genericServiceArgument.getRequestBodyTranslated());
-            } else {
-                returnObjectRef.set(jsonObjectMapper.convertToObject(ObjectNodePath.rootNode(),
-                    genericServiceArgument.getRequestBody(), parameterClass));
-            }
-        }
-    }
-
-    private void resolveValuePathVariable(GenericServiceArgument genericServiceArgument, PathVariable pathVariable,
-        AtomicReference<Object> returnObjectRef, MethodParameterInfo methodParameterInfo) {
-        var argumentMetaModel = methodParameterInfo.getArgumentMetaModel();
-        getFirstValue(pathVariable.name(), pathVariable.value(), methodParameterInfo.getName())
-            .ifPresent(pathVariableName -> {
-                Object pathVariableValue = genericServiceArgument.getUrlPathParams().get(pathVariableName);
-                if (pathVariableValue == null) {
-                    if (pathVariable.required()) {
-                        throw new TechnicalException("Cannot find required path variable value with name: " + pathVariableName);
-                    }
-                    returnObjectRef.set(NULL_REFERENCE);
-                } else {
-                    if (argumentMetaModel.getRawClass().isAssignableFrom(pathVariableValue.getClass())) {
-                        returnObjectRef.set(pathVariableValue);
-                    } else {
-                        returnObjectRef.set(jsonObjectMapper.convertToObject(pathVariableValue.toString(), argumentMetaModel));
-                    }
-                }
-            });
     }
 
     @SuppressWarnings("unchecked")
@@ -334,10 +215,6 @@ public class DelegatedServiceMethodInvoker {
             .body(result);
     }
 
-    public void informAboutRequiredAnnotation(Annotation annotation, int parameterIndex, GenericServiceArgument genericServiceArgument) {
-        throw new TechnicalException("Argument annotated " + annotation + " is required " + atIndexInMethod(parameterIndex, genericServiceArgument));
-    }
-
     private String atIndexInMethod(int parameterIndex, GenericServiceArgument genericServiceArgument) {
         var method = genericServiceArgument.getEndpointMetaModel().getServiceMetaModel()
             .getServiceBeanAndMethod().getOriginalMethod();
@@ -346,10 +223,16 @@ public class DelegatedServiceMethodInvoker {
             realIndex, method.getDeclaringClass().getCanonicalName(), method.getName(), method);
     }
 
-    public static Optional<String> getFirstValue(String... arguments) {
-        return elements(arguments)
-            .filter(StringUtils::isNotBlank)
-            .findFirst();
+    private GenericServiceArgumentMethodProvider createDataProvider(GenericServiceArgument genericServiceArgument) {
+        return new GenericServiceArgumentMethodProvider(genericServiceArgument.getEndpointMetaModel(),
+            genericServiceArgument.getRequest(),
+            genericServiceArgument.getResponse(),
+            genericServiceArgument.getRequestBodyTranslated(),
+            genericServiceArgument.getRequestBody(),
+            genericServiceArgument.getHeaders(),
+            genericServiceArgument.getHttpQueryTranslated(),
+            genericServiceArgument.getUrlPathParams(),
+            genericServiceArgument,
+            genericServiceArgument.getValidationContext());
     }
-
 }

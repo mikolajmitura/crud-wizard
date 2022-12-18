@@ -15,18 +15,17 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.Generic
 import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.MAPPER_JOINED_RESULTS_EXPECTED_ARGS_TYPE;
 import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.SERVICE_EXPECTED_ARGS_TYPE;
 import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgumentConfig.getCommonExpectedArgsTypeAndOther;
+import static pl.jalokim.crudwizard.genericapp.metamodel.method.argument.TypePredicateAndDataExtractorResolver.findTypePredicateAndDataExtractor;
 import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -392,8 +391,9 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                 log.debug("argument index: {} name: {}", methodArgIndex, methodArgument.getParameter().getName());
                 ClassMetaModel classMetaModelFromMethodArg = classMetaModelFromType(methodArgument.getArgumentType());
                 log.debug("classMetaModelFromMethodArg: {}", classMetaModelFromMethodArg.getTypeDescription());
-                boolean foundExpectedMethodArgType = foundExpectedMethodArgType(methodExpectedArguments,
+                TypePredicateAndDataExtractor typePredicateAndDataExtractor = findTypePredicateAndDataExtractor(methodExpectedArguments,
                     typeOfInputServiceOrMapper, methodArgument, classMetaModelFromMethodArg, endpointQueryAndUrlMetaModel);
+                boolean foundExpectedMethodArgType = typePredicateAndDataExtractor != null;
                 if (!foundExpectedMethodArgType) {
                     log.debug("validateMethodArguments not found foundExpectedMethodArgType");
                     results.add(newError("methodName",
@@ -406,63 +406,6 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         } catch (TechnicalException ex) {
             log.debug("exception during validation", ex);
         }
-    }
-
-    @SuppressWarnings("PMD.UnusedAssignment")
-    private boolean foundExpectedMethodArgType(List<GenericMethodArgument> methodExpectedArguments, ClassMetaModel typeOfInputServiceOrMapper,
-        MethodArgumentMetaModel methodArgument, ClassMetaModel classMetaModelFromMethodArg, EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
-
-        boolean foundExpectedMethodArgType = false;
-        for (GenericMethodArgument expectedMethodArgument : methodExpectedArguments) {
-
-            Class<?> annotatedWith = expectedMethodArgument.getAnnotatedWith();
-            List<TypePredicateAndDataExtractor> typePredicates = expectedMethodArgument.getTypePredicatesAndDataExtractors();
-            log.debug("expectedMethodArgument isAnnotatedWith: {}", annotatedWith);
-            log.debug("expectedMethodArgument typePredicates size: {}", typePredicates.size());
-
-            boolean isAnnotatedWithFound = false;
-            AtomicInteger index = new AtomicInteger();
-            if ((annotatedWith == null ||
-                (isAnnotatedWithFound = elements(methodArgument.getAnnotations())
-                    .map(Annotation::annotationType)
-                    .asList()
-                    .contains(annotatedWith))) &&
-                elements(typePredicates)
-                    .anyMatch(typePredicate -> {
-                            log.debug("checking predicate at index: {}", index.incrementAndGet());
-                            boolean subTypeOfResult = classMetaModelFromMethodArg
-                                .isSubTypeOf(typePredicate.getSubTypeOf());
-
-                            log.debug("classMetaModelFromMethodArg is sub type of {}, result: {}",
-                                typePredicate.getSubTypeOf().getTypeDescription(), subTypeOfResult);
-
-                            boolean predicatesAllEmptyOrAllMatch = typePredicate.getPredicatesOfModel().isEmpty() ||
-                                typePredicate.getPredicatesOfModel().stream().allMatch(
-                                    predicateClass -> predicateClass.test(
-                                        methodArgument,
-                                        classMetaModelFromMethodArg,
-                                        typeOfInputServiceOrMapper,
-                                        endpointQueryAndUrlMetaModel
-                                    ));
-
-                            log.debug("predicatesAllEmptyOrAllMatch: {}", predicatesAllEmptyOrAllMatch);
-
-                            return subTypeOfResult &&
-                                predicatesAllEmptyOrAllMatch;
-                        }
-                    )) {
-                log.debug("foundExpectedMethodArgType set to true");
-                foundExpectedMethodArgType = true;
-                break;
-            }
-
-            if (isAnnotatedWithFound) {
-                log.debug("foundExpectedMethodArgType set to false due to isAnnotatedWithFound=true");
-                foundExpectedMethodArgType = false;
-                break;
-            }
-        }
-        return foundExpectedMethodArgType;
     }
 
     private List<InnerError> validateExistenceBeanAndMethod(BeanAndMethodDto beanAndMethodDto) {

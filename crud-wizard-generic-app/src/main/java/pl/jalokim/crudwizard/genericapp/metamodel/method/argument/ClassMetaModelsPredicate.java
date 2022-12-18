@@ -5,7 +5,15 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel
 
 public interface ClassMetaModelsPredicate {
 
-    boolean test(MethodArgumentMetaModel methodArgumentMetaModel,
+    default boolean test(MethodArgumentMetaModel methodArgumentMetaModel,
+        ClassMetaModel methodArgClassMetaModel,
+        ClassMetaModel inputTypeOfMapperOrService,
+        EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel) {
+        return inputTypeOfMapperOrService != null && innerTest(methodArgumentMetaModel, methodArgClassMetaModel,
+            inputTypeOfMapperOrService, endpointQueryAndUrlMetaModel);
+    }
+
+    boolean innerTest(MethodArgumentMetaModel methodArgumentMetaModel,
         ClassMetaModel methodArgClassMetaModel,
         ClassMetaModel inputTypeOfMapperOrService,
         EndpointQueryAndUrlMetaModel endpointQueryAndUrlMetaModel);

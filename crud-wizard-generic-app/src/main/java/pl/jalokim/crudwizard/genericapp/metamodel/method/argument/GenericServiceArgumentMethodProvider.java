@@ -15,17 +15,14 @@ public class GenericServiceArgumentMethodProvider extends GenericMethodArgumentP
 
     private final GenericServiceArgument genericServiceArgument;
     private final ValidationSessionContext validationSessionContext;
-    private final TranslatedPayload translatedPayload;
 
     public GenericServiceArgumentMethodProvider(EndpointMetaModel endpointMetaModel, HttpServletRequest httpServletRequest,
         HttpServletResponse httpServletResponse, TranslatedPayload translatedPayload, JsonNode requestBodyAsJsonNode,
         Map<String, String> headers, Map<String, Object> httpQueryTranslated, Map<String, Object> urlPathParams,
-        GenericServiceArgument genericServiceArgument, ValidationSessionContext validationSessionContext,
-        TranslatedPayload translatedPayload1) {
+        GenericServiceArgument genericServiceArgument, ValidationSessionContext validationSessionContext) {
         super(endpointMetaModel, httpServletRequest, httpServletResponse,
             translatedPayload, requestBodyAsJsonNode, headers, httpQueryTranslated, urlPathParams);
         this.genericServiceArgument = genericServiceArgument;
         this.validationSessionContext = validationSessionContext;
-        this.translatedPayload = translatedPayload1;
     }
 }
