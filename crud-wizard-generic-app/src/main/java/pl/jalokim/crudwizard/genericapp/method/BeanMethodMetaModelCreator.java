@@ -16,6 +16,10 @@ public class BeanMethodMetaModelCreator {
 
     private final MethodSignatureMetaModelResolver methodSignatureMetaModelResolver;
 
+    public BeanAndMethodMetaModel createBeanMethodMetaModel(String methodName, Class<?> instanceClass, String beanName) {
+        return createBeanMethodMetaModel(methodName, instanceClass.getCanonicalName(), beanName);
+    }
+
     public BeanAndMethodMetaModel createBeanMethodMetaModel(String methodName, String className, String beanName) {
         Class<?> realClass = loadRealClass(className);
         Method method = findMethodByName(realClass, methodName);

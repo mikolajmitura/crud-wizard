@@ -57,11 +57,16 @@ import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.OTHER_WITH_ELEMENTS_MDL
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.OTHER_WITH_ELEMENTS_MODEL
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_2_MODEL
+import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_2_MODEL2
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MAPPING_CONF
+import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MAPPING_CONF2
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_META_MODEL_AS_METAMODEL
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MODEL
+import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MODEL2
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MODEL_2_MDL
+import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MODEL_2_MDL2
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MODEL_MDL
+import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.PERSON_MODEL_MDL2
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.SAMPLE_PERSON_DTO_AS_CLASS
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.SET_OF_CLASSES
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.SOME_CLS_TO_CLS_CONF
@@ -131,9 +136,13 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.Fields
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.validation.MapperGenerationException
+import pl.jalokim.crudwizard.genericapp.mapper.instance.SomeDocumentMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
+import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.utils.file.FileUtils
@@ -160,6 +169,9 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
     @Autowired
     MetaModelContextService metaModelContextService
 
+    @Autowired
+    BeanMethodMetaModelCreator beanMethodMetaModelCreator
+
     @Unroll
     def "return expected code for #expectedFileName"() {
         given:
@@ -176,10 +188,13 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             newMapperGenerateConfiguration.addSubMapperConfiguration(methodName, methodMapperConfig)
         }
         def sessionTimestamp = overiddenSessionTime != null ? overiddenSessionTime : 1
+        Map<String, String> headers = [:]
 
         if (expectedFileName == 'model_multiSourceExampleModel_to_class_ForTestMappingMultiSourceDto') {
             def metamodelContext = metaModelContextService.metaModelContext
             metamodelContext.mapperMetaModels.setMapperModelWithName("fromLocalDateToStringMapper", MapperMetaModel.builder()
+                .methodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel("mainMap",
+                    LocalDateToStringMapperDummyGenerated.class, null))
                 .mapperName("fromLocalDateToStringMapper")
                 .mapperInstance(new LocalDateToStringMapperDummyGenerated())
                 .build())
@@ -188,6 +203,8 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         if (expectedFileName == 'usage_invoker_other_mapper_with_class_metamodel_by_name') {
             def metamodelContext = metaModelContextService.metaModelContext
             metamodelContext.mapperMetaModels.setMapperModelWithName("personToPerson2Mapper", MapperMetaModel.builder()
+                .methodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel("mainMap",
+                    PersonToPerson2MapperDummyGenerated.class, null))
                 .mapperName("personToPerson2Mapper")
                 .mapperInstance(new PersonToPerson2MapperDummyGenerated())
                 .build())
@@ -195,6 +212,18 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
             def classMetaModels = metaModelContextService.metaModelContext.classMetaModels
             classMetaModels.put(1L, DOCUMENT_MODEL)
             classMetaModels.put(2L, DOCUMENT_OTHER_MODEL)
+        }
+
+        if (expectedFileName == 'usage_invoker_other_mapper_which_is_not_generated') {
+            def metamodelContext = metaModelContextService.metaModelContext
+            metamodelContext.mapperMetaModels.setMapperModelWithName("someDocumentMapper", MapperMetaModel.builder()
+                .methodMetaModel(beanMethodMetaModelCreator.createBeanMethodMetaModel("mapDocument",
+                    SomeDocumentMapper.class, null))
+                .mapperName("someDocumentMapper")
+                .mapperInstance(new SomeDocumentMapper())
+                .build())
+
+            headers.put("x-user", "123")
         }
 
         if (expectedFileName == "mapping_metamodel_with_enums_to_metamodel_with_enums") {
@@ -216,6 +245,12 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         GenericMapperArgument finalGenericMapperArgument = genericMapperArgument.toBuilder()
             .sourceMetaModel(sourceMetaModel)
             .targetMetaModel(targetMetaModel)
+            .headers(headers)
+            .genericServiceArgument(GenericServiceArgument.builder()
+                .headers(headers)
+                .endpointMetaModel(EndpointMetaModel.builder()
+                    .build())
+                .build())
             .build()
 
         then:
@@ -454,6 +489,11 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         PERSON_MODEL                           | PERSON_2_MODEL                                | PERSON_MAPPING_CONF                           |
             "usage_invoker_other_mapper_with_class_metamodel_by_name"             | PERSON_MODEL_MDL                                           |
             PERSON_MODEL_2_MDL                                                                                                                          | null
+
+        // usage of invoke other mapper which is not generated
+        PERSON_MODEL2                          | PERSON_2_MODEL2                               | PERSON_MAPPING_CONF2                          |
+            "usage_invoker_other_mapper_which_is_not_generated"                   | PERSON_MODEL_MDL2                                          |
+            PERSON_MODEL_2_MDL2                                                                                                                         | null
     }
 
     def "not found mapping way for object fields via main method chain"() {

@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassModelWithGenerics
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
@@ -48,6 +49,8 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.Fields
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.MethodInCurrentClassAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression
+import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentSource
+import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentTarget
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
@@ -1887,19 +1890,19 @@ class MapperCodeGeneratorSamples {
         .build()
 
     public static final def PERSON_MODEL_MDL = emptyGenericMapperArgument([
-        id : 1L,
-        name: "personName",
+        id      : 1L,
+        name    : "personName",
         document: [
-            ID: 11L,
+            ID          : 11L,
             serialNumber: "XCD_2304895"
         ]
     ])
 
     public static final def PERSON_MODEL_2_MDL = [
-        id : 1L,
-        name: "personName",
+        id            : 1L,
+        name          : "personName",
         documentTarget: [
-            uuid: "1234-1211",
+            uuid  : "1234-1211",
             number: "PL_XCD_2304895"
         ]
     ]
@@ -1932,6 +1935,54 @@ class MapperCodeGeneratorSamples {
                             new FieldsChainToAssignExpression(PERSON_MODEL,
                                 "rootSourceObject", [PERSON_MODEL.getFieldByName("document")]),
                             "personToPerson2Mapper"
+                        )
+                    ])
+                    .build()
+            ])
+            .build()).build())
+
+    public static final ClassMetaModel PERSON_MODEL2 = ClassMetaModel.builder()
+        .name("personm2")
+        .fields([
+            createValidFieldMetaModel("id", Long),
+            createValidFieldMetaModel("name", String),
+            createValidFieldMetaModel("document", createClassModelWithGenerics(SomeDocumentSource, String))
+        ]
+        )
+        .build()
+
+    public static final ClassMetaModel PERSON_2_MODEL2 = ClassMetaModel.builder()
+        .name("person2m2")
+        .fields([
+            createValidFieldMetaModel("id", Long),
+            createValidFieldMetaModel("name", String),
+            createValidFieldMetaModel("documentTarget", createClassModelWithGenerics(SomeDocumentTarget, String, Long))
+        ]
+        )
+        .build()
+
+    public static final def PERSON_MODEL_MDL2 = emptyGenericMapperArgument([
+        id      : 1L,
+        name    : "personName",
+        document: new SomeDocumentSource<String>(11L, "XCD_2304895")
+    ])
+
+    public static final def PERSON_MODEL_2_MDL2 = [
+        id            : 1L,
+        name          : "personName",
+        documentTarget: new SomeDocumentTarget<String, Long>("11", "XCD_2304895", 123L)
+    ]
+
+    public static final MapperGenerateConfiguration PERSON_MAPPING_CONF2 = withMapperConfigurations(MapperConfiguration.builder()
+        .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+            .mappingsByPropertyName([
+                documentTarget: PropertiesOverriddenMapping.builder()
+                    .valueMappingStrategy([
+                        new ByMapperNameAssignExpression(
+                            PERSON_2_MODEL2.getRequiredFieldByName("documentTarget").getFieldType(),
+                            new FieldsChainToAssignExpression(PERSON_MODEL2,
+                                "rootSourceObject", [PERSON_MODEL2.getRequiredFieldByName("document")]),
+                            "someDocumentMapper"
                         )
                     ])
                     .build()

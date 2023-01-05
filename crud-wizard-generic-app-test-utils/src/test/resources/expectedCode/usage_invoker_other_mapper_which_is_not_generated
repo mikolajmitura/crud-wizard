@@ -9,12 +9,12 @@ import java.util.List;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 /**
-mapping from genericModel name: person to genericModel name: person2
+mapping from genericModel name: personm2 to genericModel name: person2m2
 **/
-class MpersonToMperson2Mapper1 implements GeneratedMapper {
+class Mpersonm2ToMperson2m2Mapper1 implements GeneratedMapper {
 		private final pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker;
 		private final pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService;
-    MpersonToMperson2Mapper1(pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker,
+    Mpersonm2ToMperson2m2Mapper1(pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker,
 pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService) {
 		this.mapperByNameInvoker = mapperByNameInvoker;
 		this.metaModelContextService = metaModelContextService;
@@ -35,9 +35,19 @@ pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaM
 
 		Map<String, Object> map = new java.util.HashMap<>();
 
-		map.put("documentTarget", ((java.util.Map<java.lang.String, java.lang.Object>) mapperByNameInvoker.mapWithMapper("personToPerson2Mapper", genericMapperArgument, ((java.util.Map<java.lang.String, java.lang.Object>) Optional.ofNullable(rootSourceObject)
+		map.put("documentTarget", ((pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentTarget<java.lang.String, java.lang.Long>) mapperByNameInvoker.mapWithMapper("someDocumentMapper", genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentSource<java.lang.String>) Optional.ofNullable(rootSourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("document"))
-			.orElse(null)), metaModelContextService.getClassMetaModelByName("document"), metaModelContextService.getClassMetaModelByName("documentOther"))));
+			.orElse(null)), ClassMetaModel.builder()
+            	.realClass(pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentSource.class)
+            	.genericTypes(List.of(ClassMetaModel.builder()
+            	.realClass(java.lang.String.class)
+            	.build()))            	.build(), ClassMetaModel.builder()
+            	.realClass(pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentTarget.class)
+            	.genericTypes(List.of(ClassMetaModel.builder()
+            	.realClass(java.lang.String.class)
+            	.build(), ClassMetaModel.builder()
+            	.realClass(java.lang.Long.class)
+            	.build()))            	.build())));
 
 		map.put("id", ((java.lang.Long) Optional.ofNullable(sourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))

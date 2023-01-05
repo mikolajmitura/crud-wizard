@@ -10,7 +10,10 @@ import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 @Getter
 public class InvokerGenericMapperArgument {
 
-    GenericServiceArgument genericServiceArgument;
     MapperMetaModel mapperMetaModel;
     GenericMapperArgument mapperArgument;
+
+    public GenericServiceArgument getGenericServiceArgument() {
+        return mapperArgument.getGenericServiceArgument();
+    }
 }

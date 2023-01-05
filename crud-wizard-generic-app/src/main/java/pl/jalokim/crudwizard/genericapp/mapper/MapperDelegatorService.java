@@ -15,7 +15,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
-import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class MapperDelegatorService {
     private final DelegatedMapperMethodInvoker delegatedMapperMethodInvoker;
 
     @SuppressWarnings({"PMD.ConfusingTernary"})
-    public Object mapToTarget(GenericServiceArgument genericServiceArgument, MapperMetaModel mapperMetaModel, GenericMapperArgument mapperArgument) {
+    public Object mapToTarget(MapperMetaModel mapperMetaModel, GenericMapperArgument mapperArgument) {
         if (GENERATED.equals(mapperMetaModel.getMapperType())) {
             GeneratedMapper generatedMapper = ((GeneratedMapper) mapperMetaModel.getMapperInstance());
             return generatedMapper.mainMap(mapperArgument);
@@ -37,7 +36,6 @@ public class MapperDelegatorService {
                 return invokeMethod(mapperMetaModel.getMapperInstance(), mapperMetaModel.getMethodMetaModel().getOriginalMethod(), mapperArgument);
             }
             return delegatedMapperMethodInvoker.callMethod(InvokerGenericMapperArgument.builder()
-                .genericServiceArgument(genericServiceArgument)
                 .mapperMetaModel(mapperMetaModel)
                 .mapperArgument(mapperArgument)
                 .build());

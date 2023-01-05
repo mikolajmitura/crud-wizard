@@ -5,6 +5,7 @@ import java.util.Map;
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+import java.util.List;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 /**
@@ -12,13 +13,13 @@ mapping from genericModel name: multiSourceExampleModel to real class: pl.jaloki
 **/
 class MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
-		private final pl.jalokim.crudwizard.genericapp.mapper.invoker.GeneratedMapperInvoker generatedMapperInvoker;
+		private final pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker;
 		private final pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService;
     MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1(org.springframework.core.convert.ConversionService conversionService,
-pl.jalokim.crudwizard.genericapp.mapper.invoker.GeneratedMapperInvoker generatedMapperInvoker,
+pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker,
 pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService) {
 		this.conversionService = conversionService;
-		this.generatedMapperInvoker = generatedMapperInvoker;
+		this.mapperByNameInvoker = mapperByNameInvoker;
 		this.metaModelContextService = metaModelContextService;
     }
 
@@ -172,7 +173,7 @@ pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaM
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentData"))
 			.orElse(null)))),
 
-		conversionService.convert(((java.lang.String) generatedMapperInvoker.mapWithMapper("fromLocalDateToStringMapper", genericMapperArgument, ((java.time.LocalDateTime) Optional.ofNullable(rootSourceObject)
+		conversionService.convert(((java.lang.String) mapperByNameInvoker.mapWithMapper("fromLocalDateToStringMapper", genericMapperArgument, ((java.time.LocalDateTime) Optional.ofNullable(rootSourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart1"))
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("localDateTime66"))
 			.orElse(null)), ClassMetaModel.builder()

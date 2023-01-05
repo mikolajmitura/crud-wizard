@@ -18,7 +18,7 @@ public class ClassMetaModelBuildExpression {
     public String toString() {
         String genericParts = "";
         if (CollectionUtils.isNotEmpty(genericTypeExpressions)) {
-            genericParts = INDENTATION + "\t.genericTypes(" + elements(genericTypeExpressions).asConcatText(", ") + ")";
+            genericParts = INDENTATION + "\t.genericTypes(List.of(" + elements(genericTypeExpressions).asConcatText(", ") + "))";
         }
         return "ClassMetaModel.builder()" + System.lineSeparator() +
             INDENTATION + "\t.realClass(" + realClass.getCanonicalName() + ".class)" + System.lineSeparator() +
