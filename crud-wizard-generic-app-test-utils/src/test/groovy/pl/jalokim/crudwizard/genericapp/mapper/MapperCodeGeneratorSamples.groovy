@@ -41,6 +41,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.config.EnumEntriesMappin
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping
+import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ByMapperNameAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.BySpringBeanMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.EachElementMapByMethodAssignExpression
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.FieldsChainToAssignExpression
@@ -1866,4 +1867,74 @@ class MapperCodeGeneratorSamples {
                 )] as ListAsListGenericType2.NestedCollectionElement[]
         ] as Set
     )
+
+    public static final ClassMetaModel DOCUMENT_MODEL = ClassMetaModel.builder()
+        .name("document")
+        .fields([
+            createValidFieldMetaModel("ID", Long),
+            createValidFieldMetaModel("serialNumber", String)]
+        )
+        .build()
+
+    public static final ClassMetaModel PERSON_MODEL = ClassMetaModel.builder()
+        .name("person")
+        .fields([
+            createValidFieldMetaModel("id", Long),
+            createValidFieldMetaModel("name", String),
+            createValidFieldMetaModel("document", DOCUMENT_MODEL)
+        ]
+        )
+        .build()
+
+    public static final def PERSON_MODEL_MDL = emptyGenericMapperArgument([
+        id : 1L,
+        name: "personName",
+        document: [
+            ID: 11L,
+            serialNumber: "XCD_2304895"
+        ]
+    ])
+
+    public static final def PERSON_MODEL_2_MDL = [
+        id : 1L,
+        name: "personName",
+        documentTarget: [
+            uuid: "1234-1211",
+            number: "PL_XCD_2304895"
+        ]
+    ]
+
+    public static final DOCUMENT_OTHER_MODEL = ClassMetaModel.builder()
+        .name("documentOther")
+        .fields([
+            createValidFieldMetaModel("uuid", String),
+            createValidFieldMetaModel("number", String)]
+        )
+        .build()
+
+    public static final ClassMetaModel PERSON_2_MODEL = ClassMetaModel.builder()
+        .name("person2")
+        .fields([
+            createValidFieldMetaModel("id", Long),
+            createValidFieldMetaModel("name", String),
+            createValidFieldMetaModel("documentTarget", DOCUMENT_OTHER_MODEL)
+        ]
+        )
+        .build()
+
+    public static final MapperGenerateConfiguration PERSON_MAPPING_CONF = withMapperConfigurations(MapperConfiguration.builder()
+        .propertyOverriddenMapping(PropertiesOverriddenMapping.builder()
+            .mappingsByPropertyName([
+                documentTarget: PropertiesOverriddenMapping.builder()
+                    .valueMappingStrategy([
+                        new ByMapperNameAssignExpression(
+                            DOCUMENT_OTHER_MODEL,
+                            new FieldsChainToAssignExpression(PERSON_MODEL,
+                                "rootSourceObject", [PERSON_MODEL.getFieldByName("document")]),
+                            "personToPerson2Mapper"
+                        )
+                    ])
+                    .build()
+            ])
+            .build()).build())
 }
