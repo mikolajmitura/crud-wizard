@@ -16,7 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import pl.jalokim.crudwizard.genericapp.config.GenericMethod;
 import pl.jalokim.crudwizard.genericapp.config.GenericService;
-import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Service

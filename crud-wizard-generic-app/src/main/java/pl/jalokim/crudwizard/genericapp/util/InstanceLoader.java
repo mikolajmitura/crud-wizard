@@ -83,7 +83,7 @@ public class InstanceLoader {
         if (isEmpty(elements(constructor.getParameters()).asList())) {
             Object createdInstance = InvokableReflectionUtils.newInstance(realClass);
             notSpringBeanInstancesByClass.put(realClass, createdInstance);
-            return (T) InvokableReflectionUtils.newInstance(realClass);
+            return (T) createdInstance;
         }
         TypeMetadata typeMetadataOfClass = MetadataReflectionUtils.getTypeMetadataFromClass(realClass);
         ConstructorMetadata metaForConstructor = typeMetadataOfClass.getMetaForConstructor(constructor);

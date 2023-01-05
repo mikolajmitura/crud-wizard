@@ -44,8 +44,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageInstanc
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.BeforeEndpointValidatorUpdater
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
-import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader

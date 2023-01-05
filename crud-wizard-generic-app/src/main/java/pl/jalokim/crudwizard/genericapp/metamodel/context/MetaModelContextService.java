@@ -143,8 +143,6 @@ public class MetaModelContextService {
             });
     }
 
-
-
     private void loadMapperMetaModels(MetaModelContext metaModelContext) {
         var mapperMetaModels = new MappersModelsCache();
 
@@ -161,7 +159,7 @@ public class MetaModelContextService {
                 .ifPresent(mapperName -> mapperMetaModels.setMapperModelWithName(mapperName, mapperMetaModel));
         }
 
-        mapperSetterByDefaultMapperId.forEach((getter, setter ) -> {
+        mapperSetterByDefaultMapperId.forEach((getter, setter) -> {
             Consumer<MapperMetaModel> mapperMetaModelConsumer = mapperSetterByDefaultMapperId.get(getter);
             Long mapperId = getter.get();
             if (mapperMetaModelConsumer != null) {

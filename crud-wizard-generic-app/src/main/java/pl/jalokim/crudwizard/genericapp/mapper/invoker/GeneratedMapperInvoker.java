@@ -1,7 +1,8 @@
-package pl.jalokim.crudwizard.genericapp.mapper;
+package pl.jalokim.crudwizard.genericapp.mapper.invoker;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
@@ -20,6 +21,7 @@ public class GeneratedMapperInvoker {
         MapperMetaModel mapperMetaModelByName = metaModelContext.getMapperMetaModels().getMapperMetaModelByName(mapperName);
 
         GenericMapperArgument newMapperArgument = genericMapperArgument.toBuilder()
+            // TODO #1 get metamodels from some place
             .sourceMetaModel(null)
             .targetMetaModel(null)
             .sourceObject(mapFrom)

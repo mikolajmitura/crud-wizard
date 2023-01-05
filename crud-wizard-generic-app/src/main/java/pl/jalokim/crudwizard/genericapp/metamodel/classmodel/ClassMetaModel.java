@@ -258,20 +258,27 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         if (isGenericMetamodelEnum()) {
             return "String";
         }
+        if (getRealClass() != null) {
+            return getClassAndGenerics(getRealClass(), genericTypes);
+        }
+        if (getBasedOnClass() != null) {
+            return getClassAndGenerics(getBasedOnClass(), genericTypes);
+        }
         if (isGenericModel()) {
             return getRawJavaGenericTypeInfoForGenericModel();
         }
-        if (getRealClass() != null) {
-            String realClass = getCanonicalNameOfRealClass();
-            String genericParts = CollectionUtils.isEmpty(getGenericTypes()) || this.realClass.isArray() ? "" :
-                StringUtils.concatElements("<",
-                    getGenericTypes(),
-                    ClassMetaModel::getJavaGenericTypeInfo,
-                    ", ",
-                    ">");
-            return realClass + genericParts;
-        }
         throw new IllegalStateException("Cannot generate java generic type for class metamodel: " + this);
+    }
+
+    private static String getClassAndGenerics(Class<?> realClass, List<ClassMetaModel> genericTypes) {
+        String realClassAsText = realClass.getCanonicalName();
+        String genericParts = CollectionUtils.isEmpty(genericTypes) || realClass.isArray() ? "" :
+            StringUtils.concatElements("<",
+                genericTypes,
+                ClassMetaModel::getJavaGenericTypeInfo,
+                ", ",
+                ">");
+        return realClassAsText + genericParts;
     }
 
     public static String getRawJavaGenericTypeInfoForGenericModel() {
@@ -409,5 +416,10 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             }
         );
         return matchAll.get();
+    }
+
+    public Class<?> getRealOrBasedClass() {
+        Class<?> realClass = getRealClass();
+        return realClass == null ? getBasedOnClass() : realClass;
     }
 }

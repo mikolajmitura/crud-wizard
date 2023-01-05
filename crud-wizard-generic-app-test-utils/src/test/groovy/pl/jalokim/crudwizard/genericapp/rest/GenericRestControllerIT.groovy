@@ -49,10 +49,7 @@ import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
-import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
-import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService
@@ -81,9 +78,6 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
 
     @Autowired
     private RawOperationsOnEndpoints rawOperationsOnEndpoints
-
-    @Autowired
-    private MetaModelContextService metaModelContextService
 
     @Autowired
     private DataStorage dataStorage
@@ -1007,32 +1001,5 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         LocalDate validFrom
         LocalDate validTo
         String enumField
-    }
-
-    ClassMetaModel findClassMetaModelByName(String name) {
-        metaModelContextService.getMetaModelContext().getClassMetaModels()
-            .fetchAll().find {
-            it.name == name
-        }
-    }
-
-    ApiTagDto createApiTagDtoByName(String tagName) {
-        def tagMetaModel = metaModelContextService.getMetaModelContext().getApiTags()
-            .fetchAll().find {
-            it.name == tagName
-        }
-        ApiTagDto.builder()
-            .id(tagMetaModel.id)
-            .build()
-    }
-
-    DataStorageMetaModelDto findDataStorageMetaModelDtoByClass(Class<?> dataStorageClass) {
-        def foundDsMetaModel = metaModelContextService.getMetaModelContext().getDataStorages()
-            .fetchAll().find {
-            it.dataStorage.class == dataStorageClass
-        }
-        DataStorageMetaModelDto.builder()
-            .id(foundDsMetaModel.id)
-            .build()
     }
 }

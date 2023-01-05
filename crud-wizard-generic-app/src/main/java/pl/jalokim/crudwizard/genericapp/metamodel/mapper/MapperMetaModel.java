@@ -22,6 +22,7 @@ public class MapperMetaModel extends WithAdditionalPropertiesMetaModel {
 
     MapperType mapperType;
     String mapperName;
+    // TODO #1 check that sourceClassMetaModel and targetClassMetaModel exists in GENERATED mappers and in this from beans.
     ClassMetaModel sourceClassMetaModel;
     ClassMetaModel targetClassMetaModel;
     MetaModelState state;

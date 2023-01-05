@@ -78,18 +78,18 @@ public class DefaultGenericService {
                 genericMapperArgumentFactory, dataStorageQueryArgumentsFactory);
         } else if (httpMethod.equals(HttpMethod.GET)) {
             Class<?> responseRealClass = responseClassMetaModel.getRealClass();
-            if (responseRealClass == null) {
-                getResultById(genericServiceArgument, endpointMetaModel, resultsByDataStorageName, responseClassMetaModel,
-                    genericMapperArgumentFactory, dataStorageQueryArgumentsFactory);
-            } else {
+
+            if (responseRealClass != null) {
                 if (isTypeOf(responseRealClass, Page.class)) {
                     return returnPage(genericServiceArgument, endpointMetaModel, responseClassMetaModel,
                         dataStorageQueryArgumentsFactory, genericMapperArgumentFactory, responseMetaModel);
                 } else if (isTypeOf(responseRealClass, Collection.class)) {
                     return returnCollection(endpointMetaModel, responseMetaModel, responseClassMetaModel,
-                        genericMapperArgumentFactory, responseRealClass, dataStorageQueryArgumentsFactory);
+                        genericMapperArgumentFactory, responseRealClass, dataStorageQueryArgumentsFactory, genericServiceArgument);
                 }
             }
+            getResultById(genericServiceArgument, endpointMetaModel, resultsByDataStorageName, responseClassMetaModel,
+                genericMapperArgumentFactory, dataStorageQueryArgumentsFactory);
         }
 
         Object responseBody = null;
@@ -100,7 +100,7 @@ public class DefaultGenericService {
                 .targetMetaModel(responseClassMetaModel)
                 .build();
 
-            responseBody = mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
+            responseBody = mapperDelegatorService.mapToTarget(genericServiceArgument, responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
         }
 
         return responseBody;
@@ -161,7 +161,7 @@ public class DefaultGenericService {
                     .sourceMetaModel(typeOfSourceElement)
                     .targetMetaModel(elementTypeInCollection)
                     .build();
-                return mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
+                return mapperDelegatorService.mapToTarget(genericServiceArgument, responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
             });
     }
 
@@ -176,13 +176,14 @@ public class DefaultGenericService {
         Object idOfObject = genericServiceArgument.getUrlPathParams().get(lastVariableNameInUrl);
         for (DataStorageConnectorMetaModel dataStorageConnector : endpointMetaModel.getDataStorageConnectors()) {
             getResultFromDataStorageAndPutToContext(resultsByDataStorageName, genericMapperArgumentFactory,
-                idOfObject, typeOfIdObject, dataStorageConnector, responseClassMetaModel, dataStorageQueryArgumentsFactory);
+                idOfObject, typeOfIdObject, dataStorageConnector, responseClassMetaModel, dataStorageQueryArgumentsFactory, genericServiceArgument);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Collection<Object> returnCollection(EndpointMetaModel endpointMetaModel, EndpointResponseMetaModel responseMetaModel,
         ClassMetaModel responseClassMetaModel, GenericMapperArgumentFactory genericMapperArgumentFactory,
-        Class<?> responseRealClass, DataStorageQueryArgumentsFactory dataStorageQueryArguments) {
+        Class<?> responseRealClass, DataStorageQueryArgumentsFactory dataStorageQueryArguments, GenericServiceArgument genericServiceArgument) {
 
         ClassMetaModel elementTypeInCollection = responseClassMetaModel.getGenericTypes().get(0);
         Map<String, QueryResult> queriesResults = new HashMap<>();
@@ -211,7 +212,7 @@ public class DefaultGenericService {
                     .sourceMetaModel(typeOfSourceElement)
                     .targetMetaModel(elementTypeInCollection)
                     .build();
-                return mapperDelegatorService.mapToTarget(responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
+                return mapperDelegatorService.mapToTarget(genericServiceArgument, responseMetaModel.getMapperMetaModel(), finalResultMapperArgument);
             }).asList();
 
         results = runFinalQueryWhenShould(dataStorageQueryArguments.create().build(),
@@ -263,7 +264,8 @@ public class DefaultGenericService {
         for (DataStorageConnectorMetaModel dataStorageConnector : endpointMetaModel.getDataStorageConnectors()) {
 
             var mappedIdForDataStorage = getResultFromDataStorageAndPutToContext(resultsByDataStorageName,
-                genericMapperArgumentFactory, idOfObject, typeOfIdObject, dataStorageConnector, null, dataStorageQueryArgumentsFactory);
+                genericMapperArgumentFactory, idOfObject, typeOfIdObject, dataStorageConnector, null,
+                dataStorageQueryArgumentsFactory, genericServiceArgument);
 
             if (mappedIdForDataStorage.getMappedId() == null) {
                 mappedIdForDataStorage.getDataStorage().delete(mappedIdForDataStorage.getQuery());
@@ -289,7 +291,8 @@ public class DefaultGenericService {
                 .targetMetaModel(targetMetaModel)
                 .build();
 
-            Object mappedObjectForDs = mapperDelegatorService.mapToTarget(dataStorageConnector.getMapperMetaModelForPersist(), mapperArgument);
+            Object mappedObjectForDs = mapperDelegatorService
+                .mapToTarget(genericServiceArgument, dataStorageConnector.getMapperMetaModelForPersist(), mapperArgument);
             Object currentOrNewId = dataStorageConnector.getDataStorage().saveOrUpdate(targetMetaModel, mappedObjectForDs);
             resultsByDataStorageName.put(dataStorageName, currentOrNewId);
         }
@@ -307,7 +310,7 @@ public class DefaultGenericService {
         GenericMapperArgumentFactory genericMapperArgumentFactory, Object idOfObject,
         ClassMetaModel typeOfIdObject, DataStorageConnectorMetaModel dataStorageConnector,
         ClassMetaModel otherReturnClassModel,
-        DataStorageQueryArgumentsFactory dataStorageQueryArgumentsFactory) {
+        DataStorageQueryArgumentsFactory dataStorageQueryArgumentsFactory, GenericServiceArgument genericServiceArgument) {
 
         ClassMetaModel classMetaModelInDataStorage = Optional.ofNullable(dataStorageConnector.getClassMetaModelInDataStorage())
             .orElse(otherReturnClassModel);
@@ -335,7 +338,7 @@ public class DefaultGenericService {
             .sourceObject(idOfObject)
             .build();
 
-        Object mappedId = mapperDelegatorService.mapToTarget(dataStorageConnector.getMapperMetaModelForQuery(), mapperArgument);
+        Object mappedId = mapperDelegatorService.mapToTarget(genericServiceArgument, dataStorageConnector.getMapperMetaModelForQuery(), mapperArgument);
 
         resultsByDataStorageName.put(dataStorage.getName(), dataStorage.getEntityById(classMetaModelInDataStorage, mappedId));
         return ResultInDataStorageFoundBy.of(dataStorage, mappedId, null);
@@ -383,6 +386,7 @@ public class DefaultGenericService {
 
     @Value
     private static class QueryResult {
+
         ClassMetaModel typeOfElement;
         List<Object> result;
     }

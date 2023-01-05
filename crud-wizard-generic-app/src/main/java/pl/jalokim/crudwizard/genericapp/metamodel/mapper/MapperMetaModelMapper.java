@@ -40,8 +40,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgument;
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator;
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
-import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator;
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 

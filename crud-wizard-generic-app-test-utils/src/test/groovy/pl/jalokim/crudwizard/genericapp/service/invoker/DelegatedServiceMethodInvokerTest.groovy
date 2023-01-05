@@ -18,6 +18,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper

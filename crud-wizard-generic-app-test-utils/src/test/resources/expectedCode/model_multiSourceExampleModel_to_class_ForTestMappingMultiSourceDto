@@ -12,9 +12,9 @@ mapping from genericModel name: multiSourceExampleModel to real class: pl.jaloki
 **/
 class MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
-		private final pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker;
+		private final pl.jalokim.crudwizard.genericapp.mapper.invoker.GeneratedMapperInvoker generatedMapperInvoker;
     MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1(org.springframework.core.convert.ConversionService conversionService,
-pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker) {
+pl.jalokim.crudwizard.genericapp.mapper.invoker.GeneratedMapperInvoker generatedMapperInvoker) {
 		this.conversionService = conversionService;
 		this.generatedMapperInvoker = generatedMapperInvoker;
     }

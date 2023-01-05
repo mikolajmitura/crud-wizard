@@ -65,7 +65,9 @@ public class MapperGeneratedInstanceService {
             var mapperCompiledCodeMetadata = mapperGenerateConfigurationEntity.getMapperCompiledCodeMetadata();
             if (newCodeMd5.equals(mapperCompiledCodeMetadata.getGeneratedCodeHash())) {
                 log.info("use earlier compiled class: {}", mapperCompiledCodeMetadata.getFullClassName());
-                return classLoaderService.loadClass(mapperCompiledCodeMetadata.getFullClassName(), mapperCompiledCodeMetadata.getSessionGenerationTimestamp());
+                Class<?> loadedClass = classLoaderService.loadClass(mapperCompiledCodeMetadata.getFullClassName(),
+                    mapperCompiledCodeMetadata.getSessionGenerationTimestamp());
+                return instanceLoader.createInstanceOrGetBean(loadedClass);
             } else {
                 var newCompiledCodeMetadata = codeCompiler.compileCodeAndReturnMetaData(mapperCodeMetadata.getMapperClassName(),
                     GENERATED_MAPPER_PACKAGE, generatedMapperCode, currentTimestamp);
@@ -82,11 +84,11 @@ public class MapperGeneratedInstanceService {
 
                 mapperCompiledCodeMetadataRepository.save(mapperCompiledCodeMetadata);
 
-                Class<?> newMapperInstance = classLoaderService.loadClass(newCompiledCodeMetadata.getFullClassName(), newClassLoaderName);
-                return instanceLoader.createInstanceOrGetBean(newMapperInstance);
+                Class<?> newMapperClass = classLoaderService.loadClass(newCompiledCodeMetadata.getFullClassName(), newClassLoaderName);
+                return instanceLoader.createInstanceOrGetBean(newMapperClass);
             }
         } catch (Exception exception) {
-            // TODO #1 how to rollback to earlier version of application when exception occurred?
+            // TODO #60 how to rollback to earlier version of application when exception occurred?
             //  for example somebody updated class metamodel and few mappers can inform about exception... how to fix the problems then?
             //  new version of class metamodels does not exists and then mappers cannot be fixed which are created in others endpoints
             throw new IllegalStateException(exception);

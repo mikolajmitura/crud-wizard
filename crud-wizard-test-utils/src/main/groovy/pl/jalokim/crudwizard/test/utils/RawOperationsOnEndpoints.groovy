@@ -7,6 +7,7 @@ import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.MockMvc
@@ -45,8 +46,9 @@ class RawOperationsOnEndpoints implements EndpointActions {
         perform(requestBuilder).andReturn().response.contentAsString
     }
 
-    long postAndReturnLong(String url, Object payload) {
-        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.post(url), payload)
+    long postAndReturnLong(String url, Object payload, Map<String, String> headers = [:]) {
+        def httpResponse = performWithJsonContent(MockMvcRequestBuilders.post(url)
+            .headers(createHeaders(headers)), payload)
         httpResponse.andExpect(status().isCreated())
         extractResponseAsLong(httpResponse)
     }
@@ -65,6 +67,12 @@ class RawOperationsOnEndpoints implements EndpointActions {
         def httpResponse = performQuery(url, parameters)
         httpResponse.andExpect(status().isOk())
         extractResponseAsJsonArray(httpResponse)
+    }
+
+    public <T> List<T> getAndReturnCollectionOfObjects(String url, Class<T> elementType, Map parameters = null) {
+        def httpResponse = performQuery(url, parameters)
+        httpResponse.andExpect(status().isOk())
+        extractResponseAsObjectList(httpResponse, elementType)
     }
 
     Map getAndReturnJson(String url, Map parameters = null) {
@@ -132,6 +140,14 @@ class RawOperationsOnEndpoints implements EndpointActions {
 
     static <T> T extractResponseAsClass(ResultActions response, Class<T> valueClass) {
         objectMapper.convertValue(extractResponseAsJson(response), valueClass)
+    }
+
+    private HttpHeaders createHeaders(Map<String, String> headers) {
+        def headersResult = new HttpHeaders()
+        headers.forEach {key, value ->
+            headersResult.add(key, value)
+        }
+        headersResult
     }
 
     protected String asJsonString(final obj) {
