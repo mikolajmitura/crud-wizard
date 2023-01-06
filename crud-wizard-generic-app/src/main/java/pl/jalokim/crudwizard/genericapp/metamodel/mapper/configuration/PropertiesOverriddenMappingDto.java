@@ -33,4 +33,11 @@ public class PropertiesOverriddenMappingDto {
     boolean ignoreField;
 
     boolean ignoredAllMappingProblem;
+
+    public static PropertiesOverriddenMappingDto mappingEntry(String target, String source) {
+        return PropertiesOverriddenMappingDto.builder()
+            .targetAssignPath(target)
+            .sourceAssignExpression(source)
+            .build();
+    }
 }

@@ -37,6 +37,7 @@ public class TempFilesCleanerService {
                 var mapperCompiledCodeMetadata = mapperGenerateConfiguration.getMapperCompiledCodeMetadata();
                 allFoundFullPaths.add(mapperCompiledCodeMetadata.getFullPath());
                 allFoundFullPaths.add(mapperCompiledCodeMetadata.getFullPath().replace(".class", ".java"));
+                allFoundFullPaths.add(mapperCompiledCodeMetadata.getFullPath().replace(".class", "$1.class"));
             });
 
         if (!Files.exists(Path.of(compiledCodeRootPathProvider.getCompiledCodeRootPath()))) {

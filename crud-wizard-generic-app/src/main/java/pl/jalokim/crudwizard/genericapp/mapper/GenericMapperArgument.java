@@ -4,11 +4,13 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument;
 
 @Value
 @Builder(toBuilder = true)
 public class GenericMapperArgument {
 
+    GenericServiceArgument genericServiceArgument;
     ClassMetaModel sourceMetaModel;
     Object sourceObject;
     ClassMetaModel targetMetaModel;
@@ -19,5 +21,5 @@ public class GenericMapperArgument {
      *  results of current mapping from other data storages run earlier than current mapper
      */
     Map<String, Object> mappingContext;
-
+    // TODO #59 create dynamic ClassMetaModel for mappingContext
 }

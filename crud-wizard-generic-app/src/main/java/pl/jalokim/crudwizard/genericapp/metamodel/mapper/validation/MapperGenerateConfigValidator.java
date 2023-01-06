@@ -63,8 +63,7 @@ public class MapperGenerateConfigValidator implements BaseConstraintValidator<Ma
 
             MapperGenerateConfiguration mapperGenerateConfiguration;
             try {
-                mapperGenerateConfiguration = mapperGenerateConfigurationMapper.mapConfiguration(
-                    mapperGenerateConfigurationMapper.mapToEntity(mapperGenerateConfigurationDto),
+                mapperGenerateConfiguration = mapperGenerateConfigurationMapper.mapConfiguration(mapperGenerateConfigurationDto,
                     findClassMetaModelForDto(createEndpointMetaModelDto.getPathParams()),
                     findClassMetaModelForDto(createEndpointMetaModelDto.getQueryArguments()),
                     temporaryMetaModelContext);

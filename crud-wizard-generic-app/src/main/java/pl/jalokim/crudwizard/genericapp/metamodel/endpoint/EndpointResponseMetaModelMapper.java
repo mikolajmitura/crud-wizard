@@ -7,12 +7,14 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
@@ -24,7 +26,8 @@ public abstract class EndpointResponseMetaModelMapper
     private QueryProviderMapper queryProviderMapper;
 
     public EndpointResponseMetaModel toEndpointResponseMetaModel(MetaModelContext metaModelContext,
-        EndpointResponseMetaModelEntity endpointResponseMetaModelEntity) {
+        EndpointMetaModelEntity endpointMetaModelEntity) {
+        EndpointResponseMetaModelEntity endpointResponseMetaModelEntity = endpointMetaModelEntity.getResponseMetaModel();
         if (endpointResponseMetaModelEntity == null) {
             return null;
         }
@@ -34,7 +37,7 @@ public abstract class EndpointResponseMetaModelMapper
             .mapperMetaModel(ofNullable(getFromContextByEntity(
                 metaModelContext::getMapperMetaModels,
                 endpointResponseMetaModelEntity::getMapperMetaModel))
-                .orElse(metaModelContext.getDefaultMapperMetaModel()))
+                .orElseGet(() -> resolveDefaultFinalMapper(endpointMetaModelEntity, metaModelContext)))
             .queryProvider(queryProviderMapper.mapInstance(endpointResponseMetaModelEntity.getQueryProvider()))
             .build();
     }
@@ -52,4 +55,18 @@ public abstract class EndpointResponseMetaModelMapper
 
     @Mapping(target = "classMetaModelDtoType", ignore = true)
     public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
+
+    MapperMetaModel resolveDefaultFinalMapper(EndpointMetaModelEntity endpointMetaModelEntity, MetaModelContext metaModelContext) {
+
+        var responseClassModel = ofNullable(endpointMetaModelEntity.getResponseMetaModel())
+            .map(EndpointResponseMetaModelEntity::getClassMetaModel)
+            .orElse(null);
+        if (responseClassModel == null) {
+            return null;
+        }
+        if (endpointMetaModelEntity.getHttpMethod().equals(HttpMethod.POST)) {
+            return metaModelContext.getDefaultExtractIdMapperMetaModel();
+        }
+        return metaModelContext.getDefaultFinalMapperMetaModel();
+    }
 }

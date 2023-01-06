@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.MapGenericService
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper

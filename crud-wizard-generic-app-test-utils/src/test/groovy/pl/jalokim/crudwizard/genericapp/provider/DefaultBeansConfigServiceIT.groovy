@@ -3,7 +3,9 @@ package pl.jalokim.crudwizard.genericapp.provider
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppBaseIntegrationSpecification
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
-import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalGetIdAfterSaveMapper
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalJoinedRowOrDefaultMapper
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntityRepository
@@ -31,7 +33,10 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
         when:
         defaultBeansConfigService.saveAllDefaultMetaModels()
         def defaultDataStorageId = defaultBeansConfigService.getDefaultDataStorageId()
-        def defaultGenericMapperId = defaultBeansConfigService.getDefaultGenericMapperId()
+        def defaultQueryMapperId = defaultBeansConfigService.getDefaultQueryMapperId()
+        def defaultPersistMapperId = defaultBeansConfigService.getDefaultPersistMapperId()
+        def defaultFinalGetIdAfterSaveMapperId = defaultBeansConfigService.getDefaultFinalGetIdAfterSaveMapperId()
+        def defaultFinalJoinedRowMapperId = defaultBeansConfigService.getDefaultFinalJoinedRowMapperId()
         def genericServiceMetaModelId = defaultBeansConfigService.getDefaultGenericServiceId()
         def defaultDataStorageConnectorsId = defaultBeansConfigService.getDefaultDataStorageConnectorsId()
 
@@ -43,10 +48,34 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
                 className == InMemoryDataStorage.canonicalName
             }
 
-            verifyAll(mapperMetaModelEntityRepository.getOne(defaultGenericMapperId)) {
+            verifyAll(mapperMetaModelEntityRepository.getOne(defaultQueryMapperId)) {
                 verifyAll(mapperBeanAndMethod) {
                     className == DefaultGenericMapper.canonicalName
                     beanName == "defaultGenericMapper"
+                    methodName == "mapToTarget"
+                }
+            }
+
+            verifyAll(mapperMetaModelEntityRepository.getOne(defaultPersistMapperId)) {
+                verifyAll(mapperBeanAndMethod) {
+                    className == DefaultGenericMapper.canonicalName
+                    beanName == "defaultGenericMapper"
+                    methodName == "mapToTarget"
+                }
+            }
+
+            verifyAll(mapperMetaModelEntityRepository.getOne(defaultFinalGetIdAfterSaveMapperId)) {
+                verifyAll(mapperBeanAndMethod) {
+                    className == DefaultFinalGetIdAfterSaveMapper.canonicalName
+                    beanName == "defaultFinalGetIdAfterSaveMapper"
+                    methodName == "mapToTarget"
+                }
+            }
+
+            verifyAll(mapperMetaModelEntityRepository.getOne(defaultFinalJoinedRowMapperId)) {
+                verifyAll(mapperBeanAndMethod) {
+                    className == DefaultFinalJoinedRowOrDefaultMapper.canonicalName
+                    beanName == "defaultFinalJoinedRowOrDefaultMapper"
                     methodName == "mapToTarget"
                 }
             }
@@ -62,8 +91,8 @@ class DefaultBeansConfigServiceIT extends GenericAppBaseIntegrationSpecification
 
             verifyAll(dataStorageConnectorMetaModelRepository.getOne(defaultDataStorageConnectorsId[0])) {
                 dataStorageMetaModel.id == defaultDataStorageId
-                mapperMetaModelForQuery.id == defaultGenericMapperId
-                mapperMetaModelForPersist.id == defaultGenericMapperId
+                mapperMetaModelForQuery.id == defaultQueryMapperId
+                mapperMetaModelForPersist.id == defaultPersistMapperId
                 classMetaModelInDataStorage == null
             }
         }

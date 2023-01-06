@@ -9,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 
@@ -26,7 +27,24 @@ public class ReflectionUtils {
         }
 
         if (foundMethods.size() > 1) {
+
+            Map<Class<?>, List<Method>> methodByClass = elements(foundMethods)
+                .asMapGroupedBy(Method::getDeclaringClass);
+
             String foundMethodsAsText = elements(foundMethods).asConcatText(System.lineSeparator());
+
+            Class<?> currentClass = fromClass;
+            while (currentClass != null) {
+                List<Method> methods = methodByClass.get(currentClass);
+                if (methods.size() == 1) {
+                    return elements(methods).getFirst();
+                } else if (methods.size() > 1) {
+                    foundMethodsAsText = elements(methods).asConcatText(System.lineSeparator());
+                    throw new TechnicalException(String.format("Found more than one method with name '%s' in class: %s found methods: %s",
+                        methodName, currentClass.getCanonicalName(), foundMethodsAsText));
+                }
+                currentClass = currentClass.getSuperclass();
+            }
 
             throw new TechnicalException(String.format("Found more than one method with name '%s' in class: %s found methods: %s",
                 methodName, fromClass.getCanonicalName(), foundMethodsAsText));

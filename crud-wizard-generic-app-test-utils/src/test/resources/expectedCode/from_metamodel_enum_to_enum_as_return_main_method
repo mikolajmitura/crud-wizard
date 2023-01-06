@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from genericModel name: someEnum1Model to real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
+**/
 class MsomeEnum1ModelToCSomeEnum1Mapper1 implements GeneratedMapper {
 
     MsomeEnum1ModelToCSomeEnum1Mapper1() {

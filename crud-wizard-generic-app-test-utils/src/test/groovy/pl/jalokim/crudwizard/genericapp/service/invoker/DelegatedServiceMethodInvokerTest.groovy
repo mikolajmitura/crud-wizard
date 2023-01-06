@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.service.invoker
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.createObjectMapper
 import static pl.jalokim.crudwizard.core.datastorage.RawEntityObjectSamples.createHttpQueryParamsTranslated
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.GenericServiceArgumentSamples.createInputGenericServiceArgument
 import static pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload.translatedPayload
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.ValueConstants
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.utils.ReflectionUtils
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
@@ -28,10 +31,14 @@ class DelegatedServiceMethodInvokerTest extends Specification {
 
     ObjectMapper objectMapper = createObjectMapper()
     JsonObjectMapper jsonObjectMapper = new JsonObjectMapper(objectMapper)
-    DelegatedServiceMethodInvoker testCase = new DelegatedServiceMethodInvoker(jsonObjectMapper)
+    DelegatedServiceMethodInvoker testCase = new DelegatedServiceMethodInvoker()
 
     MethodSignatureMetaModelResolver methodSignatureMetaModelResolver = new MethodSignatureMetaModelResolver(jsonObjectMapper)
     BeanMethodMetaModelCreator beanMethodMetaModelCreator = new BeanMethodMetaModelCreator(methodSignatureMetaModelResolver)
+
+    def setup() {
+        jsonObjectMapper.postConstruct()
+    }
 
     def "should invoke method as expected"() {
         given:
@@ -133,7 +140,7 @@ class DelegatedServiceMethodInvokerTest extends Specification {
 
         then:
         TechnicalException ex = thrown()
-        ex.message == "Cannot convert from value: '$invokerArgs.rawJson' to class $NormalSpringService.InvalidJavaBean.canonicalName"
+        ex.message == "Cannot convert from: $invokerArgs.rawJson to rawClass=$NormalSpringService.InvalidJavaBean.canonicalName"
         ex.cause.message.contains("Cannot construct instance of `$NormalSpringService.canonicalName\$InvalidJavaBean`")
     }
 
@@ -159,16 +166,16 @@ class DelegatedServiceMethodInvokerTest extends Specification {
         }
 
         where:
-        methodName                | expectedMsgParts
-        "missingReqRequestHeader" | ["Cannot find required header value with header name: someRequiredHeader"]
-        "missingReqRequestParam"  | ["Cannot find required http request parameter with name: someRequiredParam"]
-        "missingReqRequestBody"   |
+        methodName                    | expectedMsgParts
+        "missingReqRequestHeader"     | ["Cannot find required header value with header name: someRequiredHeader"]
+        "missingReqRequestParam"      | ["Cannot find required http request parameter with name: someRequiredParam"]
+        "missingReqRequestBody"       |
             ["Argument annotated @org.springframework.web.bind.annotation.RequestBody(required=true) is required at index: 1$System.lineSeparator",
-            "in class: $NormalSpringService.canonicalName$System.lineSeparator" ,
-            "with method name: missingReqRequestBody$System.lineSeparator" ,
-            "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestBody')}".toString()]
-        "missingReqPathVariable"  | ["Cannot find required path variable value with name: someRequiredVariable"]
-        "missingReqRequestAllHeaders"   | [
+             "in class: $NormalSpringService.canonicalName$System.lineSeparator",
+             "with method name: missingReqRequestBody$System.lineSeparator",
+             "in method : ${ReflectionUtils.findMethodByName(NormalSpringService, 'missingReqRequestBody')}".toString()]
+        "missingReqPathVariable"      | ["Cannot find required path variable value with name: someRequiredVariable"]
+        "missingReqRequestAllHeaders" | [
             "Argument annotated @org.springframework.web.bind.annotation.RequestHeader(",
             "name=\"\"",
             "value=\"\"",
@@ -191,6 +198,34 @@ class DelegatedServiceMethodInvokerTest extends Specification {
             .urlPathParams([objectId: 15, objectUuid: DataFakerHelper.randomText()])
             .endpointMetaModel(EndpointMetaModel.builder()
                 .httpMethod(httpMethod)
+                .payloadMetamodel(ClassMetaModel.builder()
+                    .name("person")
+                    .fields([
+                        createValidFieldMetaModel("id", Long),
+                        createValidFieldMetaModel("name", String),
+                        createValidFieldMetaModel("surname", String),
+                    ])
+                    .build())
+                .queryArguments(ClassMetaModel.builder()
+                        .name("person-queryArguments")
+                        .fields([
+                            createValidFieldMetaModel("lastContact", String),
+                            createValidFieldMetaModel("numberAsText", String),
+                            createValidFieldMetaModel("notExistQueryParam", String),
+                            createValidFieldMetaModel("someRequiredParam", String),
+                        ])
+                        .build()
+                )
+                .pathParams(ClassMetaModel.builder()
+                    .name("person-pathParams")
+                    .fields([
+                        createValidFieldMetaModel("objectId", Long),
+                        createValidFieldMetaModel("notExistPathVar", String),
+                        createValidFieldMetaModel("objectUuid", String),
+                        createValidFieldMetaModel("someRequiredVariable", String),
+                    ])
+                    .build()
+                )
                 .responseMetaModel(EndpointResponseMetaModel.builder()
                     .successHttpCode(successHttpCode)
                     .build())

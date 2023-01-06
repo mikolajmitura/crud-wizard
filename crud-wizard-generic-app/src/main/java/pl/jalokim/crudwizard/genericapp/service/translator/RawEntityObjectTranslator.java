@@ -2,12 +2,14 @@ package pl.jalokim.crudwizard.genericapp.service.translator;
 
 import static pl.jalokim.crudwizard.core.config.jackson.StringBlankToNullModule.blankTextToNull;
 import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.asLowerCamel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.createJacksonJavaType;
 import static pl.jalokim.crudwizard.genericapp.service.translator.JsonNodeUtils.getFieldsOfObjectNode;
 import static pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath.rootNode;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isCollectionType;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isMapType;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ContainerNode;
@@ -58,7 +60,7 @@ public class RawEntityObjectTranslator {
     private Object convertObject(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {
         Object newObject = null;
         if (jsonNode != null) {
-            if (classMetaModel.getRealClass() == null) {
+            if (classMetaModel.getRealOrBasedClass() == null) {
                 newObject = convertObjectBasedOnMetaData(objectNodePath, jsonNode, classMetaModel);
             } else {
                 newObject = convertObjectBasedOnRealClass(objectNodePath, jsonNode, classMetaModel);
@@ -138,6 +140,10 @@ public class RawEntityObjectTranslator {
             return jsonNode instanceof ContainerNode ? jsonNode.toString() : blankTextToNull(jsonNode.textValue());
         }
 
+        if (classMetaModel.hasGenericTypes()) {
+            JavaType jacksonJavaType = createJacksonJavaType(classMetaModel);
+            return jsonObjectMapper.convertToObject(objectNodePath, jsonNode, jacksonJavaType);
+        }
         return jsonObjectMapper.convertToObject(objectNodePath, jsonNode, realClass);
     }
 

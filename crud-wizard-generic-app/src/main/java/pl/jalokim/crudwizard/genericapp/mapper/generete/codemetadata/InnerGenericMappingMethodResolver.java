@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata;
 
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.ClassMetamodelDescriber.getFullDescription;
+
 import pl.jalokim.utils.template.TemplateAsText;
 
 public class InnerGenericMappingMethodResolver implements MethodTemplateResolver {
@@ -13,6 +15,8 @@ public class InnerGenericMappingMethodResolver implements MethodTemplateResolver
             .overrideVariable("methodArguments", methodCodeMetadata.buildMethodArguments())
             .overrideVariable("mappingsCode", methodCodeMetadata.getMappingsCodeAsText())
             .overrideVariable("lastLine", methodCodeMetadata.getLastLine())
+            .overrideVariable("sourceMetaModel", getFullDescription(methodCodeMetadata.getMethodArguments()))
+            .overrideVariable("targetMetaModel", getFullDescription(methodCodeMetadata.getReturnClassMetaModel()))
             .overrideVariable("earlierNullReturnExpression", methodCodeMetadata.getMethodArguments().size() == 1 ?
                 TemplateAsText.fromClassPath("templates/mapper/earlier-null-return").getCurrentTemplateText() : "")
             .getCurrentTemplateText();

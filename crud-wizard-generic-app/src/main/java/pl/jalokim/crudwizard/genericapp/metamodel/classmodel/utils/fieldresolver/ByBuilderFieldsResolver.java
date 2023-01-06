@@ -6,6 +6,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassM
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getAllDeclaredNotStaticMethods;
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromClass;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,6 +17,7 @@ import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
@@ -33,9 +35,9 @@ public class ByBuilderFieldsResolver implements FieldMetaResolver {
             TypeMetadata builderTypeMetadata;
             if (Modifier.isAbstract(builderClass.getModifiers())) {
                 Class<?> notAbstractBuilderClass = ClassUtils.loadRealClass(builderClass.getCanonicalName() + "Impl");
-                builderTypeMetadata = MetadataReflectionUtils.getTypeMetadataFromClass(notAbstractBuilderClass);
+                builderTypeMetadata = addGenericsFromNotBuilderClass(getTypeMetadataFromClass(notAbstractBuilderClass), typeMetadata);
             } else {
-                builderTypeMetadata = MetadataReflectionUtils.getTypeMetadataFromClass(builderClass);
+                builderTypeMetadata = addGenericsFromNotBuilderClass(getTypeMetadataFromClass(builderClass), typeMetadata);
             }
 
             if (builderMethod.getParameterCount() != 0) {
@@ -96,5 +98,13 @@ public class ByBuilderFieldsResolver implements FieldMetaResolver {
             throw new TechnicalException(createMessagePlaceholder(
                 "cannot.find.builder.method.in.class", rawClass.getCanonicalName()), e);
         }
+    }
+
+    private TypeMetadata addGenericsFromNotBuilderClass(TypeMetadata builderTypeMetadata, TypeMetadata notBuilderTypeMetadata) {
+        if (notBuilderTypeMetadata.hasGenericTypes()) {
+            return InvokableReflectionUtils.invokeStaticMethod(TypeMetadata.class, "newTypeMetadata", builderTypeMetadata.getRawClass(),
+                notBuilderTypeMetadata.getGenericTypes());
+        }
+        return builderTypeMetadata;
     }
 }

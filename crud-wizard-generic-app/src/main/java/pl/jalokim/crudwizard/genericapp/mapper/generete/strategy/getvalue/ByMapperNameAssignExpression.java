@@ -1,14 +1,17 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 
+import static pl.jalokim.crudwizard.core.utils.StringCaseUtils.firstLetterToLowerCase;
+import static pl.jalokim.utils.collection.Elements.elements;
+
+import java.util.List;
 import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
+import pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
 
 @Value
 public class ByMapperNameAssignExpression implements ValueToAssignExpression {
-
-    public static final String GENERATED_MAPPER_INVOKER_BEAN_NAME = "generatedMapperInvoker";
 
     ClassMetaModel mapperReturnClassMetaModel;
     ValueToAssignExpression valueExpression;
@@ -16,14 +19,32 @@ public class ByMapperNameAssignExpression implements ValueToAssignExpression {
 
     @Override
     public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
-        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
 
-        mapperGeneratedCodeMetadata.addConstructorArgument(GeneratedMapperInvoker.class, GENERATED_MAPPER_INVOKER_BEAN_NAME);
+        mapperGeneratedCodeMetadata.addConstructorArgument(MapperByNameInvoker.class);
+        mapperGeneratedCodeMetadata.addConstructorArgument(MetaModelContextService.class);
+        mapperGeneratedCodeMetadata.addImport(ClassMetaModel.class);
+        mapperGeneratedCodeMetadata.addImport(List.class);
+
+        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
         returnCodeMetadata.setReturnClassModel(mapperReturnClassMetaModel);
-        returnCodeMetadata.setValueGettingCode(String.format("%s.%s(\"%s\", %s, %s)", GENERATED_MAPPER_INVOKER_BEAN_NAME,
-            "mapWithMapper", mapperName, "genericMapperArgument", valueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata)
-                .getFullValueExpression()));
+        ValueToAssignCodeMetadata valueToAssignCodeMetadata = valueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata);
+        returnCodeMetadata.setValueGettingCode(String.format("%s.%s(\"%s\", %s, %s, %s, %s)", firstLetterToLowerCase(MapperByNameInvoker.class.getSimpleName()),
+            "mapWithMapper", mapperName, "genericMapperArgument", valueToAssignCodeMetadata.getFullValueExpression(),
+            generateFetchClassMetaModel(valueToAssignCodeMetadata.getReturnClassModel()), generateFetchClassMetaModel(mapperReturnClassMetaModel)));
 
         return returnCodeMetadata;
+    }
+
+    private String generateFetchClassMetaModel(ClassMetaModel classMetaModel) {
+        if (classMetaModel.isGenericModel()) {
+            return String.format(firstLetterToLowerCase(MetaModelContextService.class.getSimpleName()) +
+                ".getClassMetaModelByName(\"%s\")", classMetaModel.getName());
+        }
+        return ClassMetaModelBuildExpression.builder()
+            .realClass(classMetaModel.getRealOrBasedClass())
+            .genericTypeExpressions(elements(classMetaModel.getGenericTypes())
+                .map(this::generateFetchClassMetaModel)
+                .asList()).build()
+            .toString();
     }
 }

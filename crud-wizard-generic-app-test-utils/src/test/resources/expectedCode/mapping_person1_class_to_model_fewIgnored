@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1 to genericModel name: somePerson1
+**/
 class CSomePerson1ToMsomePerson1Mapper2 implements GeneratedMapper {
 
     CSomePerson1ToMsomePerson1Mapper2() {
@@ -59,6 +62,9 @@ class CSomePerson1ToMsomePerson1Mapper2 implements GeneratedMapper {
 			.orElse(null)));
         return (java.util.Map<java.lang.String, java.lang.Object>) map;
     }
+    /**
+    mapping from real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1 to genericModel name: someContact1
+    **/
     @GeneratedMethod
     public java.util.Map<java.lang.String, java.lang.Object> mapCSomeContact1ToMsomeContact1(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeContact1 sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -84,6 +90,9 @@ class CSomePerson1ToMsomePerson1Mapper2 implements GeneratedMapper {
         return (java.util.Map<java.lang.String, java.lang.Object>) map;
     }
 
+    /**
+    mapping from real class: pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1 to genericModel name: someDocument1
+    **/
 
     public java.util.Map<java.lang.String, java.lang.Object> mapDocument(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeDocument1 sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();

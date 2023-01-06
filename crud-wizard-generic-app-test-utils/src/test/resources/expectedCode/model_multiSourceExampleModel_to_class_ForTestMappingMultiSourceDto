@@ -5,15 +5,22 @@ import java.util.Map;
 import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+import java.util.List;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
-
+/**
+mapping from genericModel name: multiSourceExampleModel to real class: pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto
+**/
 class MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
-		private final pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker;
+		private final pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker;
+		private final pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService;
     MmultiSourceExampleModelToCForTestMappingMultiSourceDtoMapper1(org.springframework.core.convert.ConversionService conversionService,
-pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperInvoker) {
+pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker,
+pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService) {
 		this.conversionService = conversionService;
-		this.generatedMapperInvoker = generatedMapperInvoker;
+		this.mapperByNameInvoker = mapperByNameInvoker;
+		this.metaModelContextService = metaModelContextService;
     }
 
     @Override
@@ -64,6 +71,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
 			.orElse(null))
         );
     }
+    /**
+    mapping from real class: pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel to real class: pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject mapCTestCurrentNodeObjectInModelToCTestCurrentNodeObject(GenericMapperArgument genericMapperArgument, pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObjectInModel sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -85,6 +95,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
         return (pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.TestCurrentNodeObject) newObject;
     }
 
+    /**
+    mapping from genericModel name: documentDataP1Modeland genericModel name: documentDataP1Model to real class: pl.jalokim.crudwizard.core.sample.InnerDocumentDto
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.InnerDocumentDto mapMdocumentDataP1ModelAndMdocumentDataP1ModelToCInnerDocumentDto(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -111,6 +124,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
         );
     }
 
+    /**
+    mapping from genericModel name: documentDataPart1Modeland genericModel name: documentDataP1Model to real class: pl.jalokim.crudwizard.core.sample.SomeDocumentDto
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SomeDocumentDto mapMdocumentDataPart1ModelAndMdocumentDataP1ModelToCSomeDocumentDto(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -136,6 +152,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
         );
     }
 
+    /**
+    mapping from genericModel name: documentDataPart1Modeland genericModel name: documentDataP1Model to real class: pl.jalokim.crudwizard.core.sample.SomeDocumentDto
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SomeDocumentDto mapMdocumentDataPart1ModelAndMdocumentDataP1ModelToCSomeDocumentDto_1(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -154,13 +173,20 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentData"))
 			.orElse(null)))),
 
-		conversionService.convert(((java.lang.String) generatedMapperInvoker.mapWithMapper("fromLocalDateToStringMapper", genericMapperArgument, ((java.time.LocalDateTime) Optional.ofNullable(rootSourceObject)
+		conversionService.convert(((java.lang.String) mapperByNameInvoker.mapWithMapper("fromLocalDateToStringMapper", genericMapperArgument, ((java.time.LocalDateTime) Optional.ofNullable(rootSourceObject)
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("documentDataPart1"))
 			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("localDateTime66"))
-			.orElse(null)))), java.lang.Long.class)
+			.orElse(null)), ClassMetaModel.builder()
+            	.realClass(java.time.LocalDateTime.class)
+            	.build(), ClassMetaModel.builder()
+            	.realClass(java.lang.String.class)
+            	.build())), java.lang.Long.class)
         );
     }
 
+    /**
+    mapping from genericModel name: multiSourceExampleModeland genericModel name: personPart2Modeland genericModel name: otherPersonPart3Model to real class: pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject mapMmultiSourceExampleModelAndMpersonPart2ModelAndMotherPersonPart3ModelToCSamplePersonDtoWitOtherObject(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1, java.util.Map<java.lang.String, java.lang.Object> argument2) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -203,6 +229,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
         return (pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) newObject;
     }
 
+    /**
+    mapping from genericModel name: personPart1Modeland genericModel name: personPart2Model to real class: pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject mapMpersonPart1ModelAndMpersonPart2ModelToCSamplePersonDtoWitOtherObject(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> argument0, java.util.Map<java.lang.String, java.lang.Object> argument1) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -245,6 +274,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
         return (pl.jalokim.crudwizard.core.sample.SamplePersonDtoWitOtherObject) newObject;
     }
 
+    /**
+    mapping from genericModel name: someOtherDtoModel to real class: pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto mapMsomeOtherDtoModelToCSomeSimpleValueDto(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -274,6 +306,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
         );
     }
 
+    /**
+    mapping from  to real class: pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto mapToCDocumentHolderDto(GenericMapperArgument genericMapperArgument) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -294,6 +329,9 @@ pl.jalokim.crudwizard.genericapp.mapper.GeneratedMapperInvoker generatedMapperIn
         );
     }
 
+    /**
+    mapping from  to real class: pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.ForTestMappingMultiSourceDto.DocumentHolderDto mapToCDocumentHolderDto_1(GenericMapperArgument genericMapperArgument) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();

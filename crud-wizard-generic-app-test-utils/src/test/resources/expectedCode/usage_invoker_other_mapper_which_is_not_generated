@@ -1,0 +1,62 @@
+package pl.jalokim.crudwizard.generated.mapper;
+
+import java.util.Optional;
+import java.util.Map;
+import pl.jalokim.crudwizard.genericapp.mapper.GenericMapperArgument;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
+import java.util.List;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+
+/**
+mapping from genericModel name: personm2 to genericModel name: person2m2
+**/
+class Mpersonm2ToMperson2m2Mapper1 implements GeneratedMapper {
+		private final pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker;
+		private final pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService;
+    Mpersonm2ToMperson2m2Mapper1(pl.jalokim.crudwizard.genericapp.mapper.invoker.MapperByNameInvoker mapperByNameInvoker,
+pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService metaModelContextService) {
+		this.mapperByNameInvoker = mapperByNameInvoker;
+		this.metaModelContextService = metaModelContextService;
+    }
+
+    @Override
+    public java.util.Map<java.lang.String, java.lang.Object> mainMap(GenericMapperArgument genericMapperArgument) {
+        Object rootSourceObject = genericMapperArgument.getSourceObject();
+        Object sourceObject = genericMapperArgument.getSourceObject();
+        Map<String, String> headers = genericMapperArgument.getHeaders();
+        Map<String, Object> pathVariables = genericMapperArgument.getPathVariables();
+        Map<String, Object> requestParams = genericMapperArgument.getRequestParams();
+        Map<String, Object> mappingContext = genericMapperArgument.getMappingContext();
+
+        if (sourceObject == null) {
+            return null;
+        }
+
+		Map<String, Object> map = new java.util.HashMap<>();
+
+		map.put("documentTarget", ((pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentTarget<java.lang.String, java.lang.Long>) mapperByNameInvoker.mapWithMapper("someDocumentMapper", genericMapperArgument, ((pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentSource<java.lang.String>) Optional.ofNullable(rootSourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("document"))
+			.orElse(null)), ClassMetaModel.builder()
+            	.realClass(pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentSource.class)
+            	.genericTypes(List.of(ClassMetaModel.builder()
+            	.realClass(java.lang.String.class)
+            	.build()))            	.build(), ClassMetaModel.builder()
+            	.realClass(pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentTarget.class)
+            	.genericTypes(List.of(ClassMetaModel.builder()
+            	.realClass(java.lang.String.class)
+            	.build(), ClassMetaModel.builder()
+            	.realClass(java.lang.Long.class)
+            	.build()))            	.build())));
+
+		map.put("id", ((java.lang.Long) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("id"))
+			.orElse(null)));
+
+		map.put("name", ((java.lang.String) Optional.ofNullable(sourceObject)
+			.map(genericMap -> ((java.util.Map<java.lang.String, java.lang.Object>) genericMap).get("name"))
+			.orElse(null)));
+        return (java.util.Map<java.lang.String, java.lang.Object>) map;
+    }
+
+}

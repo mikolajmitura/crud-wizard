@@ -109,7 +109,7 @@ class RawEntityObjectTranslatorTest extends Specification {
 
         then:
         TechnicalException ex = thrown()
-        ex.message == "Cannot convert from value: '[\"test\"]' to class $LocalDate.canonicalName in path: birthDate"
+        ex.message == "Cannot convert from value: '[\"test\"]' to type: $LocalDate.canonicalName in path: birthDate"
     }
 
     def "should convert expected String as json from map node"() {

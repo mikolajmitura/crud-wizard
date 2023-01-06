@@ -22,6 +22,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 
 @Data
+@SuppressWarnings("PMD.TooManyFields")
 public class MetaModelContext {
 
     private ModelsCache<DataStorageMetaModel> dataStorages = new ModelsCache<>();
@@ -35,7 +36,10 @@ public class MetaModelContext {
     private EndpointMetaModelContextNode endpointMetaModelContextNode = createRootMetaModelNode();
 
     private ServiceMetaModel defaultServiceMetaModel;
-    private MapperMetaModel defaultMapperMetaModel;
+    private MapperMetaModel defaultPersistMapperMetaModel;
+    private MapperMetaModel defaultQueryMapperMetaModel;
+    private MapperMetaModel defaultFinalMapperMetaModel;
+    private MapperMetaModel defaultExtractIdMapperMetaModel;
     private DataStorageMetaModel defaultDataStorageMetaModel;
     private DataStorageQueryProvider defaultDataStorageQueryProvider;
     private List<DataStorageConnectorMetaModel> defaultDataStorageConnectorMetaModels;
@@ -66,5 +70,4 @@ public class MetaModelContext {
             .map(notNullName -> getMapperMetaModels().getMappersModelByMapperName().get(name))
             .orElse(null);
     }
-
 }

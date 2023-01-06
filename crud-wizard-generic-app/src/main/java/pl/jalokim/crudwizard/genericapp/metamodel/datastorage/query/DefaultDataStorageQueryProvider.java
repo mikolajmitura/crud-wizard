@@ -53,34 +53,17 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
 
         AbstractExpression whereExpression = new EmptyExpression();
 
-        for (FieldMetaModel field : requestParamsClassMetaModel.fetchAllFields()) {
-            Boolean ignoreField = Optional.ofNullable((String) field.getPropertyRealValue(IGNORE_IN_QUERY_PARAM))
-                .map(Boolean::valueOf)
-                .orElse(false);
+        if (requestParams != null && requestParamsClassMetaModel != null) {
+            for (FieldMetaModel field : requestParamsClassMetaModel.fetchAllFields()) {
+                Boolean ignoreField = Optional.ofNullable((String) field.getPropertyRealValue(IGNORE_IN_QUERY_PARAM))
+                    .map(Boolean::valueOf)
+                    .orElse(false);
 
-            if (ignoreField) {
-                continue;
-            }
-
-            String expressionType = field.getPropertyRealValue(EXPRESSION_TYPE);
-            String rightValueAsPath = field.getPropertyRealValue(EXPRESSION_RIGHT_PATH);
-            String leftValueAsPath = field.getPropertyRealValue(EXPRESSION_LEFT_PATH);
-            ExpressionArgument leftArg = buildForPath(Optional.ofNullable(leftValueAsPath)
-                .orElse(field.getFieldName()));
-            ExpressionArgument rightArg;
-            if (rightValueAsPath == null) {
-                rightArg = Optional.ofNullable(requestParams.get(asUnderscoreLowercase(field.getFieldName())))
-                    .map(ExpressionArgument::buildForValue).orElse(null);
-            } else {
-                rightArg = buildForPath(rightValueAsPath);
-            }
-            if (rightArg != null) {
-                if (expressionType == null) {
-                    whereExpression = whereExpression.and(likeIgnoreCase(leftArg, rightArg));
-                } else {
-                    whereExpression = whereExpression.and(EXPRESSION_BY_TYPE.get(ExpressionType.valueOf(expressionType))
-                        .apply(leftArg, rightArg));
+                if (ignoreField) {
+                    continue;
                 }
+
+                whereExpression = getWhereExpression(requestParams, whereExpression, field);
             }
         }
 
@@ -90,5 +73,30 @@ public class DefaultDataStorageQueryProvider implements DataStorageQueryProvider
             .sortBy(dataStorageQueryArguments.getSortBy())
             .pageable(dataStorageQueryArguments.getPageable())
             .build();
+    }
+
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    private AbstractExpression getWhereExpression(Map<String, Object> requestParams, AbstractExpression whereExpression, FieldMetaModel field) {
+        String expressionType = field.getPropertyRealValue(EXPRESSION_TYPE);
+        String rightValueAsPath = field.getPropertyRealValue(EXPRESSION_RIGHT_PATH);
+        String leftValueAsPath = field.getPropertyRealValue(EXPRESSION_LEFT_PATH);
+        ExpressionArgument leftArg = buildForPath(Optional.ofNullable(leftValueAsPath)
+            .orElse(field.getFieldName()));
+        ExpressionArgument rightArg;
+        if (rightValueAsPath == null) {
+            rightArg = Optional.ofNullable(requestParams.get(asUnderscoreLowercase(field.getFieldName())))
+                .map(ExpressionArgument::buildForValue).orElse(null);
+        } else {
+            rightArg = buildForPath(rightValueAsPath);
+        }
+        if (rightArg != null) {
+            if (expressionType == null) {
+                whereExpression = whereExpression.and(likeIgnoreCase(leftArg, rightArg));
+            } else {
+                whereExpression = whereExpression.and(EXPRESSION_BY_TYPE.get(ExpressionType.valueOf(expressionType))
+                    .apply(leftArg, rightArg));
+            }
+        }
+        return whereExpression;
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,7 +24,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 public class InMemoryDataStorage implements DataStorage {
 
     public static final String DEFAULT_DS_NAME = "in_memory_data_storage";
+
     private final String name;
+    @Getter
     private final Map<String, EntityStorage> entitiesByName = new ConcurrentHashMap<>();
     private final IdGenerators idGenerators;
     private final InMemoryDsQueryRunner inMemoryDsQueryRunner;
@@ -39,10 +42,11 @@ public class InMemoryDataStorage implements DataStorage {
 
     @Override
     public Object saveOrUpdate(ClassMetaModel classMetaModel, Object entity) {
-        EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
+        String meteModelName = classMetaModel.getTypeDescription();
+        EntityStorage entityBag = entitiesByName.get(meteModelName);
         if (entityBag == null) {
             entityBag = new EntityStorage(classMetaModel, idGenerators);
-            entitiesByName.put(classMetaModel.getName(), entityBag);
+            entitiesByName.put(meteModelName, entityBag);
         }
 
         FieldMetaModel fieldWithId = classMetaModel.getIdFieldMetaModel();
@@ -53,7 +57,7 @@ public class InMemoryDataStorage implements DataStorage {
 
     @Override
     public Optional<Object> getOptionalEntityById(ClassMetaModel classMetaModel, Object idObject) {
-        return Optional.ofNullable(entitiesByName.get(classMetaModel.getName()))
+        return Optional.ofNullable(entitiesByName.get(classMetaModel.getTypeDescription()))
             .map(entityStorage -> entityStorage.getById(idObject));
     }
 
@@ -78,16 +82,16 @@ public class InMemoryDataStorage implements DataStorage {
     @Override
     public List<Object> findEntities(DataStorageQuery query) {
         ClassMetaModel selectFromClassMetaModel = query.getSelectFrom();
-        return Optional.ofNullable(entitiesByName.get(selectFromClassMetaModel.getName()))
+        return Optional.ofNullable(entitiesByName.get(selectFromClassMetaModel.getTypeDescription()))
             .map(entityStorage -> inMemoryDsQueryRunner.runQuery(entityStorage.fetchStream(), query))
             .orElse(List.of());
     }
 
     @Override
     public void innerDeleteEntity(ClassMetaModel classMetaModel, Object idObject) {
-        EntityStorage entityBag = entitiesByName.get(classMetaModel.getName());
+        EntityStorage entityBag = entitiesByName.get(classMetaModel.getTypeDescription());
         if (entityBag == null) {
-            throw new EntityNotFoundException(String.format("Cannot find storage for entities: %s", classMetaModel.getName()));
+            throw new EntityNotFoundException(String.format("Cannot find storage for entities: %s", classMetaModel.getTypeDescription()));
         }
         entityBag.delete(idObject);
     }

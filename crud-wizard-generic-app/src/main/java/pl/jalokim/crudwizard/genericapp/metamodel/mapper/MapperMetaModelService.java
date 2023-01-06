@@ -47,10 +47,12 @@ public class MapperMetaModelService extends BaseService<MapperMetaModelEntity, M
         TemporaryModelContextHolder.clearTemporaryMetaModelContext();
     }
 
-    public boolean exists(MapperMetaModelDto mapperMetaModelDto) {
+    public Long findIdForMapperModel(MapperMetaModelDto mapperMetaModelDto) {
         BeanAndMethodDto mapperBeanAndMethod = mapperMetaModelDto.getMapperBeanAndMethod();
-        return repository.existsByBeanNameAndClassNameAndMethodName(mapperBeanAndMethod.getBeanName(),
-            mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getMethodName());
+        return repository.findByBeanNameAndClassNameAndMethodName(mapperBeanAndMethod.getBeanName(),
+            mapperBeanAndMethod.getClassName(), mapperBeanAndMethod.getMethodName())
+            .map(MapperMetaModelEntity::getId)
+            .orElse(null);
     }
 
     public Long createNewAndGetId(MapperMetaModelDto mapperMetaModelDto) {

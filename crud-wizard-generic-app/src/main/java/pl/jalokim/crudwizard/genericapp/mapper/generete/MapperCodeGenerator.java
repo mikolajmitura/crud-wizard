@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete;
 
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.ClassMetaModelForMapperHelper.getClassModelInfoForGeneratedCode;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel.createOnlyOneMapperArguments;
+import static pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.ClassMetamodelDescriber.getFullDescription;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import lombok.RequiredArgsConstructor;
@@ -105,6 +106,8 @@ public class MapperCodeGenerator {
             .overrideVariable("methodReturnType", mainMethodCodeMetadata.getMethodReturnType())
             .overrideVariable("mappingsCode", mainMethodCodeMetadata.getMappingsCodeAsText())
             .overrideVariable("lastLine", mainMethodCodeMetadata.getLastLine())
+            .overrideVariable("sourceMetaModel", getFullDescription(mainMethodCodeMetadata.getMethodArguments()))
+            .overrideVariable("targetMetaModel", getFullDescription(mainMethodCodeMetadata.getReturnClassMetaModel()))
             .overrideVariable("otherMapperMethods", mapperGeneratedCodeMetadata.getOtherMapperMethodsAsText())
             .getCurrentTemplateText();
     }

@@ -1,3 +1,6 @@
+    /**
+    mapping from ${sourceMetaModel} to ${targetMetaModel}
+    **/
 ${isGenerated}
     public ${methodReturnType} ${methodName}(GenericMapperArgument genericMapperArgument${methodArguments}) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();

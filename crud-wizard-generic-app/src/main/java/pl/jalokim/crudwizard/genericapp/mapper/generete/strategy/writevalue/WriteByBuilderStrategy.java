@@ -1,12 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.getGenericsPartToString;
+
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 
 public class WriteByBuilderStrategy implements WritePropertyStrategy {
 
     @Override
     public String generateInitLine(ClassMetaModel targetClassMetaModel) {
-        return String.format("return %s.builder()", targetClassMetaModel.getRealClass().getCanonicalName());
+        return String.format("return %s.%sbuilder()", targetClassMetaModel.getRealOrBasedClass().getCanonicalName(),
+            getGenericsPartToString(targetClassMetaModel.getGenericTypes()));
     }
 
     @Override

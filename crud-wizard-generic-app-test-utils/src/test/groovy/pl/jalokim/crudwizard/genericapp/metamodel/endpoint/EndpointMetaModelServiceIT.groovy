@@ -42,8 +42,8 @@ import pl.jalokim.crudwizard.core.sample.PersonEvent
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue
 import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeRootPathProvider
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
-import pl.jalokim.crudwizard.genericapp.mapper.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
+import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.mapper.instance.SomeTestMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
@@ -488,6 +488,21 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     def "validation of service, mapper, bean name, mapper #testCase during post"() {
         given:
         def createEndpointMetaModelDto = createValidPostEndpointMetaModelDto().toBuilder()
+            .baseUrl("/root/{rootId}/users")
+            .queryArguments(
+                ClassMetaModelDto.builder()
+                    .isGenericEnumType(false)
+                    .fields([
+                        createValidFieldMetaModelDto("requestParamName", String),
+                    ])
+                    .build()
+            )
+            .pathParams(ClassMetaModelDto.builder()
+                .isGenericEnumType(false)
+                .fields([
+                    createValidFieldMetaModelDto("rootId", Long),
+                ])
+                .build())
             .payloadMetamodel(payloadMetamodel)
             .serviceMetaModel(ServiceMetaModelDto.builder()
                 .serviceBeanAndMethod(serviceBean)
@@ -619,8 +634,6 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
                 invalidMethodParameter(1, BeanType.SERVICE)),
             errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
-                invalidMethodParameter(2, BeanType.SERVICE)),
-            errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
                 invalidMethodParameter(3, BeanType.SERVICE)),
             errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
                 invalidMethodParameter(4, BeanType.SERVICE)),
@@ -660,8 +673,6 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                 invalidMethodParameter(0, BeanType.MAPPER)),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",
                 invalidMethodParameter(1, BeanType.MAPPER)),
-            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",
-                invalidMethodParameter(2, BeanType.MAPPER)),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",
                 invalidMethodParameter(3, BeanType.MAPPER)),
             errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",

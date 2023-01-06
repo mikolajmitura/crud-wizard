@@ -63,12 +63,6 @@ public class MapperMethodGenerator {
 
     public static final String ITERABLE_ELEMENT_NODE_NAME = "*";
 
-    // TODO #1 mapper task orders
-    //  - MapperDelegatorService
-    //  - implement use mapper with have input field other than GenericMapperArgument but raw object
-    //  - full IT for create new endpoint with mapper with some overridden fields
-    //      - invoke that endpoint and verify that mapping was correct
-
     private final GenericObjectsConversionService genericObjectsConversionService;
     private final AssignExpressionAsTextResolver assignExpressionAsTextResolver;
     private final SimpleTargetAssignResolver simpleTargetAssignResolver;

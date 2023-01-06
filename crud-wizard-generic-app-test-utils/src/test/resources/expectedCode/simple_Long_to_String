@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from real class: java.lang.Long to real class: java.lang.String
+**/
 class CLongToCStringMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
     CLongToCStringMapper1(org.springframework.core.convert.ConversionService conversionService) {

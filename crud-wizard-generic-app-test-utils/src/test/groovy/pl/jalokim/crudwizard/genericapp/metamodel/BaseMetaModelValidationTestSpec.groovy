@@ -44,8 +44,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageInstanc
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.BeforeEndpointValidatorUpdater
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
-import pl.jalokim.crudwizard.genericapp.service.invoker.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
@@ -118,7 +118,6 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", Mappers.getMapper(FieldMetaModelMapper))
         setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
 
-        setValueForField(mapperMetaModelMapper, "genericBeanProvider", genericBeanProvider)
         setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
         setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(
             new MethodSignatureMetaModelResolver(jsonObjectMapper)))

@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from genericModel name: classHasSamplePersonModel2 to real class: pl.jalokim.crudwizard.core.sample.ClassHasSamplePersonDto
+**/
 class MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
 		private final pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService normalSpringService;
@@ -48,6 +51,9 @@ class MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper1 implements Ge
 			.orElse(null)), java.lang.Long.class)
         );
     }
+    /**
+    mapping from genericModel name: SomeDtoWithSettersModel to real class: pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters mapMSomeDtoWithSettersModelToCSomeDtoWithSetters(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -88,6 +94,9 @@ class MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper1 implements Ge
         return (pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters) newObject;
     }
 
+    /**
+    mapping from genericModel name: person2 to real class: pl.jalokim.crudwizard.core.sample.SamplePersonDto
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SamplePersonDto mapMperson2ToCSamplePersonDto(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -121,6 +130,9 @@ class MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper1 implements Ge
         .build();
     }
 
+    /**
+    mapping from genericModel name: someDtoWithBuilderModel to real class: pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder mapMsomeDtoWithBuilderModelToCSomeDtoWithBuilder(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();
@@ -148,6 +160,9 @@ class MclassHasSamplePersonModel2ToCClassHasSamplePersonDtoMapper1 implements Ge
         .build();
     }
 
+    /**
+    mapping from genericModel name: someObjectWithFewObjectsModel to real class: pl.jalokim.crudwizard.core.sample.SomeObjectWithFewObjects
+    **/
     @GeneratedMethod
     public pl.jalokim.crudwizard.core.sample.SomeObjectWithFewObjects mapMsomeObjectWithFewObjectsModelToCSomeObjectWithFewObjects(GenericMapperArgument genericMapperArgument, java.util.Map<java.lang.String, java.lang.Object> sourceObject) {
         Object rootSourceObject = genericMapperArgument.getSourceObject();

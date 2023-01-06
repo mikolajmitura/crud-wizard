@@ -75,7 +75,7 @@ public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<E
             .serviceMetaModel(Optional.ofNullable(endpointMetaModelEntity.getServiceMetaModel())
                 .map(serviceMetaModel -> getFromContext(metaModelContext::getServiceMetaModels, serviceMetaModel::getId))
                 .orElse(metaModelContext.getDefaultServiceMetaModel()))
-            .responseMetaModel(endpointResponseMetaModelMapper.toEndpointResponseMetaModel(metaModelContext, endpointMetaModelEntity.getResponseMetaModel()))
+            .responseMetaModel(endpointResponseMetaModelMapper.toEndpointResponseMetaModel(metaModelContext, endpointMetaModelEntity))
             .dataStorageConnectors(getStorageConnectors(metaModelContext, endpointMetaModelEntity))
             .payloadMetamodelAdditionalValidators(createAdditionalValidatorsMetaModel(metaModelContext,
                 endpointMetaModelEntity.getPayloadMetamodelAdditionalValidators()))

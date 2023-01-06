@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldr
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,8 @@ public class ClassMetaModelFactory {
     public static ClassMetaModel createNotGenericClassMetaModel(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration fieldMetaResolverConfig) {
 
         if (classMetaModel.isOnlyRawClassModel()) {
-            TypeMetadata typeMetadataFromClass = getTypeMetadataFromType(classMetaModel.getRealClass());
+            Type type = new TypeNameWrapper(ClassMetaModelUtils.createType(classMetaModel));
+            TypeMetadata typeMetadataFromClass = getTypeMetadataFromType(type);
             return createClassMetaModelFor(typeMetadataFromClass, fieldMetaResolverConfig, null, null, false);
         }
 

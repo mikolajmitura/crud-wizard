@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.lang.reflect.Type;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,17 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 @RequiredArgsConstructor
 public class JsonObjectMapper {
 
+    private static final AtomicReference<JsonObjectMapper> MAPPER_HOLDER = new AtomicReference<>();
+
     /**
      * To add some custom deserializers and serializers inject ObjectMapper and add custom configuration to it.
      */
     private final ObjectMapper objectMapper;
+
+    @PostConstruct
+    public void postConstruct() {
+        MAPPER_HOLDER.set(this);
+    }
 
     public Object convertToObject(ObjectNodePath objectNodePath, Object sourceObject, Class<?> targetClass) {
         String jsonValue = asJsonValue(objectNodePath, sourceObject);
@@ -32,7 +41,16 @@ public class JsonObjectMapper {
         try {
             return objectMapper.readValue(jsonValue, targetClass);
         } catch (JsonProcessingException e) {
-            throw cannotConvertException(objectNodePath, targetClass, jsonValue, e);
+            throw cannotConvertException(objectNodePath, targetClass.getCanonicalName(), jsonValue, e);
+        }
+    }
+
+    public Object convertToObject(ObjectNodePath objectNodePath, Object sourceObject, JavaType jacksonJavaType) {
+        String jsonValue = asJsonValue(objectNodePath, sourceObject);
+        try {
+            return objectMapper.readValue(jsonValue, jacksonJavaType);
+        } catch (JsonProcessingException e) {
+            throw cannotConvertException(objectNodePath, jacksonJavaType.getGenericSignature(), jsonValue, e);
         }
     }
 
@@ -63,9 +81,10 @@ public class JsonObjectMapper {
         }
     }
 
-    public static TechnicalException cannotConvertException(ObjectNodePath objectNodePath, Class<?> targetClass, String jsonValue, JsonProcessingException e) {
+    public static TechnicalException cannotConvertException(ObjectNodePath objectNodePath, String typeDescription, String jsonValue,
+        JsonProcessingException e) {
         return new TechnicalException("Cannot convert from value: '" + jsonValue +
-            "' to class " + targetClass.getCanonicalName() +
+            "' to type: " + typeDescription +
             inJsonPath(objectNodePath), e);
     }
 
@@ -100,5 +119,14 @@ public class JsonObjectMapper {
     public JavaType createJavaType(Type type, Class<?> contextClass) {
         TypeFactory typeFactory = this.objectMapper.getTypeFactory();
         return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
+    }
+
+    @SuppressWarnings("PMD.SingletonClassReturningNewInstance")
+    public static JsonObjectMapper getInstance() {
+        JsonObjectMapper jsonObjectMapper = MAPPER_HOLDER.get();
+        if (jsonObjectMapper == null) {
+            throw new IllegalStateException("MAPPER_HOLDER is have not initialized yet!");
+        }
+        return jsonObjectMapper;
     }
 }

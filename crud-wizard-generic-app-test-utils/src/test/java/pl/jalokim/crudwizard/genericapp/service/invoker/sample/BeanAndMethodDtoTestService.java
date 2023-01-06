@@ -43,8 +43,8 @@ public class BeanAndMethodDtoTestService {
         @RequestHeader Map<String, String> headers1,
         @RequestHeader("x-value") Long headersXValue1,
         @RequestHeader(name = "x-value") String headersXValue2,
-        @RequestParam("name") String requestParamName,
-        @PathVariable("pathVariable") String pathVariable
+        @RequestParam("requestParamName") String requestParamNameOther,
+        @PathVariable String rootId
     ) {
         return null;
     }

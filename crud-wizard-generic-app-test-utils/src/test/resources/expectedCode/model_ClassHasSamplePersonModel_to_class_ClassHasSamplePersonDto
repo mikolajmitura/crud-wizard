@@ -7,6 +7,9 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMapper;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.GeneratedMethod;
 
 
+/**
+mapping from genericModel name: classHasSamplePersonModel to real class: pl.jalokim.crudwizard.core.sample.ClassHasSamplePersonDto
+**/
 class MclassHasSamplePersonModelToCClassHasSamplePersonDtoMapper1 implements GeneratedMapper {
 		private final org.springframework.core.convert.ConversionService conversionService;
 		private final pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService genericObjectsConversionService;
