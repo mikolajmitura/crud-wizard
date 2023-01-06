@@ -118,7 +118,6 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", Mappers.getMapper(FieldMetaModelMapper))
         setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
 
-        setValueForField(mapperMetaModelMapper, "genericBeanProvider", genericBeanProvider)
         setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
         setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(
             new MethodSignatureMetaModelResolver(jsonObjectMapper)))

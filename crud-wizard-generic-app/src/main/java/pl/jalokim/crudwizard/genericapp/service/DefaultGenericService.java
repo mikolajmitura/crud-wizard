@@ -40,7 +40,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaM
 import pl.jalokim.crudwizard.genericapp.service.results.DataStorageResultJoiner;
 import pl.jalokim.crudwizard.genericapp.service.results.JoinedResultsRow;
 import pl.jalokim.crudwizard.genericapp.service.translator.DefaultSubClassesForAbstractClassesConfig;
-import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 
 @Service
@@ -55,6 +54,7 @@ public class DefaultGenericService {
     private final MetaModelContextService metaModelContextService;
 
     @GenericMethod
+    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
     public Object saveOrReadFromDataStorages(GenericServiceArgument genericServiceArgument) {
         EndpointMetaModel endpointMetaModel = genericServiceArgument.getEndpointMetaModel();
         Map<String, Object> resultsByDataStorageName = new HashMap<>();
@@ -393,7 +393,7 @@ public class DefaultGenericService {
     }
 
     private static Map<String, List<Object>> getQueriesResults(Map<String, QueryResult> queriesResults) {
-        return Elements.elements(queriesResults.entrySet())
+        return elements(queriesResults.entrySet())
             .asMap(Entry::getKey, entry -> entry.getValue().getResult());
     }
 }

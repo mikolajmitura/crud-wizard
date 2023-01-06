@@ -39,7 +39,7 @@ public class EndpointNotExistsAlreadyValidator implements BaseConstraintValidato
 
     @Override
     public boolean isValidValue(EndpointMetaModelDto endpointMetaModelDto, ConstraintValidatorContext context) {
-        if (endpointMetaModelDto.getBaseUrl() != null) {
+        if (endpointMetaModelDto.getBaseUrl() != null && endpointMetaModelDto.getHttpMethod() != null) {
             return endpointNotDuplicated(new EndpointValidationContext(context, endpointMetaModelDto));
         }
         return true;

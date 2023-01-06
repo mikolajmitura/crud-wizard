@@ -41,7 +41,16 @@ public class JsonObjectMapper {
         try {
             return objectMapper.readValue(jsonValue, targetClass);
         } catch (JsonProcessingException e) {
-            throw cannotConvertException(objectNodePath, targetClass, jsonValue, e);
+            throw cannotConvertException(objectNodePath, targetClass.getCanonicalName(), jsonValue, e);
+        }
+    }
+
+    public Object convertToObject(ObjectNodePath objectNodePath, Object sourceObject, JavaType jacksonJavaType) {
+        String jsonValue = asJsonValue(objectNodePath, sourceObject);
+        try {
+            return objectMapper.readValue(jsonValue, jacksonJavaType);
+        } catch (JsonProcessingException e) {
+            throw cannotConvertException(objectNodePath, jacksonJavaType.getGenericSignature(), jsonValue, e);
         }
     }
 
@@ -72,9 +81,10 @@ public class JsonObjectMapper {
         }
     }
 
-    public static TechnicalException cannotConvertException(ObjectNodePath objectNodePath, Class<?> targetClass, String jsonValue, JsonProcessingException e) {
+    public static TechnicalException cannotConvertException(ObjectNodePath objectNodePath, String typeDescription, String jsonValue,
+        JsonProcessingException e) {
         return new TechnicalException("Cannot convert from value: '" + jsonValue +
-            "' to class " + targetClass.getCanonicalName() +
+            "' to type: " + typeDescription +
             inJsonPath(objectNodePath), e);
     }
 
@@ -111,6 +121,7 @@ public class JsonObjectMapper {
         return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
     }
 
+    @SuppressWarnings("PMD.SingletonClassReturningNewInstance")
     public static JsonObjectMapper getInstance() {
         JsonObjectMapper jsonObjectMapper = MAPPER_HOLDER.get();
         if (jsonObjectMapper == null) {

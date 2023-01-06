@@ -19,12 +19,13 @@ public class ByMapperNameAssignExpression implements ValueToAssignExpression {
 
     @Override
     public ValueToAssignCodeMetadata generateCodeMetadata(MapperCodeMetadata mapperGeneratedCodeMetadata) {
-        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
 
         mapperGeneratedCodeMetadata.addConstructorArgument(MapperByNameInvoker.class);
         mapperGeneratedCodeMetadata.addConstructorArgument(MetaModelContextService.class);
         mapperGeneratedCodeMetadata.addImport(ClassMetaModel.class);
         mapperGeneratedCodeMetadata.addImport(List.class);
+
+        ValueToAssignCodeMetadata returnCodeMetadata = new ValueToAssignCodeMetadata();
         returnCodeMetadata.setReturnClassModel(mapperReturnClassMetaModel);
         ValueToAssignCodeMetadata valueToAssignCodeMetadata = valueExpression.generateCodeMetadata(mapperGeneratedCodeMetadata);
         returnCodeMetadata.setValueGettingCode(String.format("%s.%s(\"%s\", %s, %s, %s, %s)", firstLetterToLowerCase(MapperByNameInvoker.class.getSimpleName()),
@@ -36,8 +37,8 @@ public class ByMapperNameAssignExpression implements ValueToAssignExpression {
 
     private String generateFetchClassMetaModel(ClassMetaModel classMetaModel) {
         if (classMetaModel.isGenericModel()) {
-            return String.format(firstLetterToLowerCase(MetaModelContextService.class.getSimpleName())
-                +".getClassMetaModelByName(\"%s\")", classMetaModel.getName());
+            return String.format(firstLetterToLowerCase(MetaModelContextService.class.getSimpleName()) +
+                ".getClassMetaModelByName(\"%s\")", classMetaModel.getName());
         }
         return ClassMetaModelBuildExpression.builder()
             .realClass(classMetaModel.getRealOrBasedClass())

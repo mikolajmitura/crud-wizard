@@ -27,10 +27,10 @@ public class DefaultGenericMapper implements BaseGenericMapper {
             if (converterDefinition != null) {
                 return converterDefinition.getConverter().convert(mapperArgument.getSourceObject());
             }
-            throw new IllegalArgumentException("cannot convert from:"
-                + sourceMetaModel.getTypeDescription() + " to: " + targetMetaModel.getTypeDescription()) {
+            throw new IllegalArgumentException("cannot convert from:" +
+                sourceMetaModel.getTypeDescription() + " to: " + targetMetaModel.getTypeDescription()) {
             };
         }
-       throw new IllegalArgumentException("conversion problem value: " + mapperArgument.getSourceObject());
+        throw new IllegalArgumentException("conversion problem value: " + mapperArgument.getSourceObject());
     }
 }

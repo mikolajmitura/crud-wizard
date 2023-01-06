@@ -1,5 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper
 
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassModelWithGenerics
+import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
 import static pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage.DEFAULT_DS_NAME
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
@@ -11,18 +14,23 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorage
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDtoSamples.sampleJoinerDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDtoSamples.createMapperMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto.mappingEntry
+import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 
+import javax.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
 import pl.jalokim.crudwizard.genericapp.mapper.instance.MapperWithNotGenericArguments
+import pl.jalokim.crudwizard.genericapp.mapper.instance.SomeBeanWithGenericsMapper
+import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.OtherBeanWithGenerics
 import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.OtherPersonEntity
 import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.PersonCreateEvent
 import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.PersonEntity
 import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.PersonOneDto
 import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.PersonTypeEnum
 import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.PersonTypeEnum2
+import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeBeanWithGenerics
 import pl.jalokim.crudwizard.genericapp.mapper.instance.query.FindByDbIdQueryProvider
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
@@ -38,6 +46,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.EnumEntri
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
 import pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints
+import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 
 class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecification {
 
@@ -320,5 +329,193 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
             fromSpringBean == "admin22 ${createPerson.surname}"
             personType == PersonTypeEnum.SIMPLE
         }
+    }
+
+    def "validation should pass when generic types matches, and mapping with that given mapper should pass"() {
+        given:
+        def payloadMetaModel = ClassMetaModelDto.builder()
+            .className(SomeBeanWithGenerics.canonicalName)
+            .genericTypes([
+                createClassMetaModelDtoFromClass(Long),
+                ClassMetaModelDto.builder()
+                    .className(List.canonicalName)
+                    .genericTypes([createClassMetaModelDtoFromClass(String)])
+                    .build()
+            ])
+            .build()
+
+        def postEndpoint = EndpointMetaModelDto.builder()
+            .baseUrl("generics")
+            .operationName("createSomeBeanWithGenerics")
+            .payloadMetamodel(payloadMetaModel)
+            .apiTag(ApiTagDto.builder().name("generics").build())
+            .httpMethod(HttpMethod.POST)
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .className(OtherBeanWithGenerics.canonicalName)
+                        .genericTypes([
+                            createClassMetaModelDtoFromClass(String),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(createMapperMetaModelDto(SomeBeanWithGenericsMapper, "map"))
+                    .build()
+            ])
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(Long))
+                .successHttpCode(201)
+                .build())
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(postEndpoint)
+
+        SomeBeanWithGenerics<Long, List<String>> payload = SomeBeanWithGenerics.builder()
+            .id(12L)
+            .listOf([
+                "test",
+                "tes2",
+            ])
+            .build()
+
+        when:
+        def createdGenericId = rawOperationsOnEndpoints.postAndReturnLong("/generics", payload)
+        InMemoryDataStorage inMemoryDataStorage = (InMemoryDataStorage) metaModelContextService.getDataStorageByName(DEFAULT_DS_NAME)
+        def savedObject = inMemoryDataStorage.getEntityById(createClassModelWithGenerics(OtherBeanWithGenerics, String), createdGenericId)
+
+        then:
+        savedObject == OtherBeanWithGenerics.<String> builder()
+            .id(12L)
+            .listOf([
+                "test",
+                "tes2",
+            ])
+            .build()
+    }
+
+    def "generate mapper with generics types as expected, and mapping with that generated mapper should pass"() {
+        given:
+        def payloadMetaModel = ClassMetaModelDto.builder()
+            .className(SomeBeanWithGenerics.canonicalName)
+            .genericTypes([
+                createClassMetaModelDtoFromClass(Long),
+                ClassMetaModelDto.builder()
+                    .className(List.canonicalName)
+                    .genericTypes([createClassMetaModelDtoFromClass(String)])
+                    .build()
+            ])
+            .build()
+
+        def classMetaModelInDs = ClassMetaModelDto.builder()
+            .className(OtherBeanWithGenerics.canonicalName)
+            .genericTypes([
+                createClassMetaModelDtoFromClass(String),
+            ])
+            .build()
+
+        def postEndpoint = EndpointMetaModelDto.builder()
+            .baseUrl("generics")
+            .operationName("createSomeBeanWithGenerics")
+            .payloadMetamodel(payloadMetaModel)
+            .apiTag(ApiTagDto.builder().name("generics").build())
+            .httpMethod(HttpMethod.POST)
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(classMetaModelInDs)
+                    .mapperMetaModelForPersist(MapperMetaModelDto.builder()
+                        .mapperType(MapperType.GENERATED)
+                        .mapperName("genericToOtherGeneric")
+                        .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
+                            .rootConfiguration(MapperConfigurationDto.builder()
+                                .sourceMetaModel(payloadMetaModel)
+                                .targetMetaModel(classMetaModelInDs)
+                                .name("genericToOtherGeneric")
+                                .build())
+                            .build())
+                        .build())
+                    .build()
+            ])
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(Long))
+                .successHttpCode(201)
+                .build())
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(postEndpoint)
+
+        SomeBeanWithGenerics<Long, List<String>> payload = SomeBeanWithGenerics.builder()
+            .id(12L)
+            .listOf([
+                "test",
+                "tes2",
+            ])
+            .build()
+
+        when:
+        def createdGenericId = rawOperationsOnEndpoints.postAndReturnLong("/generics", payload)
+        InMemoryDataStorage inMemoryDataStorage = (InMemoryDataStorage) metaModelContextService.getDataStorageByName(DEFAULT_DS_NAME)
+        def savedObject = inMemoryDataStorage.getEntityById(createClassModelWithGenerics(OtherBeanWithGenerics, String), createdGenericId)
+
+        then:
+        savedObject == OtherBeanWithGenerics.<String> builder()
+            .id(12L)
+            .listOf([
+                "test",
+                "tes2",
+            ])
+            .build()
+    }
+
+    def "validation should not pass when generic types in method don't match to class metamodels"() {
+        given:
+        def payloadMetaModel = ClassMetaModelDto.builder()
+            .className(SomeBeanWithGenerics.canonicalName)
+            .genericTypes([
+                createClassMetaModelDtoFromClass(Integer),
+                ClassMetaModelDto.builder()
+                    .className(Set.canonicalName)
+                    .genericTypes([createClassMetaModelDtoFromClass(String)])
+                    .build()
+            ])
+            .build()
+
+        def postEndpoint = EndpointMetaModelDto.builder()
+            .baseUrl("generics")
+            .operationName("createSomeBeanWithGenerics")
+            .payloadMetamodel(payloadMetaModel)
+            .apiTag(ApiTagDto.builder().name("generics").build())
+            .httpMethod(HttpMethod.POST)
+            .dataStorageConnectors([
+                DataStorageConnectorMetaModelDto.builder()
+                    .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .className(OtherBeanWithGenerics.canonicalName)
+                        .genericTypes([
+                            createClassMetaModelDtoFromClass(Long),
+                        ])
+                        .build())
+                    .mapperMetaModelForPersist(createMapperMetaModelDto(SomeBeanWithGenericsMapper, "map"))
+                    .build()
+            ])
+            .responseMetaModel(EndpointResponseMetaModelDto.builder()
+                .classMetaModel(createClassMetaModelDtoFromClass(Long))
+                .successHttpCode(201)
+                .build())
+            .build()
+
+        when:
+        endpointMetaModelService.createNewEndpoint(postEndpoint)
+
+        then:
+        ConstraintViolationException ex = thrown()
+        def foundErrors = ValidatorWithConverter.errorsFromViolationException(ex)
+
+        assertValidationResults(foundErrors, [
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",
+                translatePlaceholder("BeansAndMethodsExistsValidator.invalid.method.argument",
+                    0, "{BeansAndMethodsExistsValidator.mapper.type}")),
+            errorEntry("dataStorageConnectors[0].mapperMetaModelForPersist.methodName",
+                translatePlaceholder("BeansAndMethodsExistsValidator.method.return.type.invalid",
+                    "$OtherBeanWithGenerics.canonicalName<$String.canonicalName>",
+                    "$OtherBeanWithGenerics.canonicalName<$Long.canonicalName>")),
+        ])
     }
 }

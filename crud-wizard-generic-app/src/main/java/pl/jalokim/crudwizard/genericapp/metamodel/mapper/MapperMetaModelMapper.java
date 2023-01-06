@@ -41,16 +41,12 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgument;
 import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator;
-import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Mapper(config = MapperAsSpringBeanConfig.class)
 @Slf4j
 public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<MapperMetaModelDto, MapperMetaModelEntity, MapperMetaModel> {
-
-    @Autowired
-    private GenericBeansProvider genericBeanProvider;
 
     @Autowired
     private InstanceLoader instanceLoader;

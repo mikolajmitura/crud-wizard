@@ -25,10 +25,9 @@ public class MapperDelegatorService {
     @SuppressWarnings({"PMD.ConfusingTernary"})
     public Object mapToTarget(MapperMetaModel mapperMetaModel, GenericMapperArgument mapperArgument) {
         if (GENERATED.equals(mapperMetaModel.getMapperType())) {
-            GeneratedMapper generatedMapper = ((GeneratedMapper) mapperMetaModel.getMapperInstance());
+            GeneratedMapper generatedMapper = (GeneratedMapper) mapperMetaModel.getMapperInstance();
             return generatedMapper.mainMap(mapperArgument);
-        } else
-            if (BEAN_OR_CLASS_NAME.equals(mapperMetaModel.getMapperType())) {
+        } else if (BEAN_OR_CLASS_NAME.equals(mapperMetaModel.getMapperType())) {
             if (mapperMetaModel.getMapperInstance() instanceof BaseGenericMapper) {
                 return ((BaseGenericMapper) mapperMetaModel.getMapperInstance())
                     .mapToTarget(mapperArgument);

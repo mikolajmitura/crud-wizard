@@ -24,7 +24,6 @@ public class GenericMapperArgumentMethodProvider extends GenericMethodArgumentPr
         this.genericMapperArgument = genericMapperArgument;
     }
 
-
     public Object getMapperInput() {
         return genericMapperArgument.getSourceObject();
     }

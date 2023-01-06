@@ -22,6 +22,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 
 @Data
+@SuppressWarnings("PMD.TooManyFields")
 public class MetaModelContext {
 
     private ModelsCache<DataStorageMetaModel> dataStorages = new ModelsCache<>();

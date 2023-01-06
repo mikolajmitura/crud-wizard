@@ -11,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Value;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.utils.collection.Elements;
 
 @Builder
 @Value
@@ -38,22 +37,6 @@ public class TypePredicateAndDataExtractor {
             .build(), extractDataFunction, predicateOfType);
     }
 
-    @SuppressWarnings("unchecked")
-    static <P extends GenericMethodArgumentProvider> TypePredicateAndDataExtractor newTypePredicateAndDataProvide(Class<?> isSubTypeOf,
-        Function<P, Object> extractDataFunction,
-        ClassMetaModelsPredicate... predicateOfType) {
-        return newTypePredicate(ClassMetaModel.builder()
-                .realClass(isSubTypeOf)
-                .build(),
-            argumentValueExtractMetaModel ->
-            {
-                Object value = argumentValueExtractMetaModel.getGenericMethodArgumentProvider();
-                P provider = (P) value;
-                return extractDataFunction.apply(provider);
-            },
-            predicateOfType);
-    }
-
     static TypePredicateAndDataExtractor newTypePredicate(ClassMetaModel isSubTypeOf,
         Function<ArgumentValueExtractMetaModel, Object> extractDataFunction,
         ClassMetaModelsPredicate... predicateOfType) {
@@ -64,14 +47,23 @@ public class TypePredicateAndDataExtractor {
             .build();
     }
 
-    public void setupBelongsTo(GenericMethodArgument genericMethodArgument) {
-        belongsToReference.set(genericMethodArgument);
+    @SuppressWarnings("unchecked")
+    static <P extends GenericMethodArgumentProvider> TypePredicateAndDataExtractor newTypePredicateAndDataProvide(Class<?> isSubTypeOf,
+        Function<P, Object> extractDataFunction,
+        ClassMetaModelsPredicate... predicateOfType) {
+        return newTypePredicate(ClassMetaModel.builder()
+                .realClass(isSubTypeOf)
+                .build(),
+            argumentValueExtractMetaModel -> {
+                Object value = argumentValueExtractMetaModel.getGenericMethodArgumentProvider();
+                P provider = (P) value;
+                return extractDataFunction.apply(provider);
+            },
+            predicateOfType);
     }
 
-    private String describe(GenericMethodArgument genericMethodArgument) {
-        return Elements.elements(System.lineSeparator(),
-            "this subTypeOf: " + subTypeOf.getTypeDescription(),
-            genericMethodArgument.description()).concatWithNewLines();
+    public void setupBelongsTo(GenericMethodArgument genericMethodArgument) {
+        belongsToReference.set(genericMethodArgument);
     }
 
     public GenericMethodArgument getGenericMethodArgument() {

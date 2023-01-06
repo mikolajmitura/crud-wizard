@@ -11,6 +11,7 @@ import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 
 @RequiredArgsConstructor
 @Getter
+@SuppressWarnings("PMD.AbstractClassWithoutAnyMethod")
 public abstract class GenericMethodArgumentProvider {
 
     private final EndpointMetaModel endpointMetaModel;

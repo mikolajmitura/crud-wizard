@@ -1889,7 +1889,7 @@ class MapperCodeGeneratorSamples {
         )
         .build()
 
-    public static final def PERSON_MODEL_MDL = emptyGenericMapperArgument([
+    public static final PERSON_MODEL_MDL = emptyGenericMapperArgument([
         id      : 1L,
         name    : "personName",
         document: [
@@ -1898,7 +1898,7 @@ class MapperCodeGeneratorSamples {
         ]
     ])
 
-    public static final def PERSON_MODEL_2_MDL = [
+    public static final PERSON_MODEL_2_MDL = [
         id            : 1L,
         name          : "personName",
         documentTarget: [
@@ -1961,13 +1961,13 @@ class MapperCodeGeneratorSamples {
         )
         .build()
 
-    public static final def PERSON_MODEL_MDL2 = emptyGenericMapperArgument([
+    public static final PERSON_MODEL_MDL2 = emptyGenericMapperArgument([
         id      : 1L,
         name    : "personName",
         document: new SomeDocumentSource<String>(11L, "XCD_2304895")
     ])
 
-    public static final def PERSON_MODEL_2_MDL2 = [
+    public static final PERSON_MODEL_2_MDL2 = [
         id            : 1L,
         name          : "personName",
         documentTarget: new SomeDocumentTarget<String, Long>("11", "XCD_2304895", 123L)

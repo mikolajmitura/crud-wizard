@@ -42,9 +42,37 @@ import pl.jalokim.utils.string.StringUtils;
 
 @Slf4j
 @UtilityClass
+@SuppressWarnings({"PMD.GodClass", "PMD.CouplingBetweenObjects"})
 public class GenericMethodArgumentConfig {
 
     public static final Object NULL_REFERENCE = new Object();
+
+    public static final List<GenericMethodArgument> SERVICE_EXPECTED_ARGS_TYPE = List.of(
+        argAsTypes(
+            classAndDataExtractor(GenericServiceArgument.class, GenericServiceArgumentMethodProvider::getGenericServiceArgument),
+            classAndDataExtractor(ValidationSessionContext.class, GenericServiceArgumentMethodProvider::getValidationSessionContext),
+            classAndDataExtractor(JsonNode.class, GenericServiceArgumentMethodProvider::getRequestBodyAsJsonNode),
+            classAndDataExtractor(TranslatedPayload.class, GenericServiceArgumentMethodProvider::getTranslatedPayload)
+        ));
+
+    public static final List<GenericMethodArgument> MAPPER_EXPECTED_ARGS_TYPE = List.of(
+        argAsTypes(classAndDataExtractor(GenericMapperArgument.class, GenericMapperArgumentMethodProvider::getGenericMapperArgument)),
+        argAsPredicates(newTypePredicateAndDataProvide(Object.class,
+            GenericMapperArgumentMethodProvider::getMapperInput,
+            (
+                methodArgumentMetaModel,
+                methodArgClassMetaModel,
+                inputTypeOfMapper,
+                classMetamodelForAnnotation) -> canBeAssignAsMapperArgument(methodArgClassMetaModel, inputTypeOfMapper)
+        )).toBuilder()
+            .argumentCanBeInputOfMapper(true)
+            .build()
+    );
+
+    public static final List<GenericMethodArgument> MAPPER_JOINED_RESULTS_EXPECTED_ARGS_TYPE = List.of(
+        argAsTypes(classAndDataExtractor(GenericMapperArgument.class, GenericMapperArgumentMethodProvider::getGenericMapperArgument)),
+        argAsTypes(classAndDataExtractor(JoinedResultsRow.class, GenericMapperArgumentMethodProvider::getMapperInput))
+    );
 
     private static final ClassMetaModelsPredicate METHOD_ARG_IS_SIMPLE_TYPE = (
         methodArgumentMetaModel,
@@ -91,33 +119,6 @@ public class GenericMethodArgumentConfig {
             .map(JsonNode::toString)
             .orElse(null);
     }
-
-    public static final List<GenericMethodArgument> SERVICE_EXPECTED_ARGS_TYPE = List.of(
-        argAsTypes(
-            classAndDataExtractor(GenericServiceArgument.class, GenericServiceArgumentMethodProvider::getGenericServiceArgument),
-            classAndDataExtractor(ValidationSessionContext.class, GenericServiceArgumentMethodProvider::getValidationSessionContext),
-            classAndDataExtractor(JsonNode.class, GenericServiceArgumentMethodProvider::getRequestBodyAsJsonNode),
-            classAndDataExtractor(TranslatedPayload.class, GenericServiceArgumentMethodProvider::getTranslatedPayload)
-        ));
-
-    public static final List<GenericMethodArgument> MAPPER_EXPECTED_ARGS_TYPE = List.of(
-        argAsTypes(classAndDataExtractor(GenericMapperArgument.class, GenericMapperArgumentMethodProvider::getGenericMapperArgument)),
-        argAsPredicates(newTypePredicateAndDataProvide(Object.class,
-            GenericMapperArgumentMethodProvider::getMapperInput,
-            (
-                methodArgumentMetaModel,
-                methodArgClassMetaModel,
-                inputTypeOfMapper,
-                classMetamodelForAnnotation) -> canBeAssignAsMapperArgument(methodArgClassMetaModel, inputTypeOfMapper)
-        )).toBuilder()
-            .argumentCanBeInputOfMapper(true)
-            .build()
-    );
-
-    public static final List<GenericMethodArgument> MAPPER_JOINED_RESULTS_EXPECTED_ARGS_TYPE = List.of(
-        argAsTypes(classAndDataExtractor(GenericMapperArgument.class, GenericMapperArgumentMethodProvider::getGenericMapperArgument)),
-        argAsTypes(classAndDataExtractor(JoinedResultsRow.class, GenericMapperArgumentMethodProvider::getMapperInput))
-    );
 
     public static List<GenericMethodArgument> getCommonExpectedArgsTypeAndOther(List<GenericMethodArgument> otherExpectedArguments) {
         return elements(COMMON_EXPECTED_ARGS_TYPE)
@@ -169,7 +170,6 @@ public class GenericMethodArgumentConfig {
     }
 
     private static Object validateResolvedPathVariable(ResolvedValueForAnnotation resolvedValueForAnnotation) {
-
         PathVariable pathVariable = resolvedValueForAnnotation.getExpectedAnnotation();
         MethodParameterInfo methodParameterInfo = resolvedValueForAnnotation.getMethodParameterInfo();
         String pathVariableName = getFirstValue(pathVariable.name(), pathVariable.value(), methodParameterInfo.getName()).get();

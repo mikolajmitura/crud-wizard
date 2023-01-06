@@ -270,14 +270,21 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         throw new IllegalStateException("Cannot generate java generic type for class metamodel: " + this);
     }
 
+    public static String getGenericsPartToString(List<ClassMetaModel> genericTypes) {
+        if (CollectionUtils.isEmpty(genericTypes)) {
+            return "";
+        }
+        return StringUtils.concatElements("<",
+            genericTypes,
+            ClassMetaModel::getJavaGenericTypeInfo,
+            ", ",
+            ">");
+    }
+
     private static String getClassAndGenerics(Class<?> realClass, List<ClassMetaModel> genericTypes) {
         String realClassAsText = realClass.getCanonicalName();
-        String genericParts = CollectionUtils.isEmpty(genericTypes) || realClass.isArray() ? "" :
-            StringUtils.concatElements("<",
-                genericTypes,
-                ClassMetaModel::getJavaGenericTypeInfo,
-                ", ",
-                ">");
+        String genericParts = CollectionUtils.isEmpty(genericTypes) || realClass.isArray() ?
+            "" : getGenericsPartToString(genericTypes);
         return realClassAsText + genericParts;
     }
 
@@ -368,7 +375,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     public FieldMetaModel getIdFieldMetaModel() {
         if (isGenericModel()) {
-            return findIfField()
+            return findIdField()
                 .orElseThrow(() -> new TechnicalException(createMessagePlaceholder("ClassMetaModel.id.field.not.found", getName())));
         } else if (isOnlyRawClassModel()) {
             try {
@@ -385,10 +392,10 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     public boolean hasIdField() {
-        return findIfField().isPresent();
+        return findIdField().isPresent();
     }
 
-    private Optional<FieldMetaModel> findIfField() {
+    private Optional<FieldMetaModel> findIdField() {
         return elements(fetchAllFields())
             .filter(field -> field.getAdditionalProperties().stream()
                 .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))

@@ -14,16 +14,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.TypeNameWrapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
-import pl.jalokim.utils.collection.CollectionUtils;
 import ru.vyarus.java.generics.resolver.GenericsResolver;
 import ru.vyarus.java.generics.resolver.context.GenericsContext;
 import ru.vyarus.java.generics.resolver.context.MethodGenericsContext;
-import ru.vyarus.java.generics.resolver.context.container.ParameterizedTypeImpl;
 
 @Component
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class MethodSignatureMetaModelResolver {
     public MethodSignatureMetaModel resolveMethodSignature(Method method, Class<?> instanceClass) {
         GenericsContext context = GenericsResolver.resolve(instanceClass);
         MethodGenericsContext methodContext = context.method(method);
-        Type methodReturnType = new TypeWrapper(methodContext.resolveReturnType());
+        Type methodReturnType = new TypeNameWrapper(methodContext.resolveReturnType());
         Class<?> rawReturnClass = methodContext.resolveReturnClass();
 
         return MethodSignatureMetaModel.builder()
@@ -60,7 +59,7 @@ public class MethodSignatureMetaModelResolver {
         List<MethodArgumentMetaModel> methodArgumentMetaModels = new ArrayList<>();
         for (int parameterIndex = 0; parameterIndex < method.getParameterCount(); parameterIndex++) {
             Annotation[] argumentAnnotations = method.getParameterAnnotations()[parameterIndex];
-            Type parameterType = new TypeWrapper(methodContext.resolveParameterType(parameterIndex));
+            Type parameterType = new TypeNameWrapper(methodContext.resolveParameterType(parameterIndex));
 
             GenericsContext genericsContext = methodContext.parameterType(parameterIndex);
 
@@ -88,39 +87,9 @@ public class MethodSignatureMetaModelResolver {
     }
 
     private static Type unwrap(Type type) {
-        if (type instanceof TypeWrapper) {
-            return ((TypeWrapper) type).wrappedType;
+        if (type instanceof TypeNameWrapper) {
+            return ((TypeNameWrapper) type).getWrappedType();
         }
         return type;
-    }
-
-    @RequiredArgsConstructor
-    public static class TypeWrapper implements Type {
-
-        private final Type wrappedType;
-
-        @Override
-        public String getTypeName() {
-            if (wrappedType instanceof ParameterizedTypeImpl) {
-                ParameterizedTypeImpl parameterizedType = (ParameterizedTypeImpl) wrappedType;
-
-                List<Type> types = elements(parameterizedType.getActualTypeArguments()).asList();
-                String genericParts = "";
-                if (CollectionUtils.isNotEmpty(types)) {
-                    genericParts = "<" + elements(types)
-                        .map(TypeWrapper::new)
-                        .map(TypeWrapper::getTypeName)
-                        .asConcatText(", ") + ">";
-                }
-
-                return new TypeWrapper(parameterizedType.getRawType()).getTypeName() + genericParts;
-            }
-            return wrappedType.getTypeName();
-        }
-
-        @Override
-        public String toString() {
-            return getTypeName();
-        }
     }
 }

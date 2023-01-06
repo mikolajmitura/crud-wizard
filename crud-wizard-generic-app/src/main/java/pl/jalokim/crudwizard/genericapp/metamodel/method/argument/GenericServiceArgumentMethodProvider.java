@@ -16,6 +16,7 @@ public class GenericServiceArgumentMethodProvider extends GenericMethodArgumentP
     private final GenericServiceArgument genericServiceArgument;
     private final ValidationSessionContext validationSessionContext;
 
+    @SuppressWarnings("PMD.ExcessiveParameterList")
     public GenericServiceArgumentMethodProvider(EndpointMetaModel endpointMetaModel, HttpServletRequest httpServletRequest,
         HttpServletResponse httpServletResponse, TranslatedPayload translatedPayload, JsonNode requestBodyAsJsonNode,
         Map<String, String> headers, Map<String, Object> httpQueryTranslated, Map<String, Object> urlPathParams,

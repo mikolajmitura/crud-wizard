@@ -412,7 +412,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         List<InnerError> results = new ArrayList<>();
 
         try {
-            Class<?> beanClass = ClassUtils.loadRealClass(beanAndMethodDto.getClassName());
+            Class<?> beanClass = loadRealClass(beanAndMethodDto.getClassName());
             if (beanAndMethodDto.getBeanName() != null) {
                 Object bean = applicationContext.getBean(beanAndMethodDto.getBeanName());
                 if (!MetadataReflectionUtils.isTypeOf(bean, beanClass)) {
@@ -423,6 +423,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
             try {
                 findMethodByName(beanClass, beanAndMethodDto.getMethodName());
             } catch (Exception ex) {
+                log.error("not found method due to:", ex);
                 results.add(newError("methodName", translatePlaceholder("BeansAndMethodsExistsValidator.method.not.found",
                     beanClass.getCanonicalName())));
             }
@@ -444,7 +445,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
     private void validateNotGenericServiceMethodReturnType(List<InnerError> innerErrors,
         EndpointMetaModelDto endpointMetaModelDto) {
         BeanAndMethodDto beanAndMethodDto = endpointMetaModelDto.getServiceMetaModel().getServiceBeanAndMethod();
-        Class<?> beanClass = ClassUtils.loadRealClass(beanAndMethodDto.getClassName());
+        Class<?> beanClass = loadRealClass(beanAndMethodDto.getClassName());
         Method foundMethod = findMethodByName(beanClass, beanAndMethodDto.getMethodName());
 
         if (foundMethod.getAnnotation(GenericMethod.class) == null &&
@@ -547,7 +548,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
         } else {
             BeanAndMethodDto serviceBeanAndMethod = serviceMetaModel.getServiceBeanAndMethod();
             if (serviceBeanAndMethod != null && checkThatClassExists(serviceBeanAndMethod.getClassName())) {
-                return ClassUtils.loadRealClass(serviceBeanAndMethod.getClassName());
+                return loadRealClass(serviceBeanAndMethod.getClassName());
             }
         }
         return null;
