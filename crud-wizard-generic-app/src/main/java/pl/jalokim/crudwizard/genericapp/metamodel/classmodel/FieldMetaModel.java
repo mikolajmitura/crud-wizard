@@ -24,6 +24,10 @@ public class FieldMetaModel extends WithAdditionalPropertiesMetaModel {
 
     String fieldName;
 
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    AccessFieldType accessFieldType = AccessFieldType.WRITE_READ;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     ClassMetaModel fieldType;

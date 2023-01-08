@@ -1,8 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getRequiredFieldFromClassModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 
 import org.springframework.context.ApplicationContext
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration

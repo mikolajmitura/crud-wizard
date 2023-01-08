@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
+import static FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
@@ -15,7 +15,7 @@ class BySettersFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
 
         when:
-        def results = testCase.findDeclaredFields(someDtoTypeMetadata, READ_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(someDtoTypeMetadata, READ_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 1
@@ -31,7 +31,7 @@ class BySettersFieldsResolverTest extends FieldsResolverSpecification {
         def someMiddleGenericDtoMetadata = someDtoTypeMetadata.getParentTypeMetadata()
 
         when:
-        def results = testCase.findDeclaredFields(someMiddleGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(someMiddleGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 2
@@ -56,7 +56,7 @@ class BySettersFieldsResolverTest extends FieldsResolverSpecification {
         def superGenericDtoMetadata = someMiddleGenericDtoMetadata.getParentTypeMetadata()
 
         when:
-        def results = testCase.findDeclaredFields(superGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(superGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 3

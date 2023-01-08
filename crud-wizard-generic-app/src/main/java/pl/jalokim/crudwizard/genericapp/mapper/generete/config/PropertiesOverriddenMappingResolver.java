@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelWithOtherConfig;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.string.StringUtils.replaceAllWithEmpty;
 
@@ -11,13 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException.ErrorSource;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.MapperConfigurationParserContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.FieldMetaModelExtractor;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
 import pl.jalokim.utils.collection.Elements;
 
 @Component
@@ -27,6 +27,7 @@ public class PropertiesOverriddenMappingResolver {
 
     private final ApplicationContext applicationContext;
 
+    // TODO #62 why it is only used in test???????
     public void populateMappingEntriesToConfiguration(MapperGenerateConfiguration mapperGenerateConfiguration,
         List<MappingEntryModel> rootMapperMappingEntries, Map<String, List<MappingEntryModel>> mappingEntriesByMethodName) {
 
@@ -76,7 +77,7 @@ public class PropertiesOverriddenMappingResolver {
 
         ClassMetaModel targetMetaModel = mapperConfiguration.getTargetMetaModel();
         if (targetMetaModel.isOnlyRawClassModel()) {
-            targetMetaModel = ClassMetaModelFactory.generateGenericClassMetaModel(targetMetaModel.getRealClass(), fieldMetaResolverForRawTarget);
+            targetMetaModel = createClassMetaModelWithOtherConfig(targetMetaModel, fieldMetaResolverForRawTarget);
         }
 
         parserContext.nextEntry(entryIndex);

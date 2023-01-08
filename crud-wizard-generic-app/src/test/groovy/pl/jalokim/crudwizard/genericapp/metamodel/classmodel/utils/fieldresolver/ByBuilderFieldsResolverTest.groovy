@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.generateGenericClassMetaModel
+import static FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import java.time.LocalDateTime
@@ -20,7 +20,7 @@ class ByBuilderFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata SomeDtoWithBuilderTypeMetadata = getTypeMetadataFromType(SomeDtoWithSuperBuilder)
 
         when:
-        def results = testCase.findDeclaredFields(SomeDtoWithBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(SomeDtoWithBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 2
@@ -43,7 +43,7 @@ class ByBuilderFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata superDtoWithSuperBuilderTypeMetadata = getTypeMetadataFromType(SuperDtoWithSuperBuilder)
 
         when:
-        def results = testCase.findDeclaredFields(superDtoWithSuperBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(superDtoWithSuperBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 2
@@ -68,7 +68,7 @@ class ByBuilderFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata superDtoWithSuperBuilderTypeMetadata = getTypeMetadataFromType(SomeDtoWithBuilder)
 
         when:
-        def results = testCase.findDeclaredFields(superDtoWithSuperBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(superDtoWithSuperBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 3
@@ -97,7 +97,7 @@ class ByBuilderFieldsResolverTest extends FieldsResolverSpecification {
 
     def "return all available fields for SomeDtoWithSuperBuilder"() {
         given:
-        ClassMetaModel classMetaModel = generateGenericClassMetaModel(SomeDtoWithSuperBuilder.class, WRITE_FIELD_RESOLVER_CONFIG)
+        ClassMetaModel classMetaModel = createClassMetaModel(SomeDtoWithSuperBuilder.class, WRITE_FIELD_RESOLVER_CONFIG)
 
         when:
         def results = testCase.getAllAvailableFieldsForWrite(classMetaModel)
@@ -132,7 +132,7 @@ class ByBuilderFieldsResolverTest extends FieldsResolverSpecification {
 
     def "return all available fields for SomeDtoWithBuilder"() {
         given:
-        ClassMetaModel classMetaModel = generateGenericClassMetaModel(SomeDtoWithBuilder.class, WRITE_FIELD_RESOLVER_CONFIG)
+        ClassMetaModel classMetaModel = createClassMetaModel(SomeDtoWithBuilder.class, WRITE_FIELD_RESOLVER_CONFIG)
 
         when:
         def results = testCase.getAllAvailableFieldsForWrite(classMetaModel)

@@ -19,11 +19,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import pl.jalokim.crudwizard.core.exception.handler.DummyService
 import pl.jalokim.crudwizard.core.exception.handler.SimpleDummyDto
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseMetaModelValidationTestSpec
 import pl.jalokim.crudwizard.genericapp.metamodel.ScriptLanguage
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder

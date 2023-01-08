@@ -60,7 +60,7 @@ public class RawEntityObjectTranslator {
     private Object convertObject(ObjectNodePath objectNodePath, JsonNode jsonNode, ClassMetaModel classMetaModel) {
         Object newObject = null;
         if (jsonNode != null) {
-            if (classMetaModel.getRealOrBasedClass() == null) {
+            if (classMetaModel.getRealClass() == null) {
                 newObject = convertObjectBasedOnMetaData(objectNodePath, jsonNode, classMetaModel);
             } else {
                 newObject = convertObjectBasedOnRealClass(objectNodePath, jsonNode, classMetaModel);

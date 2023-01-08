@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
+import static FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import java.time.LocalDateTime
@@ -18,7 +18,7 @@ class ByAllArgsFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata someValueDtoTypeMetadata = getTypeMetadataFromType(SomeSimpleValueDto)
 
         when:
-        def results = testCase.findDeclaredFields(someValueDtoTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(someValueDtoTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 3
@@ -46,7 +46,7 @@ class ByAllArgsFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata someValueDtoTypeMetadata = getTypeMetadataFromType(SomeAllArgConstructor)
 
         when:
-        def results = testCase.findDeclaredFields(someValueDtoTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        def results = testCase.findFields(someValueDtoTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         results.size() == 4
@@ -80,7 +80,7 @@ class ByAllArgsFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata typeMetadata = getTypeMetadataFromType(SomeSuperAllArgConstructor)
 
         when:
-        testCase.findDeclaredFields(typeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        testCase.findFields(typeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
 
         then:
         IllegalArgumentException ex = thrown()

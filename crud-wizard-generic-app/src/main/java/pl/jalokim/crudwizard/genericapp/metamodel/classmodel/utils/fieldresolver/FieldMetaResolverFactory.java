@@ -1,19 +1,15 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver;
 
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasBuilderMethod;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasOneConstructorMaxArgNumbers;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.hasOnlyDefaultConstructor;
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.READ;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType.READ;
 import static pl.jalokim.utils.reflection.InvokableReflectionUtils.newInstance;
 
 import java.util.Map;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
-import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 
 @UtilityClass
@@ -58,8 +54,7 @@ public class FieldMetaResolverFactory {
                 if (hasOneConstructorMaxArgNumbers(someClass)) {
                     return ByAllArgsFieldsResolver.INSTANCE;
                 }
-                throw new TechnicalException(createMessagePlaceholder(
-                    "cannot.find.field.resolver.strategy", someClass.getCanonicalName()));
+                return JavaClassFieldMetaResolver.INSTANCE;
             }
         }
     }

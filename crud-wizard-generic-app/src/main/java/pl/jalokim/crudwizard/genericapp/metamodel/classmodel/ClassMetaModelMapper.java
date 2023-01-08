@@ -20,6 +20,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalP
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.ClassMetaModelBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 
 @Mapper(config = MapperAsSpringBeanConfig.class,
     imports = {
@@ -38,8 +39,10 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
     @Mapping(target = "realClass", ignore = true)
-    @Mapping(target = "basedOnClass", ignore = true)
     @Mapping(target = "enumClassMetaModel", ignore = true)
+    @Mapping(target = "fieldMetaResolverConfigurations", ignore = true) // TODO #62 this should be stored in db? Better yes,
+    // after restart application meta models should have the same fields
+    @Mapping(target = "attachedFieldsOwner", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     @Mapping(target = "state", expression = "java(pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState.INITIALIZED)")
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
@@ -78,7 +81,6 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
             extendsFromModel -> newClassMetaModel(extendsFromModel.getId())
         ));
         classMetaModel.setRealClass(loadRealClass(classMetaModelEntity.getClassName()));
-        classMetaModel.setBasedOnClass(loadRealClass(classMetaModelEntity.getBasedOnClass()));
 
         setupEnumMetaModelIfShould(classMetaModel);
 
@@ -114,19 +116,9 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
                     .asList()
             );
 
-            ClassMetaModel ownerOfField = classMetaModel;
-
             classMetaModel.setFields(
                 elements(classMetaModelDto.getFields())
-                    .map(field -> (FieldMetaModel) FieldMetaModel.builder()
-                        .fieldName(field.getFieldName())
-                        .ownerOfField(ownerOfField)
-                        .fieldType(toModelFromDto(field.getFieldType()))
-                        .additionalProperties(elements(field.getAdditionalProperties())
-                            .map(this::additionalPropertyToModel)
-                            .asList())
-                        .build()
-                    )
+                    .map(field -> fieldToModelFromDto(field, classMetaModel, toModelFromDto(field.getFieldType())))
                     .asList());
             classMetaModel.setState(MetaModelState.INITIALIZED);
         }
@@ -201,16 +193,16 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
         }
     }
 
-    @Mapping(target = "basedOnClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getBasedOnClass()))")
     @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
     @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "state", ignore = true)
+    @Mapping(target = "attachedFieldsOwner", ignore = true)
+    @Mapping(target = "fieldMetaResolverConfigurations", ignore = true)
     protected abstract ClassMetaModel innerToModelFromDto(ClassMetaModelDto classMetaModelDto);
 
-    @Mapping(target = "basedOnClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getBasedOnClass()))")
     @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
     @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
@@ -220,9 +212,16 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "fieldNames", ignore = true)
     @Mapping(target = "state", ignore = true)
+    @Mapping(target = "fieldMetaResolverConfigurations", ignore = true)
+    @Mapping(target = "attachedFieldsOwner", ignore = true)
     protected abstract void swallowUpdateFrom(@MappingTarget ClassMetaModel classMetaModel, ClassMetaModelDto classMetaModelDto);
 
     @Mapping(target = "classMetaModelDtoType", ignore = true)
     @Override
     public abstract ClassMetaModelDto toDto(ClassMetaModelEntity classMetaModelEntity);
+
+    protected FieldMetaModel fieldToModelFromDto(FieldMetaModelDto fieldMetaModelDto,
+        ClassMetaModel ownerOfField, ClassMetaModel fieldType) {
+        return fieldMetaModelMapper.toModelFromDto(fieldMetaModelDto, ownerOfField, fieldType);
+    }
 }

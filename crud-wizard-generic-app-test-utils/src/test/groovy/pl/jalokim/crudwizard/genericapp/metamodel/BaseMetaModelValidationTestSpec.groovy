@@ -115,8 +115,10 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         dataStorageInstances.getDataStorageFactoryForClass(_) >> Mock(DataStorageFactory)
 
         jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
-        setValueForField(classMetaModelMapper, "fieldMetaModelMapper", Mappers.getMapper(FieldMetaModelMapper))
+        def fieldMetaModelMapper = Mappers.getMapper(FieldMetaModelMapper)
+        setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
         setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
+        setValueForField(fieldMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
 
         setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
         setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(

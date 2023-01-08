@@ -199,7 +199,7 @@ public class DataStorageResultsJoinCorrectnessValidator
                     groupsOfDsResults.remove(rightGroup);
                 } else {
                     groupForAdd = Elements.of(leftGroup, rightGroup)
-                        .filter(Objects::nonNull)
+                        .skipNulls()
                         .getFirst();
                 }
             }

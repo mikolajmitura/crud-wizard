@@ -5,7 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType;
 
 @Value
 @Builder

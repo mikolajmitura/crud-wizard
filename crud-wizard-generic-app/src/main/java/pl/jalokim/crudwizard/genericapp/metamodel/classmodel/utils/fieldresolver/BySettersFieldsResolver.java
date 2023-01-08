@@ -1,12 +1,12 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver;
 
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.methodReturnsVoidAndHasArgumentsSize;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
@@ -18,7 +18,7 @@ public class BySettersFieldsResolver implements FieldMetaResolver {
     public static final BySettersFieldsResolver INSTANCE = new BySettersFieldsResolver();
 
     @Override
-    public List<FieldMetaModel> findDeclaredFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+    public List<FieldMetaModel> findFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         return elements(MetadataReflectionUtils.getAllDeclaredNotStaticMethods(typeMetadata.getRawType()))
             .filter(method -> method.getName().startsWith("set"))
             .filter(MetadataReflectionUtils::isPublicMethod)
@@ -38,8 +38,8 @@ public class BySettersFieldsResolver implements FieldMetaResolver {
 
                 return (FieldMetaModel) FieldMetaModel.builder()
                     .fieldName(fieldName)
-                    .fieldType(createNotGenericClassMetaModel(parameterMetadata.getTypeOfParameter(),
-                        fieldMetaResolverConfiguration, fieldName, typeMetadata))
+                    .accessFieldType(AccessFieldType.WRITE) // TODO #62 fieldMetaResolverConfiguration.getFieldAccessType()
+                    .fieldType(createClassMetaModel(parameterMetadata.getTypeOfParameter(), fieldMetaResolverConfiguration))
                     .build();
             })
             .asList();

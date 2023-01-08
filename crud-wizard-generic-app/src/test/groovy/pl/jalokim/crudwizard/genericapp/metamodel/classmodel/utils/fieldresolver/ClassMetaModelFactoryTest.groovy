@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.generateGenericClassMetaModel
+import static FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.core.sample.SomeMiddleGenericDto
@@ -11,7 +11,7 @@ class ClassMetaModelFactoryTest extends FieldsResolverSpecification {
 
     def "return expected ClassMetaModel from SomeDto"() {
         when:
-        def classMetaModel = generateGenericClassMetaModel(SomeDto, READ_FIELD_RESOLVER_CONFIG
+        def classMetaModel = createClassMetaModel(SomeDto, READ_FIELD_RESOLVER_CONFIG
         .putFieldResolver(SomeDto, ByDeclaredFieldsResolver.INSTANCE)
         .putFieldResolver(SomeMiddleGenericDto, ByDeclaredFieldsResolver.INSTANCE)
         .putFieldResolver(SuperGenericDto, ByDeclaredFieldsResolver.INSTANCE)
@@ -19,9 +19,9 @@ class ClassMetaModelFactoryTest extends FieldsResolverSpecification {
 
         then:
         verifyAll(classMetaModel) {
-            name == "someDto"
-            className == null
-            basedOnClass == SomeDto
+            name == null
+            className == SomeDto.canonicalName
+            realClass == SomeDto
             genericTypes.isEmpty()
             fields.size() == 3
             fetchAllFields().size() == 8
@@ -44,9 +44,9 @@ class ClassMetaModelFactoryTest extends FieldsResolverSpecification {
             }
 
             verifyAll(extendsFromModels[0]) {
-                name == "someMiddleGenericDto_SomeDto"
-                className == null
-                basedOnClass == SomeMiddleGenericDto
+                name == null
+                className == SomeMiddleGenericDto.canonicalName
+                realClass == SomeMiddleGenericDto
                 genericTypes == [classMetaModel]
                 fields.size() == 2
                 fetchAllFields().size() == 5
@@ -64,10 +64,10 @@ class ClassMetaModelFactoryTest extends FieldsResolverSpecification {
                 }
 
                 verifyAll(extendsFromModels[0]) {
-                    name == "superGenericDto_SomeDto_Set_String"
-                    className == null
-                    basedOnClass == SuperGenericDto
-                    genericTypes*.getTypeDescription() == ["someDto", "java.util.Set<java.lang.Long>", "java.lang.String"]
+                    name == null
+                    className == SuperGenericDto.canonicalName
+                    realClass == SuperGenericDto
+                    genericTypes*.getTypeDescription() == ["pl.jalokim.crudwizard.core.sample.SomeDto", "java.util.Set<java.lang.Long>", "java.lang.String"]
                     fields.size() == 3
                     fetchAllFields().size() == 3
                     extendsFromModels.isEmpty()

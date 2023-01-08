@@ -18,7 +18,7 @@ import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssert
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.errorsFromViolationException
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
-import java.time.Period
+import java.time.LocalDateTime
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
 import pl.jalokim.crudwizard.core.exception.CustomValidationException
 import pl.jalokim.crudwizard.core.metamodels.ValidatorMetaModelSamples
@@ -106,17 +106,6 @@ class GenericValidatorTest extends UnitTestSpec {
         ]
     }
 
-    def "expected was Long to validate but was LocalDateTime"() {
-        given:
-
-        when:
-        genericValidator.validate(createRequestBodyTranslated(), createClassMetaModelWithParents())
-
-        then:
-        IllegalStateException ex = thrown()
-        ex.message == "Expected metamodel class: java.lang.Long, but give was: java.time.LocalDateTime, field path: applicationDateTime"
-    }
-
     private Map<String, Object> invalidPayload1() {
         def payload = createRequestBodyTranslated()
         payload.name = "J"
@@ -137,8 +126,8 @@ class GenericValidatorTest extends UnitTestSpec {
     private static Map<String, Object> invalidPayloadWithParentMeta1() {
         def payload = createRequestBodyTranslated()
         payload.name = "J"
-        payload.applicationDateTime = 12341L
-        payload.age = Period.ofYears(22)
+        payload.applicationDateTime = LocalDateTime.now()
+        payload.age = 22
         payload
     }
 

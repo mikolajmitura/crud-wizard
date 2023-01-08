@@ -19,10 +19,10 @@ public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<Fiel
     @Mapping(target = "validators", ignore = true)
     public abstract FieldMetaModel toMetaModel(FieldMetaModelEntity fieldMetaModelEntity);
 
-    public FieldMetaModel toMetaModel(MetaModelContext metaModelContext, ClassMetaModel classMetaModel, FieldMetaModelEntity field) {
+    public FieldMetaModel toMetaModel(MetaModelContext metaModelContext, ClassMetaModel ownerOfField, FieldMetaModelEntity field) {
         return toMetaModel(field).toBuilder()
             .fieldType(newClassMetaModel(field.getFieldType().getId()))
-            .ownerOfField(classMetaModel)
+            .ownerOfField(ownerOfField)
             .validators(mapToList(
                 field.getValidators(),
                 validator -> metaModelContext.getValidatorMetaModels()
@@ -32,4 +32,12 @@ public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<Fiel
 
     @Mapping(target = "classMetaModelDtoType", ignore = true)
     public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
+
+    @Mapping(target = "version", source = "fieldMetaModelDto.version")
+    @Mapping(target = "additionalProperties", source = "fieldMetaModelDto.additionalProperties")
+    @Mapping(target = "id", source = "fieldMetaModelDto.id")
+    @Mapping(target = "fieldType", source = "fieldType")
+    @Mapping(target = "validators", ignore = true) // TODO #62 it is bug???
+    public abstract FieldMetaModel toModelFromDto(FieldMetaModelDto fieldMetaModelDto,
+        ClassMetaModel ownerOfField, ClassMetaModel fieldType);
 }

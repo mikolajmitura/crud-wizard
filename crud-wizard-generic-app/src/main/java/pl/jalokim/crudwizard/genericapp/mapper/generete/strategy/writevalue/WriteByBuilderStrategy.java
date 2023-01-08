@@ -8,7 +8,7 @@ public class WriteByBuilderStrategy implements WritePropertyStrategy {
 
     @Override
     public String generateInitLine(ClassMetaModel targetClassMetaModel) {
-        return String.format("return %s.%sbuilder()", targetClassMetaModel.getRealOrBasedClass().getCanonicalName(),
+        return String.format("return %s.%sbuilder()", targetClassMetaModel.getRealClass().getCanonicalName(),
             getGenericsPartToString(targetClassMetaModel.getGenericTypes()));
     }
 

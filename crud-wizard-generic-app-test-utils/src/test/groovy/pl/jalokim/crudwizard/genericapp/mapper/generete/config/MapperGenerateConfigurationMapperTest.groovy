@@ -14,7 +14,6 @@ import org.mapstruct.factory.Mappers
 import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDto
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
@@ -24,6 +23,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByAllArgsFieldsResolver
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.BySettersFieldsResolver
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryEntity

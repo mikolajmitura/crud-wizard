@@ -99,12 +99,6 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     @Size(min = 3, max = 250)
     String className;
 
-    /**
-     * From this class is created metamodel, with fields and then it became generic meta model.
-     */
-    @Size(min = 3, max = 250)
-    String basedOnClass;
-
     @NotNull
     @Builder.Default
     Boolean isGenericEnumType = false;

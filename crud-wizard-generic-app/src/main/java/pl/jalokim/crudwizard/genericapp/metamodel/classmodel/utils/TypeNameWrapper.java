@@ -5,15 +5,20 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import java.lang.reflect.Type;
 import java.util.List;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import pl.jalokim.utils.collection.CollectionUtils;
 import ru.vyarus.java.generics.resolver.context.container.ParameterizedTypeImpl;
 
-@RequiredArgsConstructor
 public class TypeNameWrapper implements Type {
 
     @Getter
     private final Type wrappedType;
+
+    public TypeNameWrapper(Type wrappedType) {
+        if (wrappedType == null) {
+            throw new IllegalStateException("wrappedType is null");
+        }
+        this.wrappedType = wrappedType;
+    }
 
     /**
      * Class ParameterizedTypeImpl is not show full name of classes.

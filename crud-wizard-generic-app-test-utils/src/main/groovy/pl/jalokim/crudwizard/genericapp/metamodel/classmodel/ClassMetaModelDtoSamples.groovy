@@ -72,7 +72,7 @@ class ClassMetaModelDtoSamples {
                 extendedPersonClassMetaModel1(), createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)
             ])
             .fields([
-                createValidFieldMetaModelDto("birthDate", Date)
+                createValidFieldMetaModelDto("birthDate", LocalDate)
             ])
             .build()
     }
