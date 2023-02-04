@@ -6,12 +6,14 @@ import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.get
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEmptyClassMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEnumMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithClassName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidEnumMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createEmptyValidatorMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
@@ -28,6 +30,7 @@ import pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState
 import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeRealClass
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
@@ -128,6 +131,24 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
                 fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, []))),
             errorEntry("extendsFromModels[0].name", whenFieldIsInStateThenOthersShould(
                 "id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, [])))
+        ]
+
+        createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
+            .fields([
+                createValidFieldMetaModelDto("id", Long),
+                createValidFieldMetaModelDto("name", String),
+            ])
+            .build()                                      | []
+
+        createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
+            .fields([
+                createValidFieldMetaModelDto("id", Long),
+                createValidFieldMetaModelDto("surname", String),
+                createValidFieldMetaModelDto("name", UUID),
+            ])
+            .build()                                      | [
+            errorEntry("fields[1].fieldName", getMessage("ForRealClassFieldsCanBeMerged.invalid.field.name")),
+            errorEntry("fields[2].fieldType", getMessage("ForRealClassFieldsCanBeMerged.invalid.field.type", String.canonicalName)),
         ]
     }
 

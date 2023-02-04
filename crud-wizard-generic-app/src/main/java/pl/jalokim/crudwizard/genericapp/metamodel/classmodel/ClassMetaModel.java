@@ -481,18 +481,25 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             Map<String, FieldMetaModel> fieldsFromThisModel = elements(fields)
                 .asMap(FieldMetaModel::getFieldName);
 
-            for (FieldMetaModel fieldMetaModel : fieldsToMerge) {
-                FieldMetaModel fieldFromThisModel = fieldsFromThisModel.get(fieldMetaModel.getFieldName());
+            for (FieldMetaModel fieldForMerge : fieldsToMerge) {
+                FieldMetaModel fieldFromThisModel = fieldsFromThisModel.get(fieldForMerge.getFieldName());
                 if (fieldFromThisModel == null) {
-                    fields.add(fieldMetaModel);
+                    fields.add(fieldForMerge);
                 } else {
                     fields.remove(fieldFromThisModel);
-                    updateAccessTypeForField(fieldMetaModel, fieldFromThisModel);
-                    fields.add(fieldMetaModel);
+                    updateAccessTypeForField(fieldForMerge, fieldFromThisModel);
+                    mergeFields(fieldForMerge, fieldFromThisModel);
+                    fields.add(fieldForMerge);
                 }
             }
         }
         attachFieldsOwner();
+    }
+
+    private void mergeFields(FieldMetaModel fieldForMerge, FieldMetaModel fieldFromThisModel) {
+        fieldForMerge.getAdditionalProperties().clear();
+        fieldForMerge.getAdditionalProperties().addAll(elements(fieldFromThisModel.getAdditionalProperties()).asList());
+        // TODO #4 merge translation
     }
 
     private void updateAccessTypeForField(FieldMetaModel fieldForUpdate, FieldMetaModel basedOnField) {

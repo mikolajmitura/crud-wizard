@@ -21,7 +21,7 @@ public class ClassUtils {
         return loadRealClass(clearCglibClassName(classProxiedByCglib.getCanonicalName()));
     }
 
-    public static boolean checkThatClassExists(String nullableClassName) {
+    public static boolean isExistThatClass(String nullableClassName) {
         return Optional.ofNullable(nullableClassName)
             .map(ClassUtils::clearCglibClassName)
             .map(className -> {

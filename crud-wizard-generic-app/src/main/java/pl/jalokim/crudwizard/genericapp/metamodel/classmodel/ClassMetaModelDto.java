@@ -27,6 +27,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumValuesInAdditionalProperties;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByName;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ForRealClassFieldsCanBeMerged;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto;
 
@@ -74,6 +75,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
 })
 @EnumValuesInAdditionalProperties
 @ExistFullDefinitionInTempContextByName
+@ForRealClassFieldsCanBeMerged
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 

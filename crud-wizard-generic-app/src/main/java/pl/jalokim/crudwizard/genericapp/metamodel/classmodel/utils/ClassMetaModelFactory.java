@@ -35,6 +35,10 @@ public class ClassMetaModelFactory {
         return createClassMetaModel(getTypeMetadataFromType(type), fieldMetaResolverConfiguration);
     }
 
+    public static ClassMetaModel createClassMetaModel(Type type) {
+        return createClassMetaModel(type, FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG);
+    }
+
     public static ClassMetaModel createClassMetaModel(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         Class<?> realRawClass = typeMetadata.getRawType();
         if (realRawClass.equals(Object.class)) {
