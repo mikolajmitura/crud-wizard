@@ -1,9 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
 import pl.jalokim.utils.reflection.TypeMetadata
 
@@ -18,14 +19,60 @@ class ByGettersFieldsResolverTest extends FieldsResolverSpecification {
     def "return expected list of field metamodels for SomeDto"() {
         given:
         TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
+        ClassMetaModel classMetaModel = ClassMetaModelFactory.createClassMetaModel(someDtoTypeMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         when:
-        def results = testCase.findFields(someDtoTypeMetadata, READ_FIELD_RESOLVER_CONFIG)
+        testCase.resolveReadFields(classMetaModel, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         then:
-        results.size() == 1
-        verifyAll(results[0]) {
+        def currentFields = classMetaModel.getFields().findAll {
+            it.isReadField()
+        }
+        currentFields.size() == 1
+        verifyAll(currentFields[0]) {
             fieldName == "someId"
+            fieldType.realClass == Long
+            isReadField()
+        }
+
+        def results = classMetaModel.fetchAllReadFields()
+        results.size() == 8
+        verifyAll(findField(results, "someId")) {
+            fieldName == "someId"
+            fieldType.realClass == Long
+            isReadField()
+        }
+
+        verifyAll(findField(results, "someString")) {
+            fieldName == "someString"
+            fieldType.realClass == String
+        }
+        verifyAll(findField(results, "someLong")) {
+            fieldName == "someLong"
+            fieldType.realClass == Long
+        }
+        verifyAll(findField(results, "objectOfMiddle")) {
+            fieldName == "objectOfMiddle"
+            fieldType.realClass == SomeDto
+        }
+
+        verifyAll(findField(results, "someListOfT")) {
+            fieldName == "someListOfT"
+            fieldType.realClass == List
+            fieldType.genericTypes*.realClass == [SomeDto]
+        }
+        verifyAll(findField(results, "objectOfIType")) {
+            fieldName == "objectOfIType"
+            fieldType.realClass == Set
+            fieldType.genericTypes*.realClass == [Long]
+        }
+        verifyAll(findField(results, "copyOfObjectOfTType")) {
+            fieldName == "copyOfObjectOfTType"
+            fieldType.realClass == Set
+            fieldType.genericTypes*.realClass == [Long]
+        }
+        verifyAll(findField(results, "results2")) {
+            fieldName == "results2"
             fieldType.realClass == Long
         }
     }
@@ -34,29 +81,62 @@ class ByGettersFieldsResolverTest extends FieldsResolverSpecification {
         given:
         TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
         def someMiddleGenericDtoMetadata = someDtoTypeMetadata.getParentTypeMetadata()
+        ClassMetaModel classMetaModel = ClassMetaModelFactory.createClassMetaModel(someMiddleGenericDtoMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         when:
-        def results = testCase.findFields(someMiddleGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
+        testCase.resolveReadFields(classMetaModel, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         then:
-        results.size() == 3
-        verifyAll(results.find {
-            it.fieldName == "someString"
-        }) {
+        def currentFields = classMetaModel.getFields().findAll {
+            it.isReadField()
+        }
+        currentFields.size() == 3
+        verifyAll(findField(currentFields, "someString")) {
             fieldName == "someString"
             fieldType.realClass == String
         }
-        verifyAll(results.find {
-            it.fieldName == "someLong"
-        }) {
+        verifyAll(findField(currentFields, "someLong")) {
             fieldName == "someLong"
             fieldType.realClass == Long
         }
-        verifyAll(results.find {
-            it.fieldName == "objectOfMiddle"
-        }) {
+        verifyAll(findField(currentFields, "objectOfMiddle")) {
             fieldName == "objectOfMiddle"
             fieldType.realClass == SomeDto
+        }
+
+        def results = classMetaModel.fetchAllReadFields()
+        results.size() == 7
+        verifyAll(findField(results, "someString")) {
+            fieldName == "someString"
+            fieldType.realClass == String
+        }
+        verifyAll(findField(results, "someLong")) {
+            fieldName == "someLong"
+            fieldType.realClass == Long
+        }
+        verifyAll(findField(results, "objectOfMiddle")) {
+            fieldName == "objectOfMiddle"
+            fieldType.realClass == SomeDto
+        }
+
+        verifyAll(findField(results, "someListOfT")) {
+            fieldName == "someListOfT"
+            fieldType.realClass == List
+            fieldType.genericTypes*.realClass == [SomeDto]
+        }
+        verifyAll(findField(results, "objectOfIType")) {
+            fieldName == "objectOfIType"
+            fieldType.realClass == Set
+            fieldType.genericTypes*.realClass == [Long]
+        }
+        verifyAll(findField(results, "copyOfObjectOfTType")) {
+            fieldName == "copyOfObjectOfTType"
+            fieldType.realClass == Set
+            fieldType.genericTypes*.realClass == [Long]
+        }
+        verifyAll(findField(results, "results2")) {
+            fieldName == "results2"
+            fieldType.realClass == Long
         }
     }
 
@@ -65,36 +145,33 @@ class ByGettersFieldsResolverTest extends FieldsResolverSpecification {
         TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
         def someMiddleGenericDtoMetadata = someDtoTypeMetadata.getParentTypeMetadata()
         def superGenericDtoMetadata = someMiddleGenericDtoMetadata.getParentTypeMetadata()
+        ClassMetaModel classMetaModel = ClassMetaModelFactory.createClassMetaModel(superGenericDtoMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         when:
-        def results = testCase.findFields(superGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
+        testCase.resolveReadFields(classMetaModel, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         then:
+        def results = classMetaModel.fetchAllReadFields()
+        results == classMetaModel.getFields().findAll {
+            it.isReadField()
+        }
         results.size() == 4
-        verifyAll(results.find {
-            it.fieldName == "someListOfT"
-        }) {
+        verifyAll(findField(results, "someListOfT")) {
             fieldName == "someListOfT"
             fieldType.realClass == List
             fieldType.genericTypes*.realClass == [SomeDto]
         }
-        verifyAll(results.find {
-            it.fieldName == "objectOfIType"
-        }) {
+        verifyAll(findField(results, "objectOfIType")) {
             fieldName == "objectOfIType"
             fieldType.realClass == Set
             fieldType.genericTypes*.realClass == [Long]
         }
-        verifyAll(results.find {
-            it.fieldName == "copyOfObjectOfTType"
-        }) {
+        verifyAll(findField(results, "copyOfObjectOfTType")) {
             fieldName == "copyOfObjectOfTType"
             fieldType.realClass == Set
             fieldType.genericTypes*.realClass == [Long]
         }
-        verifyAll(results.find {
-            it.fieldName == "results2"
-        }) {
+        verifyAll(findField(results, "results2")) {
             fieldName == "results2"
             fieldType.realClass == Long
         }

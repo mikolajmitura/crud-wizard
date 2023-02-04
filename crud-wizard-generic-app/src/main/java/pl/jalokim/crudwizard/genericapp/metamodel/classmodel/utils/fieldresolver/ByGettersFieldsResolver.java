@@ -11,21 +11,33 @@ import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
 @Slf4j
-public class ByGettersFieldsResolver implements FieldMetaResolver {
+public class ByGettersFieldsResolver implements ReadFieldResolver {
 
     public static final ByGettersFieldsResolver INSTANCE = new ByGettersFieldsResolver();
 
     @Override
-    public List<FieldMetaModel> findFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
-        return elements(MetadataReflectionUtils.getAllDeclaredNotStaticMethods(typeMetadata.getRawType()))
+    public void resolveReadFields(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+        classMetaModel.getExtendsFromModels()
+            .forEach(extendsFromModel -> resolveReadFields(extendsFromModel, fieldMetaResolverConfiguration));
+        classMetaModel.mergeFields(findFields(classMetaModel.getTypeMetadata(), fieldMetaResolverConfiguration));
+    }
+
+    public static Elements<Method> filterGettersFromMethods(List<Method> methods) {
+        return elements(methods)
             .filter(method -> method.getName().startsWith("get"))
             .filter(MetadataReflectionUtils::isPublicMethod)
             .filter(method -> methodReturnsNonVoidAndHasArgumentsSize(method, 0))
-            .filter(this::notReturnGroovyMetaClassMethod)
+            .filter(ByGettersFieldsResolver::notReturnGroovyMetaClassMethod);
+    }
+
+    private List<FieldMetaModel> findFields(TypeMetadata typeMetadata,
+        FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+        return filterGettersFromMethods(MetadataReflectionUtils.getAllDeclaredNotStaticMethods(typeMetadata.getRawType()))
             .filter(method -> {
                 try {
                     typeMetadata.getMetaForMethod(method);
@@ -46,12 +58,7 @@ public class ByGettersFieldsResolver implements FieldMetaResolver {
             .asList();
     }
 
-    private boolean notReturnGroovyMetaClassMethod(Method method) {
+    private static boolean notReturnGroovyMetaClassMethod(Method method) {
         return !"groovy.lang.MetaClass".equals(method.getReturnType().getCanonicalName());
-    }
-
-    @Override
-    public List<FieldMetaModel> getAllAvailableFieldsForWrite(ClassMetaModel classMetaModel) {
-        return classMetaModel.fetchAllFields();
     }
 }

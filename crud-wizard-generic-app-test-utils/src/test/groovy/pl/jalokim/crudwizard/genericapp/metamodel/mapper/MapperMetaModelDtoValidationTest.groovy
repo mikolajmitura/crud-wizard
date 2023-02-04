@@ -23,16 +23,15 @@ import pl.jalokim.crudwizard.genericapp.metamodel.BaseMetaModelValidationTestSpe
 import pl.jalokim.crudwizard.genericapp.metamodel.ScriptLanguage
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto
-import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.WriteFieldMetaResolverForClassEntryDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.utils.collection.Elements
 import spock.lang.Unroll
@@ -287,11 +286,6 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
             .mapperType(MapperType.GENERATED)
             .mapperName(mapperName)
             .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
-                .fieldMetaResolverForRawTarget(
-                    FieldMetaResolverConfigurationDto.builder()
-                        .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
-                        .build()
-                )
                 .rootConfiguration(MapperConfigurationDto.builder()
                     .name(mapperName)
                     .targetMetaModel(ClassMetaModelDto.builder()
@@ -343,11 +337,6 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
             .mapperType(MapperType.GENERATED)
             .mapperName(mapperName)
             .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
-                .fieldMetaResolverForRawTarget(
-                    FieldMetaResolverConfigurationDto.builder()
-                        .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
-                        .build()
-                )
                 .rootConfiguration(MapperConfigurationDto.builder()
                     .name(mapperName)
                     .targetMetaModel(ClassMetaModelDto.builder()
@@ -387,9 +376,8 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
         MapperGenerateConfigurationDto.builder()
             .fieldMetaResolverForRawTarget(
                 FieldMetaResolverConfigurationDto.builder()
-                    .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
-                    .fieldMetaResolverForClass([
-                        FieldMetaResolverForClassEntryDto.builder()
+                    .writeFieldMetaResolverForClass([
+                        WriteFieldMetaResolverForClassEntryDto.builder()
                             .className(SimpleDummyDto.canonicalName)
                             .resolverClassName(ByDeclaredFieldsResolver.canonicalName)
                             .build()

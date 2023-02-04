@@ -2,7 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getFieldFromClassModel;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
@@ -17,7 +17,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMappe
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType;
 import pl.jalokim.utils.collection.Elements;
 import pl.jalokim.utils.string.StringUtils;
 
@@ -53,15 +52,15 @@ public class ClassMetaModelTypeExtractor {
 
     private ClassMetaModel getFieldType(String currentPath, ClassMetaModel currentNode, String pathPart, boolean suppressNotFound) {
         String fieldName = pathPart.replaceFirst("\\?", "");
-        FieldMetaModel result = getFieldFromClassModel(currentNode, fieldName, READ_FIELD_RESOLVER_CONFIG);
+        FieldMetaModel result = getFieldFromClassModel(currentNode, fieldName, DEFAULT_FIELD_RESOLVERS_CONFIG);
 
         if (result == null && !suppressNotFound) {
 
             if (currentNode.isOnlyRawClassModel()) {
-                result = getFieldFromClassModel(currentNode, fieldName, FieldMetaResolverConfiguration.builder()
-                    .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
-                    .fieldMetaResolverForClass(Map.of(currentNode.getRealClass(), ByDeclaredFieldsResolver.INSTANCE))
-                    .build());
+                result = getFieldFromClassModel(currentNode, fieldName,
+                    FieldMetaResolverConfiguration.builder()
+                        .readFieldMetaResolverForClass(Map.of(currentNode.getRealClass(), ByDeclaredFieldsResolver.INSTANCE))
+                        .build());
             }
 
             if (result == null) {

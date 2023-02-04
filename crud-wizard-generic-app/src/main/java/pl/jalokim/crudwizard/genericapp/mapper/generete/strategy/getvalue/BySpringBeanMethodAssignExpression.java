@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue;
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -35,7 +35,7 @@ public class BySpringBeanMethodAssignExpression implements ValueToAssignExpressi
 
         Method method = MetadataReflectionUtils.getMethod(beanType, methodName, classes.toArray(new Class[0]));
 
-        returnCodeMetadata.setReturnClassModel(createClassMetaModel(method.getGenericReturnType(), WRITE_FIELD_RESOLVER_CONFIG));
+        returnCodeMetadata.setReturnClassModel(createClassMetaModel(method.getGenericReturnType(), DEFAULT_FIELD_RESOLVERS_CONFIG));
 
         mapperGeneratedCodeMetadata.addConstructorArgument(beanType, beanName, "@" + Qualifier.class.getCanonicalName() + "(\"" + beanName + "\")");
 

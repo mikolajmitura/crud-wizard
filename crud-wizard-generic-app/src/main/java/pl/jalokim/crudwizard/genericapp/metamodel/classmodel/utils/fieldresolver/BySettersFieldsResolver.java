@@ -13,12 +13,18 @@ import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.ParameterMetadata;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
-public class BySettersFieldsResolver implements FieldMetaResolver {
+public class BySettersFieldsResolver implements WriteFieldResolver {
 
     public static final BySettersFieldsResolver INSTANCE = new BySettersFieldsResolver();
 
     @Override
-    public List<FieldMetaModel> findFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+    public void resolveWriteFields(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+        classMetaModel.getExtendsFromModels()
+            .forEach(extendsFromModel-> resolveWriteFields(extendsFromModel, fieldMetaResolverConfiguration));
+        classMetaModel.mergeFields(findFields(classMetaModel.getTypeMetadata(), fieldMetaResolverConfiguration));
+    }
+
+    private List<FieldMetaModel> findFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         return elements(MetadataReflectionUtils.getAllDeclaredNotStaticMethods(typeMetadata.getRawType()))
             .filter(method -> method.getName().startsWith("set"))
             .filter(MetadataReflectionUtils::isPublicMethod)
@@ -38,15 +44,10 @@ public class BySettersFieldsResolver implements FieldMetaResolver {
 
                 return (FieldMetaModel) FieldMetaModel.builder()
                     .fieldName(fieldName)
-                    .accessFieldType(AccessFieldType.WRITE) // TODO #62 fieldMetaResolverConfiguration.getFieldAccessType()
+                    .accessFieldType(AccessFieldType.WRITE)
                     .fieldType(createClassMetaModel(parameterMetadata.getTypeOfParameter(), fieldMetaResolverConfiguration))
                     .build();
             })
             .asList();
-    }
-
-    @Override
-    public List<FieldMetaModel> getAllAvailableFieldsForWrite(ClassMetaModel classMetaModel) {
-        return classMetaModel.fetchAllFields();
     }
 }

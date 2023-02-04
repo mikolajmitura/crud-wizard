@@ -10,7 +10,6 @@ import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadat
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
@@ -21,12 +20,29 @@ import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
-public class ByBuilderFieldsResolver implements FieldMetaResolver {
+public class ByBuilderFieldsResolver implements WriteFieldResolver {
 
     public static final ByBuilderFieldsResolver INSTANCE = new ByBuilderFieldsResolver();
 
     @Override
-    public List<FieldMetaModel> findFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+    public void resolveWriteFields(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+        Class<?> rawClass = classMetaModel.getRealClass();
+        if (hasSuperBuilderType(rawClass)) {
+            ClassMetaModel currentModel = classMetaModel;
+            while (isNotEmpty(currentModel.getExtendsFromModels())) {
+                ClassMetaModel superMetaModel = currentModel.getExtendsFromModels().get(0);
+                if (hasSuperBuilderType(superMetaModel.getRealClass())) {
+                    currentModel = superMetaModel;
+                    classMetaModel.mergeFields(findFields(currentModel.getTypeMetadata(), fieldMetaResolverConfiguration));
+                } else {
+                    break;
+                }
+            }
+        }
+        classMetaModel.mergeFields(findFields(classMetaModel.getTypeMetadata(), fieldMetaResolverConfiguration));
+    }
+
+    private List<FieldMetaModel> findFields(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         Class<?> rawClass = typeMetadata.getRawClass();
         try {
             Method builderMethod = rawClass.getDeclaredMethod("builder");
@@ -44,7 +60,7 @@ public class ByBuilderFieldsResolver implements FieldMetaResolver {
                 throw new NoSuchMethodException("builder method with not empty arguments list");
             }
 
-            List<FieldMetaModel> fieldMetaModels = elements(getAllDeclaredNotStaticMethods(builderClass))
+            return elements(getAllDeclaredNotStaticMethods(builderClass))
                 .filter(method -> methodReturnsNonVoidAndHasArgumentsSize(method, 1))
                 .filter(MetadataReflectionUtils::isPublicMethod)
                 .filter(method -> method.getReturnType().equals(builderClass))
@@ -60,33 +76,10 @@ public class ByBuilderFieldsResolver implements FieldMetaResolver {
                         .build();
                 })
                 .asList();
-            return fieldMetaModels;
 
         } catch (NoSuchMethodException e) {
             throw new TechnicalException(createMessagePlaceholder(
                 "cannot.find.builder.method.in.class", typeMetadata.getCanonicalName()), e);
-        }
-    }
-
-    @Override
-    public List<FieldMetaModel> getAllAvailableFieldsForWrite(ClassMetaModel classMetaModel) {
-        Class<?> rawClass = classMetaModel.getRealClass();
-
-        if (hasSuperBuilderType(rawClass)) {
-            List<FieldMetaModel> fieldMetaModels = new ArrayList<>(classMetaModel.getFields());
-            ClassMetaModel currentModel = classMetaModel;
-            while (isNotEmpty(currentModel.getExtendsFromModels())) {
-                ClassMetaModel superMetaModel = currentModel.getExtendsFromModels().get(0);
-                if (hasSuperBuilderType(superMetaModel.getRealClass())) {
-                    currentModel = superMetaModel;
-                    fieldMetaModels.addAll(currentModel.getFields());
-                } else {
-                    break;
-                }
-            }
-            return fieldMetaModels;
-        } else {
-            return classMetaModel.getFields();
         }
     }
 

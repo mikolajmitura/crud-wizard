@@ -1,45 +1,37 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType.READ;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType.WRITE;
-
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
 
 @Value
 @Builder
 public class FieldMetaResolverConfiguration {
 
-
-    public static final FieldMetaResolverConfiguration WRITE_FIELD_RESOLVER_CONFIG = FieldMetaResolverConfiguration.builder()
-        .fieldMetaResolverStrategyType(WRITE)
-        .build();
-
-    public static final FieldMetaResolverConfiguration READ_FIELD_RESOLVER_CONFIG = FieldMetaResolverConfiguration.builder()
-        .fieldMetaResolverStrategyType(READ)
-        .build();
-
-    public static FieldMetaResolverConfiguration[] DEFAULT_CONFIGURATIONS = new FieldMetaResolverConfiguration[]
-        {WRITE_FIELD_RESOLVER_CONFIG, READ_FIELD_RESOLVER_CONFIG};
-
-    FieldMetaResolverStrategyType fieldMetaResolverStrategyType;
+    public static final FieldMetaResolverConfiguration DEFAULT_FIELD_RESOLVERS_CONFIG = FieldMetaResolverConfiguration.builder().build();
 
     @Builder.Default
-    Map<Class<?>, FieldMetaResolver> fieldMetaResolverForClass = new HashMap<>();
+    Map<Class<?>, ReadFieldResolver> readFieldMetaResolverForClass = new HashMap<>();
 
-    public FieldMetaResolver getFieldMetaResolverForClass(Class<?> rawDtoClass, FieldMetaResolver defaultFieldMetaResolver) {
-        return fieldMetaResolverForClass.getOrDefault(rawDtoClass, defaultFieldMetaResolver);
+    @Builder.Default
+    Map<Class<?>, WriteFieldResolver> writeFieldMetaResolverForClass = new HashMap<>();
+
+    public ReadFieldResolver getReadMetaResolverForClass(Class<?> rawDtoClass, ReadFieldResolver defaultFieldMetaResolver) {
+        return readFieldMetaResolverForClass.getOrDefault(rawDtoClass, defaultFieldMetaResolver);
     }
 
-    public FieldMetaResolverConfiguration putFieldResolver(Class<?> someClass, FieldMetaResolver fieldMetaResolver) {
-        fieldMetaResolverForClass.put(someClass, fieldMetaResolver);
+    public WriteFieldResolver getWriteFieldMetaResolverForClass(Class<?> rawDtoClass, WriteFieldResolver defaultFieldMetaResolver) {
+        return writeFieldMetaResolverForClass.getOrDefault(rawDtoClass, defaultFieldMetaResolver);
+    }
+
+    public FieldMetaResolverConfiguration putReadFieldResolver(Class<?> someClass, ReadFieldResolver fieldMetaResolver) {
+        readFieldMetaResolverForClass.put(someClass, fieldMetaResolver);
         return this;
     }
 
-    public AccessFieldType getFieldAccessType() {
-        return fieldMetaResolverStrategyType == WRITE ? AccessFieldType.WRITE : AccessFieldType.READ;
+    public FieldMetaResolverConfiguration putWriteFieldResolver(Class<?> someClass, WriteFieldResolver fieldMetaResolver) {
+        writeFieldMetaResolverForClass.put(someClass, fieldMetaResolver);
+        return this;
     }
 }

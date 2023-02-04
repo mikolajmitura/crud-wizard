@@ -20,13 +20,15 @@ import org.mapstruct.factory.Mappers
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.Agreement
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.DepartmentDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.SomeClassWithPrivateFields
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
@@ -43,14 +45,13 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
     static final EMP_PERSON_CLASS_ID = 2L
 
     MetaModelContextService metaModelContextService = Mock()
-    ClassMetaModelMapper classMetaModelMapper = Mappers.getMapper(ClassMetaModelMapper)
-    FieldMetaModelMapper fieldMetaModelMapper = Mappers.getMapper(FieldMetaModelMapper)
+    AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
+    ClassMetaModelMapper classMetaModelMapper = new ClassMetaModelMapperImpl(additionalPropertyMapper)
+    FieldMetaModelMapper fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper)
     ClassMetaModelTypeExtractor testCase
 
     def setup() {
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
-        setValueForField(fieldMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-        setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
         testCase = new ClassMetaModelTypeExtractor(classMetaModelMapper)
         MetaModelContext metaModelContext = new MetaModelContext()
         ModelsCache<ClassMetaModel> classMetaModels = new ModelsCache<>()

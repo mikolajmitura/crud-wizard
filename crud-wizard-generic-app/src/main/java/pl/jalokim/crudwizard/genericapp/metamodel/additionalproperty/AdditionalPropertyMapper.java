@@ -1,26 +1,48 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.rawJsonToObject;
 
-public abstract class AdditionalPropertyMapper<D, E, M> implements BaseMapper<D, E, M> {
+import org.mapstruct.Mapper;
+import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 
-    @Autowired
-    private RawAdditionalPropertyMapper rawAdditionalPropertyMapper;
+@Mapper(config = MapperAsSpringBeanConfig.class)
+public abstract class AdditionalPropertyMapper {
 
     public AdditionalPropertyDto additionalPropertyToDto(AdditionalPropertyEntity additionalPropertyEntity) {
-        return rawAdditionalPropertyMapper.additionalPropertyToDto(additionalPropertyEntity);
+        String valueRealClassName = additionalPropertyEntity.getValueRealClassName();
+        return AdditionalPropertyDto.builder()
+            .name(additionalPropertyEntity.getName())
+            .valueRealClassName(valueRealClassName)
+            .rawJson(additionalPropertyEntity.getRawJson())
+            .build();
     }
 
     public AdditionalPropertyEntity additionalPropertyToEntity(AdditionalPropertyDto additionalPropertyDto) {
-        return rawAdditionalPropertyMapper.additionalPropertyToEntity(additionalPropertyDto);
+        String valueRealClassName = additionalPropertyDto.getValueRealClassName();
+        return AdditionalPropertyEntity.builder()
+            .name(additionalPropertyDto.getName())
+            .valueRealClassName(valueRealClassName)
+            .rawJson(additionalPropertyDto.getRawJson())
+            .build();
     }
 
     public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyEntity additionalPropertyEntity) {
-        return rawAdditionalPropertyMapper.additionalPropertyToModel(additionalPropertyEntity);
+        String valueRealClassName = additionalPropertyEntity.getValueRealClassName();
+        return AdditionalPropertyMetaModel.builder()
+            .name(additionalPropertyEntity.getName())
+            .valueRealClassName(valueRealClassName)
+            .rawJson(additionalPropertyEntity.getRawJson())
+            .valueAsObject(rawJsonToObject(additionalPropertyEntity.getRawJson(), valueRealClassName))
+            .build();
     }
 
     public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyDto additionalPropertyDto) {
-        return rawAdditionalPropertyMapper.additionalPropertyToModel(additionalPropertyDto);
+        String valueRealClassName = additionalPropertyDto.getValueRealClassName();
+        return AdditionalPropertyMetaModel.builder()
+            .name(additionalPropertyDto.getName())
+            .valueRealClassName(valueRealClassName)
+            .rawJson(additionalPropertyDto.getRawJson())
+            .valueAsObject(rawJsonToObject(additionalPropertyDto.getRawJson(), valueRealClassName))
+            .build();
     }
 }

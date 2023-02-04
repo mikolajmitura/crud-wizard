@@ -27,7 +27,7 @@ public class PropertiesOverriddenMappingResolver {
 
     private final ApplicationContext applicationContext;
 
-    // TODO #62 why it is only used in test???????
+    // TODO why it is only used in test???????
     public void populateMappingEntriesToConfiguration(MapperGenerateConfiguration mapperGenerateConfiguration,
         List<MappingEntryModel> rootMapperMappingEntries, Map<String, List<MappingEntryModel>> mappingEntriesByMethodName) {
 

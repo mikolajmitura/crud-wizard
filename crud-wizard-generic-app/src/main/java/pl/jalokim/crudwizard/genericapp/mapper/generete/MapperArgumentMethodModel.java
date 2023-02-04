@@ -21,5 +21,4 @@ public class MapperArgumentMethodModel {
     public static List<MapperArgumentMethodModel> createOnlyOneMapperArguments(ClassMetaModel argumentType) {
         return List.of(new MapperArgumentMethodModel(SOURCE_OBJECT_VAR_NAME, argumentType, null));
     }
-
 }

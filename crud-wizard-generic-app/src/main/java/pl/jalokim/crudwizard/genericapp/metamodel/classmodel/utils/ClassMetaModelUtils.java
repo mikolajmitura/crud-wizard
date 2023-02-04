@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelWithOtherConfig;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_CONFIGURATIONS;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType;
 
@@ -43,7 +43,7 @@ public class ClassMetaModelUtils {
         } else {
             typeMetadata = MetadataReflectionUtils.getTypeMetadataFromType(javaTypeMetaModel.getOriginalType());
         }
-        return ClassMetaModelFactory.createClassMetaModel(typeMetadata, DEFAULT_CONFIGURATIONS);
+        return ClassMetaModelFactory.createClassMetaModel(typeMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG);
     }
 
     public static JavaType createJacksonJavaType(ClassMetaModel classMetaModel) {

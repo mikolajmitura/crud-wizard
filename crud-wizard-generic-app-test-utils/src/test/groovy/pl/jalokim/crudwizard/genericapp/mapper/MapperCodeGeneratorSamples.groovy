@@ -4,7 +4,7 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassModelWithGenerics
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -1275,7 +1275,7 @@ class MapperCodeGeneratorSamples {
     }
 
     static ClassMetaModel modelFromClass(Class<?> someClass,
-        FieldMetaResolverConfiguration fieldMetaResolverConfiguration = WRITE_FIELD_RESOLVER_CONFIG) {
+        FieldMetaResolverConfiguration fieldMetaResolverConfiguration = DEFAULT_FIELD_RESOLVERS_CONFIG) {
         ClassMetaModelFactory.createClassMetaModelWithOtherConfig(createClassMetaModelFromClass(someClass), fieldMetaResolverConfiguration)
     }
 

@@ -15,6 +15,7 @@ import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
@@ -36,7 +37,8 @@ import spock.lang.Specification
 class MapperGenerateConfigurationMapperTest extends Specification {
 
     private ClassMetaModelMapper classMetaModelMapper = Mock()
-    private MapperGenerateConfigurationMapper testCase = Mappers.getMapper(MapperGenerateConfigurationMapper)
+    private AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
+    private MapperGenerateConfigurationMapper testCase = new MapperGenerateConfigurationMapperImpl(additionalPropertyMapper)
 
     def setup() {
         InvokableReflectionUtils.setValueForField(testCase, "classMetaModelMapper", classMetaModelMapper)
@@ -86,16 +88,16 @@ class MapperGenerateConfigurationMapperTest extends Specification {
             globalEnableAutoMapping == mapperGenerateConfigurationEntity.globalEnableAutoMapping
             globalIgnoreMappingProblems == mapperGenerateConfigurationEntity.globalIgnoreMappingProblems
             verifyAll(fieldMetaResolverForRawTarget) {
-                fieldMetaResolverStrategyType == mapperGenerateConfigurationEntity.fieldMetaResolverForRawTarget.fieldMetaResolverStrategyType
-                fieldMetaResolverForClass == Map.of(
+                readFieldMetaResolverForClass == [:]
+                writeFieldMetaResolverForClass == Map.of(
                     SamplePersonDto, ByAllArgsFieldsResolver.INSTANCE,
                     SomeDto, BySettersFieldsResolver.INSTANCE
                 )
             }
 
             verifyAll(fieldMetaResolverForRawSource) {
-                fieldMetaResolverStrategyType == mapperGenerateConfigurationEntity.fieldMetaResolverForRawSource.fieldMetaResolverStrategyType
-                fieldMetaResolverForClass == [:]
+                readFieldMetaResolverForClass == [:]
+                writeFieldMetaResolverForClass == [:]
             }
 
             verifyAll(rootConfiguration) {
@@ -169,20 +171,20 @@ class MapperGenerateConfigurationMapperTest extends Specification {
             .globalEnableAutoMapping(true)
             .globalIgnoreMappingProblems(false)
             .fieldMetaResolverForRawTarget(FieldMetaResolverConfigurationEntity.builder()
-                .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.WRITE)
                 .fieldMetaResolverForClass([
                     FieldMetaResolverForClassEntryEntity.builder()
                         .className(SamplePersonDto.canonicalName)
                         .resolverClassName(ByAllArgsFieldsResolver.canonicalName)
+                        .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.WRITE)
                         .build(),
                     FieldMetaResolverForClassEntryEntity.builder()
                         .className(SomeDto.canonicalName)
                         .resolverClassName(BySettersFieldsResolver.canonicalName)
+                        .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.WRITE)
                         .build(),
                 ])
                 .build())
             .fieldMetaResolverForRawSource(FieldMetaResolverConfigurationEntity.builder()
-                .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
                 .fieldMetaResolverForClass([])
                 .build())
             .rootConfiguration(MapperConfigurationEntity.builder()

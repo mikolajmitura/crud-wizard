@@ -6,12 +6,13 @@ import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 
-@Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<FieldMetaModelDto, FieldMetaModelEntity, FieldMetaModel> {
+@Mapper(config = MapperAsSpringBeanConfig.class, uses = AdditionalPropertyMapper.class)
+public abstract class FieldMetaModelMapper implements BaseMapper<FieldMetaModelDto, FieldMetaModelEntity, FieldMetaModel> {
 
     @Override
     @Mapping(target = "fieldType", ignore = true)
@@ -37,7 +38,7 @@ public abstract class FieldMetaModelMapper extends AdditionalPropertyMapper<Fiel
     @Mapping(target = "additionalProperties", source = "fieldMetaModelDto.additionalProperties")
     @Mapping(target = "id", source = "fieldMetaModelDto.id")
     @Mapping(target = "fieldType", source = "fieldType")
-    @Mapping(target = "validators", ignore = true) // TODO #62 it is bug???
+    @Mapping(target = "validators", ignore = true)
     public abstract FieldMetaModel toModelFromDto(FieldMetaModelDto fieldMetaModelDto,
         ClassMetaModel ownerOfField, ClassMetaModel fieldType);
 }

@@ -1,9 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
+import pl.jalokim.crudwizard.core.sample.SomeMiddleGenericDto
+import pl.jalokim.crudwizard.core.sample.SuperGenericDto
 import pl.jalokim.utils.reflection.TypeMetadata
 
 class ByDeclaredFieldsResolverTest extends FieldsResolverSpecification {
@@ -12,12 +14,16 @@ class ByDeclaredFieldsResolverTest extends FieldsResolverSpecification {
 
     def "return expected list of field metamodels for SomeDto"() {
         given:
-        TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
+        def fieldResolversConf = FieldMetaResolverConfiguration.builder()
+            .writeFieldMetaResolverForClass(Map.of(SomeDto, testCase))
+            .build()
+        def someDtoMetamodel = createClassMetaModel(getTypeMetadataFromType(SomeDto), fieldResolversConf)
 
         when:
-        def results = testCase.findFields(someDtoTypeMetadata, READ_FIELD_RESOLVER_CONFIG)
+        testCase.resolveWriteFields(someDtoMetamodel, fieldResolversConf)
 
         then:
+        def results = someDtoMetamodel.getFields()
         results.size() == 3
         verifyAll(results[0]) {
             fieldName == "innerSomeDto"
@@ -31,17 +37,22 @@ class ByDeclaredFieldsResolverTest extends FieldsResolverSpecification {
             fieldName == "someId"
             fieldType.realClass == Long
         }
+        someDtoMetamodel.fetchAllWriteFields().size() == 8
     }
 
     def "return expected list of field metamodels for SomeMiddleGenericDto"() {
         given:
         TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
-        def someMiddleGenericDtoMetadata = someDtoTypeMetadata.getParentTypeMetadata()
+        def fieldResolversConf = FieldMetaResolverConfiguration.builder()
+            .writeFieldMetaResolverForClass(Map.of(SomeMiddleGenericDto, testCase))
+            .build()
+        def someMiddleGenericDtoMetaModel = createClassMetaModel(someDtoTypeMetadata.getParentTypeMetadata(), fieldResolversConf)
 
         when:
-        def results = testCase.findFields(someMiddleGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
+        testCase.resolveWriteFields(someMiddleGenericDtoMetaModel, fieldResolversConf)
 
         then:
+        def results = someMiddleGenericDtoMetaModel.getFields()
         results.size() == 2
         verifyAll(results[0]) {
             fieldName == "objectOfMiddle"
@@ -51,18 +62,51 @@ class ByDeclaredFieldsResolverTest extends FieldsResolverSpecification {
             fieldName == "someOtherMiddleField"
             fieldType.realClass == Long
         }
+        def allWriteFields = someMiddleGenericDtoMetaModel.fetchAllWriteFields()
+        allWriteFields.size() == 5
+
+        verifyAll(findField(allWriteFields, "someOtherMiddleField")) {
+            fieldName == "someOtherMiddleField"
+            fieldType.realClass == Long
+        }
+
+        verifyAll(findField(allWriteFields, "objectOfMiddle")) {
+            fieldName == "objectOfMiddle"
+            fieldType.realClass == SomeDto
+        }
+
+        verifyAll(findField(allWriteFields, "someListOfT")) {
+            fieldName == "someListOfT"
+            fieldType.realClass == List
+        }
+
+        verifyAll(findField(allWriteFields, "objectOfIType")) {
+            fieldName == "objectOfIType"
+            fieldType.realClass == Set
+        }
+
+        verifyAll(findField(allWriteFields, "mapWithSType")) {
+            fieldName == "mapWithSType"
+            fieldType.realClass == Map
+        }
     }
 
     def "return expected list of field metamodels for SuperGenericDto"() {
         given:
         TypeMetadata someDtoTypeMetadata = getTypeMetadataFromType(SomeDto)
         def someMiddleGenericDtoMetadata = someDtoTypeMetadata.getParentTypeMetadata()
-        def SuperGenericDtoMetadata = someMiddleGenericDtoMetadata.getParentTypeMetadata()
+        def superGenericDtoMetadata = someMiddleGenericDtoMetadata.getParentTypeMetadata()
+
+        def fieldResolversConf = FieldMetaResolverConfiguration.builder()
+            .writeFieldMetaResolverForClass(Map.of(SuperGenericDto, testCase))
+            .build()
+        def superGenericDtoMetaModel = createClassMetaModel(superGenericDtoMetadata, fieldResolversConf)
 
         when:
-        def results = testCase.findFields(SuperGenericDtoMetadata, READ_FIELD_RESOLVER_CONFIG)
+        testCase.resolveWriteFields(superGenericDtoMetaModel, fieldResolversConf)
 
         then:
+        def results = superGenericDtoMetaModel.getFields()
         results.size() == 3
         verifyAll(results[0]) {
             fieldName == "someListOfT"
@@ -80,5 +124,6 @@ class ByDeclaredFieldsResolverTest extends FieldsResolverSpecification {
             fieldType.genericTypes*.realClass == [String, Map]
             fieldType.genericTypes[1].genericTypes*.realClass == [Long, String]
         }
+        superGenericDtoMetaModel.fetchAllWriteFields().size() == 3
     }
 }

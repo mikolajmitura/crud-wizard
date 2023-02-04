@@ -1,8 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType.READ;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType.WRITE;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.string.StringUtils.replaceAllWithEmpty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,17 +15,18 @@ import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverFactory;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverStrategyType;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ReadFieldResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.WriteFieldResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverForClassEntryEntity;
@@ -32,23 +36,36 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGen
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.ReadFieldMetaResolverForClassEntryDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.WriteFieldMetaResolverForClassEntryDto;
 import pl.jalokim.utils.collection.Elements;
 
-@Mapper(config = MapperAsSpringBeanConfig.class)
+@Mapper(config = MapperAsSpringBeanConfig.class, uses = AdditionalPropertyMapper.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public abstract class MapperGenerateConfigurationMapper {
 
     @Autowired
     private ClassMetaModelMapper classMetaModelMapper;
 
-    @Autowired
-    private RawAdditionalPropertyMapper rawAdditionalPropertyMapper;
+    public abstract MapperGenerateConfigurationEntity mapToEntity(MapperGenerateConfigurationDto mapperGenerateConfigurationDto);
 
-    public AdditionalPropertyMetaModel additionalPropertyToModel(AdditionalPropertyEntity additionalPropertyEntity) {
-        return rawAdditionalPropertyMapper.additionalPropertyToModel(additionalPropertyEntity);
+    @Mapping(target = "fieldMetaResolverForClass", source = "fieldMetaResolverConfigurationDto")
+    public abstract FieldMetaResolverConfigurationEntity mapFieldResolverConfEntity(FieldMetaResolverConfigurationDto fieldMetaResolverConfigurationDto);
+
+    protected List<FieldMetaResolverForClassEntryEntity> mergeConfigs(FieldMetaResolverConfigurationDto fieldMetaResolverConfigurationDto) {
+        List<FieldMetaResolverForClassEntryEntity> entries = new ArrayList<>();
+        elements(fieldMetaResolverConfigurationDto.getReadFieldMetaResolverForClass())
+            .map(entry -> mapToEntity(entry, READ))
+            .asList();
+        elements(fieldMetaResolverConfigurationDto.getWriteFieldMetaResolverForClass())
+            .map(entry -> mapToEntity(entry, WRITE))
+            .asList();
+        return entries;
     }
 
-    public abstract MapperGenerateConfigurationEntity mapToEntity(MapperGenerateConfigurationDto mapperGenerateConfigurationDto);
+    @Mapping(target = "id", ignore = true)
+    protected abstract FieldMetaResolverForClassEntryEntity mapToEntity(FieldMetaResolverForClassEntryDto configurationDto,
+        FieldMetaResolverStrategyType fieldMetaResolverStrategyType);
 
     /**
      * Conversion from mapper configuration dto to MapperGenerateConfiguration but without parsing expressions.
@@ -95,7 +112,10 @@ public abstract class MapperGenerateConfigurationMapper {
     protected abstract MapperGenerateConfiguration innerMapper(MapperGenerateConfigurationDto mapperGenerateConfigurationDto,
         ClassMetaModel pathVariablesClassModel, ClassMetaModel requestParamsClassModel, MetaModelContext metaModelContext);
 
-    protected abstract FieldMetaResolverConfiguration mapFieldMetaResolverConfiguration(FieldMetaResolverConfigurationEntity fieldMetaResolverConfiguration);
+
+    @Mapping(target = "readFieldMetaResolverForClass", source = "fieldMetaResolverConfiguration")
+    @Mapping(target = "writeFieldMetaResolverForClass", source = "fieldMetaResolverConfiguration")
+    public abstract FieldMetaResolverConfiguration mapFieldMetaResolverConfiguration(FieldMetaResolverConfigurationEntity fieldMetaResolverConfiguration);
 
     @Mapping(target = "sourceMetaModel",
         expression = "java(toModelFromEntity(metaModelContext, mapperConfigurationEntity.getSourceMetaModel()))")
@@ -109,17 +129,57 @@ public abstract class MapperGenerateConfigurationMapper {
         expression = "java(toModelFromDto(metaModelContext, mapperConfigurationDto.getTargetMetaModel()))")
     protected abstract MapperConfiguration mapMapperConfiguration(MetaModelContext metaModelContext, MapperConfigurationDto mapperConfigurationDto);
 
-    Map<Class<?>, FieldMetaResolver> mapFieldMetaResolverForClassFromEntity(List<FieldMetaResolverForClassEntryEntity> fieldMetaResolversForClasses) {
-        return elements(fieldMetaResolversForClasses)
+    Map<Class<?>, ReadFieldResolver> mapReadFieldResolverForClassFromEntity(FieldMetaResolverConfigurationEntity fieldMetaResolverConfiguration) {
+        return elements(fieldMetaResolverConfiguration.getFieldMetaResolverForClass())
+            .filter(fieldMetaResolversForEntry -> fieldMetaResolversForEntry.getFieldMetaResolverStrategyType().equals(READ))
             .asMap(entry -> ClassUtils.loadRealClass(entry.getClassName()),
-                entry -> FieldMetaResolverFactory.createFieldMetaResolver(entry.getResolverClassName()));
+                entry -> FieldMetaResolverFactory.createReadMetaResolver(entry.getResolverClassName()));
     }
 
-    Map<Class<?>, FieldMetaResolver> mapFieldMetaResolverForClassFromDto(List<FieldMetaResolverForClassEntryDto> fieldMetaResolversForClasses) {
-        return elements(fieldMetaResolversForClasses)
+    Map<Class<?>, WriteFieldResolver> mapWriteFieldResolverForClassFromEntity(FieldMetaResolverConfigurationEntity fieldMetaResolverConfiguration) {
+        return elements(fieldMetaResolverConfiguration.getFieldMetaResolverForClass())
+            .filter(fieldMetaResolversForEntry -> fieldMetaResolversForEntry.getFieldMetaResolverStrategyType().equals(WRITE))
             .asMap(entry -> ClassUtils.loadRealClass(entry.getClassName()),
-                entry -> FieldMetaResolverFactory.createFieldMetaResolver(entry.getResolverClassName()));
+                entry -> FieldMetaResolverFactory.createWriteMetaResolver(entry.getResolverClassName()));
     }
+
+    @Mapping(target = "readFieldMetaResolverForClass", source = "fieldMetaResolverConfigurationDto")
+    @Mapping(target = "writeFieldMetaResolverForClass", source = "fieldMetaResolverConfigurationDto")
+    protected abstract FieldMetaResolverConfiguration mapMapperConfigurationFromDto(FieldMetaResolverConfigurationDto fieldMetaResolverConfigurationDto);
+
+    Map<Class<?>, ReadFieldResolver> mapReadFieldResolverForClassFromDto(FieldMetaResolverConfigurationDto fieldMetaResolverConfiguration) {
+        return elements(fieldMetaResolverConfiguration.getReadFieldMetaResolverForClass())
+            .asMap(entry -> ClassUtils.loadRealClass(entry.getClassName()),
+                entry -> FieldMetaResolverFactory.createReadMetaResolver(entry.getResolverClassName()));
+    }
+
+    Map<Class<?>, WriteFieldResolver> mapWriteFieldResolverForClassFromDto(FieldMetaResolverConfigurationDto fieldMetaResolverConfiguration) {
+        return elements(fieldMetaResolverConfiguration.getWriteFieldMetaResolverForClass())
+            .asMap(entry -> ClassUtils.loadRealClass(entry.getClassName()),
+                entry -> FieldMetaResolverFactory.createWriteMetaResolver(entry.getResolverClassName()));
+    }
+
+    @Mapping(target = "writeFieldMetaResolverForClass", source = "fieldMetaResolverConfigurationEntity")
+    @Mapping(target = "readFieldMetaResolverForClass", source = "fieldMetaResolverConfigurationEntity")
+    public abstract FieldMetaResolverConfigurationDto mapFieldResolverConfDto(FieldMetaResolverConfigurationEntity fieldMetaResolverConfigurationEntity);
+
+    protected List<WriteFieldMetaResolverForClassEntryDto> mapWriteFieldMetaResolverForClass(FieldMetaResolverConfigurationEntity entity) {
+        return elements(entity.getFieldMetaResolverForClass())
+            .filter(entry -> entry.getFieldMetaResolverStrategyType().equals(WRITE))
+            .map(this::mapWriteFieldMetaResolverForClassEntryDto)
+            .asList();
+    };
+
+    protected List<ReadFieldMetaResolverForClassEntryDto> mapReadFieldMetaResolverForClass(FieldMetaResolverConfigurationEntity entity) {
+        return elements(entity.getFieldMetaResolverForClass())
+            .filter(entry -> entry.getFieldMetaResolverStrategyType().equals(READ))
+            .map(this::mapReadFieldMetaResolverForClassEntryDto)
+            .asList();
+    };
+
+    protected abstract WriteFieldMetaResolverForClassEntryDto mapWriteFieldMetaResolverForClassEntryDto(FieldMetaResolverForClassEntryEntity entity);
+
+    protected abstract ReadFieldMetaResolverForClassEntryDto mapReadFieldMetaResolverForClassEntryDto(FieldMetaResolverForClassEntryEntity entity);
 
     PropertiesOverriddenMapping mapPropertiesOverriddenMapping(List<PropertiesOverriddenMappingEntity> mappingEntries) {
         var propertiesOverriddenMapping = PropertiesOverriddenMapping.builder().build();

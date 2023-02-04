@@ -18,6 +18,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.conversion.ClassMetaModelConverte
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapperImpl
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMappingResolver
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.AssignExpressionAsTextResolver
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.EnumsMapperMethodGenerator
@@ -32,9 +33,10 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.OtherVariableSour
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.RawJavaCodeSourceExpressionParser
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.SpringBeanOrOtherMapperParser
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WriteToMapStrategy
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.TemporaryContextLoader
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
@@ -44,6 +46,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageInstanc
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.BeforeEndpointValidatorUpdater
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapperImpl
 import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
@@ -60,8 +63,10 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
     ValidatorFactory validatorFactory = Mock()
     DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository = Mock()
     DataStorageInstances dataStorageInstances = Mock()
-    ClassMetaModelMapper classMetaModelMapper = Mappers.getMapper(ClassMetaModelMapper)
-    MapperMetaModelMapper mapperMetaModelMapper = Mappers.getMapper(MapperMetaModelMapper)
+    AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
+    ClassMetaModelMapper classMetaModelMapper = new ClassMetaModelMapperImpl(additionalPropertyMapper)
+    MapperGenerateConfigurationMapper mapperGenerateConfigurationMapper = new MapperGenerateConfigurationMapperImpl(additionalPropertyMapper)
+    MapperMetaModelMapper mapperMetaModelMapper = new MapperMetaModelMapperImpl(additionalPropertyMapper, mapperGenerateConfigurationMapper)
     ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(classMetaModelMapper)
     JsonObjectMapper jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
     EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
@@ -70,7 +75,7 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
     TemporaryContextLoader temporaryContextLoader = new TemporaryContextLoader(validatorFactory,
         metaModelContextService, classMetaModelMapper, mapperMetaModelMapper
     )
-    MapperGenerateConfigurationMapper mapperGenerateConfigurationMapper = Mappers.getMapper(MapperGenerateConfigurationMapper)
+
     PropertiesOverriddenMappingResolver propertiesOverriddenMappingResolver = new PropertiesOverriddenMappingResolver(applicationContext)
 
     ClassMetaModelMapperParser classMetaModelMapperParser = new ClassMetaModelMapperParser(metaModelContextService)
@@ -115,10 +120,8 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         dataStorageInstances.getDataStorageFactoryForClass(_) >> Mock(DataStorageFactory)
 
         jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
-        def fieldMetaModelMapper = Mappers.getMapper(FieldMetaModelMapper)
+        def fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper)
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
-        setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-        setValueForField(fieldMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
 
         setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
         setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(

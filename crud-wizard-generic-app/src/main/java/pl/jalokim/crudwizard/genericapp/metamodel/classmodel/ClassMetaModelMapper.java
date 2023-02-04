@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
@@ -26,9 +27,10 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
     imports = {
         ClassUtils.class,
         MetaModelState.class
-    })
+    },
+    uses = AdditionalPropertyMapper.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
+public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
     @Autowired
     private FieldMetaModelMapper fieldMetaModelMapper;
@@ -40,10 +42,13 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "extendsFromModels", ignore = true)
     @Mapping(target = "realClass", ignore = true)
     @Mapping(target = "enumClassMetaModel", ignore = true)
-    @Mapping(target = "fieldMetaResolverConfigurations", ignore = true) // TODO #62 this should be stored in db? Better yes,
+    @Mapping(target = "fieldMetaResolverConfiguration", ignore = true)
     // after restart application meta models should have the same fields
     @Mapping(target = "attachedFieldsOwner", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
+    @Mapping(target = "typeMetadata", ignore = true)
+    @Mapping(target = "writeFieldResolver", ignore = true)
+    @Mapping(target = "readFieldResolver", ignore = true)
     @Mapping(target = "state", expression = "java(pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState.INITIALIZED)")
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
@@ -200,7 +205,10 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "attachedFieldsOwner", ignore = true)
-    @Mapping(target = "fieldMetaResolverConfigurations", ignore = true)
+    @Mapping(target = "fieldMetaResolverConfiguration", ignore = true)
+    @Mapping(target = "writeFieldResolver", ignore = true)
+    @Mapping(target = "readFieldResolver", ignore = true)
+    @Mapping(target = "typeMetadata", ignore = true)
     protected abstract ClassMetaModel innerToModelFromDto(ClassMetaModelDto classMetaModelDto);
 
     @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
@@ -212,8 +220,11 @@ public abstract class ClassMetaModelMapper extends AdditionalPropertyMapper<Clas
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "fieldNames", ignore = true)
     @Mapping(target = "state", ignore = true)
-    @Mapping(target = "fieldMetaResolverConfigurations", ignore = true)
+    @Mapping(target = "fieldMetaResolverConfiguration", ignore = true)
     @Mapping(target = "attachedFieldsOwner", ignore = true)
+    @Mapping(target = "typeMetadata", ignore = true)
+    @Mapping(target = "writeFieldResolver", ignore = true)
+    @Mapping(target = "readFieldResolver", ignore = true)
     protected abstract void swallowUpdateFrom(@MappingTarget ClassMetaModel classMetaModel, ClassMetaModelDto classMetaModelDto);
 
     @Mapping(target = "classMetaModelDtoType", ignore = true)
