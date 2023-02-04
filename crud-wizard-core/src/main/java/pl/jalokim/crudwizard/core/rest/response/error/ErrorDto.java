@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.core.rest.response.error;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder;
 
@@ -10,6 +11,7 @@ public class ErrorDto {
 
     String property;
     String message;
+    @EqualsAndHashCode.Exclude
     String errorCode;
 
     public static ErrorDto errorEntry(String property, String message) {

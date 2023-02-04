@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.utils.ValueExtractorFromPath;
 import pl.jalokim.crudwizard.genericapp.groovy.GroovyScriptInvoker;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
@@ -78,20 +79,15 @@ public class GenericValidator {
             if (MetadataReflectionUtils.isArrayType(objectToValidate.getClass())) {
                 Object[] array = (Object[]) objectToValidate;
                 validateElements(propertyPathMetaModel, classMetaModel, elements(array));
-            }
-
-            if (MetadataReflectionUtils.isCollectionType(objectToValidate.getClass())) {
+            } else if (MetadataReflectionUtils.isCollectionType(objectToValidate.getClass())) {
                 Collection<?> collection = (Collection<?>) objectToValidate;
                 validateElements(propertyPathMetaModel, classMetaModel, elements(collection));
-            }
+            } else if (objectToValidate instanceof Map || isObjectBasedOnRealClass(classMetaModel)) {
 
-            if (objectToValidate instanceof Map) {
-                Map<?, ?> objectToValidateAsMap = (Map<?, ?>) objectToValidate;
                 List<FieldMetaModel> fields = classMetaModel.fetchAllFields();
-                // TODO how to get fields when has generic fields ???
                 for (FieldMetaModel field : fields) {
                     String fieldName = field.getFieldName();
-                    Object mapFieldValue = objectToValidateAsMap.get(field.getFieldName());
+                    Object mapFieldValue = ValueExtractorFromPath.getValueFromPath(objectToValidate, field.getFieldName());
 
                     PropertyPath propertyPathByFieldName = propertyPathMetaModel.getCurrentPath()
                         .nextWithName(fieldName);
@@ -108,6 +104,11 @@ public class GenericValidator {
                 }
             }
         }
+    }
+
+    private boolean isObjectBasedOnRealClass(ClassMetaModel classMetaModel) {
+        return classMetaModel.isOnlyRawClassModel() && !classMetaModel.isSimpleType() &&
+            !classMetaModel.getTypeMetadata().rawClassIsComingFromJavaApi();
     }
 
     private void validateCurrentNode(PropertyPathMetaModel propertyPathMetaModel, Class<?> metaModelRealClass, ClassMetaModel classMetaModel,
