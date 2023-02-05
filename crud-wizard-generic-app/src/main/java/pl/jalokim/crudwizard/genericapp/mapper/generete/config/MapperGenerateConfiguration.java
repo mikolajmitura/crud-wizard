@@ -1,14 +1,13 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG;
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Builder;
 import lombok.Data;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
 
 @Data
 @Builder(toBuilder = true)
@@ -23,10 +22,10 @@ public class MapperGenerateConfiguration {
     private boolean globalIgnoreMappingProblems;
 
     @Builder.Default
-    private FieldMetaResolverConfiguration fieldMetaResolverForRawTarget = WRITE_FIELD_RESOLVER_CONFIG;
+    private FieldMetaResolverConfiguration fieldMetaResolverForRawTarget = DEFAULT_FIELD_RESOLVERS_CONFIG;
 
     @Builder.Default
-    private FieldMetaResolverConfiguration fieldMetaResolverForRawSource = READ_FIELD_RESOLVER_CONFIG;
+    private FieldMetaResolverConfiguration fieldMetaResolverForRawSource = DEFAULT_FIELD_RESOLVERS_CONFIG;
 
     private MapperConfiguration rootConfiguration;
 

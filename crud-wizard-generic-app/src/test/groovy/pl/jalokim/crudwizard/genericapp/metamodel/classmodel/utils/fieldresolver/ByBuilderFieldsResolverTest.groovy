@@ -1,7 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.generateGenericClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType
 
 import java.time.LocalDateTime
@@ -17,144 +17,77 @@ class ByBuilderFieldsResolverTest extends FieldsResolverSpecification {
 
     def "return expected list of fields for SomeDtoWithSuperBuilder"() {
         given:
-        TypeMetadata SomeDtoWithBuilderTypeMetadata = getTypeMetadataFromType(SomeDtoWithSuperBuilder)
+        TypeMetadata someDtoWithBuilderTypeMetadata = getTypeMetadataFromType(SomeDtoWithSuperBuilder)
+        ClassMetaModel classMetaModel = createClassMetaModel(someDtoWithBuilderTypeMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         when:
-        def results = testCase.findDeclaredFields(SomeDtoWithBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        testCase.resolveWriteFields(classMetaModel, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         then:
-        results.size() == 2
-        verifyAll(results.find {
-            it.fieldName == "someString1"
-        }) {
+        def results = classMetaModel.fetchAllWriteFields()
+        results.size() == 4
+        verifyAll(findField(results, "someString1")) {
             fieldName == "someString1"
             fieldType.realClass == String
         }
-        verifyAll(results.find {
-            it.fieldName == "someLong1"
-        }) {
+        verifyAll(findField(results, "someLong1")) {
             fieldName == "someLong1"
             fieldType.realClass == Long
+        }
+        verifyAll(findField(results, "superStringField")) {
+            fieldName == "superStringField"
+            fieldType.realClass == String
+        }
+        verifyAll(findField(results, "someMap")) {
+            fieldName == "someMap"
+            fieldType.realClass == Map
         }
     }
 
     def "return expected list of fields for SuperDtoWithSuperBuilder"() {
         given:
         TypeMetadata superDtoWithSuperBuilderTypeMetadata = getTypeMetadataFromType(SuperDtoWithSuperBuilder)
+        ClassMetaModel classMetaModel = createClassMetaModel(superDtoWithSuperBuilderTypeMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         when:
-        def results = testCase.findDeclaredFields(superDtoWithSuperBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        testCase.resolveWriteFields(classMetaModel, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         then:
+        def results = classMetaModel.fetchAllWriteFields()
         results.size() == 2
-        verifyAll(results.find {
-            it.fieldName == "superStringField"
-        }) {
+        verifyAll(findField(results, "superStringField")) {
             fieldName == "superStringField"
             fieldType.realClass == String
         }
-        verifyAll(results.find {
-            it.fieldName == "someMap"
-        }) {
+        verifyAll(findField(results, "someMap")) {
             fieldName == "someMap"
-            fieldType.realClass == Map
-            fieldType.genericTypes*.realClass == [String, List]
-            fieldType.genericTypes[1].genericTypes*.realClass == [Long]
+            fieldType.getJavaGenericTypeInfo() == "java.util.Map<java.lang.String, java.util.List<java.lang.Long>>"
         }
     }
 
     def "return expected list of fields for SomeDtoWithBuilder"() {
         given:
         TypeMetadata superDtoWithSuperBuilderTypeMetadata = getTypeMetadataFromType(SomeDtoWithBuilder)
+        ClassMetaModel classMetaModel = createClassMetaModel(superDtoWithSuperBuilderTypeMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         when:
-        def results = testCase.findDeclaredFields(superDtoWithSuperBuilderTypeMetadata, WRITE_FIELD_RESOLVER_CONFIG)
+        testCase.resolveWriteFields(classMetaModel, DEFAULT_FIELD_RESOLVERS_CONFIG)
 
         then:
+        def results = classMetaModel.fetchAllWriteFields()
         results.size() == 3
-
-        verifyAll(results.find {
-            it.fieldName == "test1"
-        }) {
+        verifyAll(findField(results, "test1")) {
             fieldName == "test1"
             fieldType.realClass == String
         }
 
-        verifyAll(results.find {
-            it.fieldName == "testLong1"
-        }) {
+        verifyAll(findField(results, "testLong1")) {
             fieldName == "testLong1"
             fieldType.realClass == Long
         }
 
-        verifyAll(results.find {
-            it.fieldName == "localDateTime1"
-        }) {
+        verifyAll(findField(results, "localDateTime1")) {
             fieldName == "localDateTime1"
-            fieldType.realClass == LocalDateTime
-        }
-    }
-
-    def "return all available fields for SomeDtoWithSuperBuilder"() {
-        given:
-        ClassMetaModel classMetaModel = generateGenericClassMetaModel(SomeDtoWithSuperBuilder.class, WRITE_FIELD_RESOLVER_CONFIG)
-
-        when:
-        def results = testCase.getAllAvailableFieldsForWrite(classMetaModel)
-
-        then:
-        results.size() == 4
-
-        verifyAll(results.find {
-            it.fieldName == "someString1"
-        }) {
-            fieldType.realClass == String
-        }
-
-        verifyAll(results.find {
-            it.fieldName == "someLong1"
-        }) {
-            fieldType.realClass == Long
-        }
-
-        verifyAll(results.find {
-            it.fieldName == "superStringField"
-        }) {
-            fieldType.realClass == String
-        }
-
-        verifyAll(results.find {
-            it.fieldName == "someMap"
-        }) {
-            fieldType.realClass == Map
-        }
-    }
-
-    def "return all available fields for SomeDtoWithBuilder"() {
-        given:
-        ClassMetaModel classMetaModel = generateGenericClassMetaModel(SomeDtoWithBuilder.class, WRITE_FIELD_RESOLVER_CONFIG)
-
-        when:
-        def results = testCase.getAllAvailableFieldsForWrite(classMetaModel)
-
-        then:
-        results.size() == 3
-
-        verifyAll(results.find {
-            it.fieldName == "test1"
-        }) {
-            fieldType.realClass == String
-        }
-
-        verifyAll(results.find {
-            it.fieldName == "testLong1"
-        }) {
-            fieldType.realClass == Long
-        }
-
-        verifyAll(results.find {
-            it.fieldName == "localDateTime1"
-        }) {
             fieldType.realClass == LocalDateTime
         }
     }

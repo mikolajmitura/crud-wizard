@@ -12,6 +12,8 @@ import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
@@ -31,9 +33,11 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.PropertyPathResolver
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.utils.collection.CollectionUtils;
 
-// TODO try use uses to inject others mapper, now is problem with ambiguity from AdditionalPropertyMapper
-@Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class EndpointMetaModelMapper extends AdditionalPropertyMapper<EndpointMetaModelDto, EndpointMetaModelEntity, EndpointMetaModel> {
+// TODO #mappers try use uses to inject others mapper
+@Mapper(
+    config = MapperAsSpringBeanConfig.class,
+    uses = {AdditionalPropertyMapper.class, MapperGenerateConfigurationMapper.class})
+public abstract class EndpointMetaModelMapper implements BaseMapper<EndpointMetaModelDto, EndpointMetaModelEntity, EndpointMetaModel> {
 
     @Autowired
     private EndpointResponseMetaModelMapper endpointResponseMetaModelMapper;

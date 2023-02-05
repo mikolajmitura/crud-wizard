@@ -20,13 +20,15 @@ import org.mapstruct.factory.Mappers
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.Agreement
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.RawAdditionalPropertyMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.DepartmentDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.SomeClassWithPrivateFields
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService
@@ -43,14 +45,13 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
     static final EMP_PERSON_CLASS_ID = 2L
 
     MetaModelContextService metaModelContextService = Mock()
-    ClassMetaModelMapper classMetaModelMapper = Mappers.getMapper(ClassMetaModelMapper)
-    FieldMetaModelMapper fieldMetaModelMapper = Mappers.getMapper(FieldMetaModelMapper)
+    AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
+    ClassMetaModelMapper classMetaModelMapper = new ClassMetaModelMapperImpl(additionalPropertyMapper)
+    FieldMetaModelMapper fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper)
     ClassMetaModelTypeExtractor testCase
 
     def setup() {
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
-        setValueForField(fieldMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
-        setValueForField(classMetaModelMapper, "rawAdditionalPropertyMapper", Mappers.getMapper(RawAdditionalPropertyMapper))
         testCase = new ClassMetaModelTypeExtractor(classMetaModelMapper)
         MetaModelContext metaModelContext = new MetaModelContext()
         ModelsCache<ClassMetaModel> classMetaModels = new ModelsCache<>()
@@ -77,28 +78,28 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
 
         then:
         if (expectedType == null) {
-            result == Optional.empty()
+            assert result == Optional.empty()
         } else {
-            result.get().isTheSameMetaModel(expectedResult.get())
+            assert result.get().isTheSameMetaModel(expectedResult.get())
         }
 
         where:
-        inputClassDto                                                | givenPath                               || expectedType
+        inputClassDto                                                | givenPath                             || expectedType
 
         // get field from ClassMetaModelDto
-        simplePersonClassMetaModel()                                 | "birthDate"                             || createClassMetaModelFromClass(LocalDate.class)
+        simplePersonClassMetaModel()                                 | "birthDate"                           || createClassMetaModelFromClass(LocalDate.class)
 
         // get field from ClassMetaModelDto by dynamic pattern
-        simplePersonClassMetaModel()                                 | "?birthDate"                            || createClassMetaModelFromClass(LocalDate.class)
+        simplePersonClassMetaModel()                                 | "?birthDate"                          || createClassMetaModelFromClass(LocalDate.class)
 
         // get field from ClassMetaModelDto by dynamic pattern which does not exist
-        simplePersonClassMetaModel()                                 | "?dynamicField"                         || null
+        simplePersonClassMetaModel()                                 | "?dynamicField"                       || null
 
         // get field from entity
-        personDtoInPersonMetaModel()                                 | "surname"                               || createClassMetaModelFromClass(String.class)
+        personDtoInPersonMetaModel()                                 | "surname"                             || createClassMetaModelFromClass(String.class)
 
         // get field from java type
-        createClassMetaModelDtoFromClass(DepartmentDto)              | "headOfDepartment"                      ||
+        createClassMetaModelDtoFromClass(DepartmentDto)              | "headOfDepartment"                    ||
             createClassMetaModelFromClass(SamplePersonDto.class)
 
         // get field from ClassMetaModelDto, entity, raw type (dto), simple field
@@ -107,7 +108,7 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
             .fields([
                 createValidFieldMetaModelDto("somePerson", personDtoInPersonMetaModel())
             ])
-            .build()                                                 | "somePerson.fatherData.someNumber"      || createClassMetaModelFromClass(Long.class)
+            .build()                                                 | "somePerson.fatherData.someNumber"    || createClassMetaModelFromClass(Long.class)
 
         // get field from ClassMetaModelDto, entity, raw type (dto by dynamic), simple field
         ClassMetaModelDto.builder()
@@ -115,7 +116,7 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
             .fields([
                 createValidFieldMetaModelDto("somePerson", personDtoInPersonMetaModel())
             ])
-            .build()                                                 | "somePerson.?fatherData.someNumber"     || createClassMetaModelFromClass(Long.class)
+            .build()                                                 | "somePerson.?fatherData.someNumber"   || createClassMetaModelFromClass(Long.class)
 
         // get field from ClassMetaModelDto, entity, raw type (dto), simple field as dynamic field which not exist, return null
         ClassMetaModelDto.builder()
@@ -123,38 +124,39 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
             .fields([
                 createValidFieldMetaModelDto("somePerson", personDtoInPersonMetaModel())
             ])
-            .build()                                                 | "?somePerson.fatherData.?someDynamic"   || null
+            .build()                                                 | "?somePerson.fatherData.?someDynamic" || null
 
         // get field from ClassMetaModelDto(extends from other) from first object
-        exampleClassMetaModelDtoWithExtension()                      | "id"                                    || createClassMetaModelFromClass(Long.class)
+        exampleClassMetaModelDtoWithExtension()                      | "id"                                  || createClassMetaModelFromClass(Long.class)
 
         // get field from ClassMetaModelDto(extends from other) from second object
-        exampleClassMetaModelDtoWithExtension()                      | "someNumber"                            || createClassMetaModelFromClass(Long.class)
+        exampleClassMetaModelDtoWithExtension()                      | "someNumber"                          || createClassMetaModelFromClass(Long.class)
 
         // get field which is without getter
-        createClassMetaModelDtoFromClass(SomeClassWithPrivateFields) | "id"                                    || createClassMetaModelFromClass(Long.class)
+        createClassMetaModelDtoFromClass(SomeClassWithPrivateFields) | "id"                                  || createClassMetaModelFromClass(Long.class)
 
         // get field from ClassMetaModelDto(extends from other) but name exists in current ClassMetaModelDto
-        exampleClassMetaModelDtoWithExtension()                      | "birthDate"                             || createClassMetaModelFromClass(Date.class)
+        exampleClassMetaModelDtoWithExtension()                      | "birthDate"                           || createClassMetaModelFromClass(LocalDate.class)
 
         // get field from entity(extends from other) from first object
-        empPersonDtoInEmpPersonMetaModel()                           | "name"                                  || createClassMetaModelFromClass(String.class)
+        empPersonDtoInEmpPersonMetaModel()                           | "name"                                ||
+            createClassMetaModelFromClass(DepartmentDto.DepartmentName.class)
 
         // get field from entity(extends from other) from second object
-        empPersonDtoInEmpPersonMetaModel()                           | "headOfDepartment"                      ||
+        empPersonDtoInEmpPersonMetaModel()                           | "headOfDepartment"                    ||
             createClassMetaModelFromClass(SamplePersonDto.class)
 
         // get field from entity(extends from other) but name exists in current entity
-        empPersonDtoInEmpPersonMetaModel()                           | "fullName"                              || createClassMetaModelFromClass(Map.class)
+        empPersonDtoInEmpPersonMetaModel()                           | "fullName"                            || createClassMetaModelFromClass(Map.class)
 
         // get field from dto(extends from other)
-        createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)    | "birthDay"                              || createClassMetaModelFromClass(LocalDate.class)
+        createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)    | "birthDay"                            || createClassMetaModelFromClass(LocalDate.class)
 
         // get field from dto(extends from other) but name exists in current class
-        createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)    | "id"                                    || createClassMetaModelFromClass(String.class)
+        createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)    | "id"                                  || createClassMetaModelFromClass(Long.class)
 
         // get field from dto(extends from other), entity(extends from other), raw type (dto, extends from other), simple field
-        aLotOfExtensionsClassMetaModelDto()                          | "someEmpField.fatherData.lastLogin"     ||
+        aLotOfExtensionsClassMetaModelDto()                          | "someEmpField.fatherData.lastLogin"   ||
             createClassMetaModelFromClass(LocalDateTime.class)
 
         // get field which is not raw java type
@@ -163,10 +165,10 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
             .fields([
                 createValidFieldMetaModelDto("somePerson", personDtoInPersonMetaModel())
             ])
-            .build()                                                 | "somePerson.passportData"               || createSimpleDocumentMetaModel()
+            .build()                                                 | "somePerson.passportData"             || createSimpleDocumentMetaModel()
 
         // crete class metamodel and usage of BY_NAME type definition.
-        buildPersonMetaModel()                                       | "parent.mainDocument.serialNumber" || createClassMetaModelFromClass(String.class)
+        buildPersonMetaModel()                                       | "parent.mainDocument.serialNumber"    || createClassMetaModelFromClass(String.class)
     }
 
     private static ClassMetaModelDto buildPersonMetaModel() {

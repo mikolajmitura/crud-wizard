@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty
+import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson
 import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
@@ -45,6 +46,7 @@ import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
 import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.mapper.instance.SomeTestMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
@@ -69,6 +71,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperCon
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeRealClass
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity
@@ -1826,6 +1829,40 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         ConstraintViolationException ex = thrown()
         ex.message != null
         !Files.exists(Path.of(codeRootPathProvider.compiledCodeRootPath + "/1668361280915"))
+    }
+
+    // TODO #4 merge translations too
+    def "should merge fields properties correctly"() {
+        given:
+        def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(
+                createClassMetaModelDtoFromClass(SomeRealClass)
+                    .toBuilder()
+                    .fields([
+                        createValidFieldMetaModelDto("name", String, [], [
+                            AdditionalPropertyDto.builder()
+                                .name("some-property")
+                                .valueRealClassName(String.canonicalName)
+                                .rawJson(objectToRawJson("some-value"))
+                                .build()
+                        ])
+                    ])
+                    .build()
+            )
+            .build()
+
+        when:
+        def endpointId = endpointMetaModelService.createNewEndpoint(postEndpoint)
+
+        then:
+        endpointId >= 0
+        def metaModelContext = metaModelContextService.metaModelContext
+        def foundClassModel = metaModelContext.classMetaModels.findOneBy {
+            (SomeRealClass == it.realClass)
+        }
+        foundClassModel.fetchAllFields().find {
+            it.fieldName == "name"
+        }.getAdditionalProperties()[0].valueAsObject == "some-value"
     }
 
     private static String parseExpressionMessage(int columnNumber, String message) {

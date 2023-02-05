@@ -2,9 +2,9 @@ package pl.jalokim.crudwizard.genericapp.mapper.generete.config
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping.getPropertiesOverriddenMapping
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelConstants.STRING_MODEL
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -116,12 +116,12 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
                     [new BySpringBeanMethodAssignExpression(DummyService, "dummyService", "fetchSomeMap",
                         [
                             new FieldsChainToAssignExpression(multiSourceExampleModel, "sourceObject", [someObjectField])
-                                .createExpressionWithNextField("personPart2", READ_FIELD_RESOLVER_CONFIG)
-                                .createExpressionWithNextField("id", READ_FIELD_RESOLVER_CONFIG)
+                                .createExpressionWithNextField("personPart2", DEFAULT_FIELD_RESOLVERS_CONFIG)
+                                .createExpressionWithNextField("id", DEFAULT_FIELD_RESOLVERS_CONFIG)
                         ]),
                      new FieldsChainToAssignExpression(multiSourceExampleModel, "sourceObject", [someObjectField])
-                         .createExpressionWithNextField("personPart1", READ_FIELD_RESOLVER_CONFIG)
-                         .createExpressionWithNextField("someString", READ_FIELD_RESOLVER_CONFIG)
+                         .createExpressionWithNextField("personPart1", DEFAULT_FIELD_RESOLVERS_CONFIG)
+                         .createExpressionWithNextField("someString", DEFAULT_FIELD_RESOLVERS_CONFIG)
                     ])
             ]
             mappingsByPropertyName.isEmpty()
@@ -153,7 +153,7 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
                     valueMappingStrategy == [
                         new FieldsChainToAssignExpression(multiSourceExampleModel, "sourceObject",
                             [multiSourceExampleModel.getRequiredFieldByName("documentDataPart2")])
-                            .createExpressionWithNextField("mainDocId", READ_FIELD_RESOLVER_CONFIG)
+                            .createExpressionWithNextField("mainDocId", DEFAULT_FIELD_RESOLVERS_CONFIG)
                     ]
                     mappingsByPropertyName.isEmpty()
                 }
@@ -176,7 +176,7 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
                         new ByMapperNameAssignExpression(createClassMetaModelFromClass(Long),
                             new FieldsChainToAssignExpression(multiSourceExampleModel, "sourceObject",
                                 [multiSourceExampleModel.getRequiredFieldByName("documentDataPart1")])
-                                .createExpressionWithNextField("localDateTime66", READ_FIELD_RESOLVER_CONFIG),
+                                .createExpressionWithNextField("localDateTime66", DEFAULT_FIELD_RESOLVERS_CONFIG),
                             "fromLocalDateToLongMapper"
                         )
                     ]
@@ -200,7 +200,7 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
                     valueMappingStrategy == [
                         new FieldsChainToAssignExpression(multiSourceExampleModel, "sourceObject",
                             [multiSourceExampleModel.getRequiredFieldByName("documentDataPart2")])
-                            .createExpressionWithNextField("mainDocId", READ_FIELD_RESOLVER_CONFIG),
+                            .createExpressionWithNextField("mainDocId", DEFAULT_FIELD_RESOLVERS_CONFIG),
                     ]
                     mappingsByPropertyName.keySet().isEmpty()
                 }
@@ -301,7 +301,7 @@ class PropertiesOverriddenMappingResolverIT extends GenericAppWithReloadMetaCont
                 valueMappingStrategy == [
                     new FieldsChainToAssignExpression(multiSourceExampleModel,
                         "rootSourceObject", [multiSourceExampleModel.getRequiredFieldByName("otherPersonPart3")])
-                        .createExpressionWithNextField("field3", READ_FIELD_RESOLVER_CONFIG)
+                        .createExpressionWithNextField("field3", DEFAULT_FIELD_RESOLVERS_CONFIG)
                 ]
                 mappingsByPropertyName.keySet().isEmpty()
             }

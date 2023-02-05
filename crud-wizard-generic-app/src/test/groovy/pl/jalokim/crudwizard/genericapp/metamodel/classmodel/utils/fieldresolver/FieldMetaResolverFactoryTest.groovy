@@ -1,10 +1,5 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
-import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.READ
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.WRITE
-
-import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
 import pl.jalokim.crudwizard.core.sample.SuperDtoWithSuperBuilder
@@ -14,29 +9,36 @@ import spock.lang.Unroll
 class FieldMetaResolverFactoryTest extends FieldsResolverSpecification {
 
     @Unroll
-    def "return expected #expectedFieldMetaResolver for given class: #givenClass and #strategyType"() {
+    def "return expected #expectedFieldMetaResolver for given class: #givenClass for read"() {
         when:
-        def result = FieldMetaResolverFactory.findFieldMetaResolverForClass(givenClass, strategyType)
+        def result = FieldMetaResolverFactory.findDefaultReadFieldMetaResolverForClass(givenClass)
 
         then:
         result == expectedFieldMetaResolver
 
         where:
-        expectedFieldMetaResolver        | givenClass               | strategyType
-        ByGettersFieldsResolver.INSTANCE | SuperDtoWithSuperBuilder | READ
-        ByGettersFieldsResolver.INSTANCE | SomeDtoWithSetters       | READ
-        ByGettersFieldsResolver.INSTANCE | SomeSimpleValueDto       | READ
-        ByBuilderFieldsResolver.INSTANCE | SuperDtoWithSuperBuilder | WRITE
-        BySettersFieldsResolver.INSTANCE | SomeDtoWithSetters       | WRITE
-        ByAllArgsFieldsResolver.INSTANCE | SomeSimpleValueDto       | WRITE
+        expectedFieldMetaResolver           | givenClass
+        ByGettersFieldsResolver.INSTANCE    | SuperDtoWithSuperBuilder
+        ByGettersFieldsResolver.INSTANCE    | SomeDtoWithSetters
+        ByGettersFieldsResolver.INSTANCE    | SomeSimpleValueDto
+        JavaClassFieldMetaResolver.INSTANCE | List
+        ByDeclaredFieldsResolver.INSTANCE   | ReflectionUtils
     }
 
-    def "return expected exception"() {
+    @Unroll
+    def "return expected #expectedFieldMetaResolver for given class: #givenClass for write"() {
         when:
-        FieldMetaResolverFactory.findFieldMetaResolverForClass(ReflectionUtils, WRITE)
+        def result = FieldMetaResolverFactory.findDefaultWriteFieldMetaResolverForClass(givenClass)
 
         then:
-        TechnicalException ex = thrown()
-        ex.message == translatePlaceholder("cannot.find.field.resolver.strategy", ReflectionUtils.getCanonicalName())
+        result == expectedFieldMetaResolver
+
+        where:
+        expectedFieldMetaResolver           | givenClass
+        ByBuilderFieldsResolver.INSTANCE    | SuperDtoWithSuperBuilder
+        BySettersFieldsResolver.INSTANCE    | SomeDtoWithSetters
+        ByAllArgsFieldsResolver.INSTANCE    | SomeSimpleValueDto
+        JavaClassFieldMetaResolver.INSTANCE | List
+        ByDeclaredFieldsResolver.INSTANCE   | ReflectionUtils
     }
 }

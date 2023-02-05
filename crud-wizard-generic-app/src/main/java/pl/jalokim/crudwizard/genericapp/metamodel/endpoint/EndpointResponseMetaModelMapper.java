@@ -9,6 +9,8 @@ import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
@@ -18,10 +20,11 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
-@Mapper(config = MapperAsSpringBeanConfig.class)
+@Mapper(config = MapperAsSpringBeanConfig.class, uses = {AdditionalPropertyMapper.class, MapperGenerateConfigurationMapper.class})
 public abstract class EndpointResponseMetaModelMapper
-    extends AdditionalPropertyMapper<EndpointResponseMetaModelDto, EndpointResponseMetaModelEntity, EndpointResponseMetaModel> {
+    implements BaseMapper<EndpointResponseMetaModelDto, EndpointResponseMetaModelEntity, EndpointResponseMetaModel> {
 
+    // TODO #mappers make all fields in mapper as constructor arguments
     @Autowired
     private QueryProviderMapper queryProviderMapper;
 

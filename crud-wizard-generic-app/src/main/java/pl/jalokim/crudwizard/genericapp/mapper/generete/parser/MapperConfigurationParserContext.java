@@ -11,13 +11,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.ApplicationContext;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.core.translations.MessagePlaceholder;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.PropertiesOverriddenMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.EntryMappingParseException.ErrorSource;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.ValueToAssignExpression;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
 import pl.jalokim.utils.collection.Elements;
 
 @RequiredArgsConstructor

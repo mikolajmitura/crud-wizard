@@ -7,6 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel;
@@ -14,8 +15,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel.Servi
 import pl.jalokim.crudwizard.genericapp.provider.BeanInstanceMetaModel;
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider;
 
-@Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class ServiceMetaModelMapper extends AdditionalPropertyMapper<ServiceMetaModelDto, ServiceMetaModelEntity, ServiceMetaModel> {
+@Mapper(config = MapperAsSpringBeanConfig.class, uses = AdditionalPropertyMapper.class)
+public abstract class ServiceMetaModelMapper implements BaseMapper<ServiceMetaModelDto, ServiceMetaModelEntity, ServiceMetaModel> {
 
     @Autowired
     private GenericBeansProvider genericBeansProvider;

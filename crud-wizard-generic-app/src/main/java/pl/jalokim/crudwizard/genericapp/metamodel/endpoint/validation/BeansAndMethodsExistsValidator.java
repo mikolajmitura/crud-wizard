@@ -3,8 +3,8 @@ package pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
-import static pl.jalokim.crudwizard.core.utils.ClassUtils.checkThatClassExists;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.clearCglibClassName;
+import static pl.jalokim.crudwizard.core.utils.ClassUtils.isExistThatClass;
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findMethodByName;
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator;
@@ -547,7 +547,7 @@ public class BeansAndMethodsExistsValidator implements BaseConstraintValidator<B
                 .orElse(null);
         } else {
             BeanAndMethodDto serviceBeanAndMethod = serviceMetaModel.getServiceBeanAndMethod();
-            if (serviceBeanAndMethod != null && checkThatClassExists(serviceBeanAndMethod.getClassName())) {
+            if (serviceBeanAndMethod != null && isExistThatClass(serviceBeanAndMethod.getClassName())) {
                 return loadRealClass(serviceBeanAndMethod.getClassName());
             }
         }

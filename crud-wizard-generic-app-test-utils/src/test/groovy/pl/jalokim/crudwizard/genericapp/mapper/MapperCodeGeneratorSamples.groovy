@@ -4,7 +4,7 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassModelWithGenerics
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.WRITE_FIELD_RESOLVER_CONFIG
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,7 +37,6 @@ import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum2
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum3
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomePerson1
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.EnumEntriesMapping
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfiguration
@@ -53,6 +52,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentSour
 import pl.jalokim.crudwizard.genericapp.mapper.instance.objects.SomeDocumentTarget
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 
 class MapperCodeGeneratorSamples {
@@ -1275,8 +1275,8 @@ class MapperCodeGeneratorSamples {
     }
 
     static ClassMetaModel modelFromClass(Class<?> someClass,
-        FieldMetaResolverConfiguration fieldMetaResolverConfiguration = WRITE_FIELD_RESOLVER_CONFIG) {
-        ClassMetaModelFactory.createNotGenericClassMetaModel(createClassMetaModelFromClass(someClass), fieldMetaResolverConfiguration)
+        FieldMetaResolverConfiguration fieldMetaResolverConfiguration = DEFAULT_FIELD_RESOLVERS_CONFIG) {
+        ClassMetaModelFactory.newClassMetaModelOrTheSame(createClassMetaModelFromClass(someClass), fieldMetaResolverConfiguration)
     }
 
     static GenericMapperArgument emptyGenericMapperArgument(Object sourceObject = 1) {

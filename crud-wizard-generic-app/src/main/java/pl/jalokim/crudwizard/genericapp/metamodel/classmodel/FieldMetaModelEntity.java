@@ -6,6 +6,8 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -39,6 +41,10 @@ public class FieldMetaModelEntity extends WithAdditionalPropertiesEntity {
     private Long id;
 
     private String fieldName;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    AccessFieldType accessFieldType = AccessFieldType.WRITE_READ;
 
     @ManyToOne
     @JoinColumn(name = "class_metamodel_id")

@@ -4,15 +4,18 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
 
-@Mapper(config = MapperAsSpringBeanConfig.class)
-public abstract class DataStorageMetaModelMapper
-    extends AdditionalPropertyMapper<DataStorageMetaModelDto, DataStorageMetaModelEntity, DataStorageMetaModel> {
+@Mapper(
+    config = MapperAsSpringBeanConfig.class,
+    uses = {AdditionalPropertyMapper.class, MapperGenerateConfigurationMapper.class})
+public abstract class DataStorageMetaModelMapper implements BaseMapper<DataStorageMetaModelDto, DataStorageMetaModelEntity, DataStorageMetaModel> {
 
     @Autowired
     private DataStorageInstances dataStorageInstances;

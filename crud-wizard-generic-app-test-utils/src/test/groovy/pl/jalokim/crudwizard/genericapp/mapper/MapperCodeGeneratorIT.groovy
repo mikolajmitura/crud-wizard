@@ -90,10 +90,10 @@ import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.modelFromClass
 import static pl.jalokim.crudwizard.genericapp.mapper.MapperCodeGeneratorSamples.withMapperConfigurations
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.ClassMetaModelForMapperHelper.getClassModelInfoForGeneratedCode
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.MapperCodeGenerator.GENERATED_MAPPER_PACKAGE
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.AssignExpressionAsTextResolver.occurredInNotGeneratedMethod
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.RawJavaCodeAssignExpression.createRawJavaCodeExpression
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -236,6 +236,10 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         when:
         def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(newMapperGenerateConfiguration, sessionTimestamp)
         def result = mapperGenerator.generateMapperCode(mapperCodeMetadata)
+
+        then:
+        makeLineEndingAsUnix(result) == makeLineEndingAsUnix(TemplateAsText.fromClassPath("expectedCode/" + expectedFileName).currentTemplateText)
+
         saveMapperCodeToFile(result, sourceMetaModel, targetMetaModel, sessionTimestamp)
         def compiledCodeMetadata = codeCompiler.compileCodeAndReturnMetaData(mapperCodeMetadata.getMapperClassName(), GENERATED_MAPPER_PACKAGE,
             result, sessionTimestamp)
@@ -253,8 +257,6 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                 .build())
             .build()
 
-        then:
-        makeLineEndingAsUnix(result) == makeLineEndingAsUnix(TemplateAsText.fromClassPath("expectedCode/" + expectedFileName).currentTemplateText)
         generatedMapper.mainMap(finalGenericMapperArgument.toBuilder().sourceObject(null).build()) == null
         def mappedObject = generatedMapper.mainMap(finalGenericMapperArgument)
 
@@ -855,7 +857,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .valueMappingStrategy([
                             createFieldsChainExpression(sourceClassMetaModel, "toManyDirectly"),
                             createFieldsChainExpression(sourceClassMetaModel, "nestedObject2")
-                                .createExpressionWithNextField("someLong", READ_FIELD_RESOLVER_CONFIG)
+                                .createExpressionWithNextField("someLong", DEFAULT_FIELD_RESOLVERS_CONFIG)
                         ])
                         .build(),
 
@@ -981,7 +983,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                         .valueMappingStrategy([
                             createFieldsChainExpression(sourceClassMetaModel, "toManyDirectly"),
                             createFieldsChainExpression(sourceClassMetaModel, "nestedObject2")
-                                .createExpressionWithNextField("someLong", READ_FIELD_RESOLVER_CONFIG)
+                                .createExpressionWithNextField("someLong", DEFAULT_FIELD_RESOLVERS_CONFIG)
                         ])
                         .build(),
 
@@ -1548,7 +1550,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                                 .mappingsByPropertyName([
                                     id: PropertiesOverriddenMapping.builder()
                                         .valueMappingStrategy([documentDataPart2Expression.createExpressionWithNextField(
-                                            "mainDocId", READ_FIELD_RESOLVER_CONFIG)])
+                                            "mainDocId", DEFAULT_FIELD_RESOLVERS_CONFIG)])
                                         .build()
                                 ])
                                 .build()
@@ -1564,7 +1566,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                                 .mappingsByPropertyName([
                                     id: PropertiesOverriddenMapping.builder()
                                         .valueMappingStrategy([documentDataPart2Expression.createExpressionWithNextField(
-                                            "mainDocId", READ_FIELD_RESOLVER_CONFIG)])
+                                            "mainDocId", DEFAULT_FIELD_RESOLVERS_CONFIG)])
                                         .build()
                                 ])
                                 .build()
@@ -1581,7 +1583,7 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
                                     id: PropertiesOverriddenMapping.builder()
                                         .valueMappingStrategy([new ByMapperNameAssignExpression(
                                             createClassMetaModelFromClass(String),
-                                            documentDataPart1Expression.createExpressionWithNextField("localDateTime66", READ_FIELD_RESOLVER_CONFIG),
+                                            documentDataPart1Expression.createExpressionWithNextField("localDateTime66", DEFAULT_FIELD_RESOLVERS_CONFIG),
                                             "fromLocalDateToStringMapper"
                                         )])
                                         .build()

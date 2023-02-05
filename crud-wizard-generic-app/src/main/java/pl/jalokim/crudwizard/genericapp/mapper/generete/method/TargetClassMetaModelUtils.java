@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.method;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverFactory.findFieldMetaResolver;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.newClassMetaModelOrTheSame;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +10,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateCon
 import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategy;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
 
 @UtilityClass
 public class TargetClassMetaModelUtils {
@@ -27,9 +27,9 @@ public class TargetClassMetaModelUtils {
                 if (classMetaModel.isGenericModel()) {
                     return classMetaModel.fetchAllFields();
                 }
-                FieldMetaResolver fieldMetaResolver = findFieldMetaResolver(classMetaModel.getRealClass(),
-                    mapperGenerateConfiguration.getFieldMetaResolverForRawTarget());
-                return fieldMetaResolver.getAllAvailableFieldsForWrite(classMetaModel);
+                FieldMetaResolverConfiguration fieldMetaResolverForRawTarget = mapperGenerateConfiguration.getFieldMetaResolverForRawTarget();
+                return newClassMetaModelOrTheSame(classMetaModel, fieldMetaResolverForRawTarget)
+                    .fetchAllWriteFields();
             })
             .orElse(List.of()).stream()
             .sorted(writePropertyStrategy.getFieldSorter())

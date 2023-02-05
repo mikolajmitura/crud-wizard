@@ -1,8 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration;
 
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.READ;
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType.WRITE;
-import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto.createResolverConfigurationWith;
+import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMetaResolverConfigurationDto.DEFAULT_CONFIG_DTO;
 
 import java.util.List;
 import javax.validation.Valid;
@@ -31,11 +29,11 @@ public class MapperGenerateConfigurationDto {
 
     @Valid
     @Builder.Default
-    FieldMetaResolverConfigurationDto fieldMetaResolverForRawTarget = createResolverConfigurationWith(WRITE);
+    FieldMetaResolverConfigurationDto fieldMetaResolverForRawTarget = DEFAULT_CONFIG_DTO;
 
     @Valid
     @Builder.Default
-    FieldMetaResolverConfigurationDto fieldMetaResolverForRawSource = createResolverConfigurationWith(READ);
+    FieldMetaResolverConfigurationDto fieldMetaResolverForRawSource = DEFAULT_CONFIG_DTO;
 
     @Valid
     @NotNull

@@ -5,7 +5,6 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMet
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
 import pl.jalokim.crudwizard.core.datastorage.ExampleEnum
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
@@ -135,7 +134,7 @@ class ClassMetaModelSamples {
         ClassMetaModel.builder()
             .name("somePersonApplication-queryParams")
             .fields([
-                createValidFieldMetaModel("lastContact", LocalDate),
+                createValidFieldMetaModel("lastContact", LocalDateTime),
                 createValidFieldMetaModel("lastText", String),
                 createValidFieldMetaModel("numberAsText", String)])
             .build()
@@ -179,9 +178,9 @@ class ClassMetaModelSamples {
         ClassMetaModel.builder()
             .name("modelWithParents")
             .fields([
-                createValidFieldMetaModel("applicationDateTime", Long),
-                createValidFieldMetaModel("age", Period),
+                createValidFieldMetaModel("applicationDateTime", LocalDateTime),
                 createValidFieldMetaModel("someUnique", String),
+                createValidFieldMetaModel("someNumber", Long),
                 createValidFieldMetaModel("someOtherObject", ClassMetaModel.builder()
                     .name("some-Other-Object")
                     .fields([
@@ -197,6 +196,45 @@ class ClassMetaModelSamples {
                     .fields([
                         createValidFieldMetaModel("lastContact", LocalDateTime),
                         createValidFieldMetaModel("firsParentField", String),
+                        createValidFieldMetaModel("someNumber", Number),
+                    ])
+                    .extendsFromModels([
+                        ClassMetaModel.builder()
+                            .name("root-parent")
+                            .fields([
+                                createValidFieldMetaModel("rootParentField", LocalDateTime)
+                            ])
+                            .build()
+                    ])
+                    .build(),
+                createSomePersonClassMetaModel(), createQueryArgumentsMetaModel()])
+            .validators([ValidatorMetaModelSamples.CUSTOM_TEST_VALIDATOR_METAMODEL])
+            .build()
+    }
+
+    static ClassMetaModel createClassMetaModelWithParentsInvalid() {
+        ClassMetaModel.builder()
+            .name("modelWithParents")
+            .fields([
+                createValidFieldMetaModel("applicationDateTime", LocalDateTime),
+                createValidFieldMetaModel("someUnique", String),
+                createValidFieldMetaModel("someNumber", String),
+                createValidFieldMetaModel("someOtherObject", ClassMetaModel.builder()
+                    .name("some-Other-Object")
+                    .fields([
+                        createValidFieldMetaModel("someField1", String),
+                        createValidFieldMetaModel("someField2", String)
+                    ])
+                    .validators([ValidatorMetaModelSamples.SOME_OTHER_OBJECT_VALIDATOR_METAMODEL])
+                    .build()),
+            ])
+            .extendsFromModels([
+                ClassMetaModel.builder()
+                    .name("first-parent")
+                    .fields([
+                        createValidFieldMetaModel("lastContact", LocalDateTime),
+                        createValidFieldMetaModel("firsParentField", String),
+                        createValidFieldMetaModel("someNumber", Number),
                     ])
                     .extendsFromModels([
                         ClassMetaModel.builder()
@@ -216,10 +254,10 @@ class ClassMetaModelSamples {
         def classMetamodel = ClassMetaModel.builder()
             .name("person")
             .fields([
-                createValidFieldMetaModel("id", Long),
-                createValidFieldMetaModel("name", String),
+                createValidFieldMetaModel("idP", Long),
+                createValidFieldMetaModel("personName", String),
                 createValidFieldMetaModel("surname", String),
-                createValidFieldMetaModel("fullName", String),
+                createValidFieldMetaModel("personFullName", String),
                 createValidFieldMetaModel("passportData", createSimpleDocumentMetaModel()),
                 createValidFieldMetaModel("fatherData", ExtendedSamplePersonDto)
             ])

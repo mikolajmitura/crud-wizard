@@ -50,7 +50,7 @@ class SpringBeanOrOtherMapperParserTest extends BaseSourceExpressionParserTestSp
         BySpringBeanMethodAssignExpression bySpringBeanMethodAssignExpression = (BySpringBeanMethodAssignExpression) result.getParentValueExpression()
 
         then:
-        result.sourceMetaModel.basedOnClass == SomeDocumentDto
+        result.sourceMetaModel.realClass == SomeDocumentDto
         result.fieldChains == [getFieldMetaModelByName(SomeDocumentDto, "documentData")]
         result.generateCodeMetadata().returnClassModel.realClass == InnerDocumentDto
 
@@ -89,7 +89,7 @@ class SpringBeanOrOtherMapperParserTest extends BaseSourceExpressionParserTestSp
         BySpringBeanMethodAssignExpression bySpringBeanMethodAssignExpression = (BySpringBeanMethodAssignExpression) result.getParentValueExpression()
 
         then:
-        result.sourceMetaModel.basedOnClass == SomeDocumentDto
+        result.sourceMetaModel.realClass == SomeDocumentDto
         result.fieldChains == [getFieldMetaModelByName(SomeDocumentDto, "documentData")]
         result.generateCodeMetadata().returnClassModel.realClass == InnerDocumentDto
 
@@ -138,7 +138,7 @@ class SpringBeanOrOtherMapperParserTest extends BaseSourceExpressionParserTestSp
         def bySpringBeanMethodAssignExpression = (BySpringBeanMethodAssignExpression) result.getParentValueExpression()
 
         then:
-        result.sourceMetaModel.basedOnClass == SomeDocumentDto
+        result.sourceMetaModel.realClass == SomeDocumentDto
         result.fieldChains == [getFieldMetaModelByName(SomeDocumentDto, "documentData"),
                                getFieldMetaModelByName(InnerDocumentDto, "serialNumber")]
         result.generateCodeMetadata().returnClassModel.realClass == String

@@ -41,7 +41,7 @@ public class ByMapperNameAssignExpression implements ValueToAssignExpression {
                 ".getClassMetaModelByName(\"%s\")", classMetaModel.getName());
         }
         return ClassMetaModelBuildExpression.builder()
-            .realClass(classMetaModel.getRealOrBasedClass())
+            .realClass(classMetaModel.getRealClass())
             .genericTypeExpressions(elements(classMetaModel.getGenericTypes())
                 .map(this::generateFetchClassMetaModel)
                 .asList()).build()

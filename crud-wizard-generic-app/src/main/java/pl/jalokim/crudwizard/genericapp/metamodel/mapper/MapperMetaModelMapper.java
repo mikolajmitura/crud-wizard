@@ -22,6 +22,8 @@ import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeMetadataDto;
+import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
+import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
@@ -44,9 +46,9 @@ import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator;
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
-@Mapper(config = MapperAsSpringBeanConfig.class)
+@Mapper(config = MapperAsSpringBeanConfig.class, uses = {AdditionalPropertyMapper.class, MapperGenerateConfigurationMapper.class})
 @Slf4j
-public abstract class MapperMetaModelMapper extends AdditionalPropertyMapper<MapperMetaModelDto, MapperMetaModelEntity, MapperMetaModel> {
+public abstract class MapperMetaModelMapper implements BaseMapper<MapperMetaModelDto, MapperMetaModelEntity, MapperMetaModel> {
 
     @Autowired
     private InstanceLoader instanceLoader;

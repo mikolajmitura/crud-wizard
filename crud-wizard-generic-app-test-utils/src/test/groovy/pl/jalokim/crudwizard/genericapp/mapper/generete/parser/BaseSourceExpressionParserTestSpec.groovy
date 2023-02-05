@@ -1,8 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.parser
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
-import static pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.getRequiredFieldFromClassModel
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 
 import org.springframework.context.ApplicationContext
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration
@@ -49,7 +49,7 @@ class BaseSourceExpressionParserTestSpec extends UnitTestSpec {
         applicationContext.getBean(FieldChainOrEachMapByExpressionParser) >> fieldChainSourceExpressionParser
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
-        mapperGenerateConfiguration.getFieldMetaResolverForRawSource() >> READ_FIELD_RESOLVER_CONFIG
+        mapperGenerateConfiguration.getFieldMetaResolverForRawSource() >> DEFAULT_FIELD_RESOLVERS_CONFIG
     }
 
     protected <T extends ValueToAssignExpression> T parseExpression(String expression) {
@@ -63,7 +63,7 @@ class BaseSourceExpressionParserTestSpec extends UnitTestSpec {
     }
 
     protected FieldMetaModel getFieldMetaModelByName(Class<?> rawClass, String fieldName) {
-        getRequiredFieldFromClassModel(createClassMetaModelFromClass(rawClass), fieldName, READ_FIELD_RESOLVER_CONFIG)
+        getRequiredFieldFromClassModel(createClassMetaModelFromClass(rawClass), fieldName, DEFAULT_FIELD_RESOLVERS_CONFIG)
     }
 
     protected SourceExpressionParserContext createSourceExpressionParserContext(String expression, ClassMetaModel targetFieldClassMetaModel) {

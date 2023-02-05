@@ -23,6 +23,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.Da
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDtoSamples.createQueryProviderDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetListOfPerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidGetPageOfPerson
+import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators2
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostWithSimplePerson
@@ -55,8 +56,11 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointResponseMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.NestedObject
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeRealClass
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.CreatePersonFinalMapper
 import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.FinalMapperForFewDs
 import pl.jalokim.crudwizard.genericapp.rest.samples.mapper.GetByIdFromFewDsMapper
@@ -68,6 +72,7 @@ import pl.jalokim.crudwizard.genericapp.rest.samples.query.FinalQueryProviderFor
 import pl.jalokim.crudwizard.genericapp.rest.samples.query.SecondDbPersonGetOneQuery
 import pl.jalokim.crudwizard.genericapp.rest.samples.query.ThirdQueryFindByIdFromFirstQueryResult
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
+import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints
 import pl.jalokim.utils.test.DataFakerHelper
 
@@ -952,6 +957,45 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             some_numbers: [10, 12, 13], some_texts: ["text1", "text2"],
             surname     : "surName", "age": 18
         ]
+    }
+
+    def "should not pass additional validation when payload is based on real class"() {
+        given:
+        def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodelAdditionalValidators([
+                AdditionalValidatorsMetaModelDto.builder()
+                    .fullPropertyPath("someObject.objectName")
+                    .validators([
+                        ValidatorMetaModelDto.builder()
+                            .className(NotNullValidator.canonicalName)
+                            .build()
+                    ])
+                    .build()
+            ])
+            .payloadMetamodel(createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
+                .fields([
+                    createValidFieldMetaModelDto("name", String, [
+                        ValidatorMetaModelDto.builder()
+                            .className(NotNullValidator.canonicalName)
+                            .build()
+                    ])
+                ])
+                .build())
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(postEndpoint)
+        SomeRealClass instanceSomeRealClass = new SomeRealClass(12, null, new NestedObject(null))
+
+        when:
+        def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), instanceSomeRealClass)
+
+        then:
+        httpResponse.andExpect(status().isBadRequest())
+        def errorResponse = extractErrorResponseDto(httpResponse)
+        assertValidationResults(errorResponse.getErrors(), [
+            errorEntryWithErrorCode("someObject.objectName", NOT_NULL_MESSAGE_PROPERTY),
+            errorEntryWithErrorCode("name", NOT_NULL_MESSAGE_PROPERTY),
+        ])
     }
 
     private static class ExampleUser {

@@ -2,26 +2,28 @@ package pl.jalokim.crudwizard.core.metamodels
 
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelFromClass
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelWithParents
+import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createClassMetaModelWithParentsInvalid
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
+import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
-import spock.lang.Specification
+import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 
-class ClassMetaModelTest extends Specification {
+class ClassMetaModelTest extends UnitTestSpec {
 
     def "return expected field names"() {
         given:
         def allFields = [
             "bankField", "name", "surname", "birthDate", "applicationDateTime", "age", "applicationDateTimeAsNumber",
             "personData", "addresses", "hobbies", "contactData", "someNumbersByEnums", "lastContact", "lastText", "numberAsText",
-            "someUnique", "someOtherObject", "firsParentField", "rootParentField"
+            "someUnique", "someOtherObject", "firsParentField", "rootParentField", "someNumber"
         ] as Set
         ClassMetaModel classMetaModel = createClassMetaModelWithParents()
 
@@ -59,9 +61,9 @@ class ClassMetaModelTest extends Specification {
         def foundFields = classMetaModel.fetchAllFields()
 
         then:
-        foundFields.size() == 19
-        assertFieldNameAndType(foundFields, "applicationDateTime", Long)
-        assertFieldNameAndType(foundFields, "age", Period)
+        foundFields.size() == 20
+        assertFieldNameAndType(foundFields, "applicationDateTime", LocalDateTime)
+        assertFieldNameAndType(foundFields, "age", Integer)
         assertFieldNameAndType(foundFields, "someUnique", String)
         assertFieldNameAndName(foundFields, "someOtherObject", "some-Other-Object")
         assertFieldNameAndType(foundFields, "lastContact", LocalDateTime)
@@ -88,7 +90,7 @@ class ClassMetaModelTest extends Specification {
         foundFields = classMetaModel.fetchAllFields()
 
         then:
-        foundFields.size() == 19
+        foundFields.size() == 20
 
         and:
         classMetaModel.refresh()
@@ -97,7 +99,7 @@ class ClassMetaModelTest extends Specification {
         foundFields = classMetaModel.fetchAllFields()
 
         then:
-        foundFields.size() == 20
+        foundFields.size() == 21
     }
 
     def "return expected fields type by name"() {
@@ -110,8 +112,8 @@ class ClassMetaModelTest extends Specification {
         def lastContactFieldMeta = classMetaModel.getFieldByName("lastContact")
 
         then:
-        applicationDateTimeFieldMeta.fieldType.realClass == Long
-        ageFieldMeta.fieldType.realClass == Period
+        applicationDateTimeFieldMeta.fieldType.realClass == LocalDateTime
+        ageFieldMeta.fieldType.realClass == Integer
         lastContactFieldMeta.fieldType.realClass == LocalDateTime
     }
 
@@ -163,7 +165,7 @@ class ClassMetaModelTest extends Specification {
                     ])
                     .build()
             ])
-            .build()                          | createClassMetaModelFromClass(Number)                           | false
+            .build()                          | createClassMetaModelFromClass(Number)                           | true
 
         ClassMetaModel.builder()
             .name("childOfDoubleAndString")
@@ -216,6 +218,21 @@ class ClassMetaModelTest extends Specification {
                     .build()
             ])
             .build()                          | ClassMetaModel.builder().name("otherName").build()              | false
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        ClassMetaModel.builder()
+                            .name("someOtherString")
+                            .build()
+                    ])
+                    .build()
+            ])
+            .build()                          | ClassMetaModel.builder().name("someOtherString").build()        | true
     }
 
     @Unroll
@@ -251,6 +268,19 @@ class ClassMetaModelTest extends Specification {
         ClassMetaModel.builder()
             .name("someModel")
             .build()                                       | "java.util.Map<java.lang.String, java.lang.Object>"
+    }
+
+    def "invalid inheritance found"() {
+        given:
+        def metamodel = createClassMetaModelWithParentsInvalid()
+
+        when:
+        metamodel.fetchAllFields()
+
+        then:
+        TechnicalException ex = thrown()
+        ex.message == translatePlaceholder("ClassMetaModel.invalid.field.override", "someNumber",
+            Number.canonicalName, "first-parent", String.canonicalName, "modelWithParents")
     }
 
     private boolean assertFieldNameAndType(List<FieldMetaModel> foundFields, String fieldName, Class<?> expectedFieldType) {

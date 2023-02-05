@@ -22,6 +22,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagMetamodel;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelService;
@@ -129,10 +130,7 @@ public class MetaModelContextService {
                 );
 
                 classMetaModel.getFields().forEach(
-                    fieldMetaModel -> fieldMetaModel.setFieldType(
-                        getFromContext(metaModelContext::getClassMetaModels, () -> fieldMetaModel.getFieldType().getId())
-                    )
-                );
+                    fieldMetaModel -> fieldMetaModel.setFieldType(loadFromContextOrSetCurrent(metaModelContext, fieldMetaModel)));
 
                 classMetaModel.setExtendsFromModels(
                     getListFromContext(classMetaModel.getExtendsFromModels(),
@@ -141,6 +139,14 @@ public class MetaModelContextService {
                     )
                 );
             });
+    }
+
+    private ClassMetaModel loadFromContextOrSetCurrent(MetaModelContext metaModelContext, FieldMetaModel fieldMetaModel) {
+        Long idOfFieldClassMetaModel = fieldMetaModel.getFieldType().getId();
+        if (idOfFieldClassMetaModel == null) {
+            return fieldMetaModel.getFieldType();
+        }
+        return getFromContext(metaModelContext::getClassMetaModels, () -> idOfFieldClassMetaModel);
     }
 
     private void loadMapperMetaModels(MetaModelContext metaModelContext) {

@@ -16,7 +16,7 @@ import static pl.jalokim.crudwizard.genericapp.mapper.generete.method.TargetClas
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.elements.IterableTemplateForMappingResolver.findIterableTemplateForMappingFor;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.getvalue.NullAssignExpression.NULL_ASSIGN;
 import static pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.WritePropertyStrategyFactory.createWritePropertyStrategy;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.newClassMetaModelOrTheSame;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.string.StringUtils.tabsNTimes;
@@ -89,7 +89,7 @@ public class MapperMethodGenerator {
         List<MapperArgumentMethodModel> mapperMethodArguments = elements(originalMapperMethodArguments)
             .map(methodArgument -> {
                 if (methodArgument.getArgumentType().isOnlyRawClassModel() && !isElementsType(methodArgument.getArgumentType())) {
-                    return methodArgument.overrideType(createNotGenericClassMetaModel(methodArgument.getArgumentType(),
+                    return methodArgument.overrideType(newClassMetaModelOrTheSame(methodArgument.getArgumentType(),
                         mapperGenerateConfiguration.getFieldMetaResolverForRawSource()), methodArgument.getDerivedFromExpression());
                 }
                 return methodArgument;
@@ -100,7 +100,7 @@ public class MapperMethodGenerator {
         if (targetMetaModel.hasRealClass() && !targetMetaModel.isSimpleType() &&
             !targetMetaModel.isGenericModel() && !targetMetaModel.isArrayOrCollection()) {
             writePropertyStrategy = createWritePropertyStrategy(targetMetaModel);
-            targetMetaModel = createNotGenericClassMetaModel(targetMetaModel, mapperGenerateConfiguration.getFieldMetaResolverForRawTarget());
+            targetMetaModel = newClassMetaModelOrTheSame(targetMetaModel, mapperGenerateConfiguration.getFieldMetaResolverForRawTarget());
         }
 
         TargetFieldMetaData returnMethodMetaData = TargetFieldMetaData.builder()

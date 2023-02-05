@@ -1,35 +1,29 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverFactory.findFieldMetaResolver;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverFactory.findReadFieldMetaResolver;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverFactory.findWriteFieldMetaResolver;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.experimental.UtilityClass;
-import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ReadFieldResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.WriteFieldResolver;
+import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 
 @UtilityClass
-@SuppressWarnings({
-    "PMD.UseUtilityClass",
-    "PMD.CognitiveComplexity",
-    "PMD.NPathComplexity",
-    "PMD.CollapsibleIfStatements",
-    "PMD.AvoidDeeplyNestedIfStmts",
-})
 public class ClassMetaModelFactory {
 
-    private static final Map<Class<?>, Map<FieldMetaResolver, ClassMetaModel>> RESOLVED_CLASS_META_MODELS_BY_CLASS = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Map<Set<Class<?>>, ClassMetaModel>> RESOLVED_FIELD_META_MODELS_BY_CLASS = new ConcurrentHashMap<>();
 
     public static ClassMetaModel fromRawClass(Class<?> rawClass) {
         return ClassMetaModel.builder()
@@ -38,44 +32,16 @@ public class ClassMetaModelFactory {
             .build();
     }
 
-    /**
-     * It generates all ClassMetaModel instances as generic model.
-     */
-    public static ClassMetaModel generateGenericClassMetaModel(Class<?> rawClass, FieldMetaResolverConfiguration fieldMetaResolverConfig) {
-
-        TypeMetadata typeMetadataFromClass = getTypeMetadataFromType(rawClass);
-        return createClassMetaModelFor(typeMetadataFromClass, fieldMetaResolverConfig, null, null, true);
+    public static ClassMetaModel createClassMetaModel(Type type, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+        return createClassMetaModel(getTypeMetadataFromType(type), fieldMetaResolverConfiguration);
     }
 
-    /**
-     * It get given classMetaModel or create new instance of ClassMetaModel but with resolved fields based on classMetaModel.realClass
-     */
-    public static ClassMetaModel createNotGenericClassMetaModel(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration fieldMetaResolverConfig) {
-
-        if (classMetaModel.isOnlyRawClassModel()) {
-            Type type = new TypeNameWrapper(ClassMetaModelUtils.createType(classMetaModel));
-            TypeMetadata typeMetadataFromClass = getTypeMetadataFromType(type);
-            return createClassMetaModelFor(typeMetadataFromClass, fieldMetaResolverConfig, null, null, false);
-        }
-
-        return classMetaModel;
+    public static ClassMetaModel createClassMetaModel(Type type) {
+        return createClassMetaModel(type, FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG);
     }
 
-    public static ClassMetaModel createNotGenericClassMetaModel(TypeMetadata typeMetadata,
-        FieldMetaResolverConfiguration fieldMetaResolverConfig, String fieldName, TypeMetadata fieldDeclaredIn) {
-        return createClassMetaModelFor(typeMetadata, fieldMetaResolverConfig, fieldName, fieldDeclaredIn, false);
-    }
-
-    public static ClassMetaModel createClassMetaModelFor(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfig,
-        boolean createAsGenericModel) {
-
-        return createClassMetaModelFor(typeMetadata, fieldMetaResolverConfig, null, null, createAsGenericModel);
-    }
-
-    public static ClassMetaModel createClassMetaModelFor(TypeMetadata typeMetadata,
-        FieldMetaResolverConfiguration fieldMetaResolverConfig, String fieldName,
-        TypeMetadata fieldDeclaredIn, boolean createAsGenericModel) {
-
+    @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CollapsibleIfStatements"})
+    public static ClassMetaModel createClassMetaModel(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         Class<?> realRawClass = typeMetadata.getRawType();
         if (realRawClass.equals(Object.class)) {
             return ClassMetaModel.builder()
@@ -83,99 +49,70 @@ public class ClassMetaModelFactory {
                 .build();
         }
 
-        FieldMetaResolver fieldMetaResolver = null;
-        if (!typeMetadata.isSimpleType()) {
-            fieldMetaResolver = findFieldMetaResolver(realRawClass, fieldMetaResolverConfig);
-        }
+        ReadFieldResolver readFieldMetaResolver = findReadFieldMetaResolver(realRawClass, fieldMetaResolverConfiguration);
+        WriteFieldResolver writeFieldMetaResolver = findWriteFieldMetaResolver(realRawClass, fieldMetaResolverConfiguration);
+
+        Set<Class<?>> fieldMetaResolversClasses = new HashSet<>();
+        fieldMetaResolversClasses.add(readFieldMetaResolver.getClass());
+        fieldMetaResolversClasses.add(writeFieldMetaResolver.getClass());
 
         if (!typeMetadata.hasGenericTypes()) {
-            if (RESOLVED_CLASS_META_MODELS_BY_CLASS.containsKey(realRawClass)) {
-                var resolvedByFieldMetaResolver = RESOLVED_CLASS_META_MODELS_BY_CLASS.get(realRawClass);
-                if (resolvedByFieldMetaResolver.containsKey(fieldMetaResolver)) {
-                    return resolvedByFieldMetaResolver.get(fieldMetaResolver);
+            if (RESOLVED_FIELD_META_MODELS_BY_CLASS.containsKey(realRawClass)) {
+                var resolvedByFieldMetaResolver = RESOLVED_FIELD_META_MODELS_BY_CLASS.get(realRawClass);
+
+                if (resolvedByFieldMetaResolver.containsKey(fieldMetaResolversClasses)) {
+                    return resolvedByFieldMetaResolver.get(fieldMetaResolversClasses);
                 }
             }
         }
 
         ClassMetaModel classMetaModel = ClassMetaModel.builder().build();
-        if (fieldMetaResolver != null) {
-            storeInCache(realRawClass, fieldMetaResolver, classMetaModel);
+        if (CollectionUtils.isNotEmpty(fieldMetaResolversClasses)) {
+            storeInCache(realRawClass, fieldMetaResolversClasses, classMetaModel);
         }
 
-        if (typeMetadata.isSimpleType() || typeMetadata.rawClassIsComingFromJavaApi() ||
-            typeMetadata.isHavingElementsType() || typeMetadata.isEnumType()) {
-            classMetaModel.setRealClass(realRawClass);
-            classMetaModel.setClassName(realRawClass.getCanonicalName());
-        } else {
-            if (createAsGenericModel) {
-                classMetaModel.setBasedOnClass(realRawClass);
-
-                String name = StringCaseUtils.firstLetterToLowerCase(realRawClass.getSimpleName());
-                if (typeMetadata.hasGenericTypes()) {
-                    name = name + "_" + elements(typeMetadata.getGenericTypes())
-                        .map(genericType -> genericType.getRawType().getSimpleName())
-                        .concat(fieldName)
-                        .concat(Optional.ofNullable(fieldDeclaredIn)
-                            .map(TypeMetadata::getRawClass)
-                            .map(Class::getSimpleName)
-                            .orElse(null))
-                        .filter(Objects::nonNull)
-                        .asConcatText("_");
-                }
-
-                classMetaModel.setName(name);
-            } else {
-                classMetaModel.setRealClass(realRawClass);
-                classMetaModel.setClassName(realRawClass.getCanonicalName());
-            }
-        }
-
-        if (!typeMetadata.isSimpleType() && fieldMetaResolver != null) {
-            List<FieldMetaModel> fieldMetaModels = List.of();
-            if (!typeMetadata.getRawType().equals(Object.class) &&
-                !typeMetadata.rawClassIsComingFromJavaApi()) {
-                fieldMetaModels = fieldMetaResolver.findDeclaredFields(typeMetadata, fieldMetaResolverConfig);
-            }
-            classMetaModel.setFields(fieldMetaModels);
-        }
-
-        List<ClassMetaModel> extendsFromModels = new ArrayList<>();
-        if (typeMetadata.hasParent() && !typeMetadata.rawClassIsComingFromJavaApi()) {
-            ClassMetaModel classMetaModelFor = createClassMetaModelFor(typeMetadata.getParentTypeMetadata(),
-                fieldMetaResolverConfig, createAsGenericModel);
-            extendsFromModels.add(classMetaModelFor);
-        }
-
-        classMetaModel.setExtendsFromModels(extendsFromModels);
+        classMetaModel.setFieldMetaResolverConfiguration(fieldMetaResolverConfiguration);
+        classMetaModel.setRealClass(realRawClass);
+        classMetaModel.setClassName(realRawClass.getCanonicalName());
 
         if (typeMetadata.isSimpleType()) {
             classMetaModel.setGenericTypes(List.of());
         } else {
             classMetaModel.setGenericTypes(elements(typeMetadata.getGenericTypes())
-                .map(genericType -> createClassMetaModelFor(genericType, fieldMetaResolverConfig, createAsGenericModel))
+                .map(genericType -> createClassMetaModel(genericType, fieldMetaResolverConfiguration))
                 .asList());
         }
 
         return classMetaModel;
     }
 
-    private static void storeInCache(Class<?> realRawClass, FieldMetaResolver fieldMetaResolver, ClassMetaModel classMetaModel) {
-        Map<FieldMetaResolver, ClassMetaModel> resolvedByFieldMetaResolver;
+    public static ClassMetaModel newClassMetaModelOrTheSame(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration configuration) {
 
-        if (RESOLVED_CLASS_META_MODELS_BY_CLASS.containsKey(realRawClass)) {
-            resolvedByFieldMetaResolver = RESOLVED_CLASS_META_MODELS_BY_CLASS.get(realRawClass);
-        } else {
-            resolvedByFieldMetaResolver = new ConcurrentHashMap<>();
-            RESOLVED_CLASS_META_MODELS_BY_CLASS.put(realRawClass, resolvedByFieldMetaResolver);
+        if (classMetaModel.isOnlyRawClassModel() && !Objects.equals(classMetaModel.getFieldMetaResolverConfiguration(), configuration)) {
+            Type type = new TypeNameWrapper(ClassMetaModelUtils.createType(classMetaModel));
+            return createClassMetaModel(type, configuration);
         }
 
-        if (!resolvedByFieldMetaResolver.containsKey(fieldMetaResolver)) {
-            resolvedByFieldMetaResolver.put(fieldMetaResolver, classMetaModel);
+        return classMetaModel;
+    }
+
+    private static void storeInCache(Class<?> realRawClass, Set<Class<?>> fieldMetaResolversClasses, ClassMetaModel classMetaModel) {
+        Map<Set<Class<?>>, ClassMetaModel> resolvedByFieldMetaResolver;
+
+        if (RESOLVED_FIELD_META_MODELS_BY_CLASS.containsKey(realRawClass)) {
+            resolvedByFieldMetaResolver = RESOLVED_FIELD_META_MODELS_BY_CLASS.get(realRawClass);
+        } else {
+            resolvedByFieldMetaResolver = new ConcurrentHashMap<>();
+            RESOLVED_FIELD_META_MODELS_BY_CLASS.put(realRawClass, resolvedByFieldMetaResolver);
+        }
+
+        if (!resolvedByFieldMetaResolver.containsKey(fieldMetaResolversClasses)) {
+            resolvedByFieldMetaResolver.put(fieldMetaResolversClasses, classMetaModel);
         }
     }
 
     public static void clearCache() {
-        RESOLVED_CLASS_META_MODELS_BY_CLASS.clear();
+        RESOLVED_FIELD_META_MODELS_BY_CLASS.clear();
     }
 }
 

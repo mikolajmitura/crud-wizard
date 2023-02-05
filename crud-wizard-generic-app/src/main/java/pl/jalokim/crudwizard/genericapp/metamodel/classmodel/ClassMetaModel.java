@@ -3,11 +3,15 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createNotGenericClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.READ;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.WRITE;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.WRITE_READ;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.AllAccessFieldMetaModelResolver.resolveFieldsForWholeHierarchy;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelUtils.createTypeMetadata;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isTypeOf;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,16 +31,15 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.FieldMetaResolverConfiguration;
-import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.FieldMetaResolverStrategyType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ReadFieldResolver;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.WriteFieldResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
-import pl.jalokim.utils.reflection.ReflectionOperationException;
+import pl.jalokim.utils.reflection.TypeMetadata;
 import pl.jalokim.utils.string.StringUtils;
 
 @EqualsAndHashCode(callSuper = true)
@@ -43,23 +47,23 @@ import pl.jalokim.utils.string.StringUtils;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder(toBuilder = true)
 @Slf4j
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyFields"})
 public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
 
     String name;
 
+    /**
+     * not null only when current ClassMetaModel is based on real class.
+     */
+    TypeMetadata typeMetadata;
     String className;
 
     Boolean simpleRawClass;
 
     Class<?> realClass;
 
-    /**
-     * It means that this metamodel was generated upon this class.
-     */
-    Class<?> basedOnClass;
     EnumClassMetaModel enumClassMetaModel;
 
     @Builder.Default
@@ -79,6 +83,20 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     ParentMetamodelCacheContext parentMetamodelCacheContext;
 
     MetaModelState state;
+
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    FieldMetaResolverConfiguration fieldMetaResolverConfiguration = FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG;
+
+    @EqualsAndHashCode.Exclude
+    WriteFieldResolver writeFieldResolver;
+
+    @EqualsAndHashCode.Exclude
+    ReadFieldResolver readFieldResolver;
+
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    AtomicBoolean attachedFieldsOwner = new AtomicBoolean(false);
 
     /**
      * when true then does it mean that this meta model is like generic enum metamodel
@@ -115,7 +133,22 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     public List<FieldMetaModel> getFields() {
+        if (CollectionUtils.isEmpty(fields) && isRawClassAndRawClassesGenerics()) {
+            fetchAllFields();
+        }
+        tryAttachFieldsOwner();
         return fields;
+    }
+
+    private void tryAttachFieldsOwner() {
+        if (!attachedFieldsOwner.get()) {
+            attachFieldsOwner();
+            attachedFieldsOwner.set(true);
+        }
+    }
+
+    private void attachFieldsOwner() {
+        elements(fields).forEach(field -> field.setOwnerOfField(this));
     }
 
     public List<ValidatorMetaModel> getValidators() {
@@ -126,8 +159,8 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         if (validatorMetaModels == null) {
             List<ValidatorMetaModel> allValidators = new ArrayList<>(elements(validators).asList());
 
-            if (CollectionUtils.isNotEmpty(extendsFromModels)) {
-                for (ClassMetaModel extendsFromModel : extendsFromModels) {
+            if (CollectionUtils.isNotEmpty(getExtendsFromModels())) {
+                for (ClassMetaModel extendsFromModel : getExtendsFromModels()) {
                     allValidators.addAll(elements(extendsFromModel.getValidators()).asList());
                 }
             }
@@ -151,45 +184,50 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
         parentMetamodelCacheContext.setFieldsByName(new HashMap<>());
         parentMetamodelCacheContext.setFieldMetaModels(new ArrayList<>());
+        initExtendsFromModels(this);
+        resolveFieldsForWholeHierarchy(this);
         fetchFieldsFromClassMetaModel(parentMetamodelCacheContext, this);
         parentMetamodelCacheContext.setFieldsByName(unmodifiableMap(parentMetamodelCacheContext.getFieldsByName()));
         parentMetamodelCacheContext.setFieldMetaModels(unmodifiableList(parentMetamodelCacheContext.getFieldMetaModels()));
-
         return parentMetamodelCacheContext.getFieldMetaModels();
     }
 
     public void fetchFieldsFromClassMetaModel(ParentMetamodelCacheContext parentMetamodelCacheContext, ClassMetaModel classMetaModel) {
-        if (classMetaModel.isOnlyRawClassModel()) {
-
-            ClassMetaModel foundFieldByDefaultReadConfig = createNotGenericClassMetaModel(classMetaModel,
-                FieldMetaResolverConfiguration.READ_FIELD_RESOLVER_CONFIG);
-
-            addFieldsToParentCacheContext(parentMetamodelCacheContext, foundFieldByDefaultReadConfig);
-
-            ClassMetaModel foundFieldByGetters = createNotGenericClassMetaModel(classMetaModel,
-                FieldMetaResolverConfiguration.builder()
-                    .fieldMetaResolverStrategyType(FieldMetaResolverStrategyType.READ)
-                    .fieldMetaResolverForClass(Map.of(classMetaModel.getRealClass(), ByDeclaredFieldsResolver.INSTANCE))
-                    .build());
-            addFieldsToParentCacheContext(parentMetamodelCacheContext, foundFieldByGetters);
-
-            elements(foundFieldByDefaultReadConfig.getExtendsFromModels())
-                .forEach(extendsFromClassMetaModel -> fetchFieldsFromClassMetaModel(parentMetamodelCacheContext, extendsFromClassMetaModel));
-
-        } else {
-            addFieldsToParentCacheContext(parentMetamodelCacheContext, classMetaModel);
-        }
         elements(classMetaModel.getExtendsFromModels())
             .forEach(extendsFromClassMetaModel -> fetchFieldsFromClassMetaModel(parentMetamodelCacheContext, extendsFromClassMetaModel));
+        addFieldsToParentCacheContext(parentMetamodelCacheContext, classMetaModel.getFields(), classMetaModel);
     }
 
-    private void addFieldsToParentCacheContext(ParentMetamodelCacheContext parentMetamodelCacheContext, ClassMetaModel classMetaModel) {
-        elements(classMetaModel.getFields())
+    private void initExtendsFromModels(ClassMetaModel classMetaModel) {
+        elements(classMetaModel.getExtendsFromModels())
+            .forEach(this::initExtendsFromModels);
+    }
+
+    private void addFieldsToParentCacheContext(ParentMetamodelCacheContext parentMetamodelCacheContext, List<FieldMetaModel> fields,
+        ClassMetaModel forClassMetamodel) {
+
+        elements(fields)
             .forEach(field -> {
-                    var foundFieldMeta = parentMetamodelCacheContext.getFieldsByName().get(field.getFieldName());
-                    if (foundFieldMeta == null) {
-                        parentMetamodelCacheContext.getFieldsByName().put(field.getFieldName(), field);
-                        parentMetamodelCacheContext.getFieldMetaModels().add(field);
+                    Map<String, FieldMetaModel> fieldsByName = parentMetamodelCacheContext.getFieldsByName();
+                    List<FieldMetaModel> fieldMetaModels = parentMetamodelCacheContext.getFieldMetaModels();
+                    var foundFieldMetaInSuperModels = fieldsByName.get(field.getFieldName());
+                    if (foundFieldMetaInSuperModels == null) {
+                        fieldsByName.put(field.getFieldName(), field);
+                        fieldMetaModels.add(field);
+                    } else {
+                        if (field.getFieldType().isSubTypeOf(foundFieldMetaInSuperModels.getFieldType())) {
+                            updateAccessTypeForField(field, foundFieldMetaInSuperModels);
+                            fieldsByName.put(field.getFieldName(), field);
+                            int currentIndex = fieldMetaModels.indexOf(foundFieldMetaInSuperModels);
+                            fieldMetaModels.set(currentIndex, field);
+                        } else {
+                            if (!forClassMetamodel.isRawClassAndRawClassesGenerics()) {
+                                throw new TechnicalException(createMessagePlaceholder("ClassMetaModel.invalid.field.override",
+                                    field.getFieldName(), foundFieldMetaInSuperModels.getFieldType().getTypeDescription(),
+                                    foundFieldMetaInSuperModels.getOwnerOfField().getTypeDescription(),
+                                    field.getFieldType().getTypeDescription(), field.getOwnerOfField().getTypeDescription()));
+                            }
+                        }
                     }
                 }
             );
@@ -261,9 +299,6 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         if (getRealClass() != null) {
             return getClassAndGenerics(getRealClass(), genericTypes);
         }
-        if (getBasedOnClass() != null) {
-            return getClassAndGenerics(getBasedOnClass(), genericTypes);
-        }
         if (isGenericModel()) {
             return getRawJavaGenericTypeInfoForGenericModel();
         }
@@ -294,6 +329,10 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     @SuppressWarnings({"PMD.ConfusingTernary", "PMD.CognitiveComplexity"})
     public boolean isSubTypeOf(ClassMetaModel expectedParent) {
+        if (getTypeDescription().equals(expectedParent.getTypeDescription())) {
+            return true;
+        }
+
         if (hasRealClass() && expectedParent.hasRealClass()) {
             if (!hasGenericTypes() && !expectedParent.hasGenericTypes()) {
                 return isTypeOf(getRealClass(), expectedParent.getRealClass());
@@ -302,17 +341,13 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             } else if (hasGenericTypes() && !expectedParent.hasGenericTypes()) {
                 return isTypeOf(getRealClass(), expectedParent.getRealClass());
             }
+            return false;
         }
 
-        List<ClassMetaModel> allExtendsOf = getAllExtendsOf();
-        allExtendsOf.add(this);
+        List<ClassMetaModel> allExtendsOf = getExtendsFromModels();
 
         for (ClassMetaModel classMetaModel : allExtendsOf) {
-            if (expectedParent.hasRealClass() && classMetaModel.hasRealClass() &&
-                expectedParent.getRealClass().equals(classMetaModel.getRealClass())) {
-                return true;
-            } else if (expectedParent.isGenericModel() && classMetaModel.isGenericModel() &&
-                expectedParent.getName().equals(classMetaModel.getName())) {
+            if (classMetaModel.isSubTypeOf(expectedParent)) {
                 return true;
             }
         }
@@ -331,18 +366,23 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             .asConcatText(", ") + ")";
     }
 
-    private List<ClassMetaModel> getAllExtendsOf() {
-        List<ClassMetaModel> extendsFromAll = new ArrayList<>();
-        populateExtendsAll(extendsFromAll);
-        return extendsFromAll;
+    public List<ClassMetaModel> getExtendsFromModels() {
+        if (isRawClassAndRawClassesGenerics() && CollectionUtils.isEmpty(extendsFromModels)) {
+            TypeMetadata thisTypeMetadata = getTypeMetadata();
+            TypeMetadata parentTypeMetadata = thisTypeMetadata.getParentTypeMetadata();
+            if (parentTypeMetadata != null && !parentTypeMetadata.rawClassIsComingFromJavaApi()) {
+                if (extendsFromModels == null) {
+                    extendsFromModels = new CopyOnWriteArrayList<>();
+                }
+                extendsFromModels.add(createClassMetaModel(parentTypeMetadata, fieldMetaResolverConfiguration));
+            }
+        }
+        return extendsFromModels;
     }
 
-    private void populateExtendsAll(List<ClassMetaModel> extendsFromAll) {
-        List<ClassMetaModel> classMetaModels = elements(getExtendsFromModels()).asList();
-        extendsFromAll.addAll(classMetaModels);
-        for (ClassMetaModel extendsFrom : classMetaModels) {
-            extendsFrom.populateExtendsAll(extendsFromAll);
-        }
+    private boolean isRawClassAndRawClassesGenerics() {
+        return isOnlyRawClassModel() && (!hasGenericTypes() ||
+            elements(getGenericTypes()).allMatch(ClassMetaModel::isOnlyRawClassModel));
     }
 
     @SuppressWarnings("PMD.CollapsibleIfStatements")
@@ -365,30 +405,13 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return Objects.equals(name, otherClassMetaModel.getName());
     }
 
-    public Class<?> getRealClassOrBasedOn() {
-        return realClass == null ? basedOnClass : realClass;
-    }
-
     public boolean hasGenericTypes() {
         return !genericTypes.isEmpty();
     }
 
     public FieldMetaModel getIdFieldMetaModel() {
-        if (isGenericModel()) {
-            return findIdField()
-                .orElseThrow(() -> new TechnicalException(createMessagePlaceholder("ClassMetaModel.id.field.not.found", getName())));
-        } else if (isOnlyRawClassModel()) {
-            try {
-                Field id = MetadataReflectionUtils.getField(realClass, "id");
-                return FieldMetaModel.builder()
-                    .fieldName("id")
-                    .fieldType(ClassMetaModelFactory.fromRawClass(id.getType()))
-                    .build();
-            } catch (ReflectionOperationException ex) {
-                log.warn("real class: " + realClass.getCanonicalName() + " does not have id field", ex);
-            }
-        }
-        throw new TechnicalException(createMessagePlaceholder("ClassMetaModel.id.field.not.found", getTypeDescription()));
+        return findIdField()
+            .orElseThrow(() -> new TechnicalException(createMessagePlaceholder("ClassMetaModel.id.field.not.found", getTypeDescription())));
     }
 
     public boolean hasIdField() {
@@ -396,21 +419,25 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     private Optional<FieldMetaModel> findIdField() {
-        return elements(fetchAllFields())
-            .filter(field -> field.getAdditionalProperties().stream()
-                .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
-            .findFirst()
-            .or(() -> {
-                try {
-                    Field id = MetadataReflectionUtils.getField(realClass, "id");
-                    return Optional.of(FieldMetaModel.builder()
-                        .fieldName("id")
-                        .fieldType(ClassMetaModelFactory.fromRawClass(id.getType()))
-                        .build());
-                } catch (ReflectionOperationException ex) {
-                    return Optional.empty();
-                }
-            });
+        Optional<FieldMetaModel> foundField = Optional.empty();
+        if (isGenericModel()) {
+            foundField = elements(fetchAllFields())
+                .filter(field -> field.getAdditionalProperties().stream()
+                    .anyMatch(property -> FieldMetaModel.IS_ID_FIELD.equals(property.getName())))
+                .findFirst()
+                .or(this::findIdWhenIsBasedOnRealClass);
+        } else if (isOnlyRawClassModel()) {
+            foundField = Optional.ofNullable(getFieldByName("id"));
+        }
+        return foundField;
+    }
+
+    private Optional<FieldMetaModel> findIdWhenIsBasedOnRealClass() {
+        FieldMetaModel id = getFieldByName("id");
+        if (id != null && id.getFieldType() != null && id.getFieldType().isOnlyRawClassModel()) {
+            return Optional.of(id);
+        }
+        return Optional.empty();
     }
 
     public static boolean hasTheSameElementsWithTheSameOrder(List<ClassMetaModel> first, List<ClassMetaModel> second) {
@@ -425,8 +452,83 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return matchAll.get();
     }
 
-    public Class<?> getRealOrBasedClass() {
-        Class<?> realClass = getRealClass();
-        return realClass == null ? getBasedOnClass() : realClass;
+    public TypeMetadata getTypeMetadata() {
+        if (typeMetadata == null && hasRealClass()) {
+            typeMetadata = createTypeMetadata(this);
+        }
+        return typeMetadata;
+    }
+
+    public void mergeFields(List<FieldMetaModel> fieldsToMerge) {
+        if (CollectionUtils.isEmpty(fields)) {
+            fields = new ArrayList<>(fieldsToMerge);
+        } else {
+            Map<String, FieldMetaModel> fieldsFromThisModel = elements(fields)
+                .asMap(FieldMetaModel::getFieldName);
+
+            for (FieldMetaModel fieldForMerge : fieldsToMerge) {
+                FieldMetaModel fieldFromThisModel = fieldsFromThisModel.get(fieldForMerge.getFieldName());
+                if (fieldFromThisModel == null) {
+                    fields.add(fieldForMerge);
+                } else {
+                    fields.remove(fieldFromThisModel);
+                    updateAccessTypeForField(fieldForMerge, fieldFromThisModel);
+                    mergeFields(fieldForMerge, fieldFromThisModel);
+                    fields.add(fieldForMerge);
+                }
+            }
+        }
+        attachFieldsOwner();
+    }
+
+    private void mergeFields(FieldMetaModel fieldForMerge, FieldMetaModel fieldFromThisModel) {
+        fieldForMerge.setAdditionalProperties(mergeListsSkipDuplicates(
+            fieldForMerge.getAdditionalProperties(), fieldFromThisModel.getAdditionalProperties()));
+
+        fieldForMerge.setValidators(mergeListsSkipDuplicates(
+            fieldForMerge.getValidators(), fieldFromThisModel.getValidators()));
+        // TODO #4 merge translation
+    }
+
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
+    private <T> List<T> mergeListsSkipDuplicates(List<T> target, List<T> source) {
+        if (target == null) {
+            target = new ArrayList<>();
+        }
+
+        if (target.isEmpty()) {
+            target.addAll(source);
+        } else {
+            if (source != null) {
+                for (T sourceObject : source) {
+                    if (!target.contains(sourceObject)) {
+                        target.add(sourceObject);
+                    }
+                }
+            }
+        }
+
+        return target;
+    }
+
+    private void updateAccessTypeForField(FieldMetaModel fieldForUpdate, FieldMetaModel basedOnField) {
+        Set<AccessFieldType> currentAccessTypes = elements(fieldForUpdate.getAccessFieldType(),
+            basedOnField.getAccessFieldType()).asImmutableSet();
+
+        if (currentAccessTypes.equals(Set.of(READ, WRITE)) || basedOnField.getAccessFieldType() == WRITE_READ) {
+            fieldForUpdate.setAccessFieldType(WRITE_READ);
+        }
+    }
+
+    public List<FieldMetaModel> fetchAllWriteFields() {
+        return elements(fetchAllFields())
+            .filter(FieldMetaModel::isWriteField)
+            .asList();
+    }
+
+    public List<FieldMetaModel> fetchAllReadFields() {
+        return elements(fetchAllFields())
+            .filter(FieldMetaModel::isReadField)
+            .asList();
     }
 }
