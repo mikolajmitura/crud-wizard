@@ -2,8 +2,11 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolve
 
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.methodReturnsNonVoidAndHasArgumentsSize;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.findJsonPropertyInField;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.resolveJsonProperties;
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.lang.reflect.Method;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +56,10 @@ public class ByGettersFieldsResolver implements ReadFieldResolver {
                     .fieldName(fieldName)
                     .accessFieldType(AccessFieldType.READ)
                     .fieldType(createClassMetaModel(methodMetadata.getReturnType(), fieldMetaResolverConfiguration))
+                    .additionalProperties(resolveJsonProperties(AccessFieldType.READ, elements(
+                        methodMetadata.getMethod().getDeclaredAnnotation(JsonProperty.class),
+                        findJsonPropertyInField(typeMetadata.getRawType(), fieldName)
+                    )))
                     .build();
             })
             .asList();

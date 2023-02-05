@@ -58,6 +58,7 @@ public class FieldMetaModel extends WithAdditionalPropertiesMetaModel {
             .map(ClassMetaModel::getTypeDescription)
             .orElse(null) +
             ", validators=" + validators +
+            ", additionalProperties=" + getAdditionalProperties() +
             '}';
     }
 }

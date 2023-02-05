@@ -17,7 +17,7 @@ import pl.jalokim.utils.collection.Elements;
 public class WithAdditionalPropertiesMetaModel extends ObjectWithVersion {
 
     @Builder.Default
-    private final List<AdditionalPropertyMetaModel> additionalProperties = new CopyOnWriteArrayList<>();
+    private List<AdditionalPropertyMetaModel> additionalProperties = new CopyOnWriteArrayList<>();
 
     @SuppressWarnings("unchecked")
     public <T> T getPropertyRealValue(String propertyName) {

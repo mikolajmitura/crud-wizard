@@ -1,8 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver;
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.resolveJsonProperties;
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.lang.reflect.Field;
 import java.util.List;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
@@ -48,6 +50,7 @@ public class ByDeclaredFieldsResolver implements WriteFieldResolver, ReadFieldRe
             .fieldName(field.getName())
             .accessFieldType(accessFieldType)
             .fieldType(createClassMetaModel(typeMetadata.getMetaForField(field), fieldMetaResolverConfiguration))
+            .additionalProperties(resolveJsonProperties(accessFieldType, elements(field.getDeclaredAnnotation(JsonProperty.class))))
             .build();
     }
 }

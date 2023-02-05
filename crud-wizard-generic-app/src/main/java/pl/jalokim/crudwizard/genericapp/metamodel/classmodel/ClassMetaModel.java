@@ -482,11 +482,32 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     }
 
     private void mergeFields(FieldMetaModel fieldForMerge, FieldMetaModel fieldFromThisModel) {
-        fieldForMerge.getAdditionalProperties().clear();
-        fieldForMerge.getAdditionalProperties().addAll(elements(fieldFromThisModel.getAdditionalProperties()).asList());
-        fieldForMerge.getValidators().clear();
-        fieldForMerge.getValidators().addAll(elements(fieldFromThisModel.getValidators()).asList());
+        fieldForMerge.setAdditionalProperties(mergeListsSkipDuplicates(
+            fieldForMerge.getAdditionalProperties(), fieldFromThisModel.getAdditionalProperties()));
+
+        fieldForMerge.setValidators(mergeListsSkipDuplicates(
+            fieldForMerge.getValidators(), fieldFromThisModel.getValidators()));
         // TODO #4 merge translation
+    }
+
+    private <T> List<T> mergeListsSkipDuplicates(List<T> target, List<T> source) {
+        if (target == null) {
+            target = new ArrayList<>();
+        }
+
+        if (target.isEmpty()) {
+            target.addAll(source);
+        } else {
+            if (source != null) {
+                for (T sourceObject : source) {
+                    if (!target.contains(sourceObject)) {
+                        target.add(sourceObject);
+                    }
+                }
+            }
+        }
+
+        return target;
     }
 
     private void updateAccessTypeForField(FieldMetaModel fieldForUpdate, FieldMetaModel basedOnField) {

@@ -3,11 +3,14 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolve
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.methodReturnsNonVoidAndHasArgumentsSize;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.findJsonPropertyInField;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.resolveJsonProperties;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getAllDeclaredNotStaticMethods;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromClass;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -70,6 +73,10 @@ public class ByBuilderFieldsResolver implements WriteFieldResolver {
                     return (FieldMetaModel) FieldMetaModel.builder()
                         .fieldName(fieldName)
                         .accessFieldType(AccessFieldType.WRITE)
+                        .additionalProperties(resolveJsonProperties(AccessFieldType.WRITE, elements(
+                            methodMetadata.getMethod().getDeclaredAnnotation(JsonProperty.class),
+                            findJsonPropertyInField(typeMetadata.getRawType(), fieldName)
+                        )))
                         .fieldType(createClassMetaModel(methodMetadata.getParameters()
                                 .get(0).getTypeOfParameter(),
                             fieldMetaResolverConfiguration))

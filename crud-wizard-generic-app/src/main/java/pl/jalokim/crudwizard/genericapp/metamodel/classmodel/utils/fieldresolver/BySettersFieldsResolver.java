@@ -2,8 +2,11 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolve
 
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.methodReturnsVoidAndHasArgumentsSize;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.findJsonPropertyInField;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.resolveJsonProperties;
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
@@ -45,6 +48,10 @@ public class BySettersFieldsResolver implements WriteFieldResolver {
                 return (FieldMetaModel) FieldMetaModel.builder()
                     .fieldName(fieldName)
                     .accessFieldType(AccessFieldType.WRITE)
+                    .additionalProperties(resolveJsonProperties(AccessFieldType.WRITE, elements(
+                        methodMetadata.getMethod().getDeclaredAnnotation(JsonProperty.class),
+                        findJsonPropertyInField(typeMetadata.getRawType(), fieldName)
+                    )))
                     .fieldType(createClassMetaModel(parameterMetadata.getTypeOfParameter(), fieldMetaResolverConfiguration))
                     .build();
             })

@@ -2,8 +2,10 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolve
 
 import static pl.jalokim.crudwizard.core.utils.ReflectionUtils.findOneConstructorMaxArgNumbers;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.JsonPropertiesResolver.resolveJsonProperties;
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
@@ -29,6 +31,9 @@ public class ByAllArgsFieldsResolver implements WriteFieldResolver {
                         .fieldName(fieldName)
                         .accessFieldType(AccessFieldType.WRITE)
                         .fieldType(createClassMetaModel(parameter.getTypeOfParameter(), fieldMetaResolverConfiguration))
+                        .additionalProperties(resolveJsonProperties(AccessFieldType.WRITE, elements(
+                            parameter.getParameter().getDeclaredAnnotation(JsonProperty.class)
+                        )))
                         .build();
                 })
                 .asList();

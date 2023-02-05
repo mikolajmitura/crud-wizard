@@ -1,23 +1,31 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.READ
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.WRITE
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.WRITE_READ
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG
 
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.core.sample.SomeMiddleGenericDto
 import pl.jalokim.crudwizard.core.sample.SuperGenericDto
+import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.testsample.BeanWithJsonProperties
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.testsample.ConcreteDto1
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.testsample.ThirdLevelClass
+import spock.lang.Unroll
 
 class ClassMetaModelFactoryTest extends FieldsResolverSpecification {
 
     def "return expected ClassMetaModel from SomeDto"() {
         when:
-        def classMetaModel = createClassMetaModel(SomeDto, DEFAULT_FIELD_RESOLVERS_CONFIG
-        .putWriteFieldResolver(SomeDto, ByDeclaredFieldsResolver.INSTANCE)
-        // those below should be skipped during resolving all fields SomeDto
-//        .putWriteFieldResolver(SomeMiddleGenericDto, BySettersFieldsResolver.INSTANCE)
-//        .putWriteFieldResolver(SuperGenericDto, BySettersFieldsResolver.INSTANCE)
+        def classMetaModel = createClassMetaModel(SomeDto, FieldMetaResolverConfiguration.builder().build()
+            .putWriteFieldResolver(SomeDto, ByDeclaredFieldsResolver.INSTANCE)
+            .putWriteFieldResolver(SomeMiddleGenericDto, BySettersFieldsResolver.INSTANCE)
+            .putWriteFieldResolver(SuperGenericDto, BySettersFieldsResolver.INSTANCE)
         )
 
         then:
@@ -335,5 +343,85 @@ class ClassMetaModelFactoryTest extends FieldsResolverSpecification {
             isReadField()
             isWriteField()
         }
+    }
+
+    @Unroll
+    def "should return expected additional properties on fields for json name field"() {
+        given:
+        def concreteDto1MetaModel = createClassMetaModel(BeanWithJsonProperties, FieldMetaResolverConfiguration.builder().build()
+            .putWriteFieldResolver(BeanWithJsonProperties, writeFieldResolver)
+            .putReadFieldResolver(BeanWithJsonProperties, readFieldResolver)
+        )
+
+        when:
+        def fields = concreteDto1MetaModel.fetchAllFields()
+
+        then:
+        fields.size() == expectedFields.size()
+        expectedFields.each {expectedField ->
+            def foundField = concreteDto1MetaModel.getFieldByName(expectedField.fieldName)
+            verifyAll(foundField) {
+                fieldName == expectedField.fieldName
+                accessFieldType == expectedField.accessFieldType
+                fieldType.realClass == expectedField.fieldType.realClass
+                additionalProperties as Set == expectedField.additionalProperties as Set
+            }
+        }
+
+        where:
+        writeFieldResolver                | readFieldResolver                 | expectedFields
+        ByDeclaredFieldsResolver.INSTANCE | ByGettersFieldsResolver.INSTANCE  | [
+            createField("field1", WRITE_READ, String, [jsonFieldName(READ, "Field_1"), jsonFieldName(WRITE, "Field_1")]),
+            createField("fieldNumber3", WRITE_READ, String, [jsonFieldName(READ, '$fieldNumber3_g')]),
+            createField("fieldNumber2", WRITE_READ, String),
+            createField("id", READ, Long, [jsonFieldName(READ, '$root_id')]),
+        ]
+
+        ByAllArgsFieldsResolver.INSTANCE  | ByGettersFieldsResolver.INSTANCE  | [
+            createField("field1", WRITE_READ, String, [jsonFieldName(READ, "Field_1")]),
+            createField("fieldNumber3", WRITE_READ, String, [jsonFieldName(READ, '$fieldNumber3_g')]),
+            createField("fieldNumber2", WRITE_READ, String, [jsonFieldName(WRITE, '$fieldNumber2')]),
+            createField("id", READ, Long, [jsonFieldName(READ, '$root_id')]),
+        ]
+
+        ByBuilderFieldsResolver.INSTANCE  | ByGettersFieldsResolver.INSTANCE  | [
+            createField("field1", WRITE_READ, String, [jsonFieldName(WRITE, "Field_1"), jsonFieldName(READ, "Field_1")]),
+            createField("fieldNumber3", WRITE_READ, String, [jsonFieldName(READ, '$fieldNumber3_g')]),
+            createField("fieldNumber2", WRITE_READ, String, []),
+            createField("id", READ, Long, [jsonFieldName(READ, '$root_id')]),
+        ]
+
+        BySettersFieldsResolver.INSTANCE  | ByDeclaredFieldsResolver.INSTANCE | [
+            createField("field1", WRITE_READ, String, [jsonFieldName(WRITE, "Field_1"), jsonFieldName(READ, "Field_1")]),
+            createField("fieldNumber3", WRITE_READ, String, [jsonFieldName(WRITE, '$fieldNumber3_s')]),
+            createField("fieldNumber2", WRITE_READ, String, []),
+            createField("otherField", WRITE, String, [jsonFieldName(WRITE, '$Other_field')]),
+        ]
+
+        ByDeclaredFieldsResolver.INSTANCE | ByDeclaredFieldsResolver.INSTANCE | [
+            createField("field1", WRITE_READ, String, [jsonFieldName(WRITE, "Field_1"), jsonFieldName(READ, "Field_1")]),
+            createField("fieldNumber3", WRITE_READ, String, []),
+            createField("fieldNumber2", WRITE_READ, String, []),
+        ]
+    }
+
+    private static FieldMetaModel createField(String name, AccessFieldType accessFieldType, Class<?> fieldType,
+        List<AdditionalPropertyMetaModel> additionalProperties = []) {
+
+        FieldMetaModel.builder()
+            .fieldName(name)
+            .accessFieldType(accessFieldType)
+            .fieldType(ClassMetaModel.builder()
+                .realClass(fieldType)
+                .build())
+            .additionalProperties(additionalProperties)
+            .build()
+    }
+
+    private static AdditionalPropertyMetaModel jsonFieldName(AccessFieldType accessFieldType, String jsonFieldName) {
+        AdditionalPropertyMetaModel.builder()
+            .name("@Json_Field_Name__${accessFieldType}")
+            .valueRealClassName(jsonFieldName)
+            .build()
     }
 }
