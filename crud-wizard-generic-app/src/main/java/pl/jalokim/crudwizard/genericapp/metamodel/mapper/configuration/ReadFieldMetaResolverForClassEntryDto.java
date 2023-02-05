@@ -12,6 +12,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 public class ReadFieldMetaResolverForClassEntryDto extends FieldMetaResolverForClassEntryDto {
 
     @ClassExists(expectedOfType = ReadFieldResolver.class)
+    @Override
     public String getResolverClassName() {
         return resolverClassName;
     }

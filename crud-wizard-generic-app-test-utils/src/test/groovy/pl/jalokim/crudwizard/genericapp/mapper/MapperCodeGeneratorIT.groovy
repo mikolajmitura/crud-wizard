@@ -237,7 +237,6 @@ class MapperCodeGeneratorIT extends GenericAppWithReloadMetaContextSpecification
         def mapperCodeMetadata = mapperGenerator.generateMapperCodeMetadata(newMapperGenerateConfiguration, sessionTimestamp)
         def result = mapperGenerator.generateMapperCode(mapperCodeMetadata)
 
-
         then:
         makeLineEndingAsUnix(result) == makeLineEndingAsUnix(TemplateAsText.fromClassPath("expectedCode/" + expectedFileName).currentTemplateText)
 

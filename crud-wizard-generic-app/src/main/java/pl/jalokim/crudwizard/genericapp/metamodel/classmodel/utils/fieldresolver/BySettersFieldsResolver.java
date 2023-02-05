@@ -23,7 +23,7 @@ public class BySettersFieldsResolver implements WriteFieldResolver {
     @Override
     public void resolveWriteFields(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         classMetaModel.getExtendsFromModels()
-            .forEach(extendsFromModel-> resolveWriteFields(extendsFromModel, fieldMetaResolverConfiguration));
+            .forEach(extendsFromModel -> resolveWriteFields(extendsFromModel, fieldMetaResolverConfiguration));
         classMetaModel.mergeFields(findFields(classMetaModel.getTypeMetadata(), fieldMetaResolverConfiguration));
     }
 

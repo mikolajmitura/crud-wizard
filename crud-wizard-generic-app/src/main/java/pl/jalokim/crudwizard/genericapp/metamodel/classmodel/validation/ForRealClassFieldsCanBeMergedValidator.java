@@ -27,8 +27,9 @@ public class ForRealClassFieldsCanBeMergedValidator implements BaseConstraintVal
             AtomicBoolean validationPassed = new AtomicBoolean(true);
             Elements.elements(classMetaModelDto.getFields())
                 .forEachWithIndex((index, field) -> {
-                    if (isNotBlank(field.getFieldName()))
+                    if (isNotBlank(field.getFieldName())) {
                         givenFieldIsValid(context, classMetaModel, index, field, validationPassed);
+                    }
                 });
             return validationPassed.get();
         }

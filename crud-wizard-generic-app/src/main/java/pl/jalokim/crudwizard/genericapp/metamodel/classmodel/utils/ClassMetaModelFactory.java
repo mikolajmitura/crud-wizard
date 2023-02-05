@@ -40,6 +40,7 @@ public class ClassMetaModelFactory {
         return createClassMetaModel(type, FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG);
     }
 
+    @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CollapsibleIfStatements"})
     public static ClassMetaModel createClassMetaModel(TypeMetadata typeMetadata, FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
         Class<?> realRawClass = typeMetadata.getRawType();
         if (realRawClass.equals(Object.class)) {

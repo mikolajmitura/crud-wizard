@@ -55,16 +55,16 @@ public abstract class MapperGenerateConfigurationMapper {
     protected List<FieldMetaResolverForClassEntryEntity> mergeConfigs(FieldMetaResolverConfigurationDto fieldMetaResolverConfigurationDto) {
         List<FieldMetaResolverForClassEntryEntity> entries = new ArrayList<>();
         elements(fieldMetaResolverConfigurationDto.getReadFieldMetaResolverForClass())
-            .map(entry -> mapToEntity(entry, READ))
+            .map(entry -> mapToResolverEntity(entry, READ))
             .asList();
         elements(fieldMetaResolverConfigurationDto.getWriteFieldMetaResolverForClass())
-            .map(entry -> mapToEntity(entry, WRITE))
+            .map(entry -> mapToResolverEntity(entry, WRITE))
             .asList();
         return entries;
     }
 
     @Mapping(target = "id", ignore = true)
-    protected abstract FieldMetaResolverForClassEntryEntity mapToEntity(FieldMetaResolverForClassEntryDto configurationDto,
+    protected abstract FieldMetaResolverForClassEntryEntity mapToResolverEntity(FieldMetaResolverForClassEntryDto configurationDto,
         FieldMetaResolverStrategyType fieldMetaResolverStrategyType);
 
     /**
@@ -111,7 +111,6 @@ public abstract class MapperGenerateConfigurationMapper {
     @Mapping(target = "requestParamsClassModel", source = "requestParamsClassModel")
     protected abstract MapperGenerateConfiguration innerMapper(MapperGenerateConfigurationDto mapperGenerateConfigurationDto,
         ClassMetaModel pathVariablesClassModel, ClassMetaModel requestParamsClassModel, MetaModelContext metaModelContext);
-
 
     @Mapping(target = "readFieldMetaResolverForClass", source = "fieldMetaResolverConfiguration")
     @Mapping(target = "writeFieldMetaResolverForClass", source = "fieldMetaResolverConfiguration")
@@ -168,14 +167,14 @@ public abstract class MapperGenerateConfigurationMapper {
             .filter(entry -> entry.getFieldMetaResolverStrategyType().equals(WRITE))
             .map(this::mapWriteFieldMetaResolverForClassEntryDto)
             .asList();
-    };
+    }
 
     protected List<ReadFieldMetaResolverForClassEntryDto> mapReadFieldMetaResolverForClass(FieldMetaResolverConfigurationEntity entity) {
         return elements(entity.getFieldMetaResolverForClass())
             .filter(entry -> entry.getFieldMetaResolverStrategyType().equals(READ))
             .map(this::mapReadFieldMetaResolverForClassEntryDto)
             .asList();
-    };
+    }
 
     protected abstract WriteFieldMetaResolverForClassEntryDto mapWriteFieldMetaResolverForClassEntryDto(FieldMetaResolverForClassEntryEntity entity);
 

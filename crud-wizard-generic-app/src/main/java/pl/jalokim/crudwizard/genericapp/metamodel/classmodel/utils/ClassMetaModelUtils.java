@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.newClassMetaModelOrTheSame;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG;
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromClass;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -15,7 +16,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 import pl.jalokim.crudwizard.genericapp.metamodel.method.JavaTypeMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.JsonObjectMapper;
 import pl.jalokim.utils.collection.CollectionUtils;
-import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
 import ru.vyarus.java.generics.resolver.context.container.ParameterizedTypeImpl;
 
@@ -39,9 +39,9 @@ public class ClassMetaModelUtils {
     public static ClassMetaModel classMetaModelFromType(JavaTypeMetaModel javaTypeMetaModel) {
         TypeMetadata typeMetadata;
         if (javaTypeMetaModel.getOriginalType() == null) {
-            typeMetadata = MetadataReflectionUtils.getTypeMetadataFromClass(javaTypeMetaModel.getRawClass());
+            typeMetadata = getTypeMetadataFromClass(javaTypeMetaModel.getRawClass());
         } else {
-            typeMetadata = MetadataReflectionUtils.getTypeMetadataFromType(javaTypeMetaModel.getOriginalType());
+            typeMetadata = getTypeMetadataFromType(javaTypeMetaModel.getOriginalType());
         }
         return ClassMetaModelFactory.createClassMetaModel(typeMetadata, DEFAULT_FIELD_RESOLVERS_CONFIG);
     }

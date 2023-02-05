@@ -47,7 +47,7 @@ import pl.jalokim.utils.string.StringUtils;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SuperBuilder(toBuilder = true)
 @Slf4j
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyFields"})
 public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     Long id;
@@ -490,6 +490,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         // TODO #4 merge translation
     }
 
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private <T> List<T> mergeListsSkipDuplicates(List<T> target, List<T> source) {
         if (target == null) {
             target = new ArrayList<>();
