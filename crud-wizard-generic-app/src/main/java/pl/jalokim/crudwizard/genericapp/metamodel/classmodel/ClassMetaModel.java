@@ -327,9 +327,12 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         return Map.class.getCanonicalName() + "<" + String.class.getCanonicalName() + ", " + Object.class.getCanonicalName() + ">";
     }
 
-    // TODO #62 check that some generic mapper can have as parent a real class and then isSubTypeOf should return true
     @SuppressWarnings({"PMD.ConfusingTernary", "PMD.CognitiveComplexity"})
     public boolean isSubTypeOf(ClassMetaModel expectedParent) {
+        if (getTypeDescription().equals(expectedParent.getTypeDescription())) {
+            return true;
+        }
+
         if (hasRealClass() && expectedParent.hasRealClass()) {
             if (!hasGenericTypes() && !expectedParent.hasGenericTypes()) {
                 return isTypeOf(getRealClass(), expectedParent.getRealClass());
@@ -338,17 +341,13 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             } else if (hasGenericTypes() && !expectedParent.hasGenericTypes()) {
                 return isTypeOf(getRealClass(), expectedParent.getRealClass());
             }
+            return false;
         }
 
-        List<ClassMetaModel> allExtendsOf = getAllExtendsOf();
-        allExtendsOf.add(this);
+        List<ClassMetaModel> allExtendsOf = getExtendsFromModels();
 
         for (ClassMetaModel classMetaModel : allExtendsOf) {
-            if (expectedParent.hasRealClass() && classMetaModel.hasRealClass() &&
-                expectedParent.getRealClass().equals(classMetaModel.getRealClass())) {
-                return true;
-            } else if (expectedParent.isGenericModel() && classMetaModel.isGenericModel() &&
-                expectedParent.getName().equals(classMetaModel.getName())) {
+            if (classMetaModel.isSubTypeOf(expectedParent)) {
                 return true;
             }
         }
@@ -384,20 +383,6 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     private boolean isRawClassAndRawClassesGenerics() {
         return isOnlyRawClassModel() && (!hasGenericTypes() ||
             elements(getGenericTypes()).allMatch(ClassMetaModel::isOnlyRawClassModel));
-    }
-
-    private List<ClassMetaModel> getAllExtendsOf() {
-        List<ClassMetaModel> extendsFromAll = new ArrayList<>();
-        populateExtendsAll(extendsFromAll);
-        return extendsFromAll;
-    }
-
-    private void populateExtendsAll(List<ClassMetaModel> extendsFromAll) {
-        List<ClassMetaModel> classMetaModels = elements(getExtendsFromModels()).asList();
-        extendsFromAll.addAll(classMetaModels);
-        for (ClassMetaModel extendsFrom : classMetaModels) {
-            extendsFrom.populateExtendsAll(extendsFromAll);
-        }
     }
 
     @SuppressWarnings("PMD.CollapsibleIfStatements")
@@ -499,6 +484,8 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     private void mergeFields(FieldMetaModel fieldForMerge, FieldMetaModel fieldFromThisModel) {
         fieldForMerge.getAdditionalProperties().clear();
         fieldForMerge.getAdditionalProperties().addAll(elements(fieldFromThisModel.getAdditionalProperties()).asList());
+        fieldForMerge.getValidators().clear();
+        fieldForMerge.getValidators().addAll(elements(fieldFromThisModel.getValidators()).asList());
         // TODO #4 merge translation
     }
 

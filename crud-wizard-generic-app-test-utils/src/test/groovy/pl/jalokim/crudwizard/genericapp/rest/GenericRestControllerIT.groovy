@@ -972,11 +972,19 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                     ])
                     .build()
             ])
-            .payloadMetamodel(createClassMetaModelDtoFromClass(SomeRealClass))
+            .payloadMetamodel(createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
+                .fields([
+                    createValidFieldMetaModelDto("name", String, [
+                        ValidatorMetaModelDto.builder()
+                            .className(NotNullValidator.canonicalName)
+                            .build()
+                    ])
+                ])
+                .build())
             .build()
 
         endpointMetaModelService.createNewEndpoint(postEndpoint)
-        SomeRealClass instanceSomeRealClass = new SomeRealClass(12, "some-name", new NestedObject(null))
+        SomeRealClass instanceSomeRealClass = new SomeRealClass(12, null, new NestedObject(null))
 
         when:
         def httpResponse = rawOperationsOnEndpoints.performWithJsonContent(MockMvcRequestBuilders.post("/users"), instanceSomeRealClass)
@@ -985,7 +993,8 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         httpResponse.andExpect(status().isBadRequest())
         def errorResponse = extractErrorResponseDto(httpResponse)
         assertValidationResults(errorResponse.getErrors(), [
-            errorEntry("someObject.objectName", notNullMessage())
+            errorEntryWithErrorCode("someObject.objectName", NOT_NULL_MESSAGE_PROPERTY),
+            errorEntryWithErrorCode("name", NOT_NULL_MESSAGE_PROPERTY),
         ])
     }
 

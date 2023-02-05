@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelWithOtherConfig;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.newClassMetaModelOrTheSame;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.FieldMetaResolverConfiguration.DEFAULT_FIELD_RESOLVERS_CONFIG;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getTypeMetadataFromType;
@@ -25,14 +25,14 @@ public class ClassMetaModelUtils {
     public static FieldMetaModel getRequiredFieldFromClassModel(ClassMetaModel genericClassMetaModel,
         String fieldName, FieldMetaResolverConfiguration fieldMetaResolverConfig) {
 
-        return createClassMetaModelWithOtherConfig(genericClassMetaModel, fieldMetaResolverConfig)
+        return newClassMetaModelOrTheSame(genericClassMetaModel, fieldMetaResolverConfig)
             .getRequiredFieldByName(fieldName);
     }
 
     public static FieldMetaModel getFieldFromClassModel(ClassMetaModel genericClassMetaModel,
         String fieldName, FieldMetaResolverConfiguration fieldMetaResolverConfig) {
 
-        return createClassMetaModelWithOtherConfig(genericClassMetaModel, fieldMetaResolverConfig)
+        return newClassMetaModelOrTheSame(genericClassMetaModel, fieldMetaResolverConfig)
             .getFieldByName(fieldName);
     }
 

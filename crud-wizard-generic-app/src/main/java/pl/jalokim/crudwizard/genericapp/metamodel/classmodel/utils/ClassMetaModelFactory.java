@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.experimental.UtilityClass;
@@ -84,13 +85,11 @@ public class ClassMetaModelFactory {
         return classMetaModel;
     }
 
-    // TODO #62 this method should be removed? Or used only in mapper generation, maybe should be just set configuration in ClassMetaModel enough
-    public static ClassMetaModel createClassMetaModelWithOtherConfig(ClassMetaModel classMetaModel,
-        FieldMetaResolverConfiguration fieldMetaResolverConfiguration) {
+    public static ClassMetaModel newClassMetaModelOrTheSame(ClassMetaModel classMetaModel, FieldMetaResolverConfiguration configuration) {
 
-        if (classMetaModel.isOnlyRawClassModel()) {
+        if (classMetaModel.isOnlyRawClassModel() && !Objects.equals(classMetaModel.getFieldMetaResolverConfiguration(), configuration)) {
             Type type = new TypeNameWrapper(ClassMetaModelUtils.createType(classMetaModel));
-            return createClassMetaModel(type, fieldMetaResolverConfiguration);
+            return createClassMetaModel(type, configuration);
         }
 
         return classMetaModel;

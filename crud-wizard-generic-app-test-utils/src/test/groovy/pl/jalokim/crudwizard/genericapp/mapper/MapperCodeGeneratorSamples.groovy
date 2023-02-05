@@ -1276,7 +1276,7 @@ class MapperCodeGeneratorSamples {
 
     static ClassMetaModel modelFromClass(Class<?> someClass,
         FieldMetaResolverConfiguration fieldMetaResolverConfiguration = DEFAULT_FIELD_RESOLVERS_CONFIG) {
-        ClassMetaModelFactory.createClassMetaModelWithOtherConfig(createClassMetaModelFromClass(someClass), fieldMetaResolverConfiguration)
+        ClassMetaModelFactory.newClassMetaModelOrTheSame(createClassMetaModelFromClass(someClass), fieldMetaResolverConfiguration)
     }
 
     static GenericMapperArgument emptyGenericMapperArgument(Object sourceObject = 1) {

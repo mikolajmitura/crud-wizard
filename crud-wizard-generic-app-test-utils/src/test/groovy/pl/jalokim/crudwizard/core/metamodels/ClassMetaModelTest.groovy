@@ -165,7 +165,7 @@ class ClassMetaModelTest extends UnitTestSpec {
                     ])
                     .build()
             ])
-            .build()                          | createClassMetaModelFromClass(Number)                           | false
+            .build()                          | createClassMetaModelFromClass(Number)                           | true
 
         ClassMetaModel.builder()
             .name("childOfDoubleAndString")
@@ -218,6 +218,21 @@ class ClassMetaModelTest extends UnitTestSpec {
                     .build()
             ])
             .build()                          | ClassMetaModel.builder().name("otherName").build()              | false
+
+        ClassMetaModel.builder()
+            .name("childOfDoubleAndString")
+            .extendsFromModels([
+                createClassMetaModelFromClass(Double),
+                ClassMetaModel.builder()
+                    .name("someString")
+                    .extendsFromModels([
+                        ClassMetaModel.builder()
+                            .name("someOtherString")
+                            .build()
+                    ])
+                    .build()
+            ])
+            .build()                          | ClassMetaModel.builder().name("someOtherString").build()        | true
     }
 
     @Unroll

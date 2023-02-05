@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.mapper.generete.config;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.createClassMetaModelWithOtherConfig;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelFactory.newClassMetaModelOrTheSame;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.string.StringUtils.replaceAllWithEmpty;
 
@@ -77,7 +77,7 @@ public class PropertiesOverriddenMappingResolver {
 
         ClassMetaModel targetMetaModel = mapperConfiguration.getTargetMetaModel();
         if (targetMetaModel.isOnlyRawClassModel()) {
-            targetMetaModel = createClassMetaModelWithOtherConfig(targetMetaModel, fieldMetaResolverForRawTarget);
+            targetMetaModel = newClassMetaModelOrTheSame(targetMetaModel, fieldMetaResolverForRawTarget);
         }
 
         parserContext.nextEntry(entryIndex);
