@@ -38,9 +38,13 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.Propertie
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.ReadFieldMetaResolverForClassEntryDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.WriteFieldMetaResolverForClassEntryDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
 import pl.jalokim.utils.collection.Elements;
 
-@Mapper(config = MapperAsSpringBeanConfig.class, uses = AdditionalPropertyMapper.class)
+@Mapper(config = MapperAsSpringBeanConfig.class,
+    uses = {
+        AdditionalPropertyMapper.class, TranslationMapper.class, ClassMetaModelMapper.class
+    })
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public abstract class MapperGenerateConfigurationMapper {
 

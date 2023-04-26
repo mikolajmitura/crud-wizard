@@ -20,7 +20,7 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MethodCodeM
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.EnumEntriesMapping;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperConfiguration;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumMetaModel;
 import pl.jalokim.utils.template.TemplateAsText;
 
 @Component
@@ -86,7 +86,7 @@ public class EnumsMapperMethodGenerator {
 
     private Map<String, EnumTypeMetaData> getEnumValues(ClassMetaModel classMetaModel) {
         if (classMetaModel.isGenericMetamodelEnum()) {
-            EnumClassMetaModel enumClassMetaModel = classMetaModel.getEnumClassMetaModel();
+            EnumMetaModel enumClassMetaModel = classMetaModel.getEnumMetaModel();
             return elements(enumClassMetaModel.getEnumValues())
                 .asMap(Function.identity(),
                     enumValue -> {

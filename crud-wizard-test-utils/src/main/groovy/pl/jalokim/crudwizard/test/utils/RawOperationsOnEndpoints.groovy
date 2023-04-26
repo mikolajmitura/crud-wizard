@@ -142,7 +142,7 @@ class RawOperationsOnEndpoints implements EndpointActions {
         objectMapper.convertValue(extractResponseAsJson(response), valueClass)
     }
 
-    private HttpHeaders createHeaders(Map<String, String> headers) {
+    static HttpHeaders createHeaders(Map<String, String> headers) {
         def headersResult = new HttpHeaders()
         headers.forEach {key, value ->
             headersResult.add(key, value)

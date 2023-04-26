@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final TimeZoneHeaderInterceptor timeZoneOffsetHeaderInterceptor;
+    private final HeadersInterceptor timeZoneOffsetHeaderInterceptor;
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {

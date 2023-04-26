@@ -36,7 +36,10 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.Writ
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.CommonClassAndFieldMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.CommonClassAndFieldMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.TemporaryContextLoader
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelTypeExtractor
 import pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNodeUtils
@@ -47,6 +50,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.BeforeEndpointValidatorUpdater
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper
 import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.provider.GenericBeansProvider
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
@@ -64,9 +68,11 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
     DataStorageConnectorMetaModelRepository dataStorageConnectorMetaModelRepository = Mock()
     DataStorageInstances dataStorageInstances = Mock()
     AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
-    ClassMetaModelMapper classMetaModelMapper = new ClassMetaModelMapperImpl(additionalPropertyMapper)
-    MapperGenerateConfigurationMapper mapperGenerateConfigurationMapper = new MapperGenerateConfigurationMapperImpl(additionalPropertyMapper)
-    MapperMetaModelMapper mapperMetaModelMapper = new MapperMetaModelMapperImpl(additionalPropertyMapper, mapperGenerateConfigurationMapper)
+    TranslationMapper translationMapper = Mappers.getMapper(TranslationMapper)
+    CommonClassAndFieldMapper commonClassAndFieldMapper = new CommonClassAndFieldMapperImpl(additionalPropertyMapper, translationMapper)
+    ClassMetaModelMapper classMetaModelMapper = new ClassMetaModelMapperImpl(additionalPropertyMapper, translationMapper)
+    MapperGenerateConfigurationMapper mapperGenerateConfigurationMapper = new MapperGenerateConfigurationMapperImpl(classMetaModelMapper)
+    MapperMetaModelMapper mapperMetaModelMapper = new MapperMetaModelMapperImpl(additionalPropertyMapper, mapperGenerateConfigurationMapper, classMetaModelMapper)
     ClassMetaModelTypeExtractor classMetaModelTypeExtractor = new ClassMetaModelTypeExtractor(classMetaModelMapper)
     JsonObjectMapper jsonObjectMapper = new JsonObjectMapper(createObjectMapper())
     EndpointMetaModelContextNodeUtils endpointMetaModelContextNodeUtils = new EndpointMetaModelContextNodeUtils(jsonObjectMapper, metaModelContextService)
@@ -96,10 +102,7 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
     CompiledCodeRootPathProvider codeRootPathProvider = new CompiledCodeRootPathProvider("target/generatedMappers")
     CodeCompiler codeCompiler = new CodeCompiler(codeRootPathProvider)
 
-    ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
-        dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
-        jdbcTemplate, dataStorageInstances, methodSignatureMetaModelResolver, classMetaModelMapper,
-        mapperGenerateConfigurationMapper, propertiesOverriddenMappingResolver, mapperCodeGenerator, codeCompiler)
+    ValidatorWithConverter validatorWithConverter
 
     Map<Class, Object> applicationContextMapping = [:]
 
@@ -115,13 +118,14 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         applicationContextMapping.put(WriteToMapStrategy, new WriteToMapStrategy())
         applicationContextMapping.put(MapperMethodGenerator, mapperMethodGenerator)
 
-        validatorFactory.getValidator() >> validatorWithConverter.getValidator()
         abstractHandlerMethodMapping.getHandlerMethods() >> [:]
         dataStorageInstances.getDataStorageFactoryForClass(_) >> Mock(DataStorageFactory)
 
         jdbcTemplate.queryForObject(_ as String, _ as Class<?>) >> 0
-        def fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper)
+        def fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper, translationMapper, commonClassAndFieldMapper)
+        FieldMetaModelService fieldMetaModelService = new FieldMetaModelService(fieldMetaModelMapper)
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
+        setValueForField(fieldMetaModelMapper, "commonClassAndFieldMapperInjected", commonClassAndFieldMapper)
 
         setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)
         setValueForField(mapperMetaModelMapper, "beanMethodMetaModelCreator", new BeanMethodMetaModelCreator(
@@ -147,6 +151,14 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         applicationContext.getBeanNamesForType(ClassMetaModelConverter.class) >> []
         conversionService.canConvert(Long, String) >> true
         conversionService.canConvert(Integer, String) >> true
+
+        validatorWithConverter = createValidatorWithConverter(endpointMetaModelContextNodeUtils, applicationContext,
+            dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
+            jdbcTemplate, dataStorageInstances, methodSignatureMetaModelResolver, classMetaModelMapper,
+            mapperGenerateConfigurationMapper, propertiesOverriddenMappingResolver, mapperCodeGenerator,
+            codeCompiler, fieldMetaModelService)
+
+        validatorFactory.getValidator() >> validatorWithConverter.getValidator()
     }
 
     def cleanup() {

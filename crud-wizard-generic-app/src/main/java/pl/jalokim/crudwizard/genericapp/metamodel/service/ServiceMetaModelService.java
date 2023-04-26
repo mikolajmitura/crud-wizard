@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.service;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
+import javax.persistence.EntityManager;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto;
@@ -13,8 +14,8 @@ public class ServiceMetaModelService extends BaseService<ServiceMetaModelEntity,
     private final ServiceMetaModelMapper serviceMetaModelMapper;
 
     public ServiceMetaModelService(ServiceMetaModelRepository repository,
-        ServiceMetaModelMapper serviceMetaModelMapper) {
-        super(repository);
+        ServiceMetaModelMapper serviceMetaModelMapper, EntityManager entityManager) {
+        super(repository, entityManager);
         this.serviceMetaModelMapper = serviceMetaModelMapper;
     }
 

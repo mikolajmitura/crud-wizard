@@ -12,9 +12,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import pl.jalokim.crudwizard.core.exception.ResourceChangedException;
 
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 @MappedSuperclass
-public abstract class BaseEntity {
+public abstract class BaseEntity extends EntityWithId<Long> {
 
     @Version
     protected Long version;
@@ -40,6 +40,4 @@ public abstract class BaseEntity {
             throw new ResourceChangedException();
         }
     }
-
-    public abstract Long getId();
 }

@@ -67,6 +67,10 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
         transactionTemplate.execute(block)
     }
 
+    void inVoidTransaction(Closure block) {
+        transactionTemplate.execute(block)
+    }
+
     def executeOnlyOnce(Closure<Object> resultActionsClosure) {
         def invokerClass = getClass()
         def foundWhereClosureInvoked = Thread.currentThread().getStackTrace()

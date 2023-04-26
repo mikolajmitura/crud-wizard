@@ -47,6 +47,7 @@ public class TemporaryMetaModelContext extends MetaModelContext {
         setDefaultDataStorageMetaModel(metaModelContext.getDefaultDataStorageMetaModel());
         setDefaultDataStorageQueryProvider(metaModelContext.getDefaultDataStorageQueryProvider());
         setDefaultDataStorageConnectorMetaModels(metaModelContext.getDefaultDataStorageConnectorMetaModels());
+        setTranslationsContext(metaModelContext.getTranslationsContext());
     }
 
     public TemporaryMetaModelContext(MetaModelContext metaModelContext, EndpointMetaModelDto createEndpointMetaModelDto) {

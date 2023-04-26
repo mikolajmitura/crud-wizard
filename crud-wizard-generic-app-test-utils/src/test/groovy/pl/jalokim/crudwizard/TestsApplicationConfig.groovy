@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSourceProvider
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.TEST_APPLICATION_TRANSLATIONS_PATH
 
+import org.junit.jupiter.api.Order
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.TestConfiguration
@@ -21,6 +22,7 @@ class TestsApplicationConfig {
     }
 
     @Bean
+    @Order(Integer.MAX_VALUE)
     MessageSourceProvider testProperties() {
         createMessageSourceProvider(TEST_APPLICATION_TRANSLATIONS_PATH)
     }

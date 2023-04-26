@@ -24,10 +24,13 @@ public class DataStorageConnectorMetaModelDto extends WithAdditionalPropertiesDt
     Long id;
     @Valid
     DataStorageMetaModelDto dataStorageMetaModel;
+
     @Valid
     MapperMetaModelDto mapperMetaModelForPersist;
+
     @Valid
     MapperMetaModelDto mapperMetaModelForQuery;
+
     @Valid
     ClassMetaModelDto classMetaModelInDataStorage;
 

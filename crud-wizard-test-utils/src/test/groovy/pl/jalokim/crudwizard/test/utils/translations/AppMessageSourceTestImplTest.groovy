@@ -5,8 +5,6 @@ import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.creat
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSourceProvider
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.initStaticAppMessageSource
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
-import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_BLANK_MESSAGE_PROPERTY
-import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_NULL_MESSAGE_PROPERTY
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
@@ -15,15 +13,17 @@ import javax.validation.constraints.DecimalMax
 import org.springframework.context.MessageSource
 import org.springframework.context.NoSuchMessageException
 import pl.jalokim.crudwizard.core.translations.ExampleEnum
-import pl.jalokim.utils.test.DataFakerHelper
+import pl.jalokim.crudwizard.core.translations.LocaleHolder
+import pl.jalokim.crudwizard.core.translations.MessageSourceProvider
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
+import pl.jalokim.utils.test.DataFakerHelper
 import spock.lang.Specification
 
 class AppMessageSourceTestImplTest extends Specification {
 
     AppMessageSourceTestImpl testCase = initStaticAppMessageSource()
-    MessageSource commonsMessageSource = createCommonMessageSourceProvider().getMessageSource()
-    MessageSource appMessageSource = createMessageSourceProvider().getMessageSource()
+    MessageSource commonsMessageSource = reloadMessageSource(createCommonMessageSourceProvider())
+    MessageSource appMessageSource = reloadMessageSource(createMessageSourceProvider())
 
     private Validator validator
 
@@ -71,17 +71,20 @@ class AppMessageSourceTestImplTest extends Specification {
 
     def "should get message from common messages"() {
         when:
-        def message = testCase.getMessage(NOT_NULL_MESSAGE_PROPERTY)
+        def message = testCase.getMessage("ResourceChangedException.default.message")
         then:
-        message == commonsMessageSource.getMessage(NOT_NULL_MESSAGE_PROPERTY, null, Locale.getDefault())
+        message == commonsMessageSource.getMessage("ResourceChangedException.default.message", null, LocaleHolder.getLocale())
     }
 
     def "should get message from app messages"() {
+        given:
+        def translationKey = "pl.jalokim.crudwizard.core.validation.javax.UniqueValue.message"
+
         when:
-        def message = testCase.getMessage(NOT_BLANK_MESSAGE_PROPERTY)
+        def message = testCase.getMessage(translationKey)
         then:
-        message == appMessageSource.getMessage(NOT_BLANK_MESSAGE_PROPERTY, null, Locale.getDefault())
-        message != commonsMessageSource.getMessage(NOT_BLANK_MESSAGE_PROPERTY, null, Locale.getDefault())
+        message == appMessageSource.getMessage(translationKey, null, LocaleHolder.getLocale())
+        message != commonsMessageSource.getMessage(translationKey, null, LocaleHolder.getLocale())
     }
 
     def "should get message for javax validation size"() {
@@ -199,6 +202,11 @@ class AppMessageSourceTestImplTest extends Specification {
         then:
         interpolatedByIndexes == "some value: $arg1, $arg2"
         interpolatedByIndexes == interpolatedWithPlaceholders
+    }
+
+    MessageSource reloadMessageSource(MessageSourceProvider messageSourceProvider) {
+        messageSourceProvider.refresh(List.of(LocaleHolder.getDefaultLocale()))
+        messageSourceProvider.getMessageSource()
     }
 
     static class SomeBean {

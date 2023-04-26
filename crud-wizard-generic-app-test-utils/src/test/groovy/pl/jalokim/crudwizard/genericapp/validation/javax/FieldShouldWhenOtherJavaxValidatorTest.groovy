@@ -16,11 +16,11 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NUL
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_1
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_2
 import static pl.jalokim.crudwizard.genericapp.validation.javax.FieldShouldWhenOtherDto.SomeEnum.ENTRY_3
+import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
+import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 import static pl.jalokim.utils.test.DataFakerHelper.randomInteger
 import static pl.jalokim.utils.test.DataFakerHelper.randomLong
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
-import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
-import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
 
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicReference
@@ -28,6 +28,8 @@ import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOther
 import pl.jalokim.crudwizard.core.validation.javax.FieldShouldWhenOtherJavaxValidator
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.InvalidAnnotation1
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.InvalidAnnotation2
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import spock.lang.Unroll
@@ -238,6 +240,30 @@ class FieldShouldWhenOtherJavaxValidatorTest extends UnitTestSpec {
         Exception ex = thrown()
         ex.getCause().message == "invalid @FieldShouldWhenOther for field=someString1 for: fieldValues=[12.11], " +
             "value of field: fieldValues should be not floating point number"
+    }
+
+    def "should inform about unexpected whenField=<NOT_PROVIDED>"() {
+        given:
+        InvalidAnnotation1 invalidAnnotation1 = new InvalidAnnotation1()
+
+        when:
+        validatorWithConverter.validateAndReturnErrors(invalidAnnotation1)
+
+        then:
+        Exception ex = thrown()
+        ex.cause.message == "invalid @FieldShouldWhenOther field 'whenField' should have other value than <NOT_PROVIDED>"
+    }
+
+    def "should inform about unexpected is=UNKNOWN"() {
+        given:
+        InvalidAnnotation2 invalidAnnotation2 = new InvalidAnnotation2()
+
+        when:
+        validatorWithConverter.validateAndReturnErrors(invalidAnnotation2)
+
+        then:
+        Exception ex = thrown()
+        ex.cause.message == "invalid @FieldShouldWhenOther field 'is' should have other value than UNKNOWN"
     }
 
     private ArrayList<ErrorDto> expectedResult1() {

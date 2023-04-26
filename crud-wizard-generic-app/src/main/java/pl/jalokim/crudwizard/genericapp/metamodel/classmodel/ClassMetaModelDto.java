@@ -25,10 +25,12 @@ import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.EnumValuesInAdditionalProperties;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ConditionallyNotNullTranslation;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByName;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ForRealClassFieldsCanBeMerged;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.OnlyExpectedFieldsForRealClass;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto;
 
 @Data
@@ -57,13 +59,14 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
     thenOthersShould = {
         @FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NOT_NULL,
             whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
+        @FieldShouldWhenOther(field = ClassMetaModelDto.ENUM_META_MODEL, should = NOT_NULL,
+            whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
         @FieldShouldWhenOther(field = ClassMetaModelDto.FIELDS, should = NULL,
             whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
         @FieldShouldWhenOther(field = ClassMetaModelDto.GENERIC_TYPES, should = NULL,
             whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
         @FieldShouldWhenOther(field = ClassMetaModelDto.EXTENDS_FROM_MODELS, should = NULL,
             whenField = ClassMetaModelDto.IS_GENERIC_ENUM_TYPE, is = EQUAL_TO_ANY, otherFieldValues = ClassMetaModelDto.TRUE),
-
         @FieldShouldWhenOther(field = ClassMetaModelDto.GENERIC_TYPES, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL),
         @FieldShouldWhenOther(field = ClassMetaModelDto.EXTENDS_FROM_MODELS, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL)
     })
@@ -73,19 +76,22 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
     @FieldShouldWhenOther(field = ClassMetaModelDto.NAME, should = NULL, whenField = ClassMetaModelDto.CLASS_NAME, is = NOT_NULL),
     @FieldShouldWhenOther(field = ClassMetaModelDto.CLASS_NAME, should = NULL, whenField = ClassMetaModelDto.NAME, is = NOT_NULL)
 })
-@EnumValuesInAdditionalProperties
 @ExistFullDefinitionInTempContextByName
 @ForRealClassFieldsCanBeMerged
+@ConditionallyNotNullTranslation
+@OnlyExpectedFieldsForRealClass
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String CLASS_NAME = "className";
+    public static final String TRANSLATION_NAME = "translationName";
     public static final String FIELDS = "fields";
     public static final String GENERIC_TYPES = "genericTypes";
     public static final String EXTENDS_FROM_MODELS = "extendsFromModels";
     public static final String IS_GENERIC_ENUM_TYPE = "isGenericEnumType";
+    public static final String ENUM_META_MODEL = "enumMetaModel";
     public static final String TRUE = "true";
 
     @NotNull(groups = UpdateContext.class)
@@ -101,9 +107,15 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     @Size(min = 3, max = 250)
     String className;
 
+    @Valid
+    TranslationDto translationName;
+
     @NotNull
     @Builder.Default
     Boolean isGenericEnumType = false;
+
+    @Valid
+    EnumMetaModelDto enumMetaModel;
 
     /**
      * Only for read only. This value is set

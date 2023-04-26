@@ -1,24 +1,38 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.BeforeClassValidationUpdater.attachFieldTranslationsWhenNotExist;
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType.GENERATED;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.BeforeClassValidationUpdater;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 @Component
+@RequiredArgsConstructor
 public class BeforeEndpointValidatorUpdater {
 
     public void beforeValidation(EndpointMetaModelDto createEndpointMetaModelDto) {
-        Optional.ofNullable(createEndpointMetaModelDto.getQueryArguments())
-            .ifPresent(queryArguments -> queryArguments.setName(createClassModelName(createEndpointMetaModelDto, "QueryArguments")));
+        addTranslationsToClassMetaModels(createEndpointMetaModelDto);
+        createDefaultClassMetaModelNames(createEndpointMetaModelDto);
+        addQueryAndPathParamsClassMetaModelsToMappers(createEndpointMetaModelDto);
+    }
 
-        Optional.ofNullable(createEndpointMetaModelDto.getPathParams())
-            .ifPresent(pathParams -> pathParams.setName(createClassModelName(createEndpointMetaModelDto, "PathParams")));
+    private void addTranslationsToClassMetaModels(EndpointMetaModelDto createEndpointMetaModelDto) {
+        attachFieldTranslationsWhenNotExist(createEndpointMetaModelDto.getPayloadMetamodel());
+        attachFieldTranslationsWhenNotExist(createEndpointMetaModelDto.getPathParams());
+        Optional.ofNullable(createEndpointMetaModelDto.getResponseMetaModel())
+            .map(EndpointResponseMetaModelDto::getClassMetaModel)
+            .ifPresent(BeforeClassValidationUpdater::attachFieldTranslationsWhenNotExist);
+        elements(createEndpointMetaModelDto.getDataStorageConnectors())
+            .forEach(dsConnector -> attachFieldTranslationsWhenNotExist(dsConnector.getClassMetaModelInDataStorage()));
+    }
 
+    private void addQueryAndPathParamsClassMetaModelsToMappers(EndpointMetaModelDto createEndpointMetaModelDto) {
         Optional.ofNullable(createEndpointMetaModelDto.getResponseMetaModel())
             .map(EndpointResponseMetaModelDto::getMapperMetaModel)
             .ifPresent(mapperMetaModelDto -> updateMapperMetaModelWithQueryAndPathParams(mapperMetaModelDto,
@@ -36,6 +50,14 @@ public class BeforeEndpointValidatorUpdater {
                         createEndpointMetaModelDto.getPathParams(), createEndpointMetaModelDto.getQueryArguments()));
             }
         }
+    }
+
+    private void createDefaultClassMetaModelNames(EndpointMetaModelDto createEndpointMetaModelDto) {
+        Optional.ofNullable(createEndpointMetaModelDto.getQueryArguments())
+            .ifPresent(queryArguments -> queryArguments.setName(createClassModelName(createEndpointMetaModelDto, "QueryArguments")));
+
+        Optional.ofNullable(createEndpointMetaModelDto.getPathParams())
+            .ifPresent(pathParams -> pathParams.setName(createClassModelName(createEndpointMetaModelDto, "PathParams")));
     }
 
     private static String createClassModelName(EndpointMetaModelDto createEndpointMetaModelDto, String typeName) {

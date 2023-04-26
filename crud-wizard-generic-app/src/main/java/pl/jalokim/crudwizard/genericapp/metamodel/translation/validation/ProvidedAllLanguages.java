@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation;
+package pl.jalokim.crudwizard.genericapp.metamodel.translation.validation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -8,11 +8,11 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = EnumValuesInAdditionalPropertiesValidator.class)
-public @interface EnumValuesInAdditionalProperties {
+@Constraint(validatedBy = ProvidedAllLanguagesValidator.class)
+public @interface ProvidedAllLanguages {
 
     String message() default "";
 

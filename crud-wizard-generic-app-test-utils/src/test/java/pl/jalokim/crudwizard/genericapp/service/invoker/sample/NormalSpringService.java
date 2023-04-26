@@ -1,11 +1,18 @@
 package pl.jalokim.crudwizard.genericapp.service.invoker.sample;
 
+import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.string.StringUtils.concatElements;
+import static pl.jalokim.utils.string.StringUtils.tabsNTimes;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,12 +23,22 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto;
 import pl.jalokim.crudwizard.core.sample.SomeDocumentDto;
+import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder;
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumEntryMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextService;
+import pl.jalokim.crudwizard.genericapp.rest.samples.dto.TranslationArgs;
 import pl.jalokim.crudwizard.genericapp.service.translator.TranslatedPayload;
 import pl.jalokim.crudwizard.genericapp.validation.ValidationSessionContext;
+import pl.jalokim.utils.collection.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class NormalSpringService {
+
+    private final MetaModelContextService metaModelContextService;
 
     public SamplePersonDto getSamplePersonDtoInvalid(@RequestBody @NotNull JsonNode jsonNode,
         @RequestBody @Validated SamplePersonDto samplePersonDto,
@@ -147,8 +164,31 @@ public class NormalSpringService {
 
     }
 
+    public Long testNotSupportedLocale(@RequestBody Map<String, Object> payload) {
+        AppMessageSourceHolder.getMessage("not-supported-translation-key");
+        return 100L;
+    }
+
+    public String cannotFindTranslationKey() {
+        return AppMessageSourceHolder.getMessage("cannot.find.translation.key");
+    }
+
+    public String getMessageWithArgs(@RequestBody TranslationArgs translationArgs) {
+        List<Object> argumentsByIndexes = translationArgs.getArgumentsByIndexes();
+        if (CollectionUtils.isNotEmpty(argumentsByIndexes)) {
+            Object[] args = elements(argumentsByIndexes).asArray(new Object[0]);
+            return AppMessageSourceHolder.getMessage(
+                translationArgs.getPlaceholder(), args);
+        } else if (translationArgs.getArgumentsByName() != null) {
+            return AppMessageSourceHolder.getMessage(
+                translationArgs.getPlaceholder(),
+                translationArgs.getArgumentsByName());
+        }
+        return AppMessageSourceHolder.getMessage(translationArgs.getPlaceholder());
+    }
+
     public CollectionElement[] getCollectionElementArray(String someString, String otherString) {
-        return new CollectionElement[] {
+        return new CollectionElement[]{
             new CollectionElement(someString, otherString, null, null)
         };
     }
@@ -179,6 +219,52 @@ public class NormalSpringService {
 
     public SomeDocumentDto getSomeDocumentDtoById(Long id, String someText, String someText2) {
         return new SomeDocumentDto(null, id);
+    }
+
+    public String getTranslatedInfo(@RequestBody Map<String, Object> personData) {
+        ClassMetaModel person = metaModelContextService.getClassMetaModelByName("person");
+        String header = getClassMetaModelTranslated(person);
+
+        List<String> fieldLines = new ArrayList<>();
+        addObjectLines(personData, person, fieldLines, 1);
+
+        return concatElements("\n", header,
+            elements(fieldLines).asConcatText("\n"));
+    }
+
+    private void addObjectLines(Map<String, Object> values,
+        ClassMetaModel classMetaModel, List<String> fieldLines, int indentation) {
+        for (FieldMetaModel field : classMetaModel.getFields()) {
+            Object value = values.get(field.getFieldName());
+            if (value instanceof Map) {
+                fieldLines.add(tabsNTimes(indentation) +
+                    getClassMetaModelTranslated(field.getFieldType()) + ":" +
+                    getFieldTranslated(field) + "=");
+                addObjectLines((Map<String, Object>) value,
+                    field.getFieldType(), fieldLines, indentation + 1);
+            } else {
+
+                if (field.getFieldName().equals("someColor") ||
+                    field.getFieldName().equals("someEnum")) {
+                    EnumEntryMetaModel enumByName = field.getFieldType().getEnumMetaModel()
+                        .getEnumByName(value.toString());
+                    value = enumByName.getTranslated() + "(" + enumByName.getTranslation().getTranslationKey() + ")";
+                }
+
+                fieldLines.add(tabsNTimes(indentation) +
+                    getClassMetaModelTranslated(field.getFieldType()) + ":" +
+                    getFieldTranslated(field) + "=" + value);
+            }
+        }
+    }
+
+    private String getClassMetaModelTranslated(ClassMetaModel classMetaModel) {
+        return classMetaModel.getTranslatedName()
+         + (classMetaModel.getTranslationName() == null ? "" : "(" + classMetaModel.getTranslationName().getTranslationKey() + ")");
+    }
+
+    private String getFieldTranslated(FieldMetaModel fieldMetaModel) {
+        return fieldMetaModel.getTranslatedName() + "(" + fieldMetaModel.getTranslationFieldName().getTranslationKey() + ")";
     }
 
     public static class InvalidJavaBean {

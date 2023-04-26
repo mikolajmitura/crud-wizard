@@ -6,6 +6,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContex
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.isTemporaryContextExists;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,6 +15,8 @@ import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import pl.jalokim.crudwizard.core.translations.LocaleService;
+import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.cleaner.TempDirCleanEvent;
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
@@ -33,6 +36,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelService;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationLanguageService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
@@ -55,6 +59,9 @@ public class MetaModelContextService {
     private final EndpointMetaModelService endpointMetaModelService;
     private final InstanceLoader instanceLoader;
     private final ApplicationEventPublisher publisher;
+    private final TranslationLanguageService translationService;
+    private final List<MessageSourceProvider> messageSourceProviders;
+    private final LocaleService localeService;
 
     public synchronized void reloadAll() {
         defaultBeansService.saveAllDefaultMetaModels();
@@ -66,6 +73,7 @@ public class MetaModelContextService {
 
     public MetaModelContext loadNewMetaModelContext() {
         MetaModelContext metaModelContext = new MetaModelContext();
+        loadTranslationContext(metaModelContext);
         loadDataStorages(metaModelContext);
         loadApiTags(metaModelContext);
         loadValidatorMetaModelModels(metaModelContext);
@@ -77,6 +85,12 @@ public class MetaModelContextService {
         loadEndpointMetaModels(metaModelContext);
         loadEndpointNodes(metaModelContext);
         return metaModelContext;
+    }
+
+    private void loadTranslationContext(MetaModelContext metaModelContext) {
+        metaModelContext.setTranslationsContext(translationService.createNewTranslationsContext());
+        messageSourceProviders.forEach(messageSourceProvider ->
+            messageSourceProvider.refresh(localeService.getAllSupportedLocales()));
     }
 
     private void loadDefaultQueryProvider(MetaModelContext metaModelContext) {

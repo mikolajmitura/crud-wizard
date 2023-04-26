@@ -7,6 +7,7 @@ import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.get
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.APPLICATION_TRANSLATIONS_PATH;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.CORE_APPLICATION_TRANSLATIONS;
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createHibernateMessageSourceProvider;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSourceDelegator;
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator;
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.EMAIL_MESSAGE_PROPERTY;
@@ -23,12 +24,16 @@ import static pl.jalokim.crudwizard.test.utils.validation.TestingConstraintValid
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Optional;
 import javax.validation.ValidatorFactory;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import pl.jalokim.crudwizard.core.translations.LocaleHolder;
 import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
 import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
 import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource;
@@ -42,6 +47,7 @@ import pl.jalokim.utils.constants.Constants;
 /**
  * Useful for testing without spring context.
  */
+@Slf4j
 public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
 
     public static final String TEST_APPLICATION_TRANSLATIONS_PATH = "test-application-translations";
@@ -56,7 +62,19 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
 
     @SuppressWarnings("PMD.CloseResource")
     public static AppMessageSourceTestImpl initStaticAppMessageSource(boolean setupInStaticHolder, String... resourcePaths) {
-        MessageSource messageSourceDelegator = createMessageSourceDelegator(createMessageSources(resourcePaths));
+        List<MessageSourceProvider> messageSourceProviders = createMessageSources(resourcePaths);
+        messageSourceProviders.add(createHibernateMessageSourceProvider());
+        List<MessageSourceProvider> loadedMessageSourceProviders = new ArrayList<>();
+        for (MessageSourceProvider messageSourceProvider : messageSourceProviders) {
+            try {
+                messageSourceProvider.refresh(List.of(LocaleHolder.getLocale()));
+                loadedMessageSourceProviders.add(messageSourceProvider);
+            } catch (MissingResourceException ex) {
+                log.warn("{} ", ex.getMessage());
+            }
+        }
+        MessageSource messageSourceDelegator = createMessageSourceDelegator(loadedMessageSourceProviders,
+            TestAppMessageSourceHolder.getLocaleService());
         ValidatorFactory testingValidatorFactory = createTestingValidatorFactory(messageSourceDelegator);
         return new AppMessageSourceTestImpl(setupInStaticHolder, messageSourceDelegator, testingValidatorFactory);
     }
@@ -194,7 +212,7 @@ public final class AppMessageSourceTestImpl extends SpringAppMessageSource {
 
     public static String classNotExistsMessage(Class<?> typeOf) {
         return messageForValidator(ClassExists.class,
-            Map.of("expectedOfType" , typeOf.getCanonicalName()));
+            Map.of("expectedOfType", typeOf.getCanonicalName()));
     }
 
     private static String joinValues(List<String> list) {

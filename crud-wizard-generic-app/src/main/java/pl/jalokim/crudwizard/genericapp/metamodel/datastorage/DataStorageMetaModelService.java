@@ -3,6 +3,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.datastorage;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import java.util.List;
+import javax.persistence.EntityManager;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 
@@ -12,8 +13,8 @@ public class DataStorageMetaModelService extends BaseService<DataStorageMetaMode
     private final DataStorageMetaModelMapper dataStorageMetaModelMapper;
 
     public DataStorageMetaModelService(DataStorageMetaModelRepository repository,
-        DataStorageMetaModelMapper dataStorageMetaModelMapper) {
-        super(repository);
+        DataStorageMetaModelMapper dataStorageMetaModelMapper, EntityManager entityManager) {
+        super(repository, entityManager);
         this.dataStorageMetaModelMapper = dataStorageMetaModelMapper;
     }
 

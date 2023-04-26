@@ -14,7 +14,7 @@ public interface BaseMapper<D, E, M> {
 
     D toDto(E entity);
 
-    E toEntity(D dtoObject);
+    E  toEntity(D dtoObject);
 
     M toMetaModel(E entity);
 

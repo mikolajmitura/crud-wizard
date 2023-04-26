@@ -3,11 +3,13 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
+import javax.persistence.EntityManager;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
 @MetamodelService
@@ -16,13 +18,16 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
     private final ValidatorMetaModelService validatorMetaModelService;
     private final ClassMetaModelMapper classMetaModelMapper;
     private final ClassMetaModelEntitySaveContext classMetaModelEntitySaveContext;
+    private final TranslationService translationService;
 
     public ClassMetaModelService(ClassMetaModelRepository classMetaModelRepository, ValidatorMetaModelService validatorMetaModelService,
-        ClassMetaModelMapper classMetaModelMapper, ClassMetaModelEntitySaveContext classMetaModelEntitySaveContext) {
-        super(classMetaModelRepository);
+        ClassMetaModelMapper classMetaModelMapper, ClassMetaModelEntitySaveContext classMetaModelEntitySaveContext,
+        TranslationService translationService, EntityManager entityManager) {
+        super(classMetaModelRepository, entityManager);
         this.validatorMetaModelService = validatorMetaModelService;
         this.classMetaModelMapper = classMetaModelMapper;
         this.classMetaModelEntitySaveContext = classMetaModelEntitySaveContext;
+        this.translationService = translationService;
     }
 
     public void saveAsSimpleClassMetaModelEntity(ClassMetaModelDto classMetaModelDto) {
@@ -60,6 +65,14 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
             return repository.findByRawClassName(classMetaModelEntity.getClassName())
                 .orElseGet(() -> {
                     classMetaModelEntityUpdateSource.setSimpleRawClass(true);
+                    classMetaModelEntityUpdateSource.setTranslationName(
+                        translationService.saveNewOrLoadById(classMetaModelEntityUpdateSource.getTranslationName()));
+
+                    elements(classMetaModelEntityUpdateSource.getEnums())
+                        .forEach(enumEntry ->
+                            enumEntry.setTranslation(translationService.saveNewOrLoadById(enumEntry.getTranslation()))
+                        );
+
                     return repository.save(classMetaModelEntityUpdateSource);
                 });
         }
@@ -86,9 +99,18 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
 
     private ClassMetaModelEntity saveOthers(ClassMetaModelEntity classMetaModelEntityToSaved, ClassMetaModelEntity classMetaModelEntityUpdateSource) {
         classMetaModelEntitySaveContext.putDuringInitializationEntity(classMetaModelEntityToSaved);
+        classMetaModelEntityToSaved.setTranslationName(translationService.saveNewOrLoadById(classMetaModelEntityUpdateSource.getTranslationName()));
+
+        elements(classMetaModelEntityUpdateSource.getEnums())
+            .forEach(enumEntry ->
+                enumEntry.setTranslation(translationService.saveNewOrLoadById(enumEntry.getTranslation()))
+            );
+        classMetaModelEntityToSaved.setEnums(classMetaModelEntityUpdateSource.getEnums());
+
         elements(classMetaModelEntityUpdateSource.getFields())
             .forEach(field -> {
                 validatorMetaModelService.saveOrCreateNewValidators(field.getValidators());
+                field.setTranslationFieldName(translationService.saveNewOrLoadById(field.getTranslationFieldName()));
                 field.setFieldType(saveNewOrLoadById(field.getFieldType()));
             });
         classMetaModelEntityToSaved.setFields(classMetaModelEntityUpdateSource.getFields());
@@ -109,7 +131,6 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
                 classMetaModelEntityUpdateSource.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
             });
         classMetaModelEntityToSaved.setExtendsFromModels(classMetaModelEntityUpdateSource.getExtendsFromModels());
-
         ClassMetaModelEntity savedClassMetaModelEntity = repository.save(classMetaModelEntityToSaved);
         classMetaModelEntitySaveContext.putFullySavedToContext(savedClassMetaModelEntity);
 

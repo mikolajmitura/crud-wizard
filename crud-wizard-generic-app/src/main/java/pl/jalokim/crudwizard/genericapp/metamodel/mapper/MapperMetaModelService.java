@@ -4,6 +4,7 @@ import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.EntityManager;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelService;
@@ -24,8 +25,8 @@ public class MapperMetaModelService extends BaseService<MapperMetaModelEntity, M
 
     public MapperMetaModelService(MapperMetaModelEntityRepository repository,
         MapperMetaModelMapper mapperMetaModelMapper, ClassMetaModelService classMetaModelService,
-        MapperGeneratedInstanceService mapperGeneratedInstanceService) {
-        super(repository);
+        MapperGeneratedInstanceService mapperGeneratedInstanceService, EntityManager entityManager) {
+        super(repository, entityManager);
         this.mapperMetaModelMapper = mapperMetaModelMapper;
         this.classMetaModelService = classMetaModelService;
         this.mapperGeneratedInstanceService = mapperGeneratedInstanceService;

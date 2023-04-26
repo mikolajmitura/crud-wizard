@@ -1,7 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
 import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
@@ -22,26 +21,46 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.Clas
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
+import pl.jalokim.utils.collection.CollectionUtils;
 
 @Mapper(config = MapperAsSpringBeanConfig.class,
     imports = {
         ClassUtils.class,
         MetaModelState.class
     },
-    uses = AdditionalPropertyMapper.class)
+    uses = {
+        AdditionalPropertyMapper.class,
+        TranslationMapper.class,
+        CommonClassAndFieldMapper.class
+    })
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
     @Autowired
     private FieldMetaModelMapper fieldMetaModelMapper;
 
+    @Autowired
+    private CommonClassAndFieldMapper commonClassAndFieldMapper;
+
+    @Override
+    public ClassMetaModelDto toDto(ClassMetaModelEntity classMetaModelEntity) {
+        return commonClassAndFieldMapper.classModelToDto(classMetaModelEntity);
+    }
+
+    @Override
+    public ClassMetaModelEntity toEntity(ClassMetaModelDto classMetaModelDto) {
+        return commonClassAndFieldMapper.toEntity(classMetaModelDto);
+    }
+
+
     @Override
     @Mapping(target = "genericTypes", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
+    @Mapping(target = "enumMetaModel", source = "classMetaModelEntity")
     @Mapping(target = "realClass", ignore = true)
-    @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "fieldMetaResolverConfiguration", ignore = true)
     // after restart application meta models should have the same fields
     @Mapping(target = "attachedFieldsOwner", ignore = true)
@@ -52,15 +71,24 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
     @Mapping(target = "state", expression = "java(pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState.INITIALIZED)")
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
-    @Mapping(target = "simpleRawClass", ignore = true)
-    @Override
-    public abstract ClassMetaModelEntity toEntity(ClassMetaModelDto classMetaModelDto);
+    protected abstract EnumEntryMetaModel mapEnumEntryMetaModel(EnumEntryMetaModelEntity entity);
+
+    protected EnumMetaModel mapToEnumMetaModel(ClassMetaModelEntity classMetaModelEntity) {
+        if (CollectionUtils.isNotEmpty(classMetaModelEntity.getEnums())) {
+            return EnumMetaModel.builder()
+                .enums(CollectionUtils.mapToList(classMetaModelEntity.getEnums(), this::mapEnumEntryMetaModel))
+                .build();
+        }
+        return null;
+    }
 
     @Mapping(target = "simpleRawClass", ignore = true)
     @Mapping(target = "genericTypes", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
+    @Mapping(target = "enums", ignore = true)
+    @Mapping(target = "translationName", ignore = true)
     public abstract ClassMetaModelEntity toSimpleEntity(ClassMetaModelDto classMetaModelDto, boolean dummyFlag);
 
     /**
@@ -87,8 +115,6 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         ));
         classMetaModel.setRealClass(loadRealClass(classMetaModelEntity.getClassName()));
 
-        setupEnumMetaModelIfShould(classMetaModel);
-
         return classMetaModel;
     }
 
@@ -107,7 +133,6 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         ClassMetaModel classMetaModel = getClassMetaModel(classMetaModelDto);
 
         if (MetaModelState.FOR_INITIALIZE.equals(classMetaModel.getState())) {
-            setupEnumMetaModelIfShould(classMetaModel);
             classMetaModel.setState(MetaModelState.DURING_INITIALIZATION);
             classMetaModel.setGenericTypes(
                 elements(classMetaModelDto.getGenericTypes())
@@ -191,15 +216,8 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         return classMetaModel;
     }
 
-    private void setupEnumMetaModelIfShould(ClassMetaModel classMetaModel) {
-        Object propertyValue = classMetaModel.getPropertyRealValue(ENUM_VALUES_PREFIX);
-        if (propertyValue != null) {
-            classMetaModel.setEnumClassMetaModel(new EnumClassMetaModel(classMetaModel));
-        }
-    }
-
     @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
-    @Mapping(target = "enumClassMetaModel", ignore = true)
+    @Mapping(target = "enumMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
@@ -212,7 +230,7 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
     protected abstract ClassMetaModel innerToModelFromDto(ClassMetaModelDto classMetaModelDto);
 
     @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
-    @Mapping(target = "enumClassMetaModel", ignore = true)
+    @Mapping(target = "enumMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
@@ -226,10 +244,6 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
     @Mapping(target = "writeFieldResolver", ignore = true)
     @Mapping(target = "readFieldResolver", ignore = true)
     protected abstract void swallowUpdateFrom(@MappingTarget ClassMetaModel classMetaModel, ClassMetaModelDto classMetaModelDto);
-
-    @Mapping(target = "classMetaModelDtoType", ignore = true)
-    @Override
-    public abstract ClassMetaModelDto toDto(ClassMetaModelEntity classMetaModelEntity);
 
     protected FieldMetaModel fieldToModelFromDto(FieldMetaModelDto fieldMetaModelDto,
         ClassMetaModel ownerOfField, ClassMetaModel fieldType) {

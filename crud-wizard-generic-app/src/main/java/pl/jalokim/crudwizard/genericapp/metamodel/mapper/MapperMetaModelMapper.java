@@ -28,8 +28,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
@@ -42,11 +40,19 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodArgumentMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.MethodSignatureMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodArgument;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
 import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator;
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
 import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
-@Mapper(config = MapperAsSpringBeanConfig.class, uses = {AdditionalPropertyMapper.class, MapperGenerateConfigurationMapper.class})
+@Mapper(config = MapperAsSpringBeanConfig.class,
+    uses = {
+        AdditionalPropertyMapper.class,
+        MapperGenerateConfigurationMapper.class,
+        TranslationMapper.class,
+        ClassMetaModelMapper.class
+    }
+)
 @Slf4j
 public abstract class MapperMetaModelMapper implements BaseMapper<MapperMetaModelDto, MapperMetaModelEntity, MapperMetaModel> {
 
@@ -75,9 +81,6 @@ public abstract class MapperMetaModelMapper implements BaseMapper<MapperMetaMode
     @Mapping(target = "mapperScript", ignore = true)
     @Mapping(target = "metamodelDtoType", ignore = true)
     public abstract MapperMetaModelDto toDto(MapperMetaModelEntity entity);
-
-    @Mapping(target = "classMetaModelDtoType", ignore = true)
-    public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 
     public MapperMetaModel toFullMetaModel(MapperMetaModelEntity mapperMetaModelEntity, MetaModelContext metaModelContext) {
 

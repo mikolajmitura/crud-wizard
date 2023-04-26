@@ -14,6 +14,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createListWithMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.extendedPersonClassMetaModel1
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.sampleEntryMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel.PLACEHOLDER_PREFIX
 import static pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDtoSamples.createSampleDataStorageConnectorDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
@@ -21,6 +22,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaMo
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService.createNewEndpointReason
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
+import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.notNullValidatorMetaModelDto
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.classNotExistsMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
@@ -36,6 +38,7 @@ import javax.validation.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpMethod
+import org.springframework.util.CollectionUtils
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.sample.Agreement
@@ -54,6 +57,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelRepository
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByName
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ContextRefreshStatus
@@ -71,7 +75,9 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperCon
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
-import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeRealClass
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.NestedObject
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.ObjectForMergeTranslations
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeEnumTranslations
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity
@@ -1831,12 +1837,12 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         !Files.exists(Path.of(codeRootPathProvider.compiledCodeRootPath + "/1668361280915"))
     }
 
-    // TODO #4 merge translations too
-    def "should merge fields properties correctly"() {
+    def "should merge fields properties correctly and enum translations"() {
         given:
-        def postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
+        def postEndpoint
+        postEndpoint = createValidPostEndpointMetaModelDto().toBuilder()
             .payloadMetamodel(
-                createClassMetaModelDtoFromClass(SomeRealClass)
+                createClassMetaModelDtoFromClass(ObjectForMergeTranslations)
                     .toBuilder()
                     .fields([
                         createValidFieldMetaModelDto("name", String, [], [
@@ -1845,7 +1851,26 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                                 .valueRealClassName(String.canonicalName)
                                 .rawJson(objectToRawJson("some-value"))
                                 .build()
-                        ])
+                        ]),
+                        createValidFieldMetaModelDto("someObject", createClassMetaModelDtoFromClass(NestedObject).toBuilder()
+                            .fields([
+                                createValidFieldMetaModelDto("objectName", String)
+                            ])
+                            .build()),
+                        createValidFieldMetaModelDto("id", Long, [notNullValidatorMetaModelDto()]),
+                        createValidFieldMetaModelDto("someType", SomeEnumTranslations).toBuilder()
+                            .fieldType(createClassMetaModelDtoFromClass(SomeEnumTranslations).toBuilder()
+                                .enumMetaModel(
+                                    EnumMetaModelDto.builder()
+                                        .enums([
+                                            sampleEntryMetaModel("SIMPLE"),
+                                            sampleEntryMetaModel("MEDIUM"),
+                                            sampleEntryMetaModel("FULL"),
+                                        ])
+                                        .build()
+                                )
+                                .build())
+                            .build()
                     ])
                     .build()
             )
@@ -1858,11 +1883,48 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         endpointId >= 0
         def metaModelContext = metaModelContextService.metaModelContext
         def foundClassModel = metaModelContext.classMetaModels.findOneBy {
-            (SomeRealClass == it.realClass)
+            ObjectForMergeTranslations == it.realClass
         }
-        foundClassModel.fetchAllFields().find {
+
+        def fieldName = foundClassModel.fetchAllFields().find {
             it.fieldName == "name"
-        }.getAdditionalProperties()[0].valueAsObject == "some-value"
+        }
+        fieldName.fieldType.realClass == String
+        fieldName.getAdditionalProperties()[0].valueAsObject == "some-value"
+        CollectionUtils.isEmpty(fieldName.validators)
+        fieldName.translationFieldName.translationKey == "field.${ObjectForMergeTranslations.canonicalName}.name"
+
+        def fieldId = foundClassModel.fetchAllFields().find {
+            it.fieldName == "id"
+        }
+        fieldId.fieldType.realClass == Long
+        CollectionUtils.isEmpty(fieldId.getAdditionalProperties())
+        fieldId.validators.collect {
+            it.realClass
+        } == [NotNullValidator]
+        fieldId.translationFieldName.translationKey == "field.${ObjectForMergeTranslations.canonicalName}.id"
+
+        def fieldSomeObject = foundClassModel.fetchAllFields().find {
+            it.fieldName == "someObject"
+        }
+        fieldSomeObject.fieldType.realClass == NestedObject
+        fieldSomeObject.fieldType.translationName.translationKey == "classMetaModel.${NestedObject.canonicalName}"
+        fieldSomeObject.translationFieldName.translationKey == "field.${ObjectForMergeTranslations.canonicalName}.someObject"
+
+        def fieldObjectName = fieldSomeObject.fieldType.fetchAllFields().find {
+            it.fieldName == "objectName"
+        }
+        fieldObjectName.fieldType.realClass == String
+        fieldObjectName.translationFieldName.translationKey == "field.${NestedObject.canonicalName}.objectName"
+
+        def fieldSomeType = foundClassModel.fetchAllFields().find {
+            it.fieldName == "someType"
+        }
+        fieldSomeType.fieldType.realClass == SomeEnumTranslations
+        def enumMetaModel = fieldSomeType.fieldType.enumMetaModel
+        enumMetaModel.getEnumByName("SIMPLE").getTranslation().translationKey == "enum.${SomeEnumTranslations.canonicalName}.SIMPLE"
+        enumMetaModel.getEnumByName("MEDIUM").getTranslation().translationKey == "enum.${SomeEnumTranslations.canonicalName}.MEDIUM"
+        enumMetaModel.getEnumByName("FULL").getTranslation().translationKey == "enum.${SomeEnumTranslations.canonicalName}.FULL"
     }
 
     private static String parseExpressionMessage(int columnNumber, String message) {

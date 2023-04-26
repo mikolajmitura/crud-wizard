@@ -10,9 +10,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import pl.jalokim.crudwizard.core.exception.TechnicalException
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
+import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.CollectionElement
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationModel
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 
@@ -281,6 +283,25 @@ class ClassMetaModelTest extends UnitTestSpec {
         TechnicalException ex = thrown()
         ex.message == translatePlaceholder("ClassMetaModel.invalid.field.override", "someNumber",
             Number.canonicalName, "first-parent", String.canonicalName, "modelWithParents")
+    }
+
+    @Unroll
+    def "return expected message translation"() {
+        when:
+        def translation = classMetaModel.getTranslatedName()
+
+        then:
+        translation == expectedTranslation
+
+        where:
+        classMetaModel                                 | expectedTranslation
+        createClassMetaModelFromClass(SamplePersonDto) | "Sample person dto"
+        createClassMetaModelFromClass(SomeDto)         | SomeDto.canonicalName
+        ClassMetaModel.builder()
+            .translationName(TranslationModel.builder()
+                .translationKey("some.metamodel.translation")
+                .build())
+            .build()                                   | "Some metamodel"
     }
 
     private boolean assertFieldNameAndType(List<FieldMetaModel> foundFields, String fieldName, Class<?> expectedFieldType) {

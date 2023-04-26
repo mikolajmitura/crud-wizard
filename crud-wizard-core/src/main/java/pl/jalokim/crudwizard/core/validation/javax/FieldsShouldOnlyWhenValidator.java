@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.core.translations.AppMessageSource.buildProp
 import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getAppMessageSource;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsExternalPlaceholder;
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.WITH_OTHER_FIELD_VALUES;
 import static pl.jalokim.crudwizard.core.validation.javax.base.BaseConstraintValidatorWithDynamicMessage.buildMessageForValidator;
 import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldMetadataExtractorFromClass.FIELD_META_EXTRACTOR_FROM_CLASS;
 import static pl.jalokim.crudwizard.core.validation.javax.inner.FieldShouldWhenOtherCoreValidator.getValuesWhenCan;
@@ -61,14 +62,22 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
         boolean isValid = true;
         if (whenFieldHasExpectedState) {
             for (FieldShouldWhenOther fieldShouldWhenOther : thenOthersShould) {
+
+                ExpectedFieldState resolvedIsValue = fieldShouldWhenOther.is() == ExpectedFieldState.UNKNOWN ? is : fieldShouldWhenOther.is();
+                List<String> resolvedFieldValues = WITH_OTHER_FIELD_VALUES.contains(resolvedIsValue) &&
+                    fieldShouldWhenOther.otherFieldValues().length == 0 ?
+                    fieldValues :
+                    Arrays.asList(fieldShouldWhenOther.otherFieldValues());
+
                 FieldShouldWhenOtherCoreValidator fieldShouldWhenOtherValidator = newValidator(
                     FIELD_META_EXTRACTOR_FROM_CLASS,
                     fieldShouldWhenOther.field(),
                     fieldShouldWhenOther.should(),
                     Arrays.asList(fieldShouldWhenOther.fieldValues()),
-                    fieldShouldWhenOther.whenField(),
-                    fieldShouldWhenOther.is(),
-                    Arrays.asList(fieldShouldWhenOther.otherFieldValues()));
+                    FieldShouldWhenOther.NOT_PROVIDED_VALUE.equals(fieldShouldWhenOther.whenField()) ?
+                        whenField : fieldShouldWhenOther.whenField(),
+                    resolvedIsValue,
+                    resolvedFieldValues);
 
                 boolean nestedIsInExpectedState = fieldShouldWhenOtherValidator.isValidValue(value);
                 if (!nestedIsInExpectedState) {
