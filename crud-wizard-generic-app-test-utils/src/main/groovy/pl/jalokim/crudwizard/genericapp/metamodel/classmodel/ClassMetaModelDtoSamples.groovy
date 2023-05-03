@@ -15,6 +15,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
+import pl.jalokim.utils.reflection.MetadataReflectionUtils
 
 class ClassMetaModelDtoSamples {
 
@@ -175,6 +176,17 @@ class ClassMetaModelDtoSamples {
 
         if (!isSimpleType(metaModelClass)) {
             classBuilder.translationName(sampleTranslationDto())
+            classBuilder.fields(MetadataReflectionUtils.getAllFields(metaModelClass)
+                .findAll() {
+                    MetadataReflectionUtils.isNotStaticField(it)
+                }
+                .collect {
+                    FieldMetaModelDto.builder()
+                        .fieldName(it.name)
+                        .fieldType(createClassMetaModelDtoFromClass(it.type))
+                        .translationFieldName(sampleTranslationDto())
+                        .build()
+                })
         }
 
         classBuilder.build()

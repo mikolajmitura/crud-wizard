@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.test.utils
 
 import pl.jalokim.crudwizard.core.datetime.TimeProviderHolder
+import pl.jalokim.crudwizard.core.translations.LocaleHolder
 import pl.jalokim.crudwizard.test.utils.datetime.UnitTestTimeProvider
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import spock.lang.Shared
@@ -16,6 +17,7 @@ abstract class UnitTestSpec extends Specification implements UsesTimeProvider {
     }
 
     def setup() {
+        LocaleHolder.setLocale(LocaleHolder.defaultLocale)
         TimeProviderHolder.setTimeProvider(sharedTimeProvider)
     }
 

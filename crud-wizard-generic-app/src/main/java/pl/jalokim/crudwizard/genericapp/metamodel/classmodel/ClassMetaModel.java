@@ -482,7 +482,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             Map<String, FieldMetaModel> fieldsFromThisModel = elements(fields)
                 .asMap(FieldMetaModel::getFieldName);
 
-            for (FieldMetaModel fieldForMerge : fieldsToMerge) {
+            for (FieldMetaModel fieldForMerge : new ArrayList<>(fieldsToMerge)) {
                 FieldMetaModel fieldFromThisModel = fieldsFromThisModel.get(fieldForMerge.getFieldName());
                 if (fieldFromThisModel != null) {
                     fields.remove(fieldFromThisModel);

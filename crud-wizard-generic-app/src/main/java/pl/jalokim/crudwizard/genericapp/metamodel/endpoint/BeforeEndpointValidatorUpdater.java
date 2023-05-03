@@ -17,14 +17,15 @@ import pl.jalokim.utils.collection.CollectionUtils;
 public class BeforeEndpointValidatorUpdater {
 
     public void beforeValidation(EndpointMetaModelDto createEndpointMetaModelDto) {
-        addTranslationsToClassMetaModels(createEndpointMetaModelDto);
         createDefaultClassMetaModelNames(createEndpointMetaModelDto);
+        addTranslationsToClassMetaModels(createEndpointMetaModelDto);
         addQueryAndPathParamsClassMetaModelsToMappers(createEndpointMetaModelDto);
     }
 
     private void addTranslationsToClassMetaModels(EndpointMetaModelDto createEndpointMetaModelDto) {
         attachFieldTranslationsWhenNotExist(createEndpointMetaModelDto.getPayloadMetamodel());
         attachFieldTranslationsWhenNotExist(createEndpointMetaModelDto.getPathParams());
+        attachFieldTranslationsWhenNotExist(createEndpointMetaModelDto.getQueryArguments());
         Optional.ofNullable(createEndpointMetaModelDto.getResponseMetaModel())
             .map(EndpointResponseMetaModelDto::getClassMetaModel)
             .ifPresent(BeforeClassValidationUpdater::attachFieldTranslationsWhenNotExist);
