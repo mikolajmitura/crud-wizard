@@ -41,6 +41,7 @@ jobs:
       with:
         name: jacoco-report
         path: crud-wizard-code-coverage/target/site/jacoco/
+        jacoco-csv-file:  crud-wizard-code-coverage/target/site/jacoco/jacoco.csv
 
     - name: Commit and push the coverage badges and summary file
       if: ${{ github.event_name != 'pull_request' }}
