@@ -40,7 +40,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: jacoco-report
-        path: target/site/jacoco/
+        path: crud-wizard-code-coverage/target/site/jacoco/
 
     - name: Commit and push the coverage badges and summary file
       if: ${{ github.event_name != 'pull_request' }}
