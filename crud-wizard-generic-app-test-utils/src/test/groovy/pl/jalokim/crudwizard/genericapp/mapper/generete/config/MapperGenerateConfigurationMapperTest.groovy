@@ -8,11 +8,9 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
-import org.mapstruct.factory.Mappers
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
@@ -30,16 +28,13 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperCon
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper
 import pl.jalokim.utils.reflection.InvokableReflectionUtils
 import spock.lang.Specification
 
 class MapperGenerateConfigurationMapperTest extends Specification {
 
     private ClassMetaModelMapper classMetaModelMapper = Mock()
-    private AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
-    private TranslationMapper translationMapper = Mappers.getMapper(TranslationMapper)
-    private MapperGenerateConfigurationMapper testCase = new MapperGenerateConfigurationMapperImpl(additionalPropertyMapper, translationMapper)
+    private MapperGenerateConfigurationMapper testCase = new MapperGenerateConfigurationMapperImpl(classMetaModelMapper)
 
     def setup() {
         InvokableReflectionUtils.setValueForField(testCase, "classMetaModelMapper", classMetaModelMapper)

@@ -34,6 +34,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaMo
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDtoSamples.sampleJoinerDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelDtoSamples.createValidServiceMetaModelDtoAsScript
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.invalidMinMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.messageForValidator
@@ -288,6 +289,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                     createValidFieldMetaModelDto("basePath", Double),
                     FieldMetaModelDto.builder()
                         .fieldName("nextId")
+                        .translationFieldName(sampleTranslationDto())
                         .fieldType(createValidClassMetaModelDtoWithName())
                         .build()
 
@@ -391,7 +393,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel()),
                 createSampleDataStorageConnectorDto(exampleClassMetaModelDtoWithExtension(), "some-query-name"),
                 DataStorageConnectorMetaModelDto.builder().id(DS_CONNECTOR_ID).build(),
-                createSampleDataStorageConnectorDto(createClassMetaModelDtoFromClass(ExtendedSamplePersonDto), "some-query-name3"),
+                createSampleDataStorageConnectorDto(createModelExtendedSamplePersonDto(), "some-query-name3"),
                 createSampleDataStorageConnectorDto(createDocumentClassMetaDto(), "some-query-name4"),
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel(), "some-query-name5"),
             ])
@@ -409,7 +411,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel()),
                 createSampleDataStorageConnectorDto(exampleClassMetaModelDtoWithExtension(), "some-query-name"),
                 DataStorageConnectorMetaModelDto.builder().id(DS_CONNECTOR_ID).build(),
-                createSampleDataStorageConnectorDto(createClassMetaModelDtoFromClass(ExtendedSamplePersonDto), "some-query-name3"),
+                createSampleDataStorageConnectorDto(createModelExtendedSamplePersonDto(), "some-query-name3"),
                 createSampleDataStorageConnectorDto(createDocumentClassMetaDto(), "some-query-name4"),
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel(), "some-query-name5"),
             ])
@@ -811,5 +813,11 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
 
     private static String parseExpressionMessage(int columnNumber, String message) {
         translatePlaceholder("MapperContextEntryError.column") + ":" + columnNumber + ", " + message
+    }
+
+    private ClassMetaModelDto createModelExtendedSamplePersonDto() {
+        def model =  createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)
+        model.fields.remove(0)
+        model
     }
 }

@@ -389,6 +389,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .build()
 
         def personDocumentInThirdDbModel = ClassMetaModelDto.builder()
+            .translationName(sampleTranslationDto())
             .name("personDocumentDb")
             .isGenericEnumType(false)
             .fields([
@@ -471,6 +472,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .mapperMetaModel(createMapperMetaModelDto(GetByIdFromFewDsMapper, "mapPersonsResultsToOne"))
                 .classMetaModel(ClassMetaModelDto.builder()
+                    .translationName(sampleTranslationDto())
                     .name("personFrom3Dbs")
                     .fields([
                         createValidFieldMetaModelDto("firstDb", createClassMetaModelDtoWithId(personClassModel.id)),
@@ -672,6 +674,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
                 .classMetaModel(createListWithMetaModel(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                     .name("personResultEntry")
                     .fields([
                         createValidFieldMetaModelDto("uuid2", String),
@@ -981,7 +984,16 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                         ValidatorMetaModelDto.builder()
                             .className(NotNullValidator.canonicalName)
                             .build()
-                    ])
+                    ]),
+                    createValidFieldMetaModelDto("id", Long),
+                    createValidFieldMetaModelDto("someObject",
+                        createClassMetaModelDtoFromClass(NestedObject)
+                        .toBuilder()
+                            .fields([
+                                createValidFieldMetaModelDto("objectName", String),
+                            ])
+                            .build()
+                    )
                 ])
                 .build())
             .build()

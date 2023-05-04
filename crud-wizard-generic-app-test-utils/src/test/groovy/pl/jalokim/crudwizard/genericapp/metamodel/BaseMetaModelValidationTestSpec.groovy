@@ -125,6 +125,7 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
         def fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper, translationMapper, commonClassAndFieldMapper)
         FieldMetaModelService fieldMetaModelService = new FieldMetaModelService(fieldMetaModelMapper)
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
+        setValueForField(classMetaModelMapper, "commonClassAndFieldMapper", commonClassAndFieldMapper)
         setValueForField(fieldMetaModelMapper, "commonClassAndFieldMapperInjected", commonClassAndFieldMapper)
 
         setValueForField(mapperMetaModelMapper, "instanceLoader", instanceLoader)

@@ -1,6 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.endpoint;
 
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.BeforeClassValidationUpdater.attachFieldTranslationsWhenNotExist;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelExistence.PATH;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelExistence.QUERY;
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperType.GENERATED;
 import static pl.jalokim.utils.collection.Elements.elements;
 
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.BeforeClassValidationUpdater;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelExistence;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.utils.collection.CollectionUtils;
 
@@ -17,7 +20,7 @@ import pl.jalokim.utils.collection.CollectionUtils;
 public class BeforeEndpointValidatorUpdater {
 
     public void beforeValidation(EndpointMetaModelDto createEndpointMetaModelDto) {
-        createDefaultClassMetaModelNames(createEndpointMetaModelDto);
+        updateQueryArgumentsAndPathParams(createEndpointMetaModelDto);
         addTranslationsToClassMetaModels(createEndpointMetaModelDto);
         addQueryAndPathParamsClassMetaModelsToMappers(createEndpointMetaModelDto);
     }
@@ -53,12 +56,18 @@ public class BeforeEndpointValidatorUpdater {
         }
     }
 
-    private void createDefaultClassMetaModelNames(EndpointMetaModelDto createEndpointMetaModelDto) {
+    private void updateQueryArgumentsAndPathParams(EndpointMetaModelDto createEndpointMetaModelDto) {
         Optional.ofNullable(createEndpointMetaModelDto.getQueryArguments())
-            .ifPresent(queryArguments -> queryArguments.setName(createClassModelName(createEndpointMetaModelDto, "QueryArguments")));
+            .ifPresent(queryArguments -> {
+                queryArguments.setName(createClassModelName(createEndpointMetaModelDto, "QueryArguments"));
+                queryArguments.setClassMetaModelExistence(QUERY);
+            });
 
         Optional.ofNullable(createEndpointMetaModelDto.getPathParams())
-            .ifPresent(pathParams -> pathParams.setName(createClassModelName(createEndpointMetaModelDto, "PathParams")));
+            .ifPresent(pathParams -> {
+                pathParams.setName(createClassModelName(createEndpointMetaModelDto, "PathParams"));
+                pathParams.setClassMetaModelExistence(PATH);
+            });
     }
 
     private static String createClassModelName(EndpointMetaModelDto createEndpointMetaModelDto, String typeName) {

@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objec
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.TRANSLATIONS_SAMPLE
 import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDtoWithKey
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType
 
@@ -194,7 +195,7 @@ class ClassMetaModelDtoSamples {
 
     static ClassMetaModelDto createEmptyClassMetaModelDto() {
         ClassMetaModelDto.builder()
-            .translationName(sampleTranslationDto())
+            .translationName(sampleTranslationDtoWithKey())
             .isGenericEnumType(false)
             .build()
     }

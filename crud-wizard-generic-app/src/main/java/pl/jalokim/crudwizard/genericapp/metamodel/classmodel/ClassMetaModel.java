@@ -63,6 +63,8 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     TypeMetadata typeMetadata;
     String className;
 
+    ClassMetaModelExistence classMetaModelExistence;
+
     TranslationModel translationName;
 
     Boolean simpleRawClass;

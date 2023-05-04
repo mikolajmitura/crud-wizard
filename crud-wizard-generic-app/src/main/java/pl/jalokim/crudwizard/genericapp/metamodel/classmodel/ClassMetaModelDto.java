@@ -114,6 +114,10 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     @Builder.Default
     Boolean isGenericEnumType = false;
 
+    @NotNull
+    @Builder.Default
+    ClassMetaModelExistence classMetaModelExistence = ClassMetaModelExistence.OTHER;
+
     @Valid
     EnumMetaModelDto enumMetaModel;
 
