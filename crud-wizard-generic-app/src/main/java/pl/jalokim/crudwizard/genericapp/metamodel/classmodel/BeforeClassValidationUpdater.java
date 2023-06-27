@@ -38,6 +38,9 @@ public class BeforeClassValidationUpdater {
                 elements(classMetaModelDto.getGenericTypes())
                     .forEach(BeforeClassValidationUpdater::attachFieldTranslationsWhenNotExist);
 
+                elements(classMetaModelDto.getExtendsFromModels())
+                    .forEach(BeforeClassValidationUpdater::attachFieldTranslationsWhenNotExist);
+
                 elements(classMetaModelDto.getFields())
                     .forEach(field -> {
                         TranslationDto translationName = field.getTranslationFieldName();

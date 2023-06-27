@@ -49,8 +49,6 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     private String name;
 
-    private ClassMetaModelExistence classMetaModelExistence;
-
     @ManyToOne
     @JoinColumn(name = "translation_id")
     private TranslationEntity translationName;

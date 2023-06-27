@@ -22,13 +22,11 @@ import pl.jalokim.crudwizard.core.validation.javax.IdExists;
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.core.validation.javax.WhenFieldIsInStateThenOthersShould;
 import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
-import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ConditionallyNotNullTranslation;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByName;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ForRealClassFieldsCanBeMerged;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.OnlyExpectedFieldsForRealClass;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.predicate.CheckOnlyIsClassDefinition;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto;
@@ -44,6 +42,13 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
     fieldValues = "BY_ID",
     thenOthersShould = {
         @FieldShouldWhenOther(field = ClassMetaModelDto.ID, should = NOT_NULL, whenField = "classMetaModelDtoType", is = NOT_NULL)
+    })
+
+@WhenFieldIsInStateThenOthersShould(whenField = "classMetaModelDtoType",
+    is = EQUAL_TO_ANY,
+    fieldValues = "BY_RAW_CLASSNAME",
+    thenOthersShould = {
+        @FieldShouldWhenOther(field = ClassMetaModelDto.CLASS_NAME, should = NOT_NULL, whenField = "classMetaModelDtoType", is = NOT_NULL)
     })
 
 @WhenFieldIsInStateThenOthersShould(whenField = "classMetaModelDtoType",
@@ -78,9 +83,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDt
 })
 @ExistFullDefinitionInTempContextByName
 @ForRealClassFieldsCanBeMerged
-@ConditionallyNotNullTranslation
-@OnlyExpectedFieldsForRealClass
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@UniqueValue(entityClass = ClassMetaModelEntity.class, runOnlyWhen = CheckOnlyIsClassDefinition.class, forField = "name")
 public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
 
     public static final String ID = "id";
@@ -94,11 +98,9 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     public static final String ENUM_META_MODEL = "enumMetaModel";
     public static final String TRUE = "true";
 
-    @NotNull(groups = UpdateContext.class)
     @IdExists(entityClass = ClassMetaModelEntity.class, groups = FirstValidationPhase.class)
     Long id;
 
-    @UniqueValue(entityClass = ClassMetaModelEntity.class)
     // TODO uniqueness should be checked in whole temp context, due to fact that in one flow somebody can provide the same names
     @Size(min = 3, max = 100, groups = FirstValidationPhase.class)
     String name;
@@ -113,10 +115,6 @@ public class ClassMetaModelDto extends WithAdditionalPropertiesDto {
     @NotNull
     @Builder.Default
     Boolean isGenericEnumType = false;
-
-    @NotNull
-    @Builder.Default
-    ClassMetaModelExistence classMetaModelExistence = ClassMetaModelExistence.OTHER;
 
     @Valid
     EnumMetaModelDto enumMetaModel;

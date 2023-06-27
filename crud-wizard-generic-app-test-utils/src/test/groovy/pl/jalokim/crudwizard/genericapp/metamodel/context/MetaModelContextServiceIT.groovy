@@ -5,6 +5,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaMo
 
 import org.springframework.beans.factory.annotation.Autowired
 import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
+import pl.jalokim.crudwizard.core.utils.InstanceLoader
 import pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage
 import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalGetIdAfterSaveMapper
 import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultFinalJoinedRowOrDefaultMapper
@@ -24,7 +25,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelServic
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 

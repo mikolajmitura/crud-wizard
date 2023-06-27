@@ -15,6 +15,9 @@ import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ConditionallyNotNullTranslation;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByClassName;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.OnlyExpectedFieldsForRealClass;
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto;
 
@@ -40,6 +43,9 @@ public class FieldMetaModelDto extends WithAdditionalPropertiesDto {
 
     @NotNull(groups = FirstValidationPhase.class)
     @Valid
+    @ConditionallyNotNullTranslation
+    @OnlyExpectedFieldsForRealClass
+    @ExistFullDefinitionInTempContextByClassName
     ClassMetaModelDto fieldType;
 
     List<@Valid ValidatorMetaModelDto> validators;

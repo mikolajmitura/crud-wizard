@@ -20,6 +20,7 @@ import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.jalokim.crudwizard.core.exception.EntityNotFoundException;
 import pl.jalokim.crudwizard.core.utils.ClassUtils;
+import pl.jalokim.crudwizard.core.utils.InstanceLoader;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeMetadataDto;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
@@ -43,7 +44,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.argument.GenericMethodA
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
 import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator;
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver;
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Mapper(config = MapperAsSpringBeanConfig.class,
     uses = {

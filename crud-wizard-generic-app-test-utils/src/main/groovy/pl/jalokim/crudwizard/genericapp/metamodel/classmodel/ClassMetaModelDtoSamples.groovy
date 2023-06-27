@@ -10,6 +10,7 @@ import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType
 
 import java.time.LocalDate
 import org.springframework.data.domain.Page
+import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
@@ -170,26 +171,36 @@ class ClassMetaModelDtoSamples {
             .build()
     }
 
+    static ClassMetaModelDto createClassMetaModelDtoForClass(Class<?> metaModelClass) {
+        ClassMetaModelDto.builder()
+            .className(metaModelClass.canonicalName)
+            .classMetaModelDtoType(MetaModelDtoType.BY_RAW_CLASSNAME)
+        .build()
+    }
+
     static ClassMetaModelDto createClassMetaModelDtoFromClass(Class<?> metaModelClass) {
         def classBuilder = ClassMetaModelDto.builder()
             .className(metaModelClass.canonicalName)
             .isGenericEnumType(false)
 
         if (!isSimpleType(metaModelClass)) {
-            classBuilder.translationName(sampleTranslationDto())
-            classBuilder.fields(MetadataReflectionUtils.getAllFields(metaModelClass)
+
+            Map<String, FieldMetaModelDto> fieldsByName = new HashMap<>()
+            MetadataReflectionUtils.getAllFields(metaModelClass)
                 .findAll() {
                     MetadataReflectionUtils.isNotStaticField(it)
                 }
-                .collect {
-                    FieldMetaModelDto.builder()
+                .each {
+                    fieldsByName.put(it.name, FieldMetaModelDto.builder()
                         .fieldName(it.name)
                         .fieldType(createClassMetaModelDtoFromClass(it.type))
                         .translationFieldName(sampleTranslationDto())
-                        .build()
-                })
-        }
+                        .build())
+                }
 
+            classBuilder.translationName(sampleTranslationDto())
+            classBuilder.fields(fieldsByName.values() as List)
+        }
         classBuilder.build()
     }
 

@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import pl.jalokim.crudwizard.core.translations.LocaleService;
 import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
+import pl.jalokim.crudwizard.core.utils.InstanceLoader;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.cleaner.TempDirCleanEvent;
 import pl.jalokim.crudwizard.genericapp.datastorage.DataStorage;
@@ -39,7 +40,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModelServic
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationLanguageService;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 import pl.jalokim.crudwizard.genericapp.provider.DefaultBeansConfigService;
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @MetamodelService
 @RequiredArgsConstructor

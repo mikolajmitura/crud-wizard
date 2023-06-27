@@ -4,8 +4,8 @@ import static java.util.Optional.ofNullable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.utils.InstanceLoader;
 import pl.jalokim.crudwizard.genericapp.datastorage.query.DataStorageQueryProvider;
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @Component
 public class QueryProviderMapper {

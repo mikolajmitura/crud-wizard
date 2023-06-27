@@ -7,6 +7,7 @@ import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createM
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoForClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithGenerics
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEnumMetaModel
@@ -21,6 +22,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaMo
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostExtendedUserWithValidators2
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.emptyEndpointMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelService.createNewEndpointReason
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModelDtoSamples.createAdditionalValidatorsForExtendedPerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.notNullValidatorMetaModelDto
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.classNotExistsMessage
@@ -43,6 +45,7 @@ import pl.jalokim.crudwizard.GenericAppWithReloadMetaContextSpecification
 import pl.jalokim.crudwizard.core.rest.response.error.ErrorDto
 import pl.jalokim.crudwizard.core.sample.Agreement
 import pl.jalokim.crudwizard.core.sample.PersonEvent
+import pl.jalokim.crudwizard.core.utils.InstanceLoader
 import pl.jalokim.crudwizard.core.validation.javax.UniqueValue
 import pl.jalokim.crudwizard.genericapp.compiler.CompiledCodeRootPathProvider
 import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
@@ -88,7 +91,6 @@ import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.BeanAndMethodDtoTestService
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.MapGenericService
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
@@ -327,11 +329,14 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     }
 
     def "should return validation messages about unique names and cannot find data storage factory"() {
+
         given:
-        def createPostPersonEndpoint = createValidPostExtendedUserWithValidators2().toBuilder()
+        def documentClassMetaDto = ClassMetaModelDtoSamples.createDocumentClassMetaDto()
+        def sampleEndpoint = createValidPostExtendedUserWithValidators2()
+        def createPostPersonEndpoint = sampleEndpoint.toBuilder()
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(
-                    ClassMetaModelDtoSamples.createDocumentClassMetaDto(),
+                    documentClassMetaDto,
                     DataStorageMetaModelDtoSamples.createDataStorageMetaModelDto("second-database")
                 )]
             )
@@ -340,18 +345,25 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint)
 
         createPostPersonEndpoint = createPostPersonEndpoint.toBuilder()
+            .payloadMetamodel(sampleEndpoint.payloadMetamodel.toBuilder()
+                .fields(changeFromClassDefinitionToByName(sampleEndpoint.payloadMetamodel))
+                .build())
             .baseUrl(createPostPersonEndpoint.getBaseUrl() + "/next")
             .build()
 
         when:
-        endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint.toBuilder()
+        def endpoint = createPostPersonEndpoint.toBuilder()
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(
-                    ClassMetaModelDtoSamples.createDocumentClassMetaDto(),
+                    documentClassMetaDto.toBuilder()
+                        .fields(changeFromClassDefinitionToByName(documentClassMetaDto))
+                        .build(),
                     DataStorageMetaModelDtoSamples.createDataStorageMetaModelDto("second-database", DataStorageWithoutFactory.canonicalName)
                 )]
             )
-            .build())
+            .build()
+
+        endpointMetaModelService.createNewEndpoint(endpoint)
 
         then:
         ConstraintViolationException tx = thrown()
@@ -364,6 +376,8 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             errorEntry("operationName", messageForValidator(UniqueValue)),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.name", messageForValidator(UniqueValue)),
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className", messageForValidator(VerifyThatCanCreateDataStorage)),
+            errorEntry("payloadMetamodel.fields[4].fieldType.genericTypes[0].name", messageForValidator(UniqueValue)),
+            errorEntry("payloadMetamodel.fields[4].fieldType.genericTypes[0].fields[2].fieldType.name", messageForValidator(UniqueValue)),
         ])
     }
 
@@ -376,6 +390,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                 .name("invoices")
                 .build())
             .payloadMetamodel(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                 .name("invoice")
                 .fields([
                     createValidFieldMetaModelDto("id", Long),
@@ -390,6 +405,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
         EndpointMetaModelDto createPersonEndpointDto = createValidPostEndpointMetaModelDto().toBuilder()
             .payloadMetamodel(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                 .name("person")
                 .fields([
                     createValidFieldMetaModelDto("id", Long),
@@ -399,6 +415,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                     createValidFieldMetaModelDto("documents", createListWithMetaModel(
                         ClassMetaModelDto.builder()
                             .name("document")
+                            .translationName(sampleTranslationDto())
                             .fields([
                                 createValidFieldMetaModelDto("uuid", String),
                                 createValidFieldMetaModelDto("serialNumber", String),
@@ -411,14 +428,10 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                     createValidFieldMetaModelDto("invoices",
                         createListWithMetaModel(buildClassMetaModelDtoWithId(invoiceClassModel.id))),
                     createValidFieldMetaModelDto("oldAgreements", createListWithMetaModel(
-                        ClassMetaModelDto.builder()
-                            .className(Agreement.canonicalName)
-                            .build()
+                        createClassMetaModelDtoFromClass(Agreement)
                     )),
                     createValidFieldMetaModelDto("currentAgreement",
-                        ClassMetaModelDto.builder()
-                            .className(Agreement.canonicalName)
-                            .build()
+                        createClassMetaModelDtoForClass(Agreement)
                     )
                 ])
                 .build())
@@ -436,8 +449,9 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         personClassModel.getFieldByName("documents").getFieldType().genericTypes[0].is(documentClassModel)
         personClassModel.getFieldByName("expiredDocuments").getFieldType().genericTypes[0].is(documentClassModel)
         personClassModel.getFieldByName("invoices").getFieldType().genericTypes[0].isTheSameMetaModel(invoiceClassModel)
-        personClassModel.getFieldByName("oldAgreements").getFieldType().genericTypes[0]
-            .is(personClassModel.getFieldByName("currentAgreement").getFieldType())
+        def oldAgreementsFirstGenericType = personClassModel.getFieldByName("oldAgreements").getFieldType().genericTypes[0]
+        def currentAgreementType = personClassModel.getFieldByName("currentAgreement").getFieldType()
+        oldAgreementsFirstGenericType.is(currentAgreementType)
     }
 
     def "should inform about lack of full class metamodel definitions"() {
@@ -450,6 +464,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                     .build(),
                 DataStorageConnectorMetaModelDto.builder()
                     .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .translationName(sampleTranslationDto())
                         .name("valid")
                         .fields([
                             createIdFieldType("id", Long)
@@ -993,8 +1008,6 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
                 invalidMethodReturnType(String.canonicalName, LocalDateTime.canonicalName)
             ),
-            errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
-                invalidMethodParameter(0, BeanType.SERVICE)),
         ]                                                                                                                         |
             "payload generic_enum, service invalid return types and arguments"
 
@@ -1425,6 +1438,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             .dataStorageConnectors([
                 DataStorageConnectorMetaModelDto.builder()
                     .classMetaModelInDataStorage(ClassMetaModelDto.builder()
+                        .translationName(sampleTranslationDto())
                         .name("personEntity")
                         .fields([
                             createIdFieldType("id", Long),
@@ -1477,7 +1491,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                                     MapperConfigurationDto.builder()
                                         .name("personEventMapper")
                                         .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
-                                        .targetMetaModel(createClassMetaModelDtoFromClass(PersonEvent))
+                                        .targetMetaModel(createClassMetaModelDtoForClass(PersonEvent))
                                         .build()
                                 )
                                 .build())
@@ -1486,6 +1500,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             ])
             .payloadMetamodel(ClassMetaModelDto.builder()
                 .name("personDto")
+                .translationName(sampleTranslationDto())
                 .fields([
                     createValidFieldMetaModelDto("id", Long),
                     createValidFieldMetaModelDto("code", String),
@@ -1568,6 +1583,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                     .build(),
             ])
             .payloadMetamodel(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                 .name("personDto")
                 .fields([
                     createIdFieldType("id", Long),
@@ -1618,6 +1634,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             ])
             .payloadMetamodel(ClassMetaModelDto.builder()
                 .name("personWrapperDto")
+                .translationName(sampleTranslationDto())
                 .fields([
                     createIdFieldType("id", Long),
                     createValidFieldMetaModelDto("uuid", String),
@@ -1667,6 +1684,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
                     .build(),
             ])
             .payloadMetamodel(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                 .name("personDto")
                 .fields([
                     createIdFieldType("id", Long),
@@ -1940,6 +1958,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
     private static final PERSON_METAMODEL = ClassMetaModelDto.builder()
         .name("person")
+        .translationName(sampleTranslationDto())
         .fields([
             createIdFieldType("id", Long),
             createValidFieldMetaModelDto("name", String),
@@ -1952,6 +1971,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     private static final PAGE_OF_PERSON_METAMODEL = createClassMetaModelDtoWithGenerics(Page, PERSON_METAMODEL)
 
     private static final PERSON_METAMODEL_DS = ClassMetaModelDto.builder()
+        .translationName(sampleTranslationDto())
         .name("person_ds")
         .fields([
             createIdFieldType("id", String),

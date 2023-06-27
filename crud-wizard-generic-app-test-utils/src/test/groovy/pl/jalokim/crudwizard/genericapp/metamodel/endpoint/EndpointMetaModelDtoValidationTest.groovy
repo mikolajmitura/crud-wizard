@@ -12,6 +12,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT_NULL
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoForClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createDocumentClassMetaDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createEmptyClassMetaModelDto
@@ -76,7 +77,11 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.NestedObject
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.ObjectForMergeTranslations
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeEnumTranslations
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeRealClass
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
+import pl.jalokim.crudwizard.genericapp.rest.samples.dto.NestedObject2L
+import pl.jalokim.crudwizard.genericapp.rest.samples.dto.NestedObject3L
+import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SomeDtoWithNestedFields
 import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SomeRawDto
 import pl.jalokim.crudwizard.genericapp.service.DefaultGenericService
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
@@ -393,7 +398,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel()),
                 createSampleDataStorageConnectorDto(exampleClassMetaModelDtoWithExtension(), "some-query-name"),
                 DataStorageConnectorMetaModelDto.builder().id(DS_CONNECTOR_ID).build(),
-                createSampleDataStorageConnectorDto(createModelExtendedSamplePersonDto(), "some-query-name3"),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoFromClass(ExtendedSamplePersonDto), "some-query-name3"),
                 createSampleDataStorageConnectorDto(createDocumentClassMetaDto(), "some-query-name4"),
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel(), "some-query-name5"),
             ])
@@ -411,7 +416,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel()),
                 createSampleDataStorageConnectorDto(exampleClassMetaModelDtoWithExtension(), "some-query-name"),
                 DataStorageConnectorMetaModelDto.builder().id(DS_CONNECTOR_ID).build(),
-                createSampleDataStorageConnectorDto(createModelExtendedSamplePersonDto(), "some-query-name3"),
+                createSampleDataStorageConnectorDto(createClassMetaModelDtoFromClass(ExtendedSamplePersonDto), "some-query-name3"),
                 createSampleDataStorageConnectorDto(createDocumentClassMetaDto(), "some-query-name4"),
                 createSampleDataStorageConnectorDto(simplePersonClassMetaModel(), "some-query-name5"),
             ])
@@ -431,6 +436,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
         createValidPostEndpointMetaModelDto().toBuilder()
             .payloadMetamodel(ClassMetaModelDto.builder()
                 .name("personDto")
+                .translationName(sampleTranslationDto())
                 .isGenericEnumType(false)
                 .fields([
                     createValidFieldMetaModelDto("id", String, [], [isIdFieldType()]),
@@ -471,12 +477,14 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                     .classMetaModelInDataStorage(ClassMetaModelDto.builder()
                         .name("personEntity")
                         .isGenericEnumType(false)
+                        .translationName(sampleTranslationDto())
                         .fields([
                             createValidFieldMetaModelDto("uuid", String, [], [isIdFieldType()]),
                             createValidFieldMetaModelDto("name", String),
                             createValidFieldMetaModelDto("surname", String),
                             createValidFieldMetaModelDto("document", ClassMetaModelDto.builder()
                                 .name("document")
+                                .translationName(sampleTranslationDto())
                                 .isGenericEnumType(false)
                                 .fields([
                                     createValidFieldMetaModelDto("serialNumber", String),
@@ -490,6 +498,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
 
         createValidPostEndpointMetaModelDto().toBuilder()
             .payloadMetamodel(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                 .name("personDto")
                 .isGenericEnumType(false)
                 .fields([
@@ -582,6 +591,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                             createValidFieldMetaModelDto("invalidInnerMethodName", String),
                             createValidFieldMetaModelDto("document", ClassMetaModelDto.builder()
                                 .name("document")
+                                .translationName(sampleTranslationDto())
                                 .isGenericEnumType(false)
                                 .fields([
                                     createValidFieldMetaModelDto("serialNumber", String),
@@ -600,7 +610,7 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                             .methodName("mapSomeRawDto")
                             .build())
                         .build())
-                    .classMetaModelInDataStorage(createClassMetaModelDtoFromClass(SomeRawDto))
+                    .classMetaModelInDataStorage(createClassMetaModelDtoForClass(SomeRawDto))
                     .build()
 
             ])
@@ -662,7 +672,6 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                     ]
 
                 ))),
-
         ]                                                      | "invalid payload with invalid target fields in mappings"
 
         createValidPostEndpointMetaModelDto().toBuilder()
@@ -681,12 +690,12 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                     ])
                     .build()
             )
-            .build() | [
+            .build()                          | [
             errorEntry("payloadMetamodel.fields[1].fieldType.enumMetaModel",
                 translatePlaceholder("ForRealClassFieldsCanBeMerged.expected.enum.translations")),
             errorEntry("payloadMetamodel.fields", "There should be a field named: id"),
             errorEntry("payloadMetamodel.fields", "There should be a field named: someObject")
-            ] | "cannot find enum metamodel for real enum during check translations"
+        ]                                                      | "cannot find enum metamodel for real enum during check translations"
 
         createValidPostEndpointMetaModelDto().toBuilder()
             .payloadMetamodel(
@@ -717,16 +726,16 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                     ])
                     .build()
             )
-            .build() | [
+            .build()                          | [
             errorEntry("payloadMetamodel.fields", "There should be a field named: someObject"),
-            errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums[2]','Unknown enum entry'),
+            errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums[2]', 'Unknown enum entry'),
             errorEntry('payloadMetamodel.fields', 'There should be a field named: id'),
-            errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums[1]','Unknown enum entry'),
+            errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums[1]', 'Unknown enum entry'),
             errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums', 'Not given translation for enum: FULL'),
             errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums', 'Not given translation for enum: MEDIUM'),
             errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums[2].name', 'must not be blank'),
             errorEntry('payloadMetamodel.fields[1].fieldType.enumMetaModel.enums[2].translation', 'must not be null'),
-            ] | "invalid translations for enums"
+        ]                                                      | "invalid translations for enums"
 
         createValidPostEndpointMetaModelDto().toBuilder()
             .payloadMetamodel(
@@ -762,7 +771,78 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
                     ])
                     .build()
             )
-            .build() | [] | "valid translations for enums"
+            .build()                          | []             | "valid translations for enums"
+
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
+                .fields([
+                    createValidFieldMetaModelDto("id", Long),
+                    createValidFieldMetaModelDto("name", String),
+                ])
+                .build())
+            .build()                          | [
+            errorEntry("payloadMetamodel.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "someObject"))
+        ]                                                      | "lack of 1 translated fields for class metamodel with classname"
+
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
+                .fields([])
+                .translationName(null).build())
+            .build()                          | [
+            errorEntry("payloadMetamodel.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "id")),
+            errorEntry("payloadMetamodel.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "name")),
+            errorEntry("payloadMetamodel.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "someObject")),
+            errorEntry("payloadMetamodel.translationName", notNullMessage())
+        ]                                                      | "lack of 3 fields for class metamodel with classname"
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(createClassMetaModelDtoFromClass(SomeDtoWithNestedFields).toBuilder()
+                .fields([
+                    createValidFieldMetaModelDto("uuid", String),
+                    createValidFieldMetaModelDto("refId", Long),
+                    createValidFieldMetaModelDto("referenceNumber", String),
+                    createValidFieldMetaModelDto("otherField",
+                        createClassMetaModelDtoFromClass(SomeRawDto).toBuilder()
+                            .extendsFromModels([createClassMetaModelDtoFromClass(Long)])
+                            .fields([
+                                createValidFieldMetaModelDto("id", Long),
+                                createValidFieldMetaModelDto("surname", String),
+                            ])
+                            .build()),
+                    createValidFieldMetaModelDto("level2", createClassMetaModelDtoFromClass(NestedObject2L).toBuilder()
+                        .fields([
+                            createValidFieldMetaModelDto("id", Long),
+                            createValidFieldMetaModelDto("level3", createClassMetaModelDtoFromClass(NestedObject3L).toBuilder()
+                                .fields([
+                                    createValidFieldMetaModelDto("realUuid", UUID),
+                                ])
+                                .build()),
+                        ])
+                        .build()),
+                    createValidFieldMetaModelDto("level22",
+                        createClassMetaModelDtoFromClass(NestedObject2L).toBuilder()
+                            .extendsFromModels([createClassMetaModelDtoFromClass(Long)])
+                            .fields([
+                                createValidFieldMetaModelDto("id", String),
+                                createValidFieldMetaModelDto("level3", NestedObject3L),
+                            ])
+                            .build()),
+                ])
+                .build())
+            .build()                          | [
+            errorEntry("payloadMetamodel.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "createdDate")),
+            errorEntry("payloadMetamodel.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "hashValue")),
+            errorEntry("payloadMetamodel.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "superId")),
+            errorEntry("payloadMetamodel.fields[3].fieldType.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "name")),
+            errorEntry("payloadMetamodel.fields[5].fieldType.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "serialNumber")),
+            errorEntry("payloadMetamodel.fields[4].fieldType.fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "serialNumber")),
+            errorEntry("payloadMetamodel.fields[3].fieldType.extendsFromModels", whenFieldIsInStateThenOthersShould(
+                "classMetaModelDtoType", EQUAL_TO_ANY, ["DEFINITION"],
+                fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, []))),
+            errorEntry("payloadMetamodel.fields[5].fieldType.extendsFromModels", whenFieldIsInStateThenOthersShould(
+                "classMetaModelDtoType", EQUAL_TO_ANY, ["DEFINITION"],
+                fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, []))),
+            errorEntry("payloadMetamodel.fields[4].fieldType.fields[0].fieldType", getMessage("ForRealClassFieldsCanBeMerged.invalid.field.type", String.canonicalName))
+        ]                                                      | "problem with nested fields names etc"
     }
 
     private ServiceMetaModel createDefaultService() {
@@ -787,9 +867,11 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
         MetaModelContext metaModelContext = new MetaModelContext()
         metaModelContext.setDefaultServiceMetaModel(createDefaultService())
         metaModelContext.setClassMetaModels(new ModelsCache())
+        metaModelContext.setTranslationsContext(new LanguagesContext(["en_US": "American English"]))
         metaModelContextService.getMetaModelContext() >> metaModelContext
         metaModelContextService.loadNewMetaModelContext() >> metaModelContext
         temporaryContextLoader.loadTemporaryContextFor(endpointMetaModelDto)
+        beforeEndpointValidatorUpdater.beforeValidation(endpointMetaModelDto)
 
         when:
         def foundErrors = validatorWithConverter.validateAndReturnErrors(endpointMetaModelDto, EndpointUpdateContext)
@@ -813,11 +895,5 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
 
     private static String parseExpressionMessage(int columnNumber, String message) {
         translatePlaceholder("MapperContextEntryError.column") + ":" + columnNumber + ", " + message
-    }
-
-    private ClassMetaModelDto createModelExtendedSamplePersonDto() {
-        def model =  createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)
-        model.fields.remove(0)
-        model
     }
 }

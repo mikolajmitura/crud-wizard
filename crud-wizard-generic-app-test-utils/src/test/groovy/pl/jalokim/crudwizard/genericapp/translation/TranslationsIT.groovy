@@ -24,9 +24,11 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.translation.Translation
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.createHeaders
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractErrorResponseDto
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractResponseAsString
+import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.TEST_APPLICATION_TRANSLATIONS_PATH
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_BLANK_MESSAGE_PROPERTY
 import static pl.jalokim.crudwizard.test.utils.translations.ValidationMessageConstants.NOT_NULL_MESSAGE_PROPERTY
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
+import static pl.jalokim.utils.collection.Elements.elements
 import static pl.jalokim.utils.template.TemplateAsText.fromClassPath
 
 import javax.validation.ConstraintViolationException
@@ -50,7 +52,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationAndSour
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationEntryEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationLanguageEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationLanguageRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationLanguageService
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationRepository
@@ -59,6 +60,7 @@ import pl.jalokim.crudwizard.genericapp.rest.samples.dto.TranslationArgs
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
 import pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
+import pl.jalokim.utils.collection.Elements
 import spock.lang.Unroll
 
 class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
@@ -516,9 +518,9 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
         then:
         ConstraintViolationException tx = thrown()
         def foundErrors = ValidatorWithConverter.errorsFromViolationException(tx)
-        assertValidationResults(foundErrors, [
-            errorEntry("translations", "Cannot enable language due to not provided translations")
-        ])
+        foundErrors.size() == 1
+        foundErrors.get(0).property == 'translations'
+        foundErrors.get(0).message.contains("Cannot enable language due to not provided translations")
     }
 
     def "can save new language without all given translations when not enabled, when enabled then context will refreshed"() {
@@ -619,13 +621,13 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
         metaModelContextService.getMetaModelContext().translationsContext
             .getAllLanguages().keySet() == ["en_US"] as Set
 
-        def translationKeyToPopulate = getTranslationKeysFromTest()
+        and:
+        def translationKeyToPopulate = getTranslationKeysFromSources()
         def translations = new HashMap<String, String>()
         translationKeyToPopulate.forEach {
             translations.put(it, 'some translations')
         }
 
-        and:
         LocaleHolder.setLocale(getDefaultLocale())
         def enablePlLang = LanguageTranslationsDto.builder()
             .languageCode("pl_PL")
@@ -676,23 +678,41 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
     }
 
     private addSupportedLanguage(String language) {
-        inVoidTransaction {
-            TranslationLanguageEntity translationLanguageEntity = TranslationLanguageEntity.builder()
-                .languageCode(language)
-                .languageFullName("Polski")
-                .build()
-            translationLanguageRepository.save(translationLanguageEntity)
-        }
-    }
+        LocaleHolder.setLocale(getDefaultLocale())
+        def enablePlLang = LanguageTranslationsDto.builder()
+            .languageCode(language)
+            .languageFullName(language)
+            .enabled(true)
+            .translations([:])
+            .build()
 
-    private Set<String> getTranslationKeysFromTest() {
-        translationService.getTranslationsAndSourceByLocale(defaultLocale)
-            .findAll {
-                it.source == "test-application-translations"
+        try {
+            translationLanguageService.saveOrUpdate(enablePlLang)
+        } catch (ConstraintViolationException exception) {
+            def size = exception.constraintViolations.size()
+            if (size == 1) {
+                def errorEntry = elements(exception.constraintViolations).asList().get(0)
+
+                def translationKeyToPopulate = Elements.bySplitText(errorEntry.message, System.lineSeparator())
+                .skip(1)
+                .asList()
+                def translations = new HashMap<String, String>()
+                translationKeyToPopulate.forEach {
+                    translations.put(it, 'some translations')
+                }
+
+                enablePlLang = LanguageTranslationsDto.builder()
+                    .languageCode(language)
+                    .languageFullName(language)
+                    .enabled(true)
+                    .translations(translations)
+                    .build()
+                translationLanguageService.saveOrUpdate(enablePlLang)
+            } else {
+                throw exception
             }
-            .collect {
-                it.translationKey
-            } as Set
+        }
+
     }
 
     static class TranslationDb {
@@ -710,5 +730,15 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
 
     TranslationDb createTranslationDb(String langKey, String key, String translation) {
         new TranslationDb(langKey, key, translation)
+    }
+
+    private Set<String> getTranslationKeysFromSources(List<String> translationsSources = [TEST_APPLICATION_TRANSLATIONS_PATH]) {
+        translationService.getTranslationsAndSourceByLocale(defaultLocale)
+            .findAll {
+                translationsSources.contains(it.source)
+            }
+            .collect {
+                it.translationKey
+            } as Set
     }
 }

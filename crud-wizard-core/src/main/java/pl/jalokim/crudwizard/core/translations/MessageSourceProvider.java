@@ -16,7 +16,7 @@ public class MessageSourceProvider {
     private final AtomicReference<Map<Locale, Set<String>>> propertiesByLocale = new AtomicReference<>();
 
     public boolean isSupportingLanguageAndProperty(Locale locale, String property) {
-        return propertiesByLocale.get().get(locale) != null && propertiesByLocale.get().get(locale).contains(property);
+        return getAllKeysForLocale(locale) != null && propertiesByLocale.get().get(locale).contains(property);
     }
 
     public void refresh(List<Locale> allSupportedLocales) {
@@ -26,5 +26,9 @@ public class MessageSourceProvider {
 
     protected void setPropertiesByLocale(Map<Locale, Set<String>> propertiesByLocale) {
         this.propertiesByLocale.set(propertiesByLocale);
+    }
+
+    public Set<String> getAllKeysForLocale(Locale locale) {
+        return propertiesByLocale.get().get(locale);
     }
 }

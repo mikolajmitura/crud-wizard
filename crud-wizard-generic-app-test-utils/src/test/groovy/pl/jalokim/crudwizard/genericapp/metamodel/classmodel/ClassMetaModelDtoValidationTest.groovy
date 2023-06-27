@@ -18,7 +18,6 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidClassMetaModelDtoWithName
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidEnumMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
-import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.TRANSLATIONS_SAMPLE
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createEmptyValidatorMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWhenOtherMessage
@@ -27,14 +26,12 @@ import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTest
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 import static pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter.createValidatorWithConverter
-import static pl.jalokim.utils.test.DataFakerHelper.randomLong
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import javax.validation.constraints.NotBlank
 import org.mapstruct.factory.Mappers
 import org.springframework.jdbc.core.JdbcTemplate
 import pl.jalokim.crudwizard.core.validation.javax.groups.FirstValidationPhase
-import pl.jalokim.crudwizard.core.validation.javax.groups.UpdateContext
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.NotContainsWhiteSpaces
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
@@ -43,11 +40,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeRealClass
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDto
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper
-import pl.jalokim.crudwizard.genericapp.rest.samples.dto.NestedObject2L
-import pl.jalokim.crudwizard.genericapp.rest.samples.dto.NestedObject3L
-import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SomeDtoWithNestedFields
-import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SomeRawDto
-import pl.jalokim.crudwizard.genericapp.rest.samples.dto.SuperNestedObject
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 import pl.jalokim.utils.reflection.InvokableReflectionUtils
@@ -90,6 +82,7 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
 
     @Unroll
     def "should return expected messages for default context of ClassMetaModelDto"() {
+        // TODO #4 those test for translations move to validation via endpoint
         when:
         attachFieldTranslationsWhenNotExist(classMetaModelDto)
         def foundErrors = validatorWithConverter.validateAndReturnErrors(classMetaModelDto, FirstValidationPhase)
@@ -125,7 +118,11 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
 
         createValidClassMetaModelDtoWithClassName()           | []
 
-        createEmptyClassMetaModelDto()                        | [
+        createEmptyClassMetaModelDto().toBuilder()
+            .translationName(createEmptyClassMetaModelDto().getTranslationName().toBuilder()
+                .translationKey(null)
+                .build())
+            .build()                                          | [
             errorEntry("name", whenFieldIsInStateThenOthersShould("id", NULL, fieldShouldWhenOtherMessage(NOT_NULL, [], "className", NULL, []))),
             errorEntry("translationName.translationKey",
                 whenFieldIsInStateThenOthersShould("translationId", NULL, fieldShouldWhenOtherMessage(NOT_BLANK, [], "translationId", NULL, [])))
@@ -196,111 +193,15 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
         createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
             .fields([
                 createValidFieldMetaModelDto("id", Long),
-                createValidFieldMetaModelDto("name", String),
-            ])
-            .build()                                          | [
-            errorEntry("fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "someObject")),
-        ]
-
-        createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
-            .fields([
-                createValidFieldMetaModelDto("id", Long),
                 createValidFieldMetaModelDto("surname", String),
                 createValidFieldMetaModelDto("name", UUID),
             ])
             .build()                                          | [
-            errorEntry("fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "someObject")),
             errorEntry("fields[1].fieldName", getMessage("ForRealClassFieldsCanBeMerged.invalid.field.name")),
             errorEntry("fields[2].fieldType", getMessage("ForRealClassFieldsCanBeMerged.invalid.field.type", String.canonicalName)),
         ]
 
-        createClassMetaModelDtoFromClass(SomeRealClass).toBuilder()
-            .translationName(null).build()                    | [
-            errorEntry("fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "id")),
-            errorEntry("fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "name")),
-            errorEntry("fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "someObject")),
-            errorEntry("translationName", notNullMessage())
-        ]
-
         createClassMetaModelDtoFromClass(String).toBuilder()
             .translationName(null).build()                    | []
-
-        createClassMetaModelDtoFromClass(SomeDtoWithNestedFields).toBuilder()
-            .fields([
-                createValidFieldMetaModelDto("uuid", String),
-                createValidFieldMetaModelDto("refId", Long),
-                createValidFieldMetaModelDto("referenceNumber", String),
-                createValidFieldMetaModelDto("otherField",
-                    createClassMetaModelDtoFromClass(SomeRawDto).toBuilder()
-                        .extendsFromModels([createClassMetaModelDtoFromClass(Long)])
-                        .fields([
-                            createValidFieldMetaModelDto("id", Long),
-                            createValidFieldMetaModelDto("surname", String),
-                        ])
-                        .build()),
-                createValidFieldMetaModelDto("level2", createClassMetaModelDtoFromClass(NestedObject2L).toBuilder()
-                    .extendsFromModels([createClassMetaModelDtoFromClass(SuperNestedObject)])
-                    .fields([
-                        createValidFieldMetaModelDto("id", Long),
-                        createValidFieldMetaModelDto("level3", createClassMetaModelDtoFromClass(NestedObject3L).toBuilder()
-                            .fields([
-                                createValidFieldMetaModelDto("realUuid", UUID),
-                            ])
-                            .build()),
-                    ])
-                    .build()),
-                createValidFieldMetaModelDto("level22",
-                    createClassMetaModelDtoFromClass(NestedObject2L).toBuilder()
-                        .extendsFromModels([createClassMetaModelDtoFromClass(Long)])
-                        .fields([
-                            createValidFieldMetaModelDto("id", Long),
-                            createValidFieldMetaModelDto("level3", NestedObject3L),
-                        ])
-                        .build()),
-            ])
-            .build()                                          | [
-            errorEntry("fields", getMessage("OnlyExpectedFieldsForRealClass.expected.field.not.found", "createdDate")),
-        ]
-    }
-
-    @Unroll
-    def "should return expected messages for update context of ClassMetaModelDto"() {
-        when:
-        attachFieldTranslationsWhenNotExist(classMetaModelDto)
-        def foundErrors = validatorWithConverter.validateAndReturnErrors(classMetaModelDto, UpdateContext)
-
-        then:
-        assertValidationResults(foundErrors, expectedErrors)
-
-        where:
-        classMetaModelDto | expectedErrors
-        createValidClassMetaModelDtoWithName()
-            .toBuilder()
-            .id(randomLong())
-            .build()      | []
-
-        createValidClassMetaModelDtoWithName().toBuilder()
-            .fields([createValidFieldMetaModelDto().toBuilder()
-                         .translationFieldName(TranslationDto.builder()
-                             .translationId(123L)
-                             .build())
-                         .build()])
-            .build()      | [errorEntry("id", notNullMessage())]
-
-        createValidClassMetaModelDtoWithName().toBuilder()
-            .fields([createValidFieldMetaModelDto().toBuilder()
-                         .translationFieldName(TranslationDto.builder()
-                             .translationId(123L)
-                             .translationKey("translation.key")
-                             .translationByCountryCode(TRANSLATIONS_SAMPLE)
-                             .build())
-                         .build()])
-            .build()      | [
-            errorEntry("id", notNullMessage()),
-            errorEntry("fields[0].translationFieldName.translationByCountryCode",
-                whenFieldIsInStateThenOthersShould("translationId", NOT_NULL, fieldShouldWhenOtherMessage(NULL, [], "translationId", NOT_NULL, []))),
-            errorEntry("fields[0].translationFieldName.translationKey",
-                whenFieldIsInStateThenOthersShould("translationId", NOT_NULL, fieldShouldWhenOtherMessage(NULL, [], "translationId", NOT_NULL, []))),
-        ]
     }
 }

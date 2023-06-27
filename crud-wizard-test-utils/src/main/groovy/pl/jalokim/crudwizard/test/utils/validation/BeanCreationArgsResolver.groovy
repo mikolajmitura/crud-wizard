@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.test.utils.validation
 
+import pl.jalokim.utils.reflection.InvokableReflectionUtils
+
 class BeanCreationArgsResolver {
 
     static def createInstance(Class<?> typeInstance, List<Object> argumentsForInject) {
@@ -30,6 +32,6 @@ class BeanCreationArgsResolver {
             }
             foundArguments.add(foundArgument)
         }
-        return firstConstructor.newInstance(foundArguments.toArray())
+        return InvokableReflectionUtils.newInstance(typeInstance, foundArguments.toArray())
     }
 }

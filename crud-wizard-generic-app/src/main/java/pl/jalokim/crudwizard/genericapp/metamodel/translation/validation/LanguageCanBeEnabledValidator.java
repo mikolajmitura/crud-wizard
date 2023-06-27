@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.translation.validation;
 
+import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.ArrayList;
@@ -38,9 +39,9 @@ public class LanguageCanBeEnabledValidator implements BaseConstraintValidator<La
                 .asList();
 
             List<String> alreadySavedTranslationKeys = elements(translationService
-                    .getTranslationsAndSourceByLocale(LocaleUtils.createLocale(langCode)))
-                    .map(TranslationAndSourceDto::getTranslationKey)
-                    .asList();
+                .getTranslationsAndSourceByLocale(LocaleUtils.createLocale(langCode)))
+                .map(TranslationAndSourceDto::getTranslationKey)
+                .asList();
             alreadySavedTranslationKeys.addAll(languageTranslationsDto.getTranslations().keySet());
 
             List<String> notFoundTranslationKeys = new ArrayList<>();
@@ -51,9 +52,8 @@ public class LanguageCanBeEnabledValidator implements BaseConstraintValidator<La
             }
 
             if (CollectionUtils.isNotEmpty(notFoundTranslationKeys)) {
-                log.warn("cannot enable language due to lack of translations: {}",
-                    elements(notFoundTranslationKeys).concatWithNewLines());
-                customMessage(context, "{ProvidedAllLanguages.cannot.enable.lang}", "translations");
+                customMessage(context, createMessagePlaceholder("ProvidedAllLanguages.cannot.enable.lang",
+                       System.lineSeparator() + elements(notFoundTranslationKeys).concatWithNewLines()), "translations");
                 return false;
             }
         }

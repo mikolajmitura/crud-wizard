@@ -13,6 +13,11 @@ public enum MetaModelDtoType {
     BY_NAME,
 
     /**
+     * When is during creation used as reference to other MetaModelDto which has type DEFINITION and className provided
+     */
+    BY_RAW_CLASSNAME,
+
+    /**
      * Is provides full definition of given MetaModel
      */
     DEFINITION

@@ -71,5 +71,4 @@ public class ClassMetaModelUtils {
         }
         return realOrBasedClass;
     }
-
 }

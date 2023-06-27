@@ -19,6 +19,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 public class TemporaryMetaModelContext extends MetaModelContext {
 
     private final ObjectCache<String, ClassMetaModel> classMetaModelsByName = new ObjectCache<>();
+    private final ObjectCache<String, ClassMetaModel> classMetaModelsByClassName = new ObjectCache<>();
     private final ObjectCache<String, MapperMetaModel> mapperMetaModelsByName = new ObjectCache<>();
     private final Map<String, ClassMetaModelDto> classMetaModelDtoDefinitionByName = new HashMap<>();
 
@@ -68,6 +69,11 @@ public class TemporaryMetaModelContext extends MetaModelContext {
             .orElseGet(() -> super.findClassMetaModelByName(name));
     }
 
+    public ClassMetaModel findClassMetaModelByClassName(String className) {
+        return Optional.ofNullable(classMetaModelsByClassName.findById(className))
+            .orElseGet(() -> super.findClassMetaModelByName(className));
+    }
+
     @Override
     public MapperMetaModel findMapperMetaModelByName(String name) {
         return Optional.ofNullable(mapperMetaModelsByName
@@ -75,8 +81,13 @@ public class TemporaryMetaModelContext extends MetaModelContext {
             .orElseGet(() -> super.findMapperMetaModelByName(name));
     }
 
-    public void putToContext(String name, ClassMetaModel classMetaModel) {
+    public void putToContextByName(String name, ClassMetaModel classMetaModel) {
         classMetaModelsByName.put(name, classMetaModel);
+        getClassMetaModels().put(generateRandomId(getClassMetaModels()), classMetaModel);
+    }
+
+    public void putToContextByClassName(String className, ClassMetaModel classMetaModel) {
+        classMetaModelsByClassName.put(className, classMetaModel);
         getClassMetaModels().put(generateRandomId(getClassMetaModels()), classMetaModel);
     }
 

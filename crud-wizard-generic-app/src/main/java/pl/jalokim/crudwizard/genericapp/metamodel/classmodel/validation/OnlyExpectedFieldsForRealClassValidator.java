@@ -21,6 +21,7 @@ import pl.jalokim.crudwizard.core.validation.javax.base.PropertyPath.PropertyPat
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
+import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.collection.Elements;
 
 @Component
@@ -48,26 +49,24 @@ public class OnlyExpectedFieldsForRealClassValidator implements BaseConstraintVa
         List<FieldMetaModelDto> allExpectedFields, AtomicBoolean isValid, PropertyPathBuilder propertyPathBuilder) {
 
         if (classForCheck != null && isExistThatClass(classForCheck.getClassName())) {
-
             var allProvidedFields = Elements.elements(classForCheck.getFields()).asList();
             var allProvidedFieldsMap = elements(allProvidedFields)
-                .asMap(FieldMetaModelDto::getFieldName);
+                .asMapGroupedBy(FieldMetaModelDto::getFieldName);
 
             for (FieldMetaModelDto expectedField : allExpectedFields) {
                 String expectedFieldName = expectedField.getFieldName();
-                FieldMetaModelDto foundProvidedField = allProvidedFieldsMap.get(expectedFieldName);
-                if (foundProvidedField == null) {
-                    customMessage(context, createMessagePlaceholder("OnlyExpectedFieldsForRealClass.expected.field.not.found",
+                var fieldMetaModels = allProvidedFieldsMap.get(expectedFieldName);
+                if (fieldMetaModels != null && fieldMetaModels.size() > 1) {
+                    customMessage(context, createMessagePlaceholder("OnlyExpectedFieldsForRealClass.duplication.found",
                         expectedFieldName), propertyPathBuilder.build());
                     isValid.set(false);
                 } else {
-                    int index = allProvidedFields.indexOf(foundProvidedField);
-                    validateFieldsCorrectness(context, foundProvidedField.getFieldType(),
-                        expectedField.getFieldType().getFields(), isValid,
-                        propertyPathBuilder.addNextIndex(index)
-                            .addNextProperty("fieldType")
-                            .addNextProperty("fields"));
-
+                    FieldMetaModelDto foundProvidedField = CollectionUtils.getFirstOrNull(elements(fieldMetaModels).asList());
+                    if (foundProvidedField == null) {
+                        customMessage(context, createMessagePlaceholder("OnlyExpectedFieldsForRealClass.expected.field.not.found",
+                            expectedFieldName), propertyPathBuilder.build());
+                        isValid.set(false);
+                    }
                 }
             }
         }

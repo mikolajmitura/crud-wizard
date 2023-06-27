@@ -108,6 +108,7 @@ import pl.jalokim.crudwizard.core.sample.SomeDtoWithBuilder
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSetters
 import pl.jalokim.crudwizard.core.sample.SomeDtoWithSimpleSuperBuilder
 import pl.jalokim.crudwizard.core.sample.SomeSimpleValueDto
+import pl.jalokim.crudwizard.core.utils.InstanceLoader
 import pl.jalokim.crudwizard.genericapp.compiler.ClassLoaderService
 import pl.jalokim.crudwizard.genericapp.compiler.CodeCompiler
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.ExampleEnum2
@@ -144,7 +145,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel
 import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.GenericServiceArgument
 import pl.jalokim.crudwizard.genericapp.service.invoker.sample.NormalSpringService
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader
 import pl.jalokim.utils.file.FileUtils
 import pl.jalokim.utils.template.TemplateAsText
 import spock.lang.Unroll

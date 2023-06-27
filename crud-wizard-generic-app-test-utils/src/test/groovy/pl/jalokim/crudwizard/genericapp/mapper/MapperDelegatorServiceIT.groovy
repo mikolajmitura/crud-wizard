@@ -5,7 +5,9 @@ import static pl.jalokim.crudwizard.core.rest.response.error.ErrorDto.errorEntry
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.translatePlaceholder
 import static pl.jalokim.crudwizard.datastorage.inmemory.InMemoryDataStorage.DEFAULT_DS_NAME
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithName
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoForClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoWithGenerics
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createIdFieldType
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createListWithMetaModel
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
@@ -14,6 +16,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorage
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDtoSamples.sampleJoinerDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDtoSamples.createMapperMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto.mappingEntry
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
 import static pl.jalokim.crudwizard.test.utils.validation.ValidationErrorsAssertion.assertValidationResults
 
 import javax.validation.ConstraintViolationException
@@ -60,6 +63,7 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
         given:
         def personDtoModel = ClassMetaModelDto.builder()
             .name("personDto")
+            .translationName(sampleTranslationDto())
             .fields([
                 createIdFieldType("id", String),
                 createValidFieldMetaModelDto("name", String),
@@ -240,6 +244,7 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
     def "invoke generated mappers as expected"() {
         def personDtoModel = ClassMetaModelDto.builder()
             .name("personDto")
+            .translationName(sampleTranslationDto())
             .fields([
                 createIdFieldType("id", String),
                 createValidFieldMetaModelDto("name", String),
@@ -264,14 +269,14 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
             .payloadMetamodel(personDtoModel)
             .dataStorageConnectors([
                 DataStorageConnectorMetaModelDto.builder()
-                    .classMetaModelInDataStorage(createClassMetaModelDtoFromClass(OtherPersonEntity))
+                    .classMetaModelInDataStorage(createClassMetaModelDtoForClass(OtherPersonEntity))
                     .mapperMetaModelForPersist(MapperMetaModelDto.builder()
                         .mapperType(MapperType.GENERATED)
                         .mapperName("dtoToEntityMapper")
                         .mapperGenerateConfiguration(MapperGenerateConfigurationDto.builder()
                             .rootConfiguration(MapperConfigurationDto.builder()
                                 .sourceMetaModel(buildClassMetaModelDtoWithName("personDto"))
-                                .targetMetaModel(createClassMetaModelDtoFromClass(OtherPersonEntity))
+                                .targetMetaModel(createClassMetaModelDtoForClass(OtherPersonEntity))
                                 .name("dtoToEntityMapper")
                                 .propertyOverriddenMapping([
                                     mappingEntry("externalId", "otherId"),
@@ -334,6 +339,7 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
     def "validation should pass when generic types matches, and mapping with that given mapper should pass"() {
         given:
         def payloadMetaModel = ClassMetaModelDto.builder()
+            .translationName(sampleTranslationDto())
             .className(SomeBeanWithGenerics.canonicalName)
             .genericTypes([
                 createClassMetaModelDtoFromClass(Long),
@@ -341,6 +347,10 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
                     .className(List.canonicalName)
                     .genericTypes([createClassMetaModelDtoFromClass(String)])
                     .build()
+            ])
+            .fields([
+                createValidFieldMetaModelDto("id", Long),
+                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(List, createClassMetaModelDtoForClass( String))),
             ])
             .build()
 
@@ -396,12 +406,17 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
         given:
         def payloadMetaModel = ClassMetaModelDto.builder()
             .className(SomeBeanWithGenerics.canonicalName)
+            .translationName(sampleTranslationDto())
             .genericTypes([
                 createClassMetaModelDtoFromClass(Long),
                 ClassMetaModelDto.builder()
                     .className(List.canonicalName)
                     .genericTypes([createClassMetaModelDtoFromClass(String)])
                     .build()
+            ])
+            .fields([
+                createValidFieldMetaModelDto("id", Long),
+                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(List, createClassMetaModelDtoForClass( String))),
             ])
             .build()
 
@@ -469,12 +484,17 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
         given:
         def payloadMetaModel = ClassMetaModelDto.builder()
             .className(SomeBeanWithGenerics.canonicalName)
+            .translationName(sampleTranslationDto())
             .genericTypes([
                 createClassMetaModelDtoFromClass(Integer),
                 ClassMetaModelDto.builder()
                     .className(Set.canonicalName)
                     .genericTypes([createClassMetaModelDtoFromClass(String)])
                     .build()
+            ])
+            .fields([
+                createValidFieldMetaModelDto("id", Integer),
+                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(Set, createClassMetaModelDtoForClass( String))),
             ])
             .build()
 
