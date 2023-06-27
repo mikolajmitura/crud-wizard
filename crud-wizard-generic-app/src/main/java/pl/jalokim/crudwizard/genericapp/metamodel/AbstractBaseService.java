@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -8,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public class AbstractBaseService<E extends EntityWithId<I>, R extends JpaRepository<E, I>, I> {
 
     protected final R repository;
-    protected final EntityManager entityManager;
+    protected @PersistenceContext(unitName = "metamodelEntityManagerFactory") EntityManager entityManager;
 
     public E saveNewOrLoadById(E entity) {
         if (entity == null) {

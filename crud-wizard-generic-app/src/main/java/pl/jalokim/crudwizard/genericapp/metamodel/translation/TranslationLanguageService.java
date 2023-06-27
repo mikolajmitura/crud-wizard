@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.persistence.EntityManager;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
@@ -27,11 +26,11 @@ public class TranslationLanguageService extends
     private final TranslationLanguageRepository translationLanguageRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public TranslationLanguageService(TranslationLanguageRepository repository, EntityManager entityManager,
+    public TranslationLanguageService(TranslationLanguageRepository repository,
         TranslationRepository translationRepository, TranslationLanguageRepository translationLanguageRepository,
         ApplicationEventPublisher applicationEventPublisher) {
 
-        super(repository, entityManager);
+        super(repository);
         this.translationRepository = translationRepository;
         this.translationLanguageRepository = translationLanguageRepository;
         this.applicationEventPublisher = applicationEventPublisher;
