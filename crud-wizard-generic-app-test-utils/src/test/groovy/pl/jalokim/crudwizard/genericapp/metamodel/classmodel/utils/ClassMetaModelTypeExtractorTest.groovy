@@ -25,6 +25,8 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.CommonClassAndFieldMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.CommonClassAndFieldMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.DepartmentDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapper
@@ -36,6 +38,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDto
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper
 import pl.jalokim.crudwizard.test.utils.UnitTestSpec
 import spock.lang.Unroll
 
@@ -46,12 +49,15 @@ class ClassMetaModelTypeExtractorTest extends UnitTestSpec {
 
     MetaModelContextService metaModelContextService = Mock()
     AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
-    ClassMetaModelMapper classMetaModelMapper = new ClassMetaModelMapperImpl(additionalPropertyMapper)
-    FieldMetaModelMapper fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper)
+    TranslationMapper translationMapper = Mappers.getMapper(TranslationMapper)
+    CommonClassAndFieldMapper commonClassAndFieldMapper = new CommonClassAndFieldMapperImpl(additionalPropertyMapper, translationMapper)
+    ClassMetaModelMapper classMetaModelMapper = new ClassMetaModelMapperImpl(additionalPropertyMapper, translationMapper, commonClassAndFieldMapper)
+    FieldMetaModelMapper fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper, translationMapper, commonClassAndFieldMapper)
     ClassMetaModelTypeExtractor testCase
 
     def setup() {
         setValueForField(classMetaModelMapper, "fieldMetaModelMapper", fieldMetaModelMapper)
+        setValueForField(classMetaModelMapper, ClassMetaModelMapper, "commonClassAndFieldMapper", commonClassAndFieldMapper)
         testCase = new ClassMetaModelTypeExtractor(classMetaModelMapper)
         MetaModelContext metaModelContext = new MetaModelContext()
         ModelsCache<ClassMetaModel> classMetaModels = new ModelsCache<>()

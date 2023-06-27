@@ -7,6 +7,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldr
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.lang.reflect.Method;
 import java.util.List;
 import pl.jalokim.crudwizard.core.utils.StringCaseUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType;
@@ -32,6 +33,7 @@ public class BySettersFieldsResolver implements WriteFieldResolver {
             .filter(method -> method.getName().startsWith("set"))
             .filter(MetadataReflectionUtils::isPublicMethod)
             .filter(method -> methodReturnsVoidAndHasArgumentsSize(method, 1))
+            .filter(this::argumentIsNotGroovyType)
             .filter(method -> {
                 try {
                     typeMetadata.getMetaForMethod(method);
@@ -56,5 +58,10 @@ public class BySettersFieldsResolver implements WriteFieldResolver {
                     .build();
             })
             .asList();
+    }
+
+    private boolean argumentIsNotGroovyType(Method method) {
+        Class<?> parameterType = method.getParameterTypes()[0];
+        return !parameterType.getCanonicalName().startsWith("groovy.lang");
     }
 }

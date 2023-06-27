@@ -87,6 +87,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     @Setter(AccessLevel.NONE)
     ParentMetamodelCacheContext parentMetamodelCacheContext;
 
+    @EqualsAndHashCode.Exclude
     MetaModelState state;
 
     @Builder.Default
@@ -480,7 +481,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             fields = new ArrayList<>(fieldsToMerge);
         } else {
             Map<String, FieldMetaModel> fieldsFromThisModel = elements(fields)
-                .asMap(FieldMetaModel::getFieldName);
+                    .asMap(FieldMetaModel::getFieldName);
 
             for (FieldMetaModel fieldForMerge : new ArrayList<>(fieldsToMerge)) {
                 FieldMetaModel fieldFromThisModel = fieldsFromThisModel.get(fieldForMerge.getFieldName());
@@ -508,7 +509,9 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
         if (enumMetaModelSource != null) {
             fieldForMerge.getFieldType().setEnumMetaModel(enumMetaModelSource);
         }
-        fieldFromThisModel.getFieldType().mergeFields(fieldForMerge.getFieldType().getFields());
+        if (!fieldFromThisModel.getFieldType().equals(this)) {
+            fieldFromThisModel.getFieldType().mergeFields(fieldForMerge.getFieldType().getFields());
+        }
     }
 
     @SuppressWarnings("PMD.AvoidReassigningParameters")

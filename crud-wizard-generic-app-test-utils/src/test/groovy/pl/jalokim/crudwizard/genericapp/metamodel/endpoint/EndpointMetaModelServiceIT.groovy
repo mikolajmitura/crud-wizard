@@ -52,6 +52,7 @@ import pl.jalokim.crudwizard.genericapp.customendpoint.SomeCustomRestController
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.SomeEnum1
 import pl.jalokim.crudwizard.genericapp.mapper.defaults.DefaultGenericMapper
 import pl.jalokim.crudwizard.genericapp.mapper.instance.SomeTestMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto
@@ -329,10 +330,10 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
     }
 
     def "should return validation messages about unique names and cannot find data storage factory"() {
-
         given:
         def documentClassMetaDto = ClassMetaModelDtoSamples.createDocumentClassMetaDto()
         def sampleEndpoint = createValidPostExtendedUserWithValidators2()
+        def payloadMetaModel = sampleEndpoint.getPayloadMetamodel()
         def createPostPersonEndpoint = sampleEndpoint.toBuilder()
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(
@@ -344,20 +345,24 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
 
         endpointMetaModelService.createNewEndpoint(createPostPersonEndpoint)
 
+        def fields = payloadMetaModel.getFields()
+        fields[5].fieldType = ClassMetaModelDto.builder()
+            .name(documentClassMetaDto.getName())
+            .classMetaModelDtoType(MetaModelDtoType.BY_NAME)
+            .build()
+
         createPostPersonEndpoint = createPostPersonEndpoint.toBuilder()
-            .payloadMetamodel(sampleEndpoint.payloadMetamodel.toBuilder()
-                .fields(changeFromClassDefinitionToByName(sampleEndpoint.payloadMetamodel))
-                .build())
             .baseUrl(createPostPersonEndpoint.getBaseUrl() + "/next")
+            .payloadMetamodel(payloadMetaModel.toBuilder()
+                .fields(fields)
+                .build())
             .build()
 
         when:
         def endpoint = createPostPersonEndpoint.toBuilder()
             .dataStorageConnectors([
                 createSampleDataStorageConnectorDto(
-                    documentClassMetaDto.toBuilder()
-                        .fields(changeFromClassDefinitionToByName(documentClassMetaDto))
-                        .build(),
+                    documentClassMetaDto,
                     DataStorageMetaModelDtoSamples.createDataStorageMetaModelDto("second-database", DataStorageWithoutFactory.canonicalName)
                 )]
             )
@@ -378,6 +383,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             errorEntry("dataStorageConnectors[0].dataStorageMetaModel.className", messageForValidator(VerifyThatCanCreateDataStorage)),
             errorEntry("payloadMetamodel.fields[4].fieldType.genericTypes[0].name", messageForValidator(UniqueValue)),
             errorEntry("payloadMetamodel.fields[4].fieldType.genericTypes[0].fields[2].fieldType.name", messageForValidator(UniqueValue)),
+            errorEntry("dataStorageConnectors[0].classMetaModelInDataStorage.fields[2].fieldType.name", messageForValidator(UniqueValue)),
         ])
     }
 
@@ -1007,6 +1013,9 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
             DEFAULT_GENERIC_MAPPER_BEAN                                    | createClassMetaModelDtoFromClass(LocalDateTime) | [
             errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
                 invalidMethodReturnType(String.canonicalName, LocalDateTime.canonicalName)
+            ), errorEntry("serviceMetaModel.serviceBeanAndMethod.methodName",
+            translatePlaceholder("BeansAndMethodsExistsValidator.invalid.method.argument",
+                0, "{BeansAndMethodsExistsValidator.service.type}")
             ),
         ]                                                                                                                         |
             "payload generic_enum, service invalid return types and arguments"

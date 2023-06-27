@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson
+import static pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType.BY_RAW_CLASSNAME
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
 import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.TRANSLATIONS_SAMPLE
 import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
@@ -9,8 +10,8 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMeta
 import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType
 
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicLong
 import org.springframework.data.domain.Page
-import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
@@ -20,6 +21,8 @@ import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
 import pl.jalokim.utils.reflection.MetadataReflectionUtils
 
 class ClassMetaModelDtoSamples {
+
+    private static ThreadLocal<ClassCreationContext> CREATION_CONTEXT = new ThreadLocal<>()
 
     static ClassMetaModelDto simplePersonClassMetaModel() {
         ClassMetaModelDto.builder()
@@ -174,11 +177,23 @@ class ClassMetaModelDtoSamples {
     static ClassMetaModelDto createClassMetaModelDtoForClass(Class<?> metaModelClass) {
         ClassMetaModelDto.builder()
             .className(metaModelClass.canonicalName)
-            .classMetaModelDtoType(MetaModelDtoType.BY_RAW_CLASSNAME)
+            .classMetaModelDtoType(BY_RAW_CLASSNAME)
         .build()
     }
 
     static ClassMetaModelDto createClassMetaModelDtoFromClass(Class<?> metaModelClass) {
+        def creationContext = CREATION_CONTEXT.get()
+        if (creationContext == null) {
+            CREATION_CONTEXT.set(new ClassCreationContext())
+        }
+        creationContext = CREATION_CONTEXT.get()
+
+        def refToClassDto = creationContext.getRef(metaModelClass)
+        if (refToClassDto != null) {
+            return refToClassDto
+        }
+        creationContext.beforeCreate(metaModelClass)
+
         def classBuilder = ClassMetaModelDto.builder()
             .className(metaModelClass.canonicalName)
             .isGenericEnumType(false)
@@ -191,16 +206,19 @@ class ClassMetaModelDtoSamples {
                     MetadataReflectionUtils.isNotStaticField(it)
                 }
                 .each {
-                    fieldsByName.put(it.name, FieldMetaModelDto.builder()
-                        .fieldName(it.name)
-                        .fieldType(createClassMetaModelDtoFromClass(it.type))
-                        .translationFieldName(sampleTranslationDto())
-                        .build())
+                    if (!it.type.canonicalName.startsWith("groovy.lang")) {
+                        fieldsByName.put(it.name, FieldMetaModelDto.builder()
+                            .fieldName(it.name)
+                            .fieldType(createClassMetaModelDtoFromClass(it.type))
+                            .translationFieldName(sampleTranslationDto())
+                            .build())
+                    }
                 }
 
             classBuilder.translationName(sampleTranslationDto())
             classBuilder.fields(fieldsByName.values() as List)
         }
+        creationContext.afterCreate()
         classBuilder.build()
     }
 
@@ -297,5 +315,33 @@ class ClassMetaModelDtoSamples {
             .translationName(sampleTranslationDto(translations))
             .genericTypes(genericTypes as List<ClassMetaModelDto>)
             .build()
+    }
+
+    private static class ClassCreationContext {
+        AtomicLong level = new AtomicLong()
+
+        Set<String> classMetaModelDtoByClassName = [] as Set
+
+        void beforeCreate(Class<?> realClass) {
+            classMetaModelDtoByClassName.add(realClass.canonicalName)
+            level.incrementAndGet()
+        }
+
+        void afterCreate() {
+            level.decrementAndGet()
+            if (level.get() == 0) {
+                CREATION_CONTEXT.set(null)
+            }
+        }
+
+        ClassMetaModelDto getRef(Class<?> realClass) {
+            if (classMetaModelDtoByClassName.contains(realClass.canonicalName)) {
+                return ClassMetaModelDto.builder()
+                    .className(realClass.canonicalName)
+                    .classMetaModelDtoType(BY_RAW_CLASSNAME)
+                    .build()
+            }
+            null
+        }
     }
 }
