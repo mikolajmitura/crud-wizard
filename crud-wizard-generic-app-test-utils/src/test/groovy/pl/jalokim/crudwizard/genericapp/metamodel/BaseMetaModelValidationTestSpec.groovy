@@ -25,10 +25,13 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.method.MapperMethodGener
 import pl.jalokim.crudwizard.genericapp.mapper.generete.method.SimpleTargetAssignResolver
 import pl.jalokim.crudwizard.genericapp.mapper.generete.parser.ClassMetaModelMapperParser
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelRepository
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.CommonClassAndFieldMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.CommonClassAndFieldMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelMapperImpl
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelService
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.TemporaryContextLoader
@@ -41,6 +44,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.BeforeEndpointValidatorUpdater
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelMapperImpl
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeDtoWithFields
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper
 import pl.jalokim.crudwizard.genericapp.method.BeanMethodMetaModelCreator
 import pl.jalokim.crudwizard.genericapp.service.invoker.MethodSignatureMetaModelResolver
@@ -50,6 +54,7 @@ import pl.jalokim.crudwizard.test.utils.validation.ValidatorWithConverter
 
 class BaseMetaModelValidationTestSpec extends UnitTestSpec {
 
+    ClassMetaModelRepository classMetaModelRepository = Mock()
     MetaModelContextService metaModelContextService = Mock()
     JdbcTemplate jdbcTemplate = Mock()
     ValidatorFactory validatorFactory = Mock()
@@ -127,9 +132,18 @@ class BaseMetaModelValidationTestSpec extends UnitTestSpec {
             dataStorageConnectorMetaModelRepository, classMetaModelTypeExtractor, metaModelContextService,
             jdbcTemplate, dataStorageInstances, methodSignatureMetaModelResolver, classMetaModelMapper,
             mapperGenerateConfigurationMapper, propertiesOverriddenMappingResolver, mapperCodeGenerator,
-            codeCompiler, fieldMetaModelService)
+            codeCompiler, fieldMetaModelService, classMetaModelRepository)
 
         validatorFactory.getValidator() >> validatorWithConverter.getValidator()
+        classMetaModelRepository.findByClassName(SomeDtoWithFields.canonicalName) >> [
+            ClassMetaModelEntity.builder()
+                .className(SomeDtoWithFields.canonicalName)
+                .fields([
+                    FieldMetaModelEntity.builder().build()
+                ])
+                .build()
+        ]
+        classMetaModelRepository.findByClassName(_ as String) >> []
     }
 
     def cleanup() {

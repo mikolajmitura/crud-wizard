@@ -59,6 +59,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntit
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumEntryMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.CannotUpdateFullDefinitionForRealClass
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
 import pl.jalokim.crudwizard.genericapp.metamodel.context.ModelsCache
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.DataStorageMetaModelDto
@@ -76,6 +77,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.NestedObject
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.ObjectForMergeTranslations
+import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeDtoWithFields
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeEnumTranslations
 import pl.jalokim.crudwizard.genericapp.metamodel.samples.SomeRealClass
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel
@@ -841,8 +843,15 @@ class EndpointMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec
             errorEntry("payloadMetamodel.fields[5].fieldType.extendsFromModels", whenFieldIsInStateThenOthersShould(
                 "classMetaModelDtoType", EQUAL_TO_ANY, ["DEFINITION"],
                 fieldShouldWhenOtherMessage(NULL, [], "className", NOT_NULL, []))),
-            errorEntry("payloadMetamodel.fields[4].fieldType.fields[0].fieldType", getMessage("ForRealClassFieldsCanBeMerged.invalid.field.type", String.canonicalName))
+            errorEntry("payloadMetamodel.fields[4].fieldType.fields[0].fieldType",
+                getMessage("ForRealClassFieldsCanBeMerged.invalid.field.type", String.canonicalName))
         ]                                                      | "problem with nested fields names etc"
+
+        createValidPostEndpointMetaModelDto().toBuilder()
+            .payloadMetamodel(createClassMetaModelDtoFromClass(SomeDtoWithFields))
+            .build()                          | [
+                errorEntry("payloadMetamodel", messageForValidator(CannotUpdateFullDefinitionForRealClass))
+            ]             | "cannot update real class definition"
     }
 
     private ServiceMetaModel createDefaultService() {

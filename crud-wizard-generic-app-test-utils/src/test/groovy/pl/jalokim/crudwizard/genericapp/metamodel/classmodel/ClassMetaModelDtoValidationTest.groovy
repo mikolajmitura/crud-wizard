@@ -47,6 +47,7 @@ import spock.lang.Unroll
 
 class ClassMetaModelDtoValidationTest extends UnitTestSpec {
 
+    private ClassMetaModelRepository classMetaModelRepository = Mock()
     private JdbcTemplate jdbcTemplate = Mock()
     private MetaModelContextService metaModelContextService = Mock()
     private MetaModelContext metaModelContext = Mock()
@@ -56,7 +57,8 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
     private FieldMetaModelMapper fieldMetaModelMapper = createFieldMetaModelMapper()
     private FieldMetaModelService fieldMetaModelService = new FieldMetaModelService(fieldMetaModelMapper)
 
-    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(jdbcTemplate, metaModelContextService, fieldMetaModelService)
+    private ValidatorWithConverter validatorWithConverter = createValidatorWithConverter(jdbcTemplate, metaModelContextService,
+        fieldMetaModelService, classMetaModelRepository)
 
     private FieldMetaModelMapper createFieldMetaModelMapper() {
         def fieldMetaModelMapper = new FieldMetaModelMapperImpl(additionalPropertyMapper, translationMapper, commonClassAndFieldMapper)
@@ -78,11 +80,11 @@ class ClassMetaModelDtoValidationTest extends UnitTestSpec {
 
         metaModelContextService.getMetaModelContext() >> metaModelContext
         metaModelContext.getAllCountryCodes() >> ["en_US"]
+        classMetaModelRepository.findByClassName(_ as String) >> []
     }
 
     @Unroll
     def "should return expected messages for default context of ClassMetaModelDto"() {
-        // TODO #4 those test for translations move to validation via endpoint
         when:
         attachFieldTranslationsWhenNotExist(classMetaModelDto)
         def foundErrors = validatorWithConverter.validateAndReturnErrors(classMetaModelDto, FirstValidationPhase)
