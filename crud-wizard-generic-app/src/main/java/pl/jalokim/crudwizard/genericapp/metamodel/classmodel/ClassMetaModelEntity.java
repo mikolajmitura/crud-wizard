@@ -1,9 +1,5 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
-import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
-import static pl.jalokim.utils.collection.Elements.elements;
-import static pl.jalokim.utils.string.StringUtils.isNotBlank;
-
 import java.util.List;
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
@@ -105,12 +101,4 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
     @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
     private List<AdditionalPropertyEntity> additionalProperties;
-
-    public boolean shouldBeSimpleRawClass() {
-        return isNotBlank(getClassName()) &&
-            isEmpty(elements(getFields())) &&
-            isEmpty(elements(getGenericTypes())) &&
-            isEmpty(elements(getExtendsFromModels())) &&
-            isEmpty(elements(getValidators()));
-    }
 }

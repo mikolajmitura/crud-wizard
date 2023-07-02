@@ -1,7 +1,9 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelsUtils.isClearRawClassFullDefinition;
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import java.util.Collection;
 import java.util.List;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
@@ -30,7 +32,7 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
     }
 
     public void saveAsSimpleClassMetaModelEntity(ClassMetaModelDto classMetaModelDto) {
-        if (classMetaModelDto.isFullDefinitionType() && classMetaModelDto.getName() != null) {
+        if (classMetaModelDto.isFullDefinitionType() && (classMetaModelDto.getName() != null || isClearRawClassFullDefinition(classMetaModelDto))) {
             classMetaModelEntitySaveContext.putPartiallySavedToContext(classMetaModelDto);
         }
         elements(classMetaModelDto.getGenericTypes())
@@ -60,33 +62,14 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
             classMetaModelEntityUpdateSource = classMetaModelMapper.toEntity(fullDtoDefinition);
         }
 
-        if (classMetaModelEntity.shouldBeSimpleRawClass()) {
-            return repository.findByRawClassName(classMetaModelEntity.getClassName())
-                .orElseGet(() -> {
-                    classMetaModelEntityUpdateSource.setSimpleRawClass(true);
-                    classMetaModelEntityUpdateSource.setTranslationName(
-                        translationService.saveNewOrLoadById(classMetaModelEntityUpdateSource.getTranslationName()));
-
-                    elements(classMetaModelEntityUpdateSource.getEnums())
-                        .forEach(enumEntry ->
-                            enumEntry.setTranslation(translationService.saveNewOrLoadById(enumEntry.getTranslation()))
-                        );
-
-                    return repository.save(classMetaModelEntityUpdateSource);
-                });
+        ClassMetaModelEntity alreadyFullySavedEntity = classMetaModelEntitySaveContext.findFullySaved(classMetaModelEntity);
+        if (classMetaModelEntity != alreadyFullySavedEntity) {
+            return alreadyFullySavedEntity;
         }
 
-        ClassMetaModelEntity alreadyFullySavedEntityWithThatName = classMetaModelEntitySaveContext
-            .findFullySavedWhenNameTheSame(classMetaModelEntity);
-        if (classMetaModelEntity != alreadyFullySavedEntityWithThatName) {
-            return alreadyFullySavedEntityWithThatName;
-        }
-
-        ClassMetaModelEntity alreadyPartiallySavedEntityWithThatName = classMetaModelEntitySaveContext
-            .findPartiallySavedWhenNameTheSame(classMetaModelEntity);
-
-        if (classMetaModelEntity != alreadyPartiallySavedEntityWithThatName) {
-            classMetaModelEntity = alreadyPartiallySavedEntityWithThatName;
+        ClassMetaModelEntity alreadyPartiallySaved = classMetaModelEntitySaveContext.findPartiallySaved(classMetaModelEntity);
+        if (classMetaModelEntity != alreadyPartiallySaved) {
+            classMetaModelEntity = alreadyPartiallySaved;
         }
 
         if (classMetaModelEntitySaveContext.isDuringFullSave(classMetaModelEntity)) {
@@ -100,36 +83,58 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
         classMetaModelEntitySaveContext.putDuringInitializationEntity(classMetaModelEntityToSaved);
         classMetaModelEntityToSaved.setTranslationName(translationService.saveNewOrLoadById(classMetaModelEntityUpdateSource.getTranslationName()));
 
-        elements(classMetaModelEntityUpdateSource.getEnums())
-            .forEach(enumEntry ->
-                enumEntry.setTranslation(translationService.saveNewOrLoadById(enumEntry.getTranslation()))
-            );
-        classMetaModelEntityToSaved.setEnums(classMetaModelEntityUpdateSource.getEnums());
-
-        elements(classMetaModelEntityUpdateSource.getFields())
-            .forEach(field -> {
-                validatorMetaModelService.saveOrCreateNewValidators(field.getValidators());
-                field.setTranslationFieldName(translationService.saveNewOrLoadById(field.getTranslationFieldName()));
-                field.setFieldType(saveNewOrLoadById(field.getFieldType()));
+        invokeWhenSourceCollectionExists(classMetaModelEntityToSaved.getEnums(),
+            classMetaModelEntityUpdateSource.getEnums(),
+            () -> {
+                elements(classMetaModelEntityUpdateSource.getEnums())
+                    .forEach(enumEntry ->
+                        enumEntry.setTranslation(translationService.saveNewOrLoadById(enumEntry.getTranslation()))
+                    );
+                classMetaModelEntityToSaved.setEnums(classMetaModelEntityUpdateSource.getEnums());
             });
-        classMetaModelEntityToSaved.setFields(classMetaModelEntityUpdateSource.getFields());
 
-        elements(classMetaModelEntityUpdateSource.getGenericTypes())
-            .forEachWithIndexed(indexed -> {
-                var genericTypeEntry = indexed.getValue();
-                classMetaModelEntityUpdateSource.getGenericTypes().set(indexed.getIndex(), saveNewOrLoadById(genericTypeEntry));
+        invokeWhenSourceCollectionExists(classMetaModelEntityToSaved.getFields(),
+            classMetaModelEntityUpdateSource.getFields(),
+            () -> {
+                elements(classMetaModelEntityUpdateSource.getFields())
+                    .forEach(field -> {
+                        validatorMetaModelService.saveOrCreateNewValidators(field.getValidators());
+                        field.setTranslationFieldName(translationService.saveNewOrLoadById(field.getTranslationFieldName()));
+                        field.setFieldType(saveNewOrLoadById(field.getFieldType()));
+                    });
+                classMetaModelEntityToSaved.setFields(classMetaModelEntityUpdateSource.getFields());
             });
-        classMetaModelEntityToSaved.setGenericTypes(classMetaModelEntityUpdateSource.getGenericTypes());
 
-        validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntityUpdateSource.getValidators());
-        classMetaModelEntityToSaved.setValidators(classMetaModelEntityUpdateSource.getValidators());
-
-        elements(classMetaModelEntityUpdateSource.getExtendsFromModels())
-            .forEachWithIndexed(indexed -> {
-                var extendsFromEntry = indexed.getValue();
-                classMetaModelEntityUpdateSource.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
+        invokeWhenSourceCollectionExists(classMetaModelEntityToSaved.getGenericTypes(),
+            classMetaModelEntityUpdateSource.getGenericTypes(),
+            () -> {
+                elements(classMetaModelEntityUpdateSource.getGenericTypes())
+                    .forEachWithIndexed(indexed -> {
+                        var genericTypeEntry = indexed.getValue();
+                        classMetaModelEntityUpdateSource.getGenericTypes().set(indexed.getIndex(), saveNewOrLoadById(genericTypeEntry));
+                    });
+                classMetaModelEntityToSaved.setGenericTypes(classMetaModelEntityUpdateSource.getGenericTypes());
             });
-        classMetaModelEntityToSaved.setExtendsFromModels(classMetaModelEntityUpdateSource.getExtendsFromModels());
+
+        invokeWhenSourceCollectionExists(classMetaModelEntityToSaved.getValidators(),
+            classMetaModelEntityUpdateSource.getValidators(),
+            () -> {
+                validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntityUpdateSource.getValidators());
+                classMetaModelEntityToSaved.setValidators(classMetaModelEntityUpdateSource.getValidators());
+            });
+
+        invokeWhenSourceCollectionExists(classMetaModelEntityToSaved.getExtendsFromModels(),
+            classMetaModelEntityUpdateSource.getExtendsFromModels(),
+            () -> {
+                elements(classMetaModelEntityUpdateSource.getExtendsFromModels())
+                    .forEachWithIndexed(indexed -> {
+                        var extendsFromEntry = indexed.getValue();
+                        classMetaModelEntityUpdateSource.getExtendsFromModels().set(indexed.getIndex(), saveNewOrLoadById(extendsFromEntry));
+                    });
+                classMetaModelEntityToSaved.setExtendsFromModels(classMetaModelEntityUpdateSource.getExtendsFromModels());
+            });
+
+
         ClassMetaModelEntity savedClassMetaModelEntity = repository.save(classMetaModelEntityToSaved);
         classMetaModelEntitySaveContext.putFullySavedToContext(savedClassMetaModelEntity);
 
@@ -140,5 +145,15 @@ public class ClassMetaModelService extends BaseService<ClassMetaModelEntity, Cla
         return elements(repository.findAll())
             .map(entity -> classMetaModelMapper.toSimpleModel(metaModelContext, entity))
             .asList();
+    }
+
+    private static <T> void invokeWhenSourceCollectionExists(Collection<T> collectionToUpdate,
+        Collection<T> sourceCollection, Runnable runnable) {
+
+        if (sourceCollection == null && collectionToUpdate != null) {
+            collectionToUpdate.clear();
+            return;
+        }
+        runnable.run();
     }
 }

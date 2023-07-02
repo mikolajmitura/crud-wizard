@@ -1,8 +1,10 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
+import static io.micrometer.core.instrument.util.StringUtils.isNotBlank;
 import static pl.jalokim.crudwizard.core.datetime.TimeProviderHolder.getTimeProvider;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelsUtils.isClearRawClassFullDefinition;
+import static pl.jalokim.utils.collection.Elements.elements;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ public class TemporaryMetaModelContext extends MetaModelContext {
     private final ObjectCache<String, ClassMetaModel> classMetaModelsByClassName = new ObjectCache<>();
     private final ObjectCache<String, MapperMetaModel> mapperMetaModelsByName = new ObjectCache<>();
     private final Map<String, ClassMetaModelDto> classMetaModelDtoDefinitionByName = new HashMap<>();
+    private final Map<String, ClassMetaModelDto> classMetaModelDtoDefinitionByClassName = new HashMap<>();
 
     @Getter
     private final Long sessionTimestamp;
@@ -71,7 +74,10 @@ public class TemporaryMetaModelContext extends MetaModelContext {
 
     public ClassMetaModel findClassMetaModelByClassName(String className) {
         return Optional.ofNullable(classMetaModelsByClassName.findById(className))
-            .orElseGet(() -> super.findClassMetaModelByName(className));
+            .orElseGet(() -> Optional.ofNullable(className)
+                .map(notNullClassName -> getClassMetaModels().findOneBy(givenClassModel ->
+                  isClearRawClassFullDefinition(givenClassModel) && notNullClassName.equals(givenClassModel.getClassName())))
+                .orElse(null));
     }
 
     @Override
@@ -98,11 +104,17 @@ public class TemporaryMetaModelContext extends MetaModelContext {
     }
 
     public void putDefinitionOfClassMetaModelDto(ClassMetaModelDto classMetaModelDto) {
-        classMetaModelDtoDefinitionByName.put(classMetaModelDto.getName(), classMetaModelDto);
+        if (isNotBlank(classMetaModelDto.getName())) {
+            classMetaModelDtoDefinitionByName.put(classMetaModelDto.getName(), classMetaModelDto);
+        } else if (isClearRawClassFullDefinition(classMetaModelDto)) {
+            classMetaModelDtoDefinitionByClassName.put(classMetaModelDto.getClassName(), classMetaModelDto);
+        }
     }
 
     public List<ClassMetaModelDto> getAllClassMetaModelDtoDefinitions() {
-        return new ArrayList<>(classMetaModelDtoDefinitionByName.values());
+        return elements(classMetaModelDtoDefinitionByName.values())
+            .concat(classMetaModelDtoDefinitionByClassName.values())
+            .asList();
     }
 
     public ClassMetaModelDto getClassMetaModelDtoByName(String nullableName) {

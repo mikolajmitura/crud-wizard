@@ -1,11 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelsUtils.isClearRawClassFullDefinition;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
-import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
-import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.string.StringUtils.isNotBlank;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,13 +18,11 @@ import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.ClassMetaModelBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
 import pl.jalokim.utils.collection.CollectionUtils;
-import pl.jalokim.utils.string.StringUtils;
 
 @Mapper(config = MapperAsSpringBeanConfig.class,
     imports = {
@@ -83,6 +81,9 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         return null;
     }
 
+    /**
+     * dummyFlag is not for resolving duplication of methods.
+     */
     @Mapping(target = "simpleRawClass", ignore = true)
     @Mapping(target = "genericTypes", ignore = true)
     @Mapping(target = "fields", ignore = true)
@@ -174,6 +175,16 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
                     .build();
                 temporaryMetaModelContext.putToContextByName(classMetaModelDto.getName(), classMetaModel);
             }
+        } else if (MetaModelDtoType.BY_RAW_CLASSNAME.equals(classMetaModelDto.getClassMetaModelDtoType())) {
+            classMetaModel = temporaryMetaModelContext.findClassMetaModelByClassName(classMetaModelDto.getClassName());
+            if (classMetaModel == null) {
+                classMetaModel = ClassMetaModel.builder()
+                    .className(classMetaModelDto.getClassName())
+                    .realClass(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))
+                    .state(MetaModelState.ONLY_RAW_CLASS)
+                    .build();
+                temporaryMetaModelContext.putToContextByClassName(classMetaModelDto.getClassName(), classMetaModel);
+            }
         } else {
             classMetaModel = getClassMetaModelWhenFullDefinition(classMetaModelDto, temporaryMetaModelContext);
         }
@@ -184,55 +195,45 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         TemporaryMetaModelContext temporaryMetaModelContext) {
 
         ClassMetaModel classMetaModel;
-        if (classMetaModelDto.getName() == null) {
-            classMetaModel = getClassMetaModelWhenNameNull(classMetaModelDto, temporaryMetaModelContext);
-            classMetaModel.setState(MetaModelState.FOR_INITIALIZE);
+        if (isNotBlank(classMetaModelDto.getClassName())) {
+            classMetaModel = getClassMetaModelWhenIsByClassName(classMetaModelDto, temporaryMetaModelContext);
+        } else if (isNotBlank(classMetaModelDto.getName())) {
+            classMetaModel = getClassMetaModelWhenIsByName(classMetaModelDto, temporaryMetaModelContext);
         } else {
-            temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
-            classMetaModel = temporaryMetaModelContext.findClassMetaModelByName(classMetaModelDto.getName());
+            classMetaModel = innerToModelFromDto(classMetaModelDto);
+        }
+        classMetaModel.setState(MetaModelState.FOR_INITIALIZE);
+        return classMetaModel;
+    }
 
-            if (classMetaModel == null) {
-                classMetaModel = innerToModelFromDto(classMetaModelDto);
-                temporaryMetaModelContext.putToContextByName(classMetaModelDto.getName(), classMetaModel);
-            } else {
-                swallowUpdateFrom(classMetaModel, classMetaModelDto);
-            }
-            classMetaModel.setState(MetaModelState.FOR_INITIALIZE);
+    private ClassMetaModel getClassMetaModelWhenIsByName(ClassMetaModelDto classMetaModelDto, TemporaryMetaModelContext temporaryMetaModelContext) {
+
+        temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
+        ClassMetaModel classMetaModel = temporaryMetaModelContext.findClassMetaModelByName(classMetaModelDto.getName());
+        if (classMetaModel == null) {
+            classMetaModel = innerToModelFromDto(classMetaModelDto);
+            temporaryMetaModelContext.putToContextByName(classMetaModelDto.getName(), classMetaModel);
+        } else {
+            swallowUpdateFrom(classMetaModel, classMetaModelDto);
         }
         return classMetaModel;
     }
 
-    private ClassMetaModel getClassMetaModelWhenNameNull(ClassMetaModelDto classMetaModelDto,
-        TemporaryMetaModelContext temporaryMetaModelContext) {
+    private ClassMetaModel getClassMetaModelWhenIsByClassName(ClassMetaModelDto classMetaModelDto, TemporaryMetaModelContext temporaryMetaModelContext) {
 
-        if (isEmpty(classMetaModelDto.getGenericTypes())
-            && isEmpty(classMetaModelDto.getExtendsFromModels())
-            && StringUtils.isNotBlank(classMetaModelDto.getClassName())) {
-            ClassMetaModel classMetaModelByClassName = temporaryMetaModelContext
-                .findClassMetaModelByClassName(classMetaModelDto.getClassName());
-            if (classMetaModelByClassName != null) {
-                return classMetaModelByClassName;
+        temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
+        ClassMetaModel classMetaModel = null;
+        if (isClearRawClassFullDefinition(classMetaModelDto)) {
+            classMetaModel = temporaryMetaModelContext.findClassMetaModelByClassName(classMetaModelDto.getClassName());
+        }
+        if (classMetaModel == null) {
+            classMetaModel = innerToModelFromDto(classMetaModelDto);
+            if (isClearRawClassFullDefinition(classMetaModelDto)) {
+                temporaryMetaModelContext.putToContextByClassName(classMetaModelDto.getClassName(), classMetaModel);
             }
+        } else {
+            swallowUpdateFrom(classMetaModel, classMetaModelDto);
         }
-
-        ClassMetaModel classMetaModel;
-        ClassMetaModelBuilder<?, ?> classBuilder = ClassMetaModel.builder();
-
-        classBuilder.className(classMetaModelDto.getClassName())
-            .realClass(loadRealClass(classMetaModelDto.getClassName()));
-
-        if (isNotEmpty(classMetaModelDto.getGenericTypes()) ||
-            isNotEmpty(classMetaModelDto.getExtendsFromModels())) {
-            classBuilder.state(MetaModelState.FOR_INITIALIZE);
-        }
-
-        classMetaModel = classBuilder.build();
-        if (StringUtils.isNotBlank(classMetaModelDto.getClassName()) &&
-            isEmpty(classMetaModelDto.getGenericTypes()) &&
-            isEmpty(classMetaModelDto.getExtendsFromModels())) {
-            temporaryMetaModelContext.putToContextByClassName(classMetaModelDto.getClassName(), classMetaModel);
-        }
-
         return classMetaModel;
     }
 
