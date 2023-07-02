@@ -101,4 +101,14 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     @AttributeOverride(name = "valueRealClassName", column = @Column(name = "valueRealClassName"))
     @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
     private List<AdditionalPropertyEntity> additionalProperties;
+
+    @Override
+    public String toString() {
+        return "ClassMetaModelEntity{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", className='" + className + '\'' +
+            ", genericTypes=" + genericTypes +
+            '}';
+    }
 }

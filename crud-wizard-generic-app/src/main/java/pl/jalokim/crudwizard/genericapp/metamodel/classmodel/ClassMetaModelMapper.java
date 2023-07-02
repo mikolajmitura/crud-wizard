@@ -100,7 +100,7 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         ClassMetaModel classMetaModel = toMetaModel(classMetaModelEntity);
         classMetaModel.setGenericTypes(mapToList(
             classMetaModelEntity.getGenericTypes(),
-            genericType -> newClassMetaModel(genericType.getId())));
+            ClassMetaModelMapper::newSimpleTemporaryClassMetaModel));
 
         classMetaModel.setFields(mapToList(classMetaModelEntity.getFields(),
             field -> fieldMetaModelMapper.toMetaModel(metaModelContext, classMetaModel, field)));
@@ -113,16 +113,19 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
 
         classMetaModel.setExtendsFromModels(mapToList(
             classMetaModelEntity.getExtendsFromModels(),
-            extendsFromModel -> newClassMetaModel(extendsFromModel.getId())
+            ClassMetaModelMapper::newSimpleTemporaryClassMetaModel
         ));
         classMetaModel.setRealClass(loadRealClass(classMetaModelEntity.getClassName()));
 
         return classMetaModel;
     }
 
-    public static ClassMetaModel newClassMetaModel(Long id) {
+    public static ClassMetaModel newSimpleTemporaryClassMetaModel(ClassMetaModelEntity classMetaModelEntity) {
         return ClassMetaModel.builder()
-            .id(id)
+            .id(classMetaModelEntity.getId())
+            .name(classMetaModelEntity.getName())
+            .className(classMetaModelEntity.getClassName())
+            .realClass(ClassUtils.loadRealClass(classMetaModelEntity.getClassName()))
             .build();
     }
 

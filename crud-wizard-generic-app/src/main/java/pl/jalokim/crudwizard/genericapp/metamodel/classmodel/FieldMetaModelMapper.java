@@ -1,6 +1,6 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper.newClassMetaModel;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper.newSimpleTemporaryClassMetaModel;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 import static pl.jalokim.utils.collection.Elements.elements;
 
@@ -33,7 +33,7 @@ public abstract class FieldMetaModelMapper implements BaseMapper<FieldMetaModelD
 
     public FieldMetaModel toMetaModel(MetaModelContext metaModelContext, ClassMetaModel ownerOfField, FieldMetaModelEntity field) {
         return toMetaModel(field).toBuilder()
-            .fieldType(newClassMetaModel(field.getFieldType().getId()))
+            .fieldType(newSimpleTemporaryClassMetaModel(field.getFieldType()))
             .ownerOfField(ownerOfField)
             .validators(mapToList(
                 field.getValidators(),
