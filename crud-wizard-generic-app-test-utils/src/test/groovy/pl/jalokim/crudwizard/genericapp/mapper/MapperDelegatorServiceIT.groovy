@@ -350,7 +350,7 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
             ])
             .fields([
                 createValidFieldMetaModelDto("id", Long),
-                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(List, createClassMetaModelDtoForClass( String))),
+                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(List, createClassMetaModelDtoForClass(String))),
             ])
             .build()
 
@@ -416,7 +416,7 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
             ])
             .fields([
                 createValidFieldMetaModelDto("id", Long),
-                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(List, createClassMetaModelDtoForClass( String))),
+                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(List, createClassMetaModelDtoForClass(String))),
             ])
             .build()
 
@@ -494,7 +494,7 @@ class MapperDelegatorServiceIT extends GenericAppWithReloadMetaContextSpecificat
             ])
             .fields([
                 createValidFieldMetaModelDto("id", Integer),
-                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(Set, createClassMetaModelDtoForClass( String))),
+                createValidFieldMetaModelDto("listOf", createClassMetaModelDtoWithGenerics(Set, createClassMetaModelDtoForClass(String))),
             ])
             .build()
 

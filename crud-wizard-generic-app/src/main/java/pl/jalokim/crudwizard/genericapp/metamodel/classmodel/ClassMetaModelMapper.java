@@ -75,7 +75,7 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
     protected EnumMetaModel mapToEnumMetaModel(ClassMetaModelEntity classMetaModelEntity) {
         if (CollectionUtils.isNotEmpty(classMetaModelEntity.getEnums())) {
             return EnumMetaModel.builder()
-                .enums(CollectionUtils.mapToList(classMetaModelEntity.getEnums(), this::mapEnumEntryMetaModel))
+                .enums(mapToList(classMetaModelEntity.getEnums(), this::mapEnumEntryMetaModel))
                 .build();
         }
         return null;
@@ -125,7 +125,7 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
             .id(classMetaModelEntity.getId())
             .name(classMetaModelEntity.getName())
             .className(classMetaModelEntity.getClassName())
-            .realClass(ClassUtils.loadRealClass(classMetaModelEntity.getClassName()))
+            .realClass(loadRealClass(classMetaModelEntity.getClassName()))
             .build();
     }
 
@@ -183,7 +183,7 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
             if (classMetaModel == null) {
                 classMetaModel = ClassMetaModel.builder()
                     .className(classMetaModelDto.getClassName())
-                    .realClass(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))
+                    .realClass(loadRealClass(classMetaModelDto.getClassName()))
                     .state(MetaModelState.ONLY_RAW_CLASS)
                     .build();
                 temporaryMetaModelContext.putToContextByClassName(classMetaModelDto.getClassName(), classMetaModel);

@@ -20,6 +20,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
     TranslationMapper.class,
     CommonClassAndFieldMapper.class
 })
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public abstract class FieldMetaModelMapper implements BaseMapper<FieldMetaModelDto, FieldMetaModelEntity, FieldMetaModel> {
 
     @Autowired
@@ -49,7 +50,6 @@ public abstract class FieldMetaModelMapper implements BaseMapper<FieldMetaModelD
     @Mapping(target = "validators", ignore = true)
     public abstract FieldMetaModel toModelFromDto(FieldMetaModelDto fieldMetaModelDto,
         ClassMetaModel ownerOfField, ClassMetaModel fieldType);
-
 
     @Mapping(target = "ownerOfFieldClassName", source = "fieldMetaModel.ownerOfField.className")
     @Mapping(target = "fieldType", expression = ("java(mapToDto(fieldMetaModel.getFieldType(), true))"))

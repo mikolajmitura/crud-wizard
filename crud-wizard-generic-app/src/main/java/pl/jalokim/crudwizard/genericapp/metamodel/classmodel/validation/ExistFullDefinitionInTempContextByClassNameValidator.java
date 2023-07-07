@@ -15,8 +15,8 @@ public class ExistFullDefinitionInTempContextByClassNameValidator implements
 
     @Override
     public boolean isValidValue(ClassMetaModelDto classMetaModel, ConstraintValidatorContext context) {
-        if (BY_RAW_CLASSNAME.equals(classMetaModel.getClassMetaModelDtoType())
-            && StringUtils.isNotBlank(classMetaModel.getClassName())) {
+        if (BY_RAW_CLASSNAME.equals(classMetaModel.getClassMetaModelDtoType()) &&
+            StringUtils.isNotBlank(classMetaModel.getClassName())) {
             var temporaryMetaModelContext = TemporaryModelContextHolder.getTemporaryMetaModelContext();
             ClassMetaModel foundByName = temporaryMetaModelContext.findClassMetaModelByClassName(classMetaModel.getClassName());
             return foundByName != null && MetaModelState.INITIALIZED.equals(foundByName.getState());

@@ -5,8 +5,10 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.Optional;
+import lombok.experimental.UtilityClass;
 import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDto;
 
+@UtilityClass
 public class BeforeClassValidationUpdater {
 
     public static void attachFieldTranslationsWhenNotExist(ClassMetaModelDto nullableClassMetaModelDto) {
@@ -17,11 +19,8 @@ public class BeforeClassValidationUpdater {
                     classMetaModelDto.getName() : classMetaModelDto.getClassName();
 
                 TranslationDto classTranslationName = classMetaModelDto.getTranslationName();
-                if (canAddTranslation(classTranslationName)) {
-
-                    if (isNoneBlank(classOrMetaModelName)) {
-                        classTranslationName.setTranslationKey("classMetaModel." + classOrMetaModelName);
-                    }
+                if (canAddTranslation(classTranslationName) && isNoneBlank(classOrMetaModelName)) {
+                    classTranslationName.setTranslationKey("classMetaModel." + classOrMetaModelName);
                 }
 
                 Optional.ofNullable(classMetaModelDto.getEnumMetaModel())
@@ -44,11 +43,8 @@ public class BeforeClassValidationUpdater {
                 elements(classMetaModelDto.getFields())
                     .forEach(field -> {
                         TranslationDto translationName = field.getTranslationFieldName();
-                        if (canAddTranslation(translationName)) {
-                            
-                            if (isNoneBlank(classOrMetaModelName)) {
-                                translationName.setTranslationKey("field." + classOrMetaModelName + "." + field.getFieldName());
-                            }
+                        if (canAddTranslation(translationName) && isNoneBlank(classOrMetaModelName)) {
+                            translationName.setTranslationKey("field." + classOrMetaModelName + "." + field.getFieldName());
                         }
                         attachFieldTranslationsWhenNotExist(field.getFieldType());
                     });

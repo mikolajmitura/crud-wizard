@@ -7,10 +7,10 @@ import lombok.experimental.UtilityClass;
 public class LocaleUtils {
 
     public static Locale createLocale(String languageCode) {
-        Locale locale;
         if (!isValidLocale(languageCode)) {
             throw new IllegalArgumentException("locale " + languageCode + " is invalid");
         }
+        Locale locale;
         if (languageCode.contains("_")) {
             String[] codeParts = languageCode.split("_");
             locale = new Locale(codeParts[0], codeParts[1]);

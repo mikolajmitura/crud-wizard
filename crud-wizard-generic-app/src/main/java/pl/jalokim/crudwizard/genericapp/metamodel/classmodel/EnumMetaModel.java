@@ -15,13 +15,13 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 public class EnumMetaModel {
 
+    List<EnumEntryMetaModel> enums;
+
     public List<String> getEnumValues() {
         return elements(enums)
             .map(EnumEntryMetaModel::getName)
             .asList();
     }
-
-    List<EnumEntryMetaModel> enums;
 
     public EnumEntryMetaModel getEnumByName(String enumName) {
         return elements(enums)

@@ -27,7 +27,7 @@ public class AbstractBaseService<E extends EntityWithId<I>, R extends JpaReposit
     }
 
     final E innerSave(E entity) {
-       E newEntity = save(entity);
+        E newEntity = save(entity);
         if (entityManager.contains(newEntity)) {
             return newEntity;
         }

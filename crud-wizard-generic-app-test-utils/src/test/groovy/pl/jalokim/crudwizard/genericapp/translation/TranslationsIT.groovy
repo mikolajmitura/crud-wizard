@@ -623,7 +623,7 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
 
         and:
         def translationKeyToPopulate = getTranslationKeysFromSources()
-        def translations = new HashMap<String, String>()
+        def translations = [:]
         translationKeyToPopulate.forEach {
             translations.put(it, 'some translations')
         }
@@ -696,7 +696,7 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
                 def translationKeyToPopulate = Elements.bySplitText(errorEntry.message, System.lineSeparator())
                 .skip(1)
                 .asList()
-                def translations = new HashMap<String, String>()
+                def translations = [:]
                 translationKeyToPopulate.forEach {
                     translations.put(it, 'some translations')
                 }
@@ -712,7 +712,6 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
                 throw exception
             }
         }
-
     }
 
     static class TranslationDb {
@@ -734,11 +733,6 @@ class TranslationsIT extends GenericAppWithReloadMetaContextSpecification {
 
     private Set<String> getTranslationKeysFromSources(List<String> translationsSources = [TEST_APPLICATION_TRANSLATIONS_PATH]) {
         translationService.getTranslationsAndSourceByLocale(defaultLocale)
-            .findAll {
-                translationsSources.contains(it.source)
-            }
-            .collect {
-                it.translationKey
-            } as Set
+            .findAll {translationsSources.contains(it.source)}*.translationKey as Set
     }
 }

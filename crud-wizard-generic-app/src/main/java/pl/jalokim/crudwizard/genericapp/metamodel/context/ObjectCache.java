@@ -42,7 +42,7 @@ public class ObjectCache<K, V> {
         if (elements.size() == 1) {
             return elements.get(0);
         }
-        if (elements.size() == 0) {
+        if (elements.isEmpty()) {
             return null;
         }
         throw new IllegalStateException("found more than one element: elements: " + elements);

@@ -21,18 +21,19 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumEntryMetaModelD
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.TypeNameWrapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
-import pl.jalokim.utils.collection.CollectionUtils;
-import pl.jalokim.utils.collection.Elements;
 import ru.vyarus.java.generics.resolver.context.container.ParameterizedTypeImpl;
 
 public class ForRealClassFieldsCanBeMergedValidator implements BaseConstraintValidator<ForRealClassFieldsCanBeMerged, ClassMetaModelDto> {
+
+    private static final String FIELD_TYPE = "fieldType";
+    public static final String FIELDS = "fields";
 
     @Override
     public boolean isValidValue(ClassMetaModelDto classMetaModelDto, ConstraintValidatorContext context) {
         if (isExistThatClass(classMetaModelDto.getClassName()) && isNotEmpty(classMetaModelDto.getFields())) {
             ClassMetaModel classMetaModel = createClassMetaModel(createType(classMetaModelDto));
             AtomicBoolean validationPassed = new AtomicBoolean(true);
-            Elements.elements(classMetaModelDto.getFields())
+            elements(classMetaModelDto.getFields())
                 .forEachWithIndex((index, field) -> {
                     if (isNotBlank(field.getFieldName())) {
                         givenFieldIsValid(context, classMetaModel, index, field, validationPassed);
@@ -43,6 +44,7 @@ public class ForRealClassFieldsCanBeMergedValidator implements BaseConstraintVal
         return true;
     }
 
+    @SuppressWarnings("PMD.CognitiveComplexity")
     private void givenFieldIsValid(ConstraintValidatorContext context, ClassMetaModel classMetaModel, Integer index,
         FieldMetaModelDto field, AtomicBoolean validationPassed) {
         FieldMetaModel fieldByName = classMetaModel.getFieldByName(field.getFieldName());
@@ -51,7 +53,7 @@ public class ForRealClassFieldsCanBeMergedValidator implements BaseConstraintVal
             validationPassed.set(false);
             customMessage(context, "{ForRealClassFieldsCanBeMerged.invalid.field.name}",
                 PropertyPath.builder()
-                    .addNextPropertyAndIndex("fields", index)
+                    .addNextPropertyAndIndex(FIELDS, index)
                     .addNextProperty("fieldName")
                     .build());
         } else {
@@ -63,20 +65,18 @@ public class ForRealClassFieldsCanBeMergedValidator implements BaseConstraintVal
                 customMessage(context, createMessagePlaceholder("ForRealClassFieldsCanBeMerged.invalid.field.type",
                     foundFieldType.getTypeDescription()),
                     PropertyPath.builder()
-                        .addNextPropertyAndIndex("fields", index)
-                        .addNextProperty("fieldType")
+                        .addNextPropertyAndIndex(FIELDS, index)
+                        .addNextProperty(FIELD_TYPE)
                         .build());
             }
 
-            if (foundFieldType != null && foundFieldType.isRealClassEnum()
-                && field.getFieldType() != null) {
-
+            if (foundFieldType != null && foundFieldType.isRealClassEnum() && field.getFieldType() != null) {
                 if (field.getFieldType().getEnumMetaModel() == null) {
                     validationPassed.set(false);
                     customMessage(context, createMessagePlaceholder("ForRealClassFieldsCanBeMerged.expected.enum.translations"),
                         PropertyPath.builder()
-                            .addNextPropertyAndIndex("fields", index)
-                            .addNextProperty("fieldType")
+                            .addNextPropertyAndIndex(FIELDS, index)
+                            .addNextProperty(FIELD_TYPE)
                             .addNextProperty("enumMetaModel")
                             .build());
                 } else {
@@ -97,22 +97,22 @@ public class ForRealClassFieldsCanBeMergedValidator implements BaseConstraintVal
                             validationPassed.set(false);
                             customMessage(context, createMessagePlaceholder("ForRealClassFieldsCanBeMerged.lack.enum.translation", expectedEnum),
                                 PropertyPath.builder()
-                                    .addNextPropertyAndIndex("fields", index)
-                                    .addNextProperty("fieldType")
+                                    .addNextPropertyAndIndex(FIELDS, index)
+                                    .addNextProperty(FIELD_TYPE)
                                     .addNextProperty("enumMetaModel")
                                     .addNextProperty("enums")
                                     .build());
                         }
                     }
 
-                    Elements.elements(providedFieldType.getEnumMetaModel().getEnums())
+                    elements(providedFieldType.getEnumMetaModel().getEnums())
                         .forEachWithIndex((enumIndex, providedEnum) -> {
                             if (!expectedEnums.contains(providedEnum.getName())) {
                                 validationPassed.set(false);
                                 customMessage(context, createMessagePlaceholder("ForRealClassFieldsCanBeMerged.unknown.enum"),
                                     PropertyPath.builder()
-                                        .addNextPropertyAndIndex("fields", index)
-                                        .addNextProperty("fieldType")
+                                        .addNextPropertyAndIndex(FIELDS, index)
+                                        .addNextProperty(FIELD_TYPE)
                                         .addNextProperty("enumMetaModel")
                                         .addNextPropertyAndIndex("enums", enumIndex)
                                         .build());
@@ -126,7 +126,7 @@ public class ForRealClassFieldsCanBeMergedValidator implements BaseConstraintVal
     public static Type createType(ClassMetaModelDto classMetaModel) {
         Class<?> realOrBasedClass = ClassUtils.loadRealClass(classMetaModel.getClassName());
         List<ClassMetaModelDto> genericTypes = classMetaModel.getGenericTypes();
-        if (CollectionUtils.isNotEmpty(genericTypes)) {
+        if (isNotEmpty(genericTypes)) {
             Type[] parameters = elements(genericTypes)
                 .map(ForRealClassFieldsCanBeMergedValidator::createType)
                 .asArray(new Type[0]);

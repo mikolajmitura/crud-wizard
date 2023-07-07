@@ -11,5 +11,4 @@ import pl.jalokim.crudwizard.test.utils.cleaner.DatabaseCleanupListener
 @TestExecutionListeners(value = [DatabaseCleanupListener], mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 class DummyBaseIntegrationControllerSpec extends BaseIntegrationSpecification {
 
-
 }

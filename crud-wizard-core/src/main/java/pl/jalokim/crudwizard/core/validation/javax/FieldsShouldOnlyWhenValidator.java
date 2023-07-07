@@ -79,35 +79,41 @@ public class FieldsShouldOnlyWhenValidator implements BaseConstraintValidatorWit
                     resolvedIsValue,
                     resolvedFieldValues);
 
-                boolean nestedIsInExpectedState = fieldShouldWhenOtherValidator.isValidValue(value);
-                if (!nestedIsInExpectedState) {
-                    boolean shouldCreateMessageWithoutWhen = parentWhenAreTheSameLikeInChildWhen(fieldsShouldOnlyWhenAnnotation, fieldShouldWhenOther);
-
-                    String nestedMessage;
-                    if (shouldCreateMessageWithoutWhen) {
-                        nestedMessage = createMessagePlaceholder(buildPropertyKey(FieldShouldWhenOther.class, "messageWithoutWhen"),
-                            fieldShouldWhenOtherValidator.getMessagePlaceholderArgs()).translateMessage();
-                    } else {
-                        nestedMessage = createMessagePlaceholder(buildMessageForValidator(FieldShouldWhenOther.class),
-                            fieldShouldWhenOtherValidator.getMessagePlaceholderArgs()).translateMessage();
-                    }
-
-                    String rootMessage = createMessagePlaceholder(
-                        messagePlaceholder(context), Map.of(
-                            "nestedMessage", nestedMessage,
-                            "whenField", wrapAsExternalPlaceholder(whenField),
-                            "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
-                            "fieldValues", getValuesWhenCan(is, fieldValues)
-                        )
-                    ).translateMessage();
-
-                    customMessage(context, rootMessage, fieldShouldWhenOtherValidator.getField());
-                }
+                boolean nestedIsInExpectedState = isNestedIsInExpectedState(value, context, fieldShouldWhenOther, fieldShouldWhenOtherValidator);
                 isValid = isValid && nestedIsInExpectedState;
             }
         }
 
         return isValid;
+    }
+
+    private boolean isNestedIsInExpectedState(Object value, ConstraintValidatorContext context, FieldShouldWhenOther fieldShouldWhenOther,
+        FieldShouldWhenOtherCoreValidator fieldShouldWhenOtherValidator) {
+        boolean nestedIsInExpectedState = fieldShouldWhenOtherValidator.isValidValue(value);
+        if (!nestedIsInExpectedState) {
+            boolean shouldCreateMessageWithoutWhen = parentWhenAreTheSameLikeInChildWhen(fieldsShouldOnlyWhenAnnotation, fieldShouldWhenOther);
+
+            String nestedMessage;
+            if (shouldCreateMessageWithoutWhen) {
+                nestedMessage = createMessagePlaceholder(buildPropertyKey(FieldShouldWhenOther.class, "messageWithoutWhen"),
+                    fieldShouldWhenOtherValidator.getMessagePlaceholderArgs()).translateMessage();
+            } else {
+                nestedMessage = createMessagePlaceholder(buildMessageForValidator(FieldShouldWhenOther.class),
+                    fieldShouldWhenOtherValidator.getMessagePlaceholderArgs()).translateMessage();
+            }
+
+            String rootMessage = createMessagePlaceholder(
+                messagePlaceholder(context), Map.of(
+                    "nestedMessage", nestedMessage,
+                    "whenField", wrapAsExternalPlaceholder(whenField),
+                    "is", getAppMessageSource().getMessageByEnumWithPrefix("whenIs", is),
+                    "fieldValues", getValuesWhenCan(is, fieldValues)
+                )
+            ).translateMessage();
+
+            customMessage(context, rootMessage, fieldShouldWhenOtherValidator.getField());
+        }
+        return nestedIsInExpectedState;
     }
 
     private boolean parentWhenAreTheSameLikeInChildWhen(WhenFieldIsInStateThenOthersShould parent, FieldShouldWhenOther child) {

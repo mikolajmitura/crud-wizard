@@ -22,21 +22,20 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
 import pl.jalokim.utils.collection.CollectionUtils;
-import pl.jalokim.utils.collection.Elements;
 
 @Component
 @RequiredArgsConstructor
 public class OnlyExpectedFieldsForRealClassValidator implements BaseConstraintValidator<OnlyExpectedFieldsForRealClass, ClassMetaModelDto> {
 
-    private static final Set<Class<?>> excludedClassesForTranslationsFields = Set.of(Page.class, List.class, Set.class, Map.class);
+    private static final Set<Class<?>> EXCLUDED_CLASSES_FOR_TRANSLATIONS_FIELDS = Set.of(Page.class, List.class, Set.class, Map.class);
     private final FieldMetaModelService fieldMetaModelService;
 
     @Override
     public boolean isValidValue(ClassMetaModelDto classMetaModelDto, ConstraintValidatorContext context) {
         AtomicBoolean isValid = new AtomicBoolean(true);
         if (DEFINITION.equals(classMetaModelDto.getClassMetaModelDtoType()) &&
-            isExistThatClass(classMetaModelDto.getClassName())
-            && !excludedClassesForTranslationsFields.contains(loadRealClass(classMetaModelDto.getClassName()))) {
+            isExistThatClass(classMetaModelDto.getClassName()) &&
+            !EXCLUDED_CLASSES_FOR_TRANSLATIONS_FIELDS.contains(loadRealClass(classMetaModelDto.getClassName()))) {
             var allExpectedFields = fieldMetaModelService
                 .getAllFieldsForRealClass(loadRealClass(classMetaModelDto.getClassName()));
             validateFieldsCorrectness(context, classMetaModelDto, new ArrayList<>(allExpectedFields),
@@ -49,7 +48,7 @@ public class OnlyExpectedFieldsForRealClassValidator implements BaseConstraintVa
         List<FieldMetaModelDto> allExpectedFields, AtomicBoolean isValid, PropertyPathBuilder propertyPathBuilder) {
 
         if (classForCheck != null && isExistThatClass(classForCheck.getClassName())) {
-            var allProvidedFields = Elements.elements(classForCheck.getFields()).asList();
+            var allProvidedFields = elements(classForCheck.getFields()).asList();
             var allProvidedFieldsMap = elements(allProvidedFields)
                 .asMapGroupedBy(FieldMetaModelDto::getFieldName);
 

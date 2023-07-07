@@ -1,8 +1,8 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelsUtils.isClearRawClassFullDefinition;
 import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
+import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
 import static pl.jalokim.utils.string.StringUtils.isNotBlank;
 
@@ -12,9 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelsUtils;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
 @Component
@@ -82,22 +80,10 @@ public class ClassMetaModelEntitySaveContext {
             }
         }
 
+        @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts"})
         public void putPartiallySavedToContext(ClassMetaModelDto classMetaModelDto) {
             if (canBeSaved(classMetaModelDto) && !partiallyEntitiesSaved.containsKey(createKey(classMetaModelDto))) {
-                ClassMetaModelEntity savedClassMetaModelEntity = null;
-                if (isNotBlank(classMetaModelDto.getClassName())) {
-                    List<ClassMetaModelEntity> foundClasses = classMetaModelRepository.findByClassName(classMetaModelDto.getClassName());
-                    for (ClassMetaModelEntity foundClass : foundClasses) {
-                        if (ClassMetaModelsUtils.isClearRawClassFullDefinition(foundClass)) {
-                            savedClassMetaModelEntity = foundClass;
-                            if (isNotEmpty(classMetaModelDto.getFields()) && CollectionUtils.isEmpty(foundClass.getFields())) {
-                                partiallyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
-                            } else {
-                                fullyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
-                            }
-                        }
-                    }
-                }
+                ClassMetaModelEntity savedClassMetaModelEntity = getClassMetaModelEntity(classMetaModelDto);
 
                 if (savedClassMetaModelEntity == null) {
                     ClassMetaModelEntity classMetaModelEntity = classMetaModelMapper.toSimpleEntity(classMetaModelDto, false);
@@ -108,6 +94,30 @@ public class ClassMetaModelEntitySaveContext {
                     savedClassMetaModelEntity = classMetaModelRepository.save(classMetaModelEntity);
                     partiallyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
                 }
+            }
+        }
+
+        private ClassMetaModelEntity getClassMetaModelEntity(ClassMetaModelDto classMetaModelDto) {
+            ClassMetaModelEntity savedClassMetaModelEntity = null;
+            if (isNotBlank(classMetaModelDto.getClassName())) {
+                List<ClassMetaModelEntity> foundClasses = classMetaModelRepository.findByClassName(classMetaModelDto.getClassName());
+                for (ClassMetaModelEntity foundClass : foundClasses) {
+                    if (isClearRawClassFullDefinition(foundClass)) {
+                        savedClassMetaModelEntity = foundClass;
+                        putToProperContextMap(classMetaModelDto, savedClassMetaModelEntity, foundClass);
+                    }
+                }
+            }
+            return savedClassMetaModelEntity;
+        }
+
+        private void putToProperContextMap(ClassMetaModelDto classMetaModelDto,
+            ClassMetaModelEntity savedClassMetaModelEntity, ClassMetaModelEntity foundClass) {
+
+            if (isNotEmpty(classMetaModelDto.getFields()) && isEmpty(foundClass.getFields())) {
+                partiallyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
+            } else {
+                fullyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
             }
         }
 
@@ -146,6 +156,10 @@ public class ClassMetaModelEntitySaveContext {
         return createKey(classMetaModelDto) != null;
     }
 
+    private static boolean canBeSaved(ClassMetaModelEntity classMetaModelEntity) {
+        return createKey(classMetaModelEntity) != null;
+    }
+
     private static ClassKey createKey(ClassMetaModelDto classMetaModelDto) {
         if (isNotBlank(classMetaModelDto.getName())) {
             return new ClassKey("n: " + classMetaModelDto.getName());
@@ -153,10 +167,6 @@ public class ClassMetaModelEntitySaveContext {
             return new ClassKey("c: " + classMetaModelDto.getClassName());
         }
         return null;
-    }
-
-    private static boolean canBeSaved(ClassMetaModelEntity classMetaModelEntity) {
-        return createKey(classMetaModelEntity) != null;
     }
 
     private static ClassKey createKey(ClassMetaModelEntity classMetaModelEntity) {

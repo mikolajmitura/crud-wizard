@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.translation.validation;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContextServic
 
 @Component
 @RequiredArgsConstructor
+@SuppressFBWarnings("WMI_WRONG_MAP_ITERATOR")
 public class ProvidedAllLanguagesValidator implements BaseConstraintValidator<ProvidedAllLanguages, Map<String, String>> {
 
     private final MetaModelContextService metaModelContextService;

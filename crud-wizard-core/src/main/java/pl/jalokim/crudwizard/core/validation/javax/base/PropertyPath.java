@@ -26,16 +26,16 @@ public class PropertyPath {
                 String propertyName = propertyPart.getPropertyName();
                 if (propertyName != null) {
                     if (!indexed.isFirst()) {
-                        result.append(".");
+                        result.append('.');
                     }
                     result.append(propertyName);
                 }
 
                 var index = propertyPart.getIndex();
                 if (index != null) {
-                    result.append("[")
+                    result.append('[')
                         .append(index)
-                        .append("]");
+                        .append(']');
                 }
             });
 

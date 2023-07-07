@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.translation;
 
 import static pl.jalokim.utils.collection.Elements.elements;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseService;
 
 @MetamodelService
+@SuppressFBWarnings("WMI_WRONG_MAP_ITERATOR")
 public class TranslationService extends BaseService<TranslationEntity, TranslationRepository> {
 
     private final List<MessageSourceProvider> messageSourceProviders;

@@ -1,5 +1,6 @@
 package pl.jalokim.crudwizard.test.utils
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import org.springframework.context.ApplicationContext
 import pl.jalokim.crudwizard.core.datetime.TimeProviderHolder
 import pl.jalokim.crudwizard.core.translations.LocaleHolder
@@ -10,6 +11,7 @@ import pl.jalokim.crudwizard.test.utils.validation.BeanCreationArgsResolver
 import spock.lang.Shared
 import spock.lang.Specification
 
+@SuppressFBWarnings("UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD")
 abstract class UnitTestSpec extends Specification implements UsesTimeProvider {
 
     protected ApplicationContext applicationContext = Mock()

@@ -1926,9 +1926,7 @@ class EndpointMetaModelServiceIT extends GenericAppWithReloadMetaContextSpecific
         }
         fieldId.fieldType.realClass == Long
         CollectionUtils.isEmpty(fieldId.getAdditionalProperties())
-        fieldId.validators.collect {
-            it.realClass
-        } == [NotNullValidator]
+        fieldId.validators*.realClass == [NotNullValidator]
         fieldId.translationFieldName.translationKey == "field.${ObjectForMergeTranslations.canonicalName}.id"
 
         def fieldSomeObject = foundClassModel.fetchAllFields().find {

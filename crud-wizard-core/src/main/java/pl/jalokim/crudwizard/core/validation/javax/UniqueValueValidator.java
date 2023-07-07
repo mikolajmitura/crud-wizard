@@ -42,17 +42,11 @@ public class UniqueValueValidator implements BaseConstraintValidator<UniqueValue
     @Override
     public boolean isValidValue(Object value, ConstraintValidatorContext context) {
         if (validateOnlyWhenPredicate.test(value)) {
-            String fieldName = Optional.ofNullable(entityFieldName)
-                .orElseGet(() -> Optional.ofNullable(forField)
-                    .orElseGet(() -> ValueExtractorFromPath.getValueFromPath(context, "basePath.currentLeafNode").toString())
-                );
-
-            String columnName = getNameOfColumnFromField(MetadataReflectionUtils.getField(entityClass, fieldName));
-
             MessagePlaceholder messagePlaceholder = createMessagePlaceholder(buildMessageForValidator(UniqueValue.class));
+            Object valueToCheck = value;
             if (StringUtils.isNotBlank(forField)) {
-                value = getValueOfField(value, forField);
-                if (value == null) {
+                valueToCheck = getValueOfField(valueToCheck, forField);
+                if (valueToCheck == null) {
                     return true;
                 }
                 customMessage(context, messagePlaceholder, forField);
@@ -60,7 +54,12 @@ public class UniqueValueValidator implements BaseConstraintValidator<UniqueValue
                 customMessage(context, messagePlaceholder);
             }
 
-            return fetchSqlCountValue(value, columnName) == 0;
+            String fieldName = Optional.ofNullable(entityFieldName)
+                .orElseGet(() -> Optional.ofNullable(forField)
+                    .orElseGet(() -> ValueExtractorFromPath.getValueFromPath(context, "basePath.currentLeafNode").toString())
+                );
+            String columnName = getNameOfColumnFromField(MetadataReflectionUtils.getField(entityClass, fieldName));
+            return fetchSqlCountValue(valueToCheck, columnName) == 0;
         }
         return true;
     }

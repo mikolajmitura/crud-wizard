@@ -34,6 +34,7 @@ public abstract class MessageSourceFromMap extends AbstractMessageSource impleme
     }
 
     @Nullable
+    @Override
     protected String resolveCodeWithoutArguments(String code, Locale locale) {
         return Optional.ofNullable(getTranslationByKey(code, locale))
             .orElse(null);
@@ -53,5 +54,6 @@ public abstract class MessageSourceFromMap extends AbstractMessageSource impleme
         return translationsByLocaleRef.get();
     }
 
+    @Override
     public abstract Map<Locale, Map<String, String>> loadAndGetAllTranslations(List<Locale> allSupportedLocales);
 }

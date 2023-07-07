@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
-import pl.jalokim.utils.collection.Elements;
 
 @RequiredArgsConstructor
 public class MessageSourceDelegator implements MessageSource {
@@ -47,11 +46,11 @@ public class MessageSourceDelegator implements MessageSource {
     }
 
     private String getMessage(Locale locale, String property, Function<RefreshableMessageSource, String> getMessageFunction) {
-        List<String> allSupportedLocales = Elements.elements(localeService.getAllSupportedLocales())
+        List<String> allSupportedLocales = elements(localeService.getAllSupportedLocales())
             .map(Locale::toString)
             .map(String::toLowerCase)
             .asList();
-        if (!allSupportedLocales.contains(locale.toString().toLowerCase()) ) {
+        if (!allSupportedLocales.contains(locale.toString().toLowerCase())) {
             throw new IllegalArgumentException("not supported locale: " + locale);
         }
 

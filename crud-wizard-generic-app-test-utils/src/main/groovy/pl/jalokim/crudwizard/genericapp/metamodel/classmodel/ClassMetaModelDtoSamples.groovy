@@ -22,7 +22,7 @@ import pl.jalokim.utils.reflection.MetadataReflectionUtils
 
 class ClassMetaModelDtoSamples {
 
-    private static ThreadLocal<ClassCreationContext> CREATION_CONTEXT = new ThreadLocal<>()
+    private final static ThreadLocal<ClassCreationContext> CREATION_CONTEXT = new ThreadLocal<>()
 
     static ClassMetaModelDto simplePersonClassMetaModel() {
         ClassMetaModelDto.builder()
@@ -199,10 +199,9 @@ class ClassMetaModelDtoSamples {
             .isGenericEnumType(false)
 
         if (!isSimpleType(metaModelClass)) {
-
-            Map<String, FieldMetaModelDto> fieldsByName = new HashMap<>()
+            Map<String, FieldMetaModelDto> fieldsByName = [:]
             MetadataReflectionUtils.getAllFields(metaModelClass)
-                .findAll() {
+                .findAll {
                     MetadataReflectionUtils.isNotStaticField(it)
                 }
                 .each {
