@@ -21,7 +21,6 @@ public class MessageSourceProvider {
 
     public void refresh(List<Locale> allSupportedLocales) {
         setPropertiesByLocale(messageSource.refreshAndGetAllPropertiesKeysByLocale(allSupportedLocales));
-
     }
 
     protected void setPropertiesByLocale(Map<Locale, Set<String>> propertiesByLocale) {

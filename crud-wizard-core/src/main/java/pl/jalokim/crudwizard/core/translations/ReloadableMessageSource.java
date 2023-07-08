@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,16 +24,20 @@ public class ReloadableMessageSource extends MessageSourceFromMap {
     public Map<Locale, Map<String, String>> loadAndGetAllTranslations(List<Locale> allSupportedLocales) {
         Map<Locale, Map<String, String>> translationsByLocale = new HashMap<>();
         for (Locale locale : allSupportedLocales) {
-            ResourceBundle bundle = getBundle(translationName, locale);
-            if (bundle.getLocale().equals(locale) || locale.toString().equals(LocaleHolder.DEFAULT_LANG_CODE)) {
-                List<String> keys = elements(bundle.getKeys().asIterator()).asList();
-                if (CollectionUtils.isNotEmpty(keys)) {
-                    Map<String, String> translations = new HashMap<>();
-                    translationsByLocale.put(locale, translations);
-                    for (String key : keys) {
-                        translations.put(key, bundle.getString(key));
+            try {
+                ResourceBundle bundle = getBundle(translationName, locale);
+                if (bundle.getLocale().equals(locale) || locale.toString().equals(LocaleHolder.DEFAULT_LANG_CODE)) {
+                    List<String> keys = elements(bundle.getKeys().asIterator()).asList();
+                    if (CollectionUtils.isNotEmpty(keys)) {
+                        Map<String, String> translations = new HashMap<>();
+                        translationsByLocale.put(locale, translations);
+                        for (String key : keys) {
+                            translations.put(key, bundle.getString(key));
+                        }
                     }
                 }
+            } catch (MissingResourceException ex) {
+                log.warn("Cannot load bundle: ", ex);
             }
         }
         return Collections.unmodifiableMap(translationsByLocale);
