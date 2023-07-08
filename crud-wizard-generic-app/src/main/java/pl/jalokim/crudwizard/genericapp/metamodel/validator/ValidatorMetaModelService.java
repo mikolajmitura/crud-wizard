@@ -6,9 +6,9 @@ import static pl.jalokim.utils.collection.Elements.elements;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import pl.jalokim.crudwizard.core.utils.InstanceLoader;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.crudwizard.genericapp.validation.validator.DataValidator;
 
 @MetamodelService

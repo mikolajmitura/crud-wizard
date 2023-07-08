@@ -25,6 +25,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity;
 
 @Entity
@@ -49,6 +50,10 @@ public class FieldMetaModelEntity extends WithAdditionalPropertiesEntity {
     @ManyToOne
     @JoinColumn(name = "class_metamodel_id")
     private ClassMetaModelEntity fieldType;
+
+    @ManyToOne
+    @JoinColumn(name = "translation_id")
+    private TranslationEntity translationFieldName;
 
     @ManyToMany
     @JoinTable(

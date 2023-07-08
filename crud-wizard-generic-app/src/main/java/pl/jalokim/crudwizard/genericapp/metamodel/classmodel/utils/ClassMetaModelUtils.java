@@ -67,9 +67,11 @@ public class ClassMetaModelUtils {
             Type[] parameters = elements(genericTypes)
                 .map(ClassMetaModelUtils::createType)
                 .asArray(new Type[0]);
+            if (parameters.length == 1 && realOrBasedClass.isArray()) {
+                return realOrBasedClass;
+            }
             return new ParameterizedTypeImpl(realOrBasedClass, parameters);
         }
         return realOrBasedClass;
     }
-
 }

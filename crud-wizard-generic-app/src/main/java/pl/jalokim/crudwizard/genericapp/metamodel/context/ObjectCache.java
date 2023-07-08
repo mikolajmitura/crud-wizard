@@ -36,9 +36,16 @@ public class ObjectCache<K, V> {
     }
 
     public V findOneBy(Predicate<V> findBy) {
-        return elements(objectsById.values())
+        List<V> elements = elements(objectsById.values())
             .filter(findBy)
-            .getFirstOrNull();
+            .asList();
+        if (elements.size() == 1) {
+            return elements.get(0);
+        }
+        if (elements.isEmpty()) {
+            return null;
+        }
+        throw new IllegalStateException("found more than one element: elements: " + elements);
     }
 
     public boolean idExists(K id) {

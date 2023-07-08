@@ -1,11 +1,11 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import static pl.jalokim.crudwizard.core.utils.ClassUtils.loadRealClass;
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX;
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelsUtils.isClearRawClassFullDefinition;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryModelContextHolder.getTemporaryMetaModelContext;
-import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
 import static pl.jalokim.utils.collection.CollectionUtils.mapToList;
 import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.string.StringUtils.isNotBlank;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,30 +18,48 @@ import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel.ClassMetaModelBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.TemporaryMetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
+import pl.jalokim.utils.collection.CollectionUtils;
 
 @Mapper(config = MapperAsSpringBeanConfig.class,
     imports = {
         ClassUtils.class,
         MetaModelState.class
     },
-    uses = AdditionalPropertyMapper.class)
+    uses = {
+        AdditionalPropertyMapper.class,
+        TranslationMapper.class,
+        CommonClassAndFieldMapper.class
+    })
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelDto, ClassMetaModelEntity, ClassMetaModel> {
 
     @Autowired
     private FieldMetaModelMapper fieldMetaModelMapper;
 
+    @Autowired
+    private CommonClassAndFieldMapper commonClassAndFieldMapper;
+
+    @Override
+    public ClassMetaModelDto toDto(ClassMetaModelEntity classMetaModelEntity) {
+        return commonClassAndFieldMapper.classModelToDto(classMetaModelEntity);
+    }
+
+    @Override
+    public ClassMetaModelEntity toEntity(ClassMetaModelDto classMetaModelDto) {
+        return commonClassAndFieldMapper.toEntity(classMetaModelDto);
+    }
+
     @Override
     @Mapping(target = "genericTypes", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
+    @Mapping(target = "enumMetaModel", source = "classMetaModelEntity")
     @Mapping(target = "realClass", ignore = true)
-    @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "fieldMetaResolverConfiguration", ignore = true)
     // after restart application meta models should have the same fields
     @Mapping(target = "attachedFieldsOwner", ignore = true)
@@ -52,15 +70,27 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
     @Mapping(target = "state", expression = "java(pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState.INITIALIZED)")
     public abstract ClassMetaModel toMetaModel(ClassMetaModelEntity classMetaModelEntity);
 
-    @Mapping(target = "simpleRawClass", ignore = true)
-    @Override
-    public abstract ClassMetaModelEntity toEntity(ClassMetaModelDto classMetaModelDto);
+    protected abstract EnumEntryMetaModel mapEnumEntryMetaModel(EnumEntryMetaModelEntity entity);
 
+    protected EnumMetaModel mapToEnumMetaModel(ClassMetaModelEntity classMetaModelEntity) {
+        if (CollectionUtils.isNotEmpty(classMetaModelEntity.getEnums())) {
+            return EnumMetaModel.builder()
+                .enums(mapToList(classMetaModelEntity.getEnums(), this::mapEnumEntryMetaModel))
+                .build();
+        }
+        return null;
+    }
+
+    /**
+     * dummyFlag is not for resolving duplication of methods.
+     */
     @Mapping(target = "simpleRawClass", ignore = true)
     @Mapping(target = "genericTypes", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
+    @Mapping(target = "enums", ignore = true)
+    @Mapping(target = "translationName", ignore = true)
     public abstract ClassMetaModelEntity toSimpleEntity(ClassMetaModelDto classMetaModelDto, boolean dummyFlag);
 
     /**
@@ -70,7 +100,7 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         ClassMetaModel classMetaModel = toMetaModel(classMetaModelEntity);
         classMetaModel.setGenericTypes(mapToList(
             classMetaModelEntity.getGenericTypes(),
-            genericType -> newClassMetaModel(genericType.getId())));
+            ClassMetaModelMapper::newSimpleTemporaryClassMetaModel));
 
         classMetaModel.setFields(mapToList(classMetaModelEntity.getFields(),
             field -> fieldMetaModelMapper.toMetaModel(metaModelContext, classMetaModel, field)));
@@ -83,18 +113,19 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
 
         classMetaModel.setExtendsFromModels(mapToList(
             classMetaModelEntity.getExtendsFromModels(),
-            extendsFromModel -> newClassMetaModel(extendsFromModel.getId())
+            ClassMetaModelMapper::newSimpleTemporaryClassMetaModel
         ));
         classMetaModel.setRealClass(loadRealClass(classMetaModelEntity.getClassName()));
-
-        setupEnumMetaModelIfShould(classMetaModel);
 
         return classMetaModel;
     }
 
-    public static ClassMetaModel newClassMetaModel(Long id) {
+    public static ClassMetaModel newSimpleTemporaryClassMetaModel(ClassMetaModelEntity classMetaModelEntity) {
         return ClassMetaModel.builder()
-            .id(id)
+            .id(classMetaModelEntity.getId())
+            .name(classMetaModelEntity.getName())
+            .className(classMetaModelEntity.getClassName())
+            .realClass(loadRealClass(classMetaModelEntity.getClassName()))
             .build();
     }
 
@@ -107,7 +138,6 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         ClassMetaModel classMetaModel = getClassMetaModel(classMetaModelDto);
 
         if (MetaModelState.FOR_INITIALIZE.equals(classMetaModel.getState())) {
-            setupEnumMetaModelIfShould(classMetaModel);
             classMetaModel.setState(MetaModelState.DURING_INITIALIZATION);
             classMetaModel.setGenericTypes(
                 elements(classMetaModelDto.getGenericTypes())
@@ -146,7 +176,17 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
                     .name(classMetaModelDto.getName())
                     .state(MetaModelState.ONLY_NAME)
                     .build();
-                temporaryMetaModelContext.putToContext(classMetaModelDto.getName(), classMetaModel);
+                temporaryMetaModelContext.putToContextByName(classMetaModelDto.getName(), classMetaModel);
+            }
+        } else if (MetaModelDtoType.BY_RAW_CLASSNAME.equals(classMetaModelDto.getClassMetaModelDtoType())) {
+            classMetaModel = temporaryMetaModelContext.findClassMetaModelByClassName(classMetaModelDto.getClassName());
+            if (classMetaModel == null) {
+                classMetaModel = ClassMetaModel.builder()
+                    .className(classMetaModelDto.getClassName())
+                    .realClass(loadRealClass(classMetaModelDto.getClassName()))
+                    .state(MetaModelState.ONLY_RAW_CLASS)
+                    .build();
+                temporaryMetaModelContext.putToContextByClassName(classMetaModelDto.getClassName(), classMetaModel);
             }
         } else {
             classMetaModel = getClassMetaModelWhenFullDefinition(classMetaModelDto, temporaryMetaModelContext);
@@ -158,48 +198,49 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
         TemporaryMetaModelContext temporaryMetaModelContext) {
 
         ClassMetaModel classMetaModel;
-        if (classMetaModelDto.getName() == null) {
-            classMetaModel = getClassMetaModelWhenNameNull(classMetaModelDto);
+        if (isNotBlank(classMetaModelDto.getClassName())) {
+            classMetaModel = getClassMetaModelWhenIsByClassName(classMetaModelDto, temporaryMetaModelContext);
+        } else if (isNotBlank(classMetaModelDto.getName())) {
+            classMetaModel = getClassMetaModelWhenIsByName(classMetaModelDto, temporaryMetaModelContext);
         } else {
-            temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
-            classMetaModel = temporaryMetaModelContext.findClassMetaModelByName(classMetaModelDto.getName());
+            classMetaModel = innerToModelFromDto(classMetaModelDto);
+        }
+        classMetaModel.setState(MetaModelState.FOR_INITIALIZE);
+        return classMetaModel;
+    }
 
-            if (classMetaModel == null) {
-                classMetaModel = innerToModelFromDto(classMetaModelDto);
-                temporaryMetaModelContext.putToContext(classMetaModelDto.getName(), classMetaModel);
-            } else {
-                swallowUpdateFrom(classMetaModel, classMetaModelDto);
+    private ClassMetaModel getClassMetaModelWhenIsByName(ClassMetaModelDto classMetaModelDto, TemporaryMetaModelContext temporaryMetaModelContext) {
+
+        temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
+        ClassMetaModel classMetaModel = temporaryMetaModelContext.findClassMetaModelByName(classMetaModelDto.getName());
+        if (classMetaModel == null) {
+            classMetaModel = innerToModelFromDto(classMetaModelDto);
+            temporaryMetaModelContext.putToContextByName(classMetaModelDto.getName(), classMetaModel);
+        } else {
+            swallowUpdateFrom(classMetaModel, classMetaModelDto);
+        }
+        return classMetaModel;
+    }
+
+    private ClassMetaModel getClassMetaModelWhenIsByClassName(ClassMetaModelDto classMetaModelDto, TemporaryMetaModelContext temporaryMetaModelContext) {
+
+        temporaryMetaModelContext.putDefinitionOfClassMetaModelDto(classMetaModelDto);
+        ClassMetaModel classMetaModel = null;
+        if (isClearRawClassFullDefinition(classMetaModelDto)) {
+            classMetaModel = temporaryMetaModelContext.findClassMetaModelByClassName(classMetaModelDto.getClassName());
+        }
+        if (classMetaModel == null) {
+            classMetaModel = innerToModelFromDto(classMetaModelDto);
+            if (isClearRawClassFullDefinition(classMetaModelDto)) {
+                temporaryMetaModelContext.putToContextByClassName(classMetaModelDto.getClassName(), classMetaModel);
             }
-            classMetaModel.setState(MetaModelState.FOR_INITIALIZE);
+        } else {
+            swallowUpdateFrom(classMetaModel, classMetaModelDto);
         }
         return classMetaModel;
-    }
-
-    private ClassMetaModel getClassMetaModelWhenNameNull(ClassMetaModelDto classMetaModelDto) {
-        ClassMetaModel classMetaModel;
-        ClassMetaModelBuilder<?, ?> classBuilder = ClassMetaModel.builder();
-
-        classBuilder.className(classMetaModelDto.getClassName())
-            .realClass(loadRealClass(classMetaModelDto.getClassName()));
-
-        if (isNotEmpty(classMetaModelDto.getGenericTypes()) ||
-            isNotEmpty(classMetaModelDto.getExtendsFromModels())) {
-            classBuilder.state(MetaModelState.FOR_INITIALIZE);
-        }
-
-        classMetaModel = classBuilder.build();
-        return classMetaModel;
-    }
-
-    private void setupEnumMetaModelIfShould(ClassMetaModel classMetaModel) {
-        Object propertyValue = classMetaModel.getPropertyRealValue(ENUM_VALUES_PREFIX);
-        if (propertyValue != null) {
-            classMetaModel.setEnumClassMetaModel(new EnumClassMetaModel(classMetaModel));
-        }
     }
 
     @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
-    @Mapping(target = "enumClassMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "validators", ignore = true)
@@ -212,7 +253,7 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
     protected abstract ClassMetaModel innerToModelFromDto(ClassMetaModelDto classMetaModelDto);
 
     @Mapping(target = "realClass", expression = "java(ClassUtils.loadRealClass(classMetaModelDto.getClassName()))")
-    @Mapping(target = "enumClassMetaModel", ignore = true)
+    @Mapping(target = "enumMetaModel", ignore = true)
     @Mapping(target = "parentMetamodelCacheContext", ignore = true)
     @Mapping(target = "fields", ignore = true)
     @Mapping(target = "extendsFromModels", ignore = true)
@@ -226,10 +267,6 @@ public abstract class ClassMetaModelMapper implements BaseMapper<ClassMetaModelD
     @Mapping(target = "writeFieldResolver", ignore = true)
     @Mapping(target = "readFieldResolver", ignore = true)
     protected abstract void swallowUpdateFrom(@MappingTarget ClassMetaModel classMetaModel, ClassMetaModelDto classMetaModelDto);
-
-    @Mapping(target = "classMetaModelDtoType", ignore = true)
-    @Override
-    public abstract ClassMetaModelDto toDto(ClassMetaModelEntity classMetaModelEntity);
 
     protected FieldMetaModel fieldToModelFromDto(FieldMetaModelDto fieldMetaModelDto,
         ClassMetaModel ownerOfField, ClassMetaModel fieldType) {

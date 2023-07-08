@@ -9,8 +9,8 @@ import javax.validation.Validator
 import javax.validation.ValidatorFactory
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorFactoryImpl
 import org.springframework.context.MessageSource
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import pl.jalokim.crudwizard.core.translations.SpringAppMessageSource
+import pl.jalokim.crudwizard.core.validation.javax.MessageInterpolatorFactory
 import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorWithDefaultGroupsWrapper
 
 /**
@@ -40,7 +40,7 @@ class TestingConstraintValidatorFactory implements ConstraintValidatorFactory {
         Validation.byDefaultProvider()
             .configure()
             .constraintValidatorFactory(new TestingConstraintValidatorFactory(validatorsDependencies))
-            .messageInterpolator(LocalValidatorFactoryBean.HibernateValidatorDelegate.buildMessageInterpolator(messageSource))
+            .messageInterpolator(MessageInterpolatorFactory.createMessageInterpolator(messageSource))
             .buildValidatorFactory()
     }
 

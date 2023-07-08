@@ -39,6 +39,7 @@ public class ValidatorMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     private String className;
     private String validatorName;
+
     private String validatorScript;
 
     /**

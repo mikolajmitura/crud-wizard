@@ -21,7 +21,7 @@ public class EnumClassMetaModelValidator {
             return null;
         }
         ClassMetaModel classMetaModel = metaModelContextService.getClassMetaModelByName(enumMetaModelName);
-        List<String> enumValues = classMetaModel.getEnumClassMetaModel().getEnumValues();
+        List<String> enumValues = classMetaModel.getEnumMetaModel().getEnumValues();
         if (enumValues.contains(enumValueToCheck)) {
             return enumValueToCheck;
         } else {

@@ -10,13 +10,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.jalokim.crudwizard.core.utils.InstanceLoader;
 import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.datastorage.query.ObjectsJoinerVerifier;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DataStorageResultsJoinerMetaModel;
@@ -25,18 +25,23 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.PropertyPath;
 import pl.jalokim.crudwizard.genericapp.metamodel.url.UrlModelResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.AdditionalValidatorsMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.PropertyPathResolver;
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.utils.collection.CollectionUtils;
 
 // TODO #mappers try use uses to inject others mapper
 @Mapper(
     config = MapperAsSpringBeanConfig.class,
-    uses = {AdditionalPropertyMapper.class, MapperGenerateConfigurationMapper.class})
+    uses = {
+        AdditionalPropertyMapper.class,
+        MapperGenerateConfigurationMapper.class,
+        TranslationMapper.class,
+        ClassMetaModelMapper.class
+    })
 public abstract class EndpointMetaModelMapper implements BaseMapper<EndpointMetaModelDto, EndpointMetaModelEntity, EndpointMetaModel> {
 
     @Autowired
@@ -64,9 +69,6 @@ public abstract class EndpointMetaModelMapper implements BaseMapper<EndpointMeta
     @Mapping(target = "mapperScript", ignore = true)
     @Mapping(target = "metamodelDtoType", ignore = true)
     public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
-
-    @Mapping(target = "classMetaModelDtoType", ignore = true)
-    public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 
     public EndpointMetaModel toFullMetaModel(MetaModelContext metaModelContext, EndpointMetaModelEntity endpointMetaModelEntity) {
         EndpointMetaModel endpointMetaModel = toMetaModel(endpointMetaModelEntity);

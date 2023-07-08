@@ -37,7 +37,7 @@ public class MetaContextTestLoader {
         reloadMetaModelsContext();
     }
 
-    protected void reloadMetaModelsContext() {
+    public void reloadMetaModelsContext() {
         applicationEventPublisher.publishEvent(new MetaModelContextRefreshEvent("reload for test",
             timeProvider.getCurrentOffsetDateTime()));
     }

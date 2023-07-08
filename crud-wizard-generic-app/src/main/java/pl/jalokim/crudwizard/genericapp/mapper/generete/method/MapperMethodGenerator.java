@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
+import pl.jalokim.crudwizard.core.utils.InstanceLoader;
 import pl.jalokim.crudwizard.genericapp.mapper.conversion.GenericObjectsConversionService;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.MapperArgumentMethodModel;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.codemetadata.MapperCodeMetadata;
@@ -52,7 +53,6 @@ import pl.jalokim.crudwizard.genericapp.mapper.generete.strategy.writevalue.Writ
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel;
 import pl.jalokim.crudwizard.genericapp.service.translator.ObjectNodePath;
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 import pl.jalokim.utils.template.TemplateAsText;
 
 @Component

@@ -1,7 +1,6 @@
 package pl.jalokim.crudwizard.core.metamodels
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -10,11 +9,13 @@ import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.DepartmentDto
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumEntryMetaModel
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationModel
 
 class ClassMetaModelSamples {
 
@@ -72,13 +73,28 @@ class ClassMetaModelSamples {
             .build()
     }
 
-    static ClassMetaModel createValidEnumMetaModel(String name, String... enumValues) {
-        ClassMetaModel enumMetaModel = ClassMetaModel.builder()
+    static ClassMetaModel createValidEnumMetaModel(String name, String... enums) {
+        createValidEnumMetaModel(name, enums.collect {
+            enumEntry(it)
+        } as EnumEntryMetaModel[])
+    }
+
+    static ClassMetaModel createValidEnumMetaModel(String name, EnumEntryMetaModel... enums) {
+        ClassMetaModel.builder()
             .name(name)
+            .enumMetaModel(EnumMetaModel.builder()
+                .enums(enums as List)
+                .build())
             .build()
-            .addProperty(ENUM_VALUES_PREFIX, enumValues)
-        enumMetaModel.setEnumClassMetaModel(new EnumClassMetaModel(enumMetaModel))
-        enumMetaModel
+    }
+
+    static EnumEntryMetaModel enumEntry(String name, String translationKey = "some.translation.key") {
+        EnumEntryMetaModel.builder()
+            .name(name)
+            .translation(TranslationModel.builder()
+                .translationKey(translationKey)
+                .build())
+            .build()
     }
 
     static ClassMetaModel createSomePersonClassMetaModel() {
@@ -105,7 +121,8 @@ class ClassMetaModelSamples {
                                 createValidFieldMetaModel("street", String),
                                 createValidFieldMetaModel("houseNr", String, [ValidatorMetaModelSamples.NOT_NULL_VALIDATOR_METAMODEL]),
                                 createValidFieldMetaModel("someEnum", ExampleEnum),
-                                createValidFieldMetaModel("customEnum", createValidEnumMetaModel("customEnumType", "ENUM1", "ENUM2"))
+                                createValidFieldMetaModel("customEnum",
+                                    createValidEnumMetaModel("customEnumType", "ENUM1", "ENUM2"))
                             ])
                             .build()
                     ])
@@ -298,7 +315,9 @@ class ClassMetaModelSamples {
     static ClassMetaModel createClassModelWithGenerics(Class<?> rawClass, Class<?>... genericTypes) {
         ClassMetaModel.builder()
             .realClass(rawClass)
-            .genericTypes(genericTypes.collect { createClassMetaModelFromClass(it)})
+            .genericTypes(genericTypes.collect {
+                createClassMetaModelFromClass(it)
+            })
             .build()
     }
 

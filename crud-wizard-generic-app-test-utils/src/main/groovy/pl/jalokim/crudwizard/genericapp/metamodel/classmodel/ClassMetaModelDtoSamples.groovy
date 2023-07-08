@@ -1,11 +1,16 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel
 
 import static pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig.objectToRawJson
+import static pl.jalokim.crudwizard.genericapp.metamodel.MetaModelDtoType.BY_RAW_CLASSNAME
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto.buildClassMetaModelDtoWithId
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.TRANSLATIONS_SAMPLE
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDtoWithKey
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.createValidValidatorMetaModelDto
+import static pl.jalokim.utils.reflection.MetadataReflectionUtils.isSimpleType
 
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicLong
 import org.springframework.data.domain.Page
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyDto
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorage.query.DefaultDataStorageQueryProvider
@@ -13,12 +18,16 @@ import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.FieldMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDto
 import pl.jalokim.crudwizard.genericapp.validation.validator.NotNullValidator
 import pl.jalokim.crudwizard.genericapp.validation.validator.SizeValidator
+import pl.jalokim.utils.reflection.MetadataReflectionUtils
 
 class ClassMetaModelDtoSamples {
+
+    private final static ThreadLocal<ClassCreationContext> CREATION_CONTEXT = new ThreadLocal<>()
 
     static ClassMetaModelDto simplePersonClassMetaModel() {
         ClassMetaModelDto.builder()
             .name("simple-person")
+            .translationName(sampleTranslationDto())
             .isGenericEnumType(false)
             .fields([
                 createValidFieldMetaModelDto("id", Long, [], [isIdFieldType()]),
@@ -49,6 +58,7 @@ class ClassMetaModelDtoSamples {
     static ClassMetaModelDto createDocumentClassMetaDto() {
         ClassMetaModelDto.builder()
             .name("document")
+            .translationName(sampleTranslationDto())
             .validators([createValidValidatorMetaModelDto(NotNullValidator, NotNullValidator.NOT_NULL)])
             .fields([
                 createValidFieldMetaModelDto("id", Long, [], [isIdFieldType()]),
@@ -67,6 +77,7 @@ class ClassMetaModelDtoSamples {
     static ClassMetaModelDto exampleClassMetaModelDtoWithExtension() {
         ClassMetaModelDto.builder()
             .name("person-with-2-extends")
+            .translationName(sampleTranslationDto())
             .isGenericEnumType(false)
             .extendsFromModels([
                 extendedPersonClassMetaModel1(), createClassMetaModelDtoFromClass(ExtendedSamplePersonDto)
@@ -84,6 +95,7 @@ class ClassMetaModelDtoSamples {
     static ClassMetaModelDto createHttpQueryParamsClassMetaModelDto() {
         ClassMetaModelDto.builder()
             .name("person-queryParams")
+            .translationName(sampleTranslationDto())
             .fields([
                 createValidFieldMetaModelDto("surname", String),
                 createValidFieldMetaModelDto("age", Integer, [],
@@ -101,17 +113,34 @@ class ClassMetaModelDtoSamples {
     static ClassMetaModelDto createValidEnumMetaModel() {
         ClassMetaModelDto.builder()
             .name("exampleEnum")
+            .translationName(sampleTranslationDto())
             .isGenericEnumType(true)
+            .enumMetaModel(sampleEnumMetaModel("VALUE_1", "VALUE_2"))
             .build()
-            .addProperty(ENUM_VALUES_PREFIX, ["VALUE_1", "VALUE_2"] as String[])
+    }
+
+    private static EnumMetaModelDto sampleEnumMetaModel(String... enums) {
+        EnumMetaModelDto.builder()
+            .enums(enums.collect {
+                sampleEntryMetaModel(it)
+            })
+            .build()
+    }
+
+    static EnumEntryMetaModelDto sampleEntryMetaModel(String enumValue, Map<String, String> translations = TRANSLATIONS_SAMPLE) {
+        EnumEntryMetaModelDto.builder()
+            .name(enumValue)
+            .translation(sampleTranslationDto(translations))
+            .build()
     }
 
     static ClassMetaModelDto createEnumMetaModel(String... enumValues) {
         ClassMetaModelDto.builder()
             .name("exampleEnum")
+            .translationName(sampleTranslationDto())
             .isGenericEnumType(true)
+            .enumMetaModel(sampleEnumMetaModel(enumValues))
             .build()
-            .addProperty(ENUM_VALUES_PREFIX, enumValues)
     }
 
     static ClassMetaModelDto createListWithMetaModel(ClassMetaModelDto classMetaModelDto) {
@@ -130,6 +159,7 @@ class ClassMetaModelDtoSamples {
 
     static ClassMetaModelDto createValidClassMetaModelDtoWithName() {
         ClassMetaModelDto.builder()
+            .translationName(sampleTranslationDto())
             .name("someValidMetamodel")
             .fields([createValidFieldMetaModelDto()])
             .isGenericEnumType(false)
@@ -139,19 +169,61 @@ class ClassMetaModelDtoSamples {
     static ClassMetaModelDto createValidClassMetaModelDtoWithClassName() {
         ClassMetaModelDto.builder()
             .className(String.canonicalName)
+            .translationName(sampleTranslationDto())
             .isGenericEnumType(false)
             .build()
     }
 
-    static ClassMetaModelDto createClassMetaModelDtoFromClass(Class<?> metaModelClass) {
+    static ClassMetaModelDto createClassMetaModelDtoForClass(Class<?> metaModelClass) {
         ClassMetaModelDto.builder()
             .className(metaModelClass.canonicalName)
+            .classMetaModelDtoType(BY_RAW_CLASSNAME)
+        .build()
+    }
+
+    static ClassMetaModelDto createClassMetaModelDtoFromClass(Class<?> metaModelClass) {
+        def creationContext = CREATION_CONTEXT.get()
+        if (creationContext == null) {
+            CREATION_CONTEXT.set(new ClassCreationContext())
+        }
+        creationContext = CREATION_CONTEXT.get()
+
+        def refToClassDto = creationContext.getRef(metaModelClass)
+        if (refToClassDto != null) {
+            return refToClassDto
+        }
+        creationContext.beforeCreate(metaModelClass)
+
+        def classBuilder = ClassMetaModelDto.builder()
+            .className(metaModelClass.canonicalName)
             .isGenericEnumType(false)
-            .build()
+
+        if (!isSimpleType(metaModelClass)) {
+            Map<String, FieldMetaModelDto> fieldsByName = [:]
+            MetadataReflectionUtils.getAllFields(metaModelClass)
+                .findAll {
+                    MetadataReflectionUtils.isNotStaticField(it)
+                }
+                .each {
+                    if (!it.type.canonicalName.startsWith("groovy.lang")) {
+                        fieldsByName.put(it.name, FieldMetaModelDto.builder()
+                            .fieldName(it.name)
+                            .fieldType(createClassMetaModelDtoFromClass(it.type))
+                            .translationFieldName(sampleTranslationDto())
+                            .build())
+                    }
+                }
+
+            classBuilder.translationName(sampleTranslationDto())
+            classBuilder.fields(fieldsByName.values() as List)
+        }
+        creationContext.afterCreate()
+        classBuilder.build()
     }
 
     static ClassMetaModelDto createEmptyClassMetaModelDto() {
         ClassMetaModelDto.builder()
+            .translationName(sampleTranslationDtoWithKey())
             .isGenericEnumType(false)
             .build()
     }
@@ -160,18 +232,25 @@ class ClassMetaModelDtoSamples {
         FieldMetaModelDto.builder()
             .fieldName("somefieldName")
             .fieldType(createValidClassMetaModelDtoWithClassName())
+            .translationFieldName(sampleTranslationDto())
             .build()
     }
 
     static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, Class<?> fieldType,
         List<ValidatorMetaModelDto> validators = [],
-        List<AdditionalPropertyDto> fieldAdditionalProperties = []) {
+        List<AdditionalPropertyDto> fieldAdditionalProperties = [],
+        Map<String, String> translations = TRANSLATIONS_SAMPLE) {
         FieldMetaModelDto.builder()
             .fieldName(fieldName)
             .fieldType(createClassMetaModelDtoFromClass(fieldType))
             .validators(validators)
             .additionalProperties(fieldAdditionalProperties)
+            .translationFieldName(sampleTranslationDto(translations))
             .build()
+    }
+
+    static FieldMetaModelDto createTranslatedFieldMetaModelDto(String fieldName, Class<?> fieldType, Map<String, String> translations) {
+        createValidFieldMetaModelDto(fieldName, fieldType, [], [], translations)
     }
 
     static FieldMetaModelDto createIdFieldType(String fieldName, Class<?> fieldType) {
@@ -184,13 +263,19 @@ class ClassMetaModelDtoSamples {
         ])
     }
 
+    static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, ClassMetaModelDto classMetaModelDto, Map<String, String> translations) {
+        createValidFieldMetaModelDto(fieldName, classMetaModelDto, [], [:], translations)
+    }
+
     static FieldMetaModelDto createValidFieldMetaModelDto(String fieldName, ClassMetaModelDto classMetaModelDto,
         List<ValidatorMetaModelDto> validators = [],
-        Map<String, Object> additionalProperties = [:]) {
+        Map<String, Object> additionalProperties = [:],
+        Map<String, String> translations = TRANSLATIONS_SAMPLE) {
         FieldMetaModelDto.builder()
             .fieldName(fieldName)
             .fieldType(classMetaModelDto)
             .validators(validators)
+            .translationFieldName(sampleTranslationDto(translations))
             .additionalProperties(additionalProperties.collect {
                 AdditionalPropertyDto.builder()
                     .name(it.key)
@@ -221,10 +306,41 @@ class ClassMetaModelDtoSamples {
             .build()
     }
 
-    static ClassMetaModelDto createClassMetaModelDtoWithGenerics(Class<?> rawClass, ClassMetaModelDto... genericTypes) {
+    static ClassMetaModelDto createClassMetaModelDtoWithGenerics(Class<?> rawClass, Map<String,
+        String> translations = TRANSLATIONS_SAMPLE, ClassMetaModelDto... genericTypes) {
+
         ClassMetaModelDto.builder()
             .className(rawClass.canonicalName)
+            .translationName(sampleTranslationDto(translations))
             .genericTypes(genericTypes as List<ClassMetaModelDto>)
             .build()
+    }
+
+    private static class ClassCreationContext {
+        AtomicLong level = new AtomicLong()
+
+        Set<String> classMetaModelDtoByClassName = [] as Set
+
+        void beforeCreate(Class<?> realClass) {
+            classMetaModelDtoByClassName.add(realClass.canonicalName)
+            level.incrementAndGet()
+        }
+
+        void afterCreate() {
+            level.decrementAndGet()
+            if (level.get() == 0) {
+                CREATION_CONTEXT.set(null)
+            }
+        }
+
+        ClassMetaModelDto getRef(Class<?> realClass) {
+            if (classMetaModelDtoByClassName.contains(realClass.canonicalName)) {
+                return ClassMetaModelDto.builder()
+                    .className(realClass.canonicalName)
+                    .classMetaModelDtoType(BY_RAW_CLASSNAME)
+                    .build()
+            }
+            null
+        }
     }
 }

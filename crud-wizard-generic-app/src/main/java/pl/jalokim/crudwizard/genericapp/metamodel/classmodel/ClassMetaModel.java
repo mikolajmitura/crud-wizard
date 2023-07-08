@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage;
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.createMessagePlaceholder;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.READ;
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.AccessFieldType.WRITE;
@@ -30,6 +31,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.context.NoSuchMessageException;
 import pl.jalokim.crudwizard.core.exception.TechnicalException;
 import pl.jalokim.crudwizard.genericapp.metamodel.MetaModelState;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesMetaModel;
@@ -37,6 +39,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ReadFieldResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.WriteFieldResolver;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationModel;
 import pl.jalokim.utils.collection.CollectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
 import pl.jalokim.utils.reflection.TypeMetadata;
@@ -60,11 +63,13 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     TypeMetadata typeMetadata;
     String className;
 
+    TranslationModel translationName;
+
     Boolean simpleRawClass;
 
     Class<?> realClass;
 
-    EnumClassMetaModel enumClassMetaModel;
+    EnumMetaModel enumMetaModel;
 
     @Builder.Default
     List<ClassMetaModel> genericTypes = new ArrayList<>();
@@ -82,6 +87,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
     @Setter(AccessLevel.NONE)
     ParentMetamodelCacheContext parentMetamodelCacheContext;
 
+    @EqualsAndHashCode.Exclude
     MetaModelState state;
 
     @Builder.Default
@@ -102,7 +108,7 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
      * when true then does it mean that this meta model is like generic enum metamodel
      */
     public boolean isGenericMetamodelEnum() {
-        return enumClassMetaModel != null;
+        return enumMetaModel != null;
     }
 
     public boolean isEnumTypeOrJavaEnum() {
@@ -287,9 +293,20 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
     public String getTypeDescription() {
         if (isGenericModel()) {
-            return getName(); // TODO #4 get translation of class meta model
+            return getName();
         }
         return getJavaGenericTypeInfo();
+    }
+
+    public String getTranslatedName() {
+        try {
+            String translationKey = Optional.ofNullable(translationName)
+                .map(TranslationModel::getTranslationKey)
+                .orElse("classMetaModel." + getClassName());
+            return getMessage(translationKey);
+        } catch (NoSuchMessageException ex) {
+            return getTypeDescription();
+        }
     }
 
     public String getJavaGenericTypeInfo() {
@@ -464,18 +481,16 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
             fields = new ArrayList<>(fieldsToMerge);
         } else {
             Map<String, FieldMetaModel> fieldsFromThisModel = elements(fields)
-                .asMap(FieldMetaModel::getFieldName);
+                    .asMap(FieldMetaModel::getFieldName);
 
-            for (FieldMetaModel fieldForMerge : fieldsToMerge) {
+            for (FieldMetaModel fieldForMerge : new ArrayList<>(fieldsToMerge)) {
                 FieldMetaModel fieldFromThisModel = fieldsFromThisModel.get(fieldForMerge.getFieldName());
-                if (fieldFromThisModel == null) {
-                    fields.add(fieldForMerge);
-                } else {
+                if (fieldFromThisModel != null) {
                     fields.remove(fieldFromThisModel);
                     updateAccessTypeForField(fieldForMerge, fieldFromThisModel);
                     mergeFields(fieldForMerge, fieldFromThisModel);
-                    fields.add(fieldForMerge);
                 }
+                fields.add(fieldForMerge);
             }
         }
         attachFieldsOwner();
@@ -487,7 +502,16 @@ public class ClassMetaModel extends WithAdditionalPropertiesMetaModel {
 
         fieldForMerge.setValidators(mergeListsSkipDuplicates(
             fieldForMerge.getValidators(), fieldFromThisModel.getValidators()));
-        // TODO #4 merge translation
+        fieldForMerge.setTranslationFieldName(fieldFromThisModel.getTranslationFieldName());
+        fieldForMerge.getFieldType().setTranslationName(fieldFromThisModel.getFieldType().getTranslationName());
+
+        EnumMetaModel enumMetaModelSource = fieldFromThisModel.getFieldType().getEnumMetaModel();
+        if (enumMetaModelSource != null) {
+            fieldForMerge.getFieldType().setEnumMetaModel(enumMetaModelSource);
+        }
+        if (!fieldFromThisModel.getFieldType().equals(this)) {
+            fieldFromThisModel.getFieldType().mergeFields(fieldForMerge.getFieldType().getFields());
+        }
     }
 
     @SuppressWarnings("PMD.AvoidReassigningParameters")

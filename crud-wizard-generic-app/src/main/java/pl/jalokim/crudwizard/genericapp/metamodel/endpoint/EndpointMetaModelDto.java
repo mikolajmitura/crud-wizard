@@ -23,6 +23,10 @@ import pl.jalokim.crudwizard.core.validation.javax.UniqueValue;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.apitag.ApiTagDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.CannotUpdateFullDefinitionForRealClass;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ConditionallyNotNullTranslation;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByClassName;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.OnlyExpectedFieldsForRealClass;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStorageConnectorMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.validation.BeansAndMethodsExists;
@@ -77,6 +81,10 @@ public class EndpointMetaModelDto extends WithAdditionalPropertiesDto {
     String operationName;
 
     @Valid
+    @ConditionallyNotNullTranslation
+    @OnlyExpectedFieldsForRealClass
+    @ExistFullDefinitionInTempContextByClassName
+    @CannotUpdateFullDefinitionForRealClass
     ClassMetaModelDto payloadMetamodel;
 
     List<@Valid AdditionalValidatorsMetaModelDto> payloadMetamodelAdditionalValidators;

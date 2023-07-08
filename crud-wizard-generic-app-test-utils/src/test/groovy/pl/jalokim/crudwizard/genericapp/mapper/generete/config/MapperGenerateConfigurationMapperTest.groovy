@@ -5,20 +5,16 @@ import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.create
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSimpleDocumentMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createSomePersonClassMetaModel
 import static pl.jalokim.crudwizard.core.metamodels.ClassMetaModelSamples.createValidFieldMetaModel
-import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumClassMetaModel.ENUM_VALUES_PREFIX
-import static pl.jalokim.utils.reflection.MetadataReflectionUtils.getFullClassName
 import static pl.jalokim.utils.test.DataFakerHelper.randomText
 
 import java.time.LocalDate
-import org.mapstruct.factory.Mappers
-import pl.jalokim.crudwizard.core.config.jackson.ObjectMapperConfig
 import pl.jalokim.crudwizard.core.sample.SamplePersonDto
 import pl.jalokim.crudwizard.core.sample.SomeDto
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity
-import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.EnumEntryMetaModelEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ExtendedSamplePersonDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModel
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.FieldMetaModelEntity
@@ -31,14 +27,14 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.FieldMeta
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperConfigurationEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGenerateConfigurationEntity
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingEntity
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationEntity
 import pl.jalokim.utils.reflection.InvokableReflectionUtils
 import spock.lang.Specification
 
 class MapperGenerateConfigurationMapperTest extends Specification {
 
     private ClassMetaModelMapper classMetaModelMapper = Mock()
-    private AdditionalPropertyMapper additionalPropertyMapper = Mappers.getMapper(AdditionalPropertyMapper)
-    private MapperGenerateConfigurationMapper testCase = new MapperGenerateConfigurationMapperImpl(additionalPropertyMapper)
+    private MapperGenerateConfigurationMapper testCase = new MapperGenerateConfigurationMapperImpl(classMetaModelMapper)
 
     def setup() {
         InvokableReflectionUtils.setValueForField(testCase, "classMetaModelMapper", classMetaModelMapper)
@@ -274,12 +270,18 @@ class MapperGenerateConfigurationMapperTest extends Specification {
         ClassMetaModelEntity.builder()
             .name("exampleEnum")
             .isGenericEnumType(true)
-            .additionalProperties([
-                AdditionalPropertyEntity.builder()
-                    .name(ENUM_VALUES_PREFIX)
-                    .valueRealClassName(getFullClassName(enumValues))
-                    .rawJson(ObjectMapperConfig.objectToRawJson(enumValues))
-                    .build()])
+            .enums(enumValues.collect {
+                createEnumEntry(it)
+            })
+            .build()
+    }
+
+    static EnumEntryMetaModelEntity createEnumEntry(String name) {
+        EnumEntryMetaModelEntity.builder()
+            .name(name)
+            .translation(TranslationEntity.builder()
+                .translationKey("some.enum.name")
+                .build())
             .build()
     }
 

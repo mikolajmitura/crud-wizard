@@ -9,6 +9,7 @@ import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NOT
 import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.NULL
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createClassMetaModelDtoFromClass
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.fieldShouldWithoutWhenMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.notNullMessage
 import static pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl.whenFieldIsInStateThenOthersShould
@@ -21,6 +22,7 @@ import pl.jalokim.crudwizard.core.exception.handler.DummyService
 import pl.jalokim.crudwizard.core.exception.handler.SimpleDummyDto
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseMetaModelValidationTestSpec
 import pl.jalokim.crudwizard.genericapp.metamodel.ScriptLanguage
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.BeforeClassValidationUpdater
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.fieldresolver.ByDeclaredFieldsResolver
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext
@@ -33,6 +35,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.MapperGen
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.PropertiesOverriddenMappingDto
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.configuration.WriteFieldMetaResolverForClassEntryDto
 import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
+import pl.jalokim.crudwizard.genericapp.translation.LanguagesContext
 import pl.jalokim.utils.collection.Elements
 import spock.lang.Unroll
 
@@ -43,6 +46,10 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
     @Unroll
     def "return expected validation messages for given mapperMetaModelDto: #mapperMetaModelDto"() {
         given:
+        MetaModelContext metaModelContext = new MetaModelContext()
+        metaModelContext.setTranslationsContext(new LanguagesContext(["en_US": "American English"]))
+        metaModelContextService.getMetaModelContext() >> metaModelContext
+
         TemporaryMetaModelContext temporaryMetaModelContext = new TemporaryMetaModelContext(123L, new MetaModelContext(),
             EndpointMetaModelDto.builder().build())
         TemporaryModelContextHolder.setTemporaryContext(temporaryMetaModelContext)
@@ -51,6 +58,8 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
         if (generateConfig) {
             def rootMapperConfiguration = generateConfig.getRootConfiguration()
             if (rootMapperConfiguration) {
+                attachFieldTranslationsWhenNotExist(rootMapperConfiguration.targetMetaModel)
+                attachFieldTranslationsWhenNotExist(rootMapperConfiguration.sourceMetaModel)
                 temporaryContextLoader.updateOrCreateClassMetaModelInContext(rootMapperConfiguration.getTargetMetaModel())
                 temporaryContextLoader.updateOrCreateClassMetaModelInContext(rootMapperConfiguration.getSourceMetaModel())
             }
@@ -61,6 +70,10 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
                         temporaryContextLoader.updateOrCreateClassMetaModelInContext(mapperConfig.getSourceMetaModel())
                 }
             }
+        }
+        if (mapperMetaModelDto.getMapperScript()) {
+            attachFieldTranslationsWhenNotExist(mapperMetaModelDto.getMapperScript().sourceMetaModel)
+            attachFieldTranslationsWhenNotExist(mapperMetaModelDto.getMapperScript().targetMetaModel)
         }
 
         when:
@@ -423,6 +436,7 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
     static ClassMetaModelDto simplePersonClassMetaModel() {
         ClassMetaModelDto.builder()
             .name("simplePerson")
+            .translationName(sampleTranslationDto())
             .isGenericEnumType(false)
             .fields([
                 createValidFieldMetaModelDto("id", Long, []),
@@ -465,5 +479,12 @@ class MapperMetaModelDtoValidationTest extends BaseMetaModelValidationTestSpec {
 
     static boolean isWindows() {
         return System.getProperty("os.name").contains("Windows")
+    }
+
+    private static attachFieldTranslationsWhenNotExist(ClassMetaModelDto nullableClassMetaModelDto) {
+        if (nullableClassMetaModelDto) {
+            nullableClassMetaModelDto.setTranslationName(sampleTranslationDto())
+            BeforeClassValidationUpdater.attachFieldTranslationsWhenNotExist(nullableClassMetaModelDto)
+        }
     }
 }

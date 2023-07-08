@@ -2,6 +2,7 @@ package pl.jalokim.crudwizard.genericapp.metamodel.context;
 
 import static pl.jalokim.crudwizard.core.utils.NullableHelper.helpWithNulls;
 import static pl.jalokim.crudwizard.genericapp.metamodel.context.EndpointMetaModelContextNode.createRootMetaModelNode;
+import static pl.jalokim.utils.collection.Elements.elements;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.DataStora
 import pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.service.ServiceMetaModel;
+import pl.jalokim.crudwizard.genericapp.translation.LanguagesContext;
 
 @Data
 @SuppressWarnings("PMD.TooManyFields")
@@ -43,6 +45,7 @@ public class MetaModelContext {
     private DataStorageMetaModel defaultDataStorageMetaModel;
     private DataStorageQueryProvider defaultDataStorageQueryProvider;
     private List<DataStorageConnectorMetaModel> defaultDataStorageConnectorMetaModels;
+    private LanguagesContext translationsContext;
 
     public static <I, R> List<R> getListFromContext(List<I> inputList,
         Supplier<ModelsCache<R>> gettingModelById, Function<I, Long> gettingId) {
@@ -69,5 +72,9 @@ public class MetaModelContext {
         return Optional.ofNullable(name)
             .map(notNullName -> getMapperMetaModels().getMappersModelByMapperName().get(name))
             .orElse(null);
+    }
+
+    public List<String> getAllCountryCodes() {
+        return elements(translationsContext.getAllLanguages().keySet()).asList();
     }
 }

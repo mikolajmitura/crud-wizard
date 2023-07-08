@@ -8,12 +8,16 @@ import pl.jalokim.crudwizard.genericapp.metamodel.method.BeanAndMethodDto
 class ServiceMetaModelDtoSamples {
 
     static ServiceMetaModelDto createValidServiceMetaModelDto() {
+        createValidServiceMetaModelDto(DummyService, "somePost")
+    }
+
+    static ServiceMetaModelDto createValidServiceMetaModelDto(Class<?> type, String methodName, String beanName = null) {
         ServiceMetaModelDto.builder()
-        .serviceBeanAndMethod(BeanAndMethodDto.builder()
-            .className(DummyService.class.getCanonicalName())
-            .beanName("dummyService")
-            .methodName("somePost")
-            .build())
+            .serviceBeanAndMethod(BeanAndMethodDto.builder()
+                .className(type.getCanonicalName())
+                .beanName(beanName)
+                .methodName(methodName)
+                .build())
             .build()
     }
 

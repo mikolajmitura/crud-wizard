@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.core.validation.javax;
 
+import static pl.jalokim.crudwizard.core.validation.javax.ExpectedFieldState.UNKNOWN;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -16,15 +18,17 @@ import javax.validation.Payload;
 @Constraint(validatedBy = FieldShouldWhenOtherJavaxValidator.class)
 public @interface FieldShouldWhenOther {
 
+    String NOT_PROVIDED_VALUE = "<NOT_PROVIDED>";
+
     String field();
 
     ExpectedFieldState should();
 
     String[] fieldValues() default {};
 
-    String whenField();
+    String whenField() default NOT_PROVIDED_VALUE;
 
-    ExpectedFieldState is();
+    ExpectedFieldState is() default UNKNOWN;
 
     String[] otherFieldValues() default {};
 

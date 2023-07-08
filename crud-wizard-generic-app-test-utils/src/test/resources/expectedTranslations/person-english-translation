@@ -1,0 +1,9 @@
+Person(classMetaModel.person)
+	Text:Name(field.person.name)=John
+	java.lang.Byte:Age(age.field.translationKEY)=25
+	Date(classMetaModel.pl.jalokim.crudwizard.genericapp.metamodel.samples.translations.SomeDate):Birthday(field.person.birthDay)=
+		Text:value(field.pl.jalokim.crudwizard.genericapp.metamodel.samples.translations.SomeDate.value)=1998-03-22
+	Color Enum(classMetaModel.pl.jalokim.crudwizard.genericapp.metamodel.samples.translations.ColorEnum):Eyes Color(field.person.someColor)=red(someColor.red.enumValue)
+	some Enum(classMetaModel.SomeEnumName):next enum(field.person.someEnum)=second(enum.SomeEnumName.SECOND)
+	Other class(otherClass.name):other field name(field.person.otherClassField)=
+		java.lang.Long:id(field.pl.jalokim.crudwizard.genericapp.metamodel.samples.translations.SomeOtherClass.id)=123

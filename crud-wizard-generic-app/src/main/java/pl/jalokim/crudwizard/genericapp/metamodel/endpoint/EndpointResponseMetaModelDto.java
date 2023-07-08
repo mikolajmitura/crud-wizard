@@ -11,6 +11,10 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.CannotUpdateFullDefinitionForRealClass;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ConditionallyNotNullTranslation;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ExistFullDefinitionInTempContextByClassName;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.OnlyExpectedFieldsForRealClass;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 
@@ -22,7 +26,12 @@ import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 public class EndpointResponseMetaModelDto extends WithAdditionalPropertiesDto {
 
     Long id;
+
     @Valid
+    @ConditionallyNotNullTranslation
+    @OnlyExpectedFieldsForRealClass
+    @ExistFullDefinitionInTempContextByClassName
+    @CannotUpdateFullDefinitionForRealClass
     ClassMetaModelDto classMetaModel;
 
     @Min(100)

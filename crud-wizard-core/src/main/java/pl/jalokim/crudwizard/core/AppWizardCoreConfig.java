@@ -1,6 +1,7 @@
 package pl.jalokim.crudwizard.core;
 
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createCommonMessageSourceProvider;
+import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createHibernateMessageSourceProvider;
 import static pl.jalokim.crudwizard.core.translations.MessageSourceFactory.createMessageSourceDelegator;
 
 import java.time.Clock;
@@ -15,9 +16,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import pl.jalokim.crudwizard.core.translations.LocaleService;
 import pl.jalokim.crudwizard.core.translations.MessageSourceFactory;
 import pl.jalokim.crudwizard.core.translations.MessageSourceProvider;
+import pl.jalokim.crudwizard.core.validation.javax.MessageInterpolatorFactory;
 import pl.jalokim.crudwizard.core.validation.javax.groups.ValidatorWithDefaultGroupFactoryBean;
 
 @Configuration
@@ -31,19 +35,27 @@ public class AppWizardCoreConfig implements BeanDefinitionRegistryPostProcessor 
     }
 
     @Bean
+    @Order(1)
     MessageSourceProvider appMessageSource() {
         return MessageSourceFactory.createMessageSourceProvider();
     }
 
     @Bean
+    @Order(3)
     MessageSourceProvider commonMessageSource() {
         return createCommonMessageSourceProvider();
     }
 
     @Bean
+    @Order(4)
+    MessageSourceProvider hibernateMessageSourceProvider() {
+        return createHibernateMessageSourceProvider();
+    }
+
+    @Bean
     @Primary
-    MessageSource mainMessageSource(List<MessageSourceProvider> messageSourceProviders) {
-        return createMessageSourceDelegator(messageSourceProviders);
+    MessageSource mainMessageSource(List<MessageSourceProvider> messageSourceProviders, LocaleService localeService) {
+        return createMessageSourceDelegator(messageSourceProviders, localeService);
     }
 
     @Bean
@@ -51,6 +63,7 @@ public class AppWizardCoreConfig implements BeanDefinitionRegistryPostProcessor 
     public LocalValidatorFactoryBean validatorWithDefaultGroupFactory(MessageSource messageSource) {
         ValidatorWithDefaultGroupFactoryBean bean = new ValidatorWithDefaultGroupFactoryBean();
         bean.setValidationMessageSource(messageSource);
+        bean.setMessageInterpolator(MessageInterpolatorFactory.createMessageInterpolator(messageSource));
         return bean;
     }
 

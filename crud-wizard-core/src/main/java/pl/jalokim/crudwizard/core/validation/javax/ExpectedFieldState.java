@@ -58,7 +58,12 @@ public enum ExpectedFieldState {
      * For Collections, Map or String as max size
      * For numbers max value
      */
-    MAX;
+    MAX,
+
+    /**
+     * Only for default values, when set by user then will be thrown validation Exception.
+     */
+    UNKNOWN;
 
     public static final List<ExpectedFieldState> FOR_COLLECTIONS = List.of(CONTAINS_ALL, CONTAINS_ANY, EMPTY, EMPTY_OR_NULL, NOT_EMPTY);
     public static final List<ExpectedFieldState> FOR_STRING = List.of(NOT_BLANK);

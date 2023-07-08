@@ -4,6 +4,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaMod
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createIdFieldType
 import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDtoSamples.createValidFieldMetaModelDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostEndpointMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
 
 import java.time.LocalDate
 import org.apache.tomcat.util.http.fileupload.FileUtils
@@ -64,6 +65,7 @@ class ManuallyRunApplicationIT extends Specification {
             ])
             .payloadMetamodel(ClassMetaModelDto.builder()
                 .name("personDto")
+                .translationName(sampleTranslationDto())
                 .fields([
                     createIdFieldType("id", Long),
                     createValidFieldMetaModelDto("code", String),

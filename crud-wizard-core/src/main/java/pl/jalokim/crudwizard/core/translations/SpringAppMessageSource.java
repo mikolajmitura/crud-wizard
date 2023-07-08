@@ -2,7 +2,6 @@ package pl.jalokim.crudwizard.core.translations;
 
 import static pl.jalokim.crudwizard.core.translations.MessagePlaceholder.wrapAsPlaceholder;
 
-import java.util.Locale;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.validation.MessageInterpolator;
@@ -29,7 +28,7 @@ public class SpringAppMessageSource implements AppMessageSource {
 
     @Override
     public String getMessage(String propertyKey) {
-        return messageSource.getMessage(propertyKey, null, Locale.getDefault());
+        return messageSource.getMessage(propertyKey, null, LocaleHolder.getLocale());
     }
 
     @Override
@@ -37,6 +36,6 @@ public class SpringAppMessageSource implements AppMessageSource {
         getMessage(propertyKey);
         MessageInterpolator messageInterpolator = getValidatorFactory().getMessageInterpolator();
         return messageInterpolator.interpolate(wrapAsPlaceholder(propertyKey), new ContextFromPlaceholderArgs(placeholderArgs),
-            Locale.getDefault());
+            LocaleHolder.getLocale());
     }
 }

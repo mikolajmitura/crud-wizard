@@ -31,8 +31,7 @@ public abstract class ServiceMetaModelMapper implements BaseMapper<ServiceMetaMo
         ServiceMetaModelBuilder<?, ?> serviceMetaModelBuilder = toMetaModel(serviceMetaModelEntity).toBuilder();
 
         BeanAndMethodEntity serviceMethod = serviceMetaModelEntity.getServiceBeanAndMethod();
-        if (serviceMethod != null && elements(serviceMethod.getClassName(),
-            serviceMethod.getBeanName(), serviceMethod.getMethodName())
+        if (serviceMethod != null && elements(serviceMethod.getClassName(), serviceMethod.getMethodName())
             .allMatch(Objects::nonNull)) {
 
             String className = serviceMethod.getClassName();

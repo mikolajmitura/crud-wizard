@@ -20,6 +20,7 @@ import pl.jalokim.crudwizard.core.datetime.TimeProvider
 import pl.jalokim.crudwizard.core.datetime.TimeProviderHolder
 import pl.jalokim.crudwizard.core.translations.AppMessageSource
 import pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder
+import pl.jalokim.crudwizard.core.utils.InstanceLoader
 import pl.jalokim.crudwizard.test.utils.translations.AppMessageSourceTestImpl
 import spock.lang.Shared
 import spock.lang.Specification
@@ -43,6 +44,9 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     @Autowired
     protected ValidatorFactory validatorFactory
 
+    @Autowired
+    protected InstanceLoader instanceLoader
+
     @Shared Map<Integer, Boolean> executedClosuresByLineNumber = [:]
 
     @Override
@@ -55,6 +59,7 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     }
 
     def setup() {
+        InstanceLoader.setInstance(instanceLoader)
         AppMessageSourceHolder.setAppMessageSource(appMessageSource)
         TimeProviderHolder.setTimeProvider(timeProvider)
     }
@@ -64,6 +69,10 @@ class BaseIntegrationSpecification extends Specification implements UsesTimeProv
     }
 
     void inTransaction(Closure<Void> block) {
+        transactionTemplate.execute(block)
+    }
+
+    void inVoidTransaction(Closure block) {
         transactionTemplate.execute(block)
     }
 

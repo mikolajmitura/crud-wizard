@@ -1,9 +1,17 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
+import static pl.jalokim.crudwizard.genericapp.metamodel.classmodel.utils.ClassMetaModelsUtils.isClearRawClassFullDefinition;
+import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
+import static pl.jalokim.utils.collection.CollectionUtils.isNotEmpty;
+import static pl.jalokim.utils.collection.Elements.elements;
+import static pl.jalokim.utils.string.StringUtils.isNotBlank;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.stereotype.Component;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelService;
 
@@ -31,12 +39,12 @@ public class ClassMetaModelEntitySaveContext {
         return alreadySavedClassMetaModelByName.get();
     }
 
-    public ClassMetaModelEntity findFullySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
-        return getSavedEntities().findFullySavedWhenNameTheSame(classMetaModelEntity);
+    public ClassMetaModelEntity findFullySaved(ClassMetaModelEntity classMetaModelEntity) {
+        return getSavedEntities().findFullySaved(classMetaModelEntity);
     }
 
-    public ClassMetaModelEntity findPartiallySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
-        return getSavedEntities().findPartiallySavedWhenNameTheSame(classMetaModelEntity);
+    public ClassMetaModelEntity findPartiallySaved(ClassMetaModelEntity classMetaModelEntity) {
+        return getSavedEntities().findPartiallySaved(classMetaModelEntity);
     }
 
     public void putFullySavedToContext(ClassMetaModelEntity savedClassMetaModelEntity) {
@@ -61,30 +69,61 @@ public class ClassMetaModelEntitySaveContext {
         private final ValidatorMetaModelService validatorMetaModelService;
         private final ClassMetaModelRepository classMetaModelRepository;
         private final ClassMetaModelMapper classMetaModelMapper;
-        private final Map<String, ClassMetaModelEntity> partiallyEntitiesSaved = new HashMap<>();
-        private final Map<String, ClassMetaModelEntity> duringFullSaveEntities = new HashMap<>();
-        private final Map<String, ClassMetaModelEntity> fullyEntitiesSaved = new HashMap<>();
+        private final Map<ClassKey, ClassMetaModelEntity> partiallyEntitiesSaved = new HashMap<>();
+        private final Map<ClassKey, ClassMetaModelEntity> duringFullSaveEntities = new HashMap<>();
+        private final Map<ClassKey, ClassMetaModelEntity> fullyEntitiesSaved = new HashMap<>();
 
         public void putFullySavedToContext(ClassMetaModelEntity savedClassMetaModelEntity) {
-            if (savedClassMetaModelEntity.getName() != null) {
+            if (canBeSaved(savedClassMetaModelEntity)) {
                 Objects.requireNonNull(savedClassMetaModelEntity.getId(), "entity should have assigned id already");
-                fullyEntitiesSaved.put(savedClassMetaModelEntity.getName(), savedClassMetaModelEntity);
+                fullyEntitiesSaved.put(createKey(savedClassMetaModelEntity), savedClassMetaModelEntity);
             }
         }
 
+        @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts"})
         public void putPartiallySavedToContext(ClassMetaModelDto classMetaModelDto) {
+            if (canBeSaved(classMetaModelDto) && !partiallyEntitiesSaved.containsKey(createKey(classMetaModelDto))) {
+                ClassMetaModelEntity savedClassMetaModelEntity = getClassMetaModelEntity(classMetaModelDto);
 
-            if (classMetaModelDto.getName() != null && !partiallyEntitiesSaved.containsKey(classMetaModelDto.getName())) {
-                ClassMetaModelEntity classMetaModelEntity = classMetaModelMapper.toSimpleEntity(classMetaModelDto, false);
-                validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntity.getValidators());
-                ClassMetaModelEntity savedClassMetaModelEntity = classMetaModelRepository.save(classMetaModelEntity);
-                partiallyEntitiesSaved.put(savedClassMetaModelEntity.getName(), savedClassMetaModelEntity);
+                if (savedClassMetaModelEntity == null) {
+                    ClassMetaModelEntity classMetaModelEntity = classMetaModelMapper.toSimpleEntity(classMetaModelDto, false);
+                    validatorMetaModelService.saveOrCreateNewValidators(classMetaModelEntity.getValidators());
+                    if (shouldBeSimpleRawClass(classMetaModelDto)) {
+                        classMetaModelEntity.setSimpleRawClass(true);
+                    }
+                    savedClassMetaModelEntity = classMetaModelRepository.save(classMetaModelEntity);
+                    partiallyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
+                }
             }
         }
 
-        public ClassMetaModelEntity findFullySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
-            if (classMetaModelEntity.getName() != null) {
-                ClassMetaModelEntity currentClassMetaModelEntityInContext = fullyEntitiesSaved.get(classMetaModelEntity.getName());
+        private ClassMetaModelEntity getClassMetaModelEntity(ClassMetaModelDto classMetaModelDto) {
+            ClassMetaModelEntity savedClassMetaModelEntity = null;
+            if (isNotBlank(classMetaModelDto.getClassName())) {
+                List<ClassMetaModelEntity> foundClasses = classMetaModelRepository.findByClassName(classMetaModelDto.getClassName());
+                for (ClassMetaModelEntity foundClass : foundClasses) {
+                    if (isClearRawClassFullDefinition(foundClass)) {
+                        savedClassMetaModelEntity = foundClass;
+                        putToProperContextMap(classMetaModelDto, savedClassMetaModelEntity, foundClass);
+                    }
+                }
+            }
+            return savedClassMetaModelEntity;
+        }
+
+        private void putToProperContextMap(ClassMetaModelDto classMetaModelDto,
+            ClassMetaModelEntity savedClassMetaModelEntity, ClassMetaModelEntity foundClass) {
+
+            if (isNotEmpty(classMetaModelDto.getFields()) && isEmpty(foundClass.getFields())) {
+                partiallyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
+            } else {
+                fullyEntitiesSaved.put(createKey(classMetaModelDto), savedClassMetaModelEntity);
+            }
+        }
+
+        public ClassMetaModelEntity findFullySaved(ClassMetaModelEntity classMetaModelEntity) {
+            if (canBeSaved(classMetaModelEntity)) {
+                ClassMetaModelEntity currentClassMetaModelEntityInContext = fullyEntitiesSaved.get(createKey(classMetaModelEntity));
                 if (currentClassMetaModelEntityInContext != null) {
                     return currentClassMetaModelEntityInContext;
                 }
@@ -92,9 +131,9 @@ public class ClassMetaModelEntitySaveContext {
             return classMetaModelEntity;
         }
 
-        public ClassMetaModelEntity findPartiallySavedWhenNameTheSame(ClassMetaModelEntity classMetaModelEntity) {
-            if (classMetaModelEntity.getName() != null) {
-                ClassMetaModelEntity currentClassMetaModelEntityInContext = partiallyEntitiesSaved.get(classMetaModelEntity.getName());
+        public ClassMetaModelEntity findPartiallySaved(ClassMetaModelEntity classMetaModelEntity) {
+            if (canBeSaved(classMetaModelEntity)) {
+                ClassMetaModelEntity currentClassMetaModelEntityInContext = partiallyEntitiesSaved.get(createKey(classMetaModelEntity));
                 if (currentClassMetaModelEntityInContext != null) {
                     return currentClassMetaModelEntityInContext;
                 }
@@ -103,13 +142,53 @@ public class ClassMetaModelEntitySaveContext {
         }
 
         public void putDuringInitializationEntity(ClassMetaModelEntity classMetaModelEntity) {
-            if (classMetaModelEntity.getName() != null && !duringFullSaveEntities.containsKey(classMetaModelEntity.getName())) {
-                duringFullSaveEntities.put(classMetaModelEntity.getName(), classMetaModelEntity);
+            if (canBeSaved(classMetaModelEntity) && !duringFullSaveEntities.containsKey(createKey(classMetaModelEntity))) {
+                duringFullSaveEntities.put(createKey(classMetaModelEntity), classMetaModelEntity);
             }
         }
 
         public boolean isDuringFullSave(ClassMetaModelEntity classMetaModelEntity) {
-            return classMetaModelEntity.getName() != null && duringFullSaveEntities.containsKey(classMetaModelEntity.getName());
+            return canBeSaved(classMetaModelEntity) && duringFullSaveEntities.containsKey(createKey(classMetaModelEntity));
         }
+    }
+
+    private static boolean canBeSaved(ClassMetaModelDto classMetaModelDto) {
+        return createKey(classMetaModelDto) != null;
+    }
+
+    private static boolean canBeSaved(ClassMetaModelEntity classMetaModelEntity) {
+        return createKey(classMetaModelEntity) != null;
+    }
+
+    private static ClassKey createKey(ClassMetaModelDto classMetaModelDto) {
+        if (isNotBlank(classMetaModelDto.getName())) {
+            return new ClassKey("n: " + classMetaModelDto.getName());
+        } else if (isClearRawClassFullDefinition(classMetaModelDto)) {
+            return new ClassKey("c: " + classMetaModelDto.getClassName());
+        }
+        return null;
+    }
+
+    private static ClassKey createKey(ClassMetaModelEntity classMetaModelEntity) {
+        if (isNotBlank(classMetaModelEntity.getName())) {
+            return new ClassKey("n: " + classMetaModelEntity.getName());
+        } else if (isClearRawClassFullDefinition(classMetaModelEntity)) {
+            return new ClassKey("c: " + classMetaModelEntity.getClassName());
+        }
+        return null;
+    }
+
+    @Value
+    private static class ClassKey {
+
+        String value;
+    }
+
+    private static boolean shouldBeSimpleRawClass(ClassMetaModelDto classMetaModelDto) {
+        return isNotBlank(classMetaModelDto.getClassName()) &&
+            isEmpty(elements(classMetaModelDto.getFields())) &&
+            isEmpty(elements(classMetaModelDto.getGenericTypes())) &&
+            isEmpty(elements(classMetaModelDto.getExtendsFromModels())) &&
+            isEmpty(elements(classMetaModelDto.getValidators()));
     }
 }

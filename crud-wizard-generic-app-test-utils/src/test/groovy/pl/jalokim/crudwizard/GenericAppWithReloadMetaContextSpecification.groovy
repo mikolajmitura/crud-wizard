@@ -10,7 +10,7 @@ import pl.jalokim.crudwizard.genericapp.reload.MetaContextTestLoader
 class GenericAppWithReloadMetaContextSpecification extends GenericAppBaseIntegrationSpecification {
 
     @Autowired
-    private MetaContextTestLoader metaContextTestLoader
+    protected MetaContextTestLoader metaContextTestLoader
 
     @Autowired
     protected MetaModelContextService metaModelContextService

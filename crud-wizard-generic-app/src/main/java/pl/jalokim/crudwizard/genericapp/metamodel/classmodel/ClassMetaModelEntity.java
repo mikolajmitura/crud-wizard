@@ -1,9 +1,5 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
-import static pl.jalokim.utils.collection.CollectionUtils.isEmpty;
-import static pl.jalokim.utils.collection.Elements.elements;
-import static pl.jalokim.utils.string.StringUtils.isNotBlank;
-
 import java.util.List;
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
@@ -18,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AccessLevel;
@@ -28,6 +25,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelEntity;
 
 @Entity
@@ -47,12 +45,20 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
 
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name = "translation_id")
+    private TranslationEntity translationName;
+
     private String className;
 
     /**
      * when true then does it mean that this meta model is like generic enum metamodel
      */
     private Boolean isGenericEnumType;
+
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @JoinColumn(name = CLASS_META_MODEL_ID)
+    private List<EnumEntryMetaModelEntity> enums;
 
     /**
      * When true then it means that this metamodel is used for simple, raw field like number, enum, text.
@@ -96,11 +102,13 @@ public class ClassMetaModelEntity extends WithAdditionalPropertiesEntity {
     @AttributeOverride(name = "rawJson", column = @Column(name = "rawJson"))
     private List<AdditionalPropertyEntity> additionalProperties;
 
-    public boolean shouldBeSimpleRawClass() {
-        return isNotBlank(getClassName()) &&
-            isEmpty(elements(getFields())) &&
-            isEmpty(elements(getGenericTypes())) &&
-            isEmpty(elements(getExtendsFromModels())) &&
-            isEmpty(elements(getValidators()));
+    @Override
+    public String toString() {
+        return "ClassMetaModelEntity{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", className='" + className + '\'' +
+            ", genericTypes=" + genericTypes +
+            '}';
     }
 }

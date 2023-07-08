@@ -29,6 +29,7 @@ import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaMo
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.EndpointMetaModelDtoSamples.createValidPostWithSimplePerson
 import static pl.jalokim.crudwizard.genericapp.metamodel.endpoint.joinresults.DataStorageResultsJoinerDtoSamples.sampleJoinerDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDtoSamples.createMapperMetaModelDto
+import static pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationDtoSamples.sampleTranslationDto
 import static pl.jalokim.crudwizard.genericapp.metamodel.validator.ValidatorMetaModelDtoSamples.notNullValidatorMetaModelDto
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractErrorResponseDto
 import static pl.jalokim.crudwizard.test.utils.RawOperationsOnEndpoints.extractResponseAsClass
@@ -180,6 +181,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .apiTag(createApiTagDtoByName(createPostPersonEndpoint.apiTag.name))
             .httpMethod(HttpMethod.GET)
             .pathParams(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                 .fields([createValidFieldMetaModelDto("userId", Long)])
                 .build())
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
@@ -375,6 +377,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
         def defaultDataStorageDto = createDataStorageMetaModelDtoWithId(defaultDataStorageId)
 
         def personInSecondDbModel = ClassMetaModelDto.builder()
+            .translationName(sampleTranslationDto())
             .name("personSecondDb")
             .isGenericEnumType(false)
             .fields([
@@ -386,6 +389,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .build()
 
         def personDocumentInThirdDbModel = ClassMetaModelDto.builder()
+            .translationName(sampleTranslationDto())
             .name("personDocumentDb")
             .isGenericEnumType(false)
             .fields([
@@ -468,6 +472,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .mapperMetaModel(createMapperMetaModelDto(GetByIdFromFewDsMapper, "mapPersonsResultsToOne"))
                 .classMetaModel(ClassMetaModelDto.builder()
+                    .translationName(sampleTranslationDto())
                     .name("personFrom3Dbs")
                     .fields([
                         createValidFieldMetaModelDto("firstDb", createClassMetaModelDtoWithId(personClassModel.id)),
@@ -669,6 +674,7 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
             .responseMetaModel(EndpointResponseMetaModelDto.builder()
                 .mapperMetaModel(createMapperMetaModelDto(FinalMapperForFewDs, "mapResults"))
                 .classMetaModel(createListWithMetaModel(ClassMetaModelDto.builder()
+                .translationName(sampleTranslationDto())
                     .name("personResultEntry")
                     .fields([
                         createValidFieldMetaModelDto("uuid2", String),
@@ -978,7 +984,16 @@ class GenericRestControllerIT extends GenericAppWithReloadMetaContextSpecificati
                         ValidatorMetaModelDto.builder()
                             .className(NotNullValidator.canonicalName)
                             .build()
-                    ])
+                    ]),
+                    createValidFieldMetaModelDto("id", Long),
+                    createValidFieldMetaModelDto("someObject",
+                        createClassMetaModelDtoFromClass(NestedObject)
+                        .toBuilder()
+                            .fields([
+                                createValidFieldMetaModelDto("objectName", String),
+                            ])
+                            .build()
+                    )
                 ])
                 .build())
             .build()

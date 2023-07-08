@@ -8,6 +8,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+import pl.jalokim.crudwizard.core.utils.InstanceLoader;
 import pl.jalokim.crudwizard.core.utils.annotations.MetamodelService;
 import pl.jalokim.crudwizard.genericapp.compiler.ClassLoaderService;
 import pl.jalokim.crudwizard.genericapp.compiler.CodeCompiler;
@@ -22,7 +23,6 @@ import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.util.GeneratedCodeMd5Generator;
-import pl.jalokim.crudwizard.genericapp.util.InstanceLoader;
 
 @MetamodelService
 @RequiredArgsConstructor

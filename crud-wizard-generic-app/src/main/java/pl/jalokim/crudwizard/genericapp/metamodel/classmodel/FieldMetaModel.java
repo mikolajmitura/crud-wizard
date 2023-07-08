@@ -1,5 +1,7 @@
 package pl.jalokim.crudwizard.genericapp.metamodel.classmodel;
 
+import static pl.jalokim.crudwizard.core.translations.AppMessageSourceHolder.getMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.WithAdditionalPropertiesMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.validation.ValidatorMetaModel;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationModel;
 
 @Data
 @SuperBuilder(toBuilder = true)
@@ -33,6 +36,8 @@ public class FieldMetaModel extends WithAdditionalPropertiesMetaModel {
 
     @EqualsAndHashCode.Exclude
     ClassMetaModel ownerOfField;
+
+    TranslationModel translationFieldName;
 
     @Builder.Default
     List<ValidatorMetaModel> validators = new ArrayList<>();
@@ -60,5 +65,9 @@ public class FieldMetaModel extends WithAdditionalPropertiesMetaModel {
             ", validators=" + validators +
             ", additionalProperties=" + getAdditionalProperties() +
             '}';
+    }
+
+    public String getTranslatedName() {
+        return getMessage(translationFieldName.getTranslationKey());
     }
 }

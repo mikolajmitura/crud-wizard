@@ -1,4 +1,4 @@
-package pl.jalokim.crudwizard.genericapp.util;
+package pl.jalokim.crudwizard.core.utils;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static pl.jalokim.utils.collection.Elements.elements;
@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import pl.jalokim.crudwizard.core.utils.ClassUtils;
 import pl.jalokim.utils.reflection.ConstructorMetadata;
 import pl.jalokim.utils.reflection.InvokableReflectionUtils;
 import pl.jalokim.utils.reflection.MetadataReflectionUtils;
@@ -32,7 +31,11 @@ public class InstanceLoader {
 
     @PostConstruct
     public void init() {
-        INSTANCE_LOADER.set(this);
+        setInstance(this);
+    }
+
+    public static void setInstance(InstanceLoader instance) {
+        INSTANCE_LOADER.set(instance);
     }
 
     public static InstanceLoader getInstance() {

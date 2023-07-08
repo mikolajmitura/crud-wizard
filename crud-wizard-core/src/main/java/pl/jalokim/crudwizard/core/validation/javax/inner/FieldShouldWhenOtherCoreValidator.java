@@ -89,6 +89,22 @@ public class FieldShouldWhenOtherCoreValidator {
     }
 
     public static void validateFieldConfiguration(ValidationFieldConfiguration validationFieldConfiguration) {
+        if (FieldShouldWhenOther.NOT_PROVIDED_VALUE.equals(validationFieldConfiguration.getFieldByPositionValue())) {
+            throw new IllegalArgumentException(String.format("invalid @%s field '%s' should have other value than %s",
+                validationFieldConfiguration.getAnnotationType().getSimpleName(),
+                validationFieldConfiguration.getFieldByPositionName(),
+                FieldShouldWhenOther.NOT_PROVIDED_VALUE
+            ));
+        }
+
+        if (ExpectedFieldState.UNKNOWN == validationFieldConfiguration.getExpectedFieldState()) {
+            throw new IllegalArgumentException(String.format("invalid @%s field '%s' should have other value than %s",
+                validationFieldConfiguration.getAnnotationType().getSimpleName(),
+                validationFieldConfiguration.getExpectedFieldStateFieldName(),
+                ExpectedFieldState.UNKNOWN
+            ));
+        }
+
         if (WITHOUT_OTHER_FIELD_VALUES.contains(validationFieldConfiguration.getExpectedFieldState()) && CollectionUtils.isNotEmpty(
             validationFieldConfiguration.getOtherFieldValue())) {
             throw new IllegalArgumentException(String.format(

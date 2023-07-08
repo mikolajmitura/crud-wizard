@@ -12,15 +12,21 @@ import pl.jalokim.crudwizard.core.utils.annotations.MapperAsSpringBeanConfig;
 import pl.jalokim.crudwizard.genericapp.mapper.generete.config.MapperGenerateConfigurationMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.BaseMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.additionalproperty.AdditionalPropertyMapper;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelDto;
-import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.classmodel.ClassMetaModelMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.context.MetaModelContext;
 import pl.jalokim.crudwizard.genericapp.metamodel.datastorageconnector.queryprovider.QueryProviderMapper;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModel;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelDto;
 import pl.jalokim.crudwizard.genericapp.metamodel.mapper.MapperMetaModelEntity;
+import pl.jalokim.crudwizard.genericapp.metamodel.translation.TranslationMapper;
 
-@Mapper(config = MapperAsSpringBeanConfig.class, uses = {AdditionalPropertyMapper.class, MapperGenerateConfigurationMapper.class})
+@Mapper(config = MapperAsSpringBeanConfig.class,
+    uses = {
+        AdditionalPropertyMapper.class,
+        MapperGenerateConfigurationMapper.class,
+        TranslationMapper.class,
+        ClassMetaModelMapper.class
+    })
 public abstract class EndpointResponseMetaModelMapper
     implements BaseMapper<EndpointResponseMetaModelDto, EndpointResponseMetaModelEntity, EndpointResponseMetaModel> {
 
@@ -55,9 +61,6 @@ public abstract class EndpointResponseMetaModelMapper
     @Mapping(target = "mapperScript", ignore = true)
     @Mapping(target = "metamodelDtoType", ignore = true)
     public abstract MapperMetaModelDto toMapperMetaModelDto(MapperMetaModelEntity entity);
-
-    @Mapping(target = "classMetaModelDtoType", ignore = true)
-    public abstract ClassMetaModelDto classModelToDto(ClassMetaModelEntity classMetaModelEntity);
 
     MapperMetaModel resolveDefaultFinalMapper(EndpointMetaModelEntity endpointMetaModelEntity, MetaModelContext metaModelContext) {
 
